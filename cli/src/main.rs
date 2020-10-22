@@ -1,5 +1,10 @@
+#[macro_use]
+extern crate clap;
+
+mod action;
+mod cmd;
+
 use std::borrow::Cow;
-use std::io::Write;
 use std::path::PathBuf;
 use std::sync::Arc;
 
@@ -10,21 +15,34 @@ use skim::{
 
 use passr::store::{Entry, Store};
 
+use crate::cmd::Handler;
+
 const STORE_DEFAULT_ROOT: &str = "~/.password-store";
 
 fn main() {
-    // Open password store, get recipients
-    let store = Store::open(STORE_DEFAULT_ROOT);
-    // let recipients = store.recipients().expect("failed to list recipients");
-    // passr::crypto::encrypt_file(&recipients, plaintext, &path).expect("failed to encrypt");
+    // Parse CLI arguments
+    let cmd_handler = Handler::parse();
 
-    let entries = store.entries();
-    let entry = select_entry(&entries).expect("no entry selected");
+    // Invoke the proper action
+    if let Err(err) = invoke_action(&cmd_handler) {
+        panic!("action failure: {:?}", err);
+        // TODO: quit_error(err, ErrorHints::default());
+    };
+}
 
-    let plaintext = passr::crypto::decrypt_file(entry.path()).expect("failed to decrypt");
-    println!("=v=v=v=v=v=v=v=v=v=");
-    std::io::stdout().write_all(&plaintext.0).unwrap();
-    println!("\n=^=^=^=^=^=^=^=^=^=");
+/// Invoke the proper action based on the CLI input.
+///
+/// If no proper action is selected, the program will quit with an error
+/// message.
+fn invoke_action(handler: &Handler) -> Result<(), ()> {
+    // Match the debug command
+    if handler.show().is_some() {
+        return action::show::Show::new(handler.matches())
+            .invoke()
+            .map_err(|err| err.into());
+    }
+
+    Ok(())
 }
 
 /// Show an interactive selection view for the given list of `items`.

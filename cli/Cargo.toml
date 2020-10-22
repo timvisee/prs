@@ -19,6 +19,7 @@ edition = "2018"
 gitlab = { repository = "timvisee/passr", branch = "master" }
 
 [dependencies]
+clap = "2.33"
 passr = { path = "../lib" }
 shellexpand = "2.0"
 skim = "0.8"

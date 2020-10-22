@@ -26,7 +26,7 @@ impl<'a> Copy<'a> {
         let store = Store::open(crate::STORE_DEFAULT_ROOT);
 
         // TODO: do not error on none selected
-        let secrets = store.secrets();
+        let secrets = store.secrets(matcher_copy.query());
         let secret = crate::select_secret(&secrets).expect("no secret selected");
 
         let mut plaintext = passr::crypto::decrypt_file(&secret.path).expect("failed to decrypt");

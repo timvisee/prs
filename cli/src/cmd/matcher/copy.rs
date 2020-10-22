@@ -1,6 +1,7 @@
 use clap::ArgMatches;
 
 use super::Matcher;
+use crate::cmd::arg::{ArgQuery, CmdArgOption};
 
 /// The copy command matcher.
 pub struct CopyMatcher<'a> {
@@ -11,6 +12,11 @@ impl<'a: 'b, 'b> CopyMatcher<'a> {
     /// Check whether to copy all of the secret.
     pub fn all(&self) -> bool {
         self.matches.is_present("all")
+    }
+
+    /// The secret query.
+    pub fn query(&self) -> Option<String> {
+        ArgQuery::value(self.matches)
     }
 }
 

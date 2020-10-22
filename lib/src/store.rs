@@ -44,8 +44,8 @@ impl Store {
     }
 
     /// List store password secrets.
-    pub fn secrets(&self) -> Vec<Secret> {
-        self.secret_iter().collect()
+    pub fn secrets(&self, filter: Option<String>) -> Vec<Secret> {
+        self.secret_iter().filter(filter).collect()
     }
 }
 
@@ -104,6 +104,11 @@ impl SecretIter {
             walker: Box::new(walker),
         }
     }
+
+    /// Transform into a filtered secret iterator.
+    pub fn filter(self, filter: Option<String>) -> FilterSecretIter<Self> {
+        FilterSecretIter::new(self, filter)
+    }
 }
 
 impl Iterator for SecretIter {
@@ -134,4 +139,50 @@ fn is_secret_file(entry: &DirEntry) -> bool {
             .to_str()
             .map(|s| s.ends_with(SECRET_SUFFIX))
             .unwrap_or(false)
+}
+
+/// Iterator that wraps a `SecretIter` with a filter.
+pub struct FilterSecretIter<I>
+where
+    I: Iterator<Item = Secret>,
+{
+    inner: I,
+    filter: Option<String>,
+}
+
+impl<I> FilterSecretIter<I>
+where
+    I: Iterator<Item = Secret>,
+{
+    /// Construct a new filter secret iterator.
+    pub fn new(inner: I, filter: Option<String>) -> Self {
+        Self { inner, filter }
+    }
+}
+
+impl<I> Iterator for FilterSecretIter<I>
+where
+    I: Iterator<Item = Secret>,
+{
+    type Item = Secret;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.filter.is_none() {
+            return self.inner.next();
+        }
+
+        let filter = self.filter.as_ref().unwrap();
+        while let Some(secret) = self.inner.next() {
+            if secret
+                .path
+                .to_str()
+                .map(|p| p.contains(filter))
+                .unwrap_or(false)
+            {
+                return Some(secret);
+            }
+        }
+
+        None
+    }
 }

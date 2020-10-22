@@ -1,6 +1,7 @@
 use clap::ArgMatches;
 
 use super::Matcher;
+use crate::cmd::arg::{ArgQuery, CmdArgOption};
 
 /// The show command matcher.
 pub struct ShowMatcher<'a> {
@@ -11,6 +12,11 @@ impl<'a: 'b, 'b> ShowMatcher<'a> {
     /// Check whether to just show the first line of the secret.
     pub fn first_line(&self) -> bool {
         self.matches.is_present("first")
+    }
+
+    /// The secret query.
+    pub fn query(&self) -> Option<String> {
+        ArgQuery::value(self.matches)
     }
 }
 

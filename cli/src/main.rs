@@ -97,6 +97,11 @@ impl SkimItem for SkimSecret {
 
 /// Select secret.
 fn select_secret(secrets: &[Secret]) -> Option<&Secret> {
+    // Return if theres just one to choose
+    if secrets.len() == 1 {
+        return secrets.get(0);
+    }
+
     // Let user select secret
     let items = skim_secret_items(secrets);
     let selected = select(items, "Select secret")?;

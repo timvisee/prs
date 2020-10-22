@@ -1,11 +1,14 @@
 use std::error::Error;
 use std::fs::{self, File};
-use std::io::{self, Write};
 use std::path::{Path, PathBuf};
 
 use gpgme::{Context, EncryptFlags, Protocol};
 
+/// Protocol to use.
 const PROTO: Protocol = Protocol::OpenPgp;
+
+const FILE_DUMMY: &str = "~/.password-store/dummy.gpg";
+const FILE_GPG_IDS: &str = "~/.password-store/.gpg-id";
 
 fn main() {
     let path = dummy_path();
@@ -17,9 +20,17 @@ fn main() {
 
 /// Get the path to the dummy key.
 fn dummy_path() -> PathBuf {
-    shellexpand::tilde("~/.password-store/dummy.gpg")
-        .as_ref()
-        .into()
+    shellexpand::tilde(FILE_DUMMY).as_ref().into()
+}
+
+/// Load the recipients to use from
+fn load_recipients() -> Vec<String> {
+    let path = shellexpand::tilde(FILE_GPG_IDS);
+    fs::read_to_string(path.as_ref())
+        .expect("failed to read GPG ids from file")
+        .lines()
+        .map(|l| l.into())
+        .collect()
 }
 
 /// Encrypt given data, write to given file.
@@ -27,12 +38,7 @@ fn encrypt(file: &Path, data: String) -> Result<(), Box<dyn Error>> {
     let mut ctx = Context::from_protocol(PROTO)?;
     ctx.set_armor(true);
 
-    let recipients: Vec<&str> = vec![
-        "7A72F0A555E7B77A9101C53EB8DB720BC383E172",
-        "23C12F39369310509C213C63A25620DC9AE971E7",
-        "893A3C8DA29D51AB9E3907A688AC573EC5796189",
-        "A85C79FBEFC319D593C8D89969AF6BB631DB0E35",
-    ];
+    let recipients = load_recipients();
 
     let keys = if !recipients.is_empty() {
         ctx.find_keys(recipients)?
@@ -51,7 +57,6 @@ fn encrypt(file: &Path, data: String) -> Result<(), Box<dyn Error>> {
     ctx.encrypt_with_flags(&keys, &mut input, &mut output, flags)
         .map_err(|e| format!("encrypting failed: {:?}", e))?;
 
-    io::stdout().write_all(&output)?;
     fs::write(file, output).unwrap();
 
     Ok(())

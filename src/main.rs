@@ -1,9 +1,9 @@
 use std::io::Write;
 use std::path::PathBuf;
 
-use pass_rs::Plaintext;
+use passr::Plaintext;
 
-const FILE_DUMMY: &str = "/tmp/pass-rs-dummy.gpg";
+const FILE_DUMMY: &str = "/tmp/passr-dummy.gpg";
 
 fn main() {
     let path = dummy_path();
@@ -11,8 +11,8 @@ fn main() {
     let plaintext: Plaintext = "blablabla".into();
 
     // Test encrypt & decrypt
-    pass_rs::encrypt_file(&path, plaintext).expect("failed to encrypt");
-    let plaintext = pass_rs::decrypt_file(&path).expect("failed to decrypt");
+    passr::encrypt_file(&path, plaintext).expect("failed to encrypt");
+    let plaintext = passr::decrypt_file(&path).expect("failed to decrypt");
 
     println!("=v=v=v=v=v=v=v=v=v=");
     std::io::stdout().write_all(&plaintext.0).unwrap();

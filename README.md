@@ -1,4 +1,4 @@
-# pass-rs
+# passr
 A smart and convenient pass client
 
 ## License

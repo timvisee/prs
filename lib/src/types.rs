@@ -27,6 +27,19 @@ impl Plaintext {
     pub fn from_string(text: String) -> Self {
         Self(text.into_bytes())
     }
+
+    /// Get the plaintext as UTF8 string.
+    // TODO: is this unsafe, because it might leak?
+    pub fn to_str(&self) -> Result<&str, std::str::Utf8Error> {
+        std::str::from_utf8(&self.0)
+    }
+
+    /// Get the first line of this secret as plaintext.
+    pub fn first_line(&self) -> Result<Plaintext, std::str::Utf8Error> {
+        Ok(Plaintext(
+            self.to_str()?.lines().next().unwrap().as_bytes().into(),
+        ))
+    }
 }
 
 impl From<&str> for Plaintext {

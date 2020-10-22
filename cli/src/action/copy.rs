@@ -1,29 +1,29 @@
-use std::io::Write;
-
 use clap::ArgMatches;
+use copypasta_ext::prelude::*;
+use copypasta_ext::x11_fork::ClipboardContext;
 
-use crate::cmd::matcher::{main::MainMatcher, show::ShowMatcher, Matcher};
+use crate::cmd::matcher::{copy::CopyMatcher, main::MainMatcher, Matcher};
 use crate::Store;
 use passr::types::Plaintext;
 
-/// A file show action.
-pub struct Show<'a> {
+/// A file copy action.
+pub struct Copy<'a> {
     cmd_matches: &'a ArgMatches<'a>,
 }
 
-impl<'a> Show<'a> {
-    /// Construct a new show action.
+impl<'a> Copy<'a> {
+    /// Construct a new copy action.
     pub fn new(cmd_matches: &'a ArgMatches<'a>) -> Self {
         Self { cmd_matches }
     }
 
-    /// Invoke the show action.
+    /// Invoke the copy action.
     // TODO: re-implement error handling
     pub fn invoke(&self) -> Result<(), ()> {
         // Create the command matchers
         // TODO: do we need these?
         let _matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
-        let _matcher_show = ShowMatcher::with(self.cmd_matches).unwrap();
+        let _matcher_copy = CopyMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(crate::STORE_DEFAULT_ROOT);
 
@@ -31,19 +31,25 @@ impl<'a> Show<'a> {
         let secrets = store.secrets();
         let secret = crate::select_secret(&secrets).expect("no secret selected");
 
-        let plaintext = passr::crypto::decrypt_file(&secret.path).expect("failed to decrypt");
-        print(plaintext);
+        let plaintext = passr::crypto::decrypt_file(&secret.path)
+            .expect("failed to decrypt")
+            .first_line()
+            .expect("failed to get first line of secret");
+
+        copy(plaintext);
 
         Ok(())
     }
 }
 
-/// Print the given plaintext to stdout.
-fn print(plaintext: Plaintext) {
-    eprintln!("=v=v=v=v=v=v=v=v=v=");
-    std::io::stdout().write_all(&plaintext.0).unwrap();
-    let _ = std::io::stdout().flush();
-    eprintln!("\n=^=^=^=^=^=^=^=^=^=");
+/// Copy the given plain text to the user clipboard.
+// TODO: clear clipboard after timeout
+fn copy(plaintext: Plaintext) {
+    let mut ctx = ClipboardContext::new().unwrap();
+    ctx.set_contents(plaintext.to_str().unwrap().into())
+        .unwrap();
+
+    eprintln!("Secret copied to clipboard...");
 }
 
 // #[derive(Debug, Fail)]

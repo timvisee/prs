@@ -35,9 +35,16 @@ fn main() {
 /// If no proper action is selected, the program will quit with an error
 /// message.
 fn invoke_action(handler: &Handler) -> Result<(), ()> {
-    // Match the debug command
+    // Match the show command
     if handler.show().is_some() {
         return action::show::Show::new(handler.matches())
+            .invoke()
+            .map_err(|err| err.into());
+    }
+
+    // Match the copy command
+    if handler.copy().is_some() {
+        return action::copy::Copy::new(handler.matches())
             .invoke()
             .map_err(|err| err.into());
     }

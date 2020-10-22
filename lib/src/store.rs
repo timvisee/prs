@@ -50,7 +50,8 @@ impl Store {
 }
 
 /// A password store entry.
-#[derive(Debug)]
+// TODO: do not derive clone!
+#[derive(Debug, Clone)]
 pub struct Entry {
     /// Display name of the entry, relative path to the password store root.
     name: String,
@@ -76,6 +77,11 @@ impl Entry {
             .unwrap_or_else(|| "?")
             .to_string();
         Self { name, path }
+    }
+
+    /// Entry file path.
+    pub fn path(&self) -> &Path {
+        &self.path
     }
 
     /// Entry display name.

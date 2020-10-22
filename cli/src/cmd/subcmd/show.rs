@@ -1,4 +1,4 @@
-use clap::{App, SubCommand};
+use clap::{App, Arg, SubCommand};
 
 /// The show command definition.
 pub struct CmdShow;
@@ -10,5 +10,11 @@ impl CmdShow {
             .alias("s")
             .alias("cat")
             .alias("display")
+            .arg(
+                Arg::with_name("first")
+                    .long("first")
+                    .short("f")
+                    .help("Show only the first line of the secret"),
+            )
     }
 }

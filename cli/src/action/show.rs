@@ -2,7 +2,7 @@ use std::io::Write;
 
 use clap::ArgMatches;
 
-use crate::cmd::matcher::{main::MainMatcher, show::ShowMatcher, Matcher};
+use crate::cmd::matcher::{show::ShowMatcher, Matcher};
 use crate::Store;
 use passr::types::Plaintext;
 
@@ -22,8 +22,7 @@ impl<'a> Show<'a> {
     pub fn invoke(&self) -> Result<(), ()> {
         // Create the command matchers
         // TODO: do we need these?
-        let _matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
-        let _matcher_show = ShowMatcher::with(self.cmd_matches).unwrap();
+        let matcher_show = ShowMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(crate::STORE_DEFAULT_ROOT);
 
@@ -31,7 +30,15 @@ impl<'a> Show<'a> {
         let secrets = store.secrets();
         let secret = crate::select_secret(&secrets).expect("no secret selected");
 
-        let plaintext = passr::crypto::decrypt_file(&secret.path).expect("failed to decrypt");
+        let mut plaintext = passr::crypto::decrypt_file(&secret.path).expect("failed to decrypt");
+
+        // Trim plaintext to first line
+        if matcher_show.first_line() {
+            plaintext = plaintext
+                .first_line()
+                .expect("failed to get first line of secret");
+        }
+
         print(plaintext);
 
         Ok(())

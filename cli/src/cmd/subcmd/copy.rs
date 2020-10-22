@@ -1,4 +1,4 @@
-use clap::{App, SubCommand};
+use clap::{App, Arg, SubCommand};
 
 /// The copy command definition.
 pub struct CmdCopy;
@@ -8,5 +8,11 @@ impl CmdCopy {
         SubCommand::with_name("copy")
             .about("Copy secret to clipboard")
             .alias("c")
+            .arg(
+                Arg::with_name("all")
+                    .long("all")
+                    .short("a")
+                    .help("Copy whole secret, not just first line"),
+            )
     }
 }

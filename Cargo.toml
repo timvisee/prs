@@ -15,7 +15,9 @@ categories = [
 ]
 edition = "2018"
 
-# [badges]
-# gitlab = { repository = "timvisee/ffsend", branch = "master" }
+[badges]
+gitlab = { repository = "timvisee/pass-rs", branch = "master" }
 
 [dependencies]
+gpgme = "0.9.2"
+shellexpand = "2.0"

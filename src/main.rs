@@ -3,7 +3,7 @@ use std::fs::{self, File};
 use std::io::{self, Write};
 use std::path::{Path, PathBuf};
 
-use gpgme::{Context, Protocol};
+use gpgme::{Context, EncryptFlags, Protocol};
 
 const PROTO: Protocol = Protocol::OpenPgp;
 
@@ -29,9 +29,9 @@ fn encrypt(file: &Path, data: String) -> Result<(), Box<dyn Error>> {
 
     let recipients: Vec<&str> = vec![
         "7A72F0A555E7B77A9101C53EB8DB720BC383E172",
-        // "23C12F39369310509C213C63A25620DC9AE971E7",
-        // "893A3C8DA29D51AB9E3907A688AC573EC5796189",
-        // "A85C79FBEFC319D593C8D89969AF6BB631DB0E35",
+        "23C12F39369310509C213C63A25620DC9AE971E7",
+        "893A3C8DA29D51AB9E3907A688AC573EC5796189",
+        "A85C79FBEFC319D593C8D89969AF6BB631DB0E35",
     ];
 
     let keys = if !recipients.is_empty() {
@@ -43,9 +43,12 @@ fn encrypt(file: &Path, data: String) -> Result<(), Box<dyn Error>> {
         Vec::new()
     };
 
+    // TODO: do not encrypt with ALWAYS_TRUST, suggest to make key trusted instead
+    let flags = EncryptFlags::ALWAYS_TRUST;
+
     let mut input: Vec<u8> = data.bytes().collect();
     let mut output = Vec::new();
-    ctx.encrypt(&keys, &mut input, &mut output)
+    ctx.encrypt_with_flags(&keys, &mut input, &mut output, flags)
         .map_err(|e| format!("encrypting failed: {:?}", e))?;
 
     io::stdout().write_all(&output)?;

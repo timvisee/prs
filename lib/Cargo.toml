@@ -5,7 +5,7 @@ authors = ["Tim Visee <3a4fb3964f@sinenomine.email>"]
 license = "GPL-3.0"
 readme = "README.md"
 # homepage = "https://timvisee.com/projects/passr"
-# repository = "https://gitlab.com/timvisee/passr"
+repository = "https://gitlab.com/timvisee/passr"
 description = "A smart and convenient pass client"
 keywords = ["pass", "passwordstore"]
 categories = [
@@ -21,4 +21,5 @@ gitlab = { repository = "timvisee/passr", branch = "master" }
 [dependencies]
 gpgme = "0.9.2"
 shellexpand = "2.0"
+walkdir = "2.0"
 zeroize = { version = "1.1", features = ["zeroize_derive"]}

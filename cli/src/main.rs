@@ -1,7 +1,7 @@
 use std::io::Write;
 use std::path::PathBuf;
 
-use passr::{types::Plaintext, Store};
+use passr::{store::Store, types::Plaintext};
 
 const STORE_DEFAULT_ROOT: &str = "~/.password-store";
 const FILE_DUMMY: &str = "/tmp/passr-dummy.gpg";
@@ -22,6 +22,11 @@ fn main() {
     println!("=v=v=v=v=v=v=v=v=v=");
     std::io::stdout().write_all(&plaintext.0).unwrap();
     println!("\n=^=^=^=^=^=^=^=^=^=");
+
+    let entries = store.entries();
+    for entry in entries {
+        println!("{}", entry.name());
+    }
 }
 
 /// Get the path to the dummy key.

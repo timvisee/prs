@@ -20,7 +20,11 @@ gitlab = { repository = "timvisee/passr", branch = "master" }
 
 [dependencies]
 clap = "2.33"
-copypasta-ext = "0.3.2"
+copypasta-ext = { version = "0.3.2", default-features = false, features = ["x11-fork"] }
 passr = { path = "../lib" }
 shellexpand = "2.0"
 skim = "0.8"
+
+[[bin]]
+name = "passr"
+path = "./src/main.rs"

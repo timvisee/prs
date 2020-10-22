@@ -35,7 +35,7 @@ impl Plaintext {
     }
 
     /// Get the first line of this secret as plaintext.
-    pub fn first_line(&self) -> Result<Plaintext, std::str::Utf8Error> {
+    pub fn first_line(self) -> Result<Plaintext, std::str::Utf8Error> {
         Ok(Plaintext(
             self.to_str()?.lines().next().unwrap().as_bytes().into(),
         ))

@@ -3,6 +3,7 @@ use std::fs;
 use std::path::Path;
 
 use gpgme::{Context, EncryptFlags, Protocol};
+use zeroize::Zeroize;
 
 /// Protocol to use.
 const PROTO: Protocol = Protocol::OpenPgp;
@@ -12,6 +13,8 @@ const FILE_GPG_IDS: &str = "~/.password-store/.gpg-id";
 const ENCRYPT_FLAGS: EncryptFlags = EncryptFlags::ALWAYS_TRUST;
 
 /// Ciphertext.
+#[derive(Zeroize)]
+#[zeroize(drop)]
 pub struct Ciphertext(pub Vec<u8>);
 
 impl Ciphertext {
@@ -22,6 +25,8 @@ impl Ciphertext {
 }
 
 /// Plaintext.
+#[derive(Zeroize)]
+#[zeroize(drop)]
 pub struct Plaintext(pub Vec<u8>);
 
 impl Plaintext {
@@ -77,7 +82,7 @@ pub fn encrypt(mut plaintext: Plaintext) -> Result<Ciphertext, Box<dyn Error>> {
 
 /// Encrypt the plaintext and write it to the file.
 pub fn encrypt_file(path: &Path, plaintext: Plaintext) -> Result<(), Box<dyn Error>> {
-    fs::write(path, encrypt(plaintext)?.0)?;
+    fs::write(path, &encrypt(plaintext)?.0)?;
     Ok(())
 }
 

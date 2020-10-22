@@ -24,7 +24,7 @@ cache:
 # Install compiler and OpenSSL dependencies
 before_script:
   - apt-get update
-  - apt-get install -y --no-install-recommends libgpgme-dev build-essential pkg-config xorg-dev python3
+  - apt-get install -y --no-install-recommends libgpgme-dev build-essential pkg-config xorg-dev python3 libx11-xcb-dev libgl1-mesa-dev
   - |
     rustup install $RUST_VERSION
     rustup default $RUST_VERSION
@@ -78,5 +78,4 @@ test-cargo:
     - check-stable
   dependencies: []
   script:
-    - apt-get install -y --no-install-recommends libx11-xcb-dev libgl1-mesa-dev
     - cargo test --verbose

@@ -50,7 +50,6 @@ impl Store {
 }
 
 /// A password store entry.
-// TODO: do not derive clone!
 #[derive(Debug, Clone)]
 pub struct Entry {
     /// Display name of the entry, relative path to the password store root.

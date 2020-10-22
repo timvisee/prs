@@ -1,4 +1,5 @@
 use std::borrow::Cow;
+use std::io::Write;
 use std::path::PathBuf;
 use std::sync::Arc;
 
@@ -15,18 +16,34 @@ fn main() {
     // Open password store, get recipients
     let store = Store::open(STORE_DEFAULT_ROOT);
     // let recipients = store.recipients().expect("failed to list recipients");
-
-    // // Test encrypt & decrypt
     // passr::crypto::encrypt_file(&recipients, plaintext, &path).expect("failed to encrypt");
-    // let plaintext = passr::crypto::decrypt_file(&path).expect("failed to decrypt");
-
-    // println!("=v=v=v=v=v=v=v=v=v=");
-    // std::io::stdout().write_all(&plaintext.0).unwrap();
-    // println!("\n=^=^=^=^=^=^=^=^=^=");
 
     let entries = store.entries();
-    let entry = select_entry(&entries);
-    dbg!(entry);
+    let entry = select_entry(&entries).expect("no entry selected");
+
+    let plaintext = passr::crypto::decrypt_file(entry.path()).expect("failed to decrypt");
+    println!("=v=v=v=v=v=v=v=v=v=");
+    std::io::stdout().write_all(&plaintext.0).unwrap();
+    println!("\n=^=^=^=^=^=^=^=^=^=");
+}
+
+/// Show an interactive selection view for the given list of `items`.
+/// The selected item is returned.  If no item is selected, `None` is returned instead.
+fn select(items: SkimItemReceiver, prompt: &str) -> Option<String> {
+    let prompt = format!("{}: ", prompt);
+    let options = SkimOptionsBuilder::default()
+        .prompt(Some(&prompt))
+        .height(Some("50%"))
+        .multi(false)
+        .build()
+        .unwrap();
+
+    let selected = Skim::run_with(&options, Some(items))
+        .map(|out| out.selected_items)
+        .unwrap_or_else(|| Vec::new());
+
+    // Get the first selected, and return
+    selected.iter().next().map(|i| i.output().to_string())
 }
 
 /// Wrapped store entry item for skim.
@@ -53,44 +70,20 @@ impl SkimItem for SkimEntry {
     }
 }
 
-/// Select game.
-// TODO: use ref
-// TODO: handle no selection
-fn select_entry(entries: &[Entry]) -> &Entry {
-    // Find game directories
-    // TODO: improve this
-    let game_items = skim_entry_items(entries);
+/// Select entry.
+fn select_entry(entries: &[Entry]) -> Option<&Entry> {
+    // Let user select entry
+    let items = skim_entry_items(entries);
+    let selected = select(items, "Select entry")?;
 
-    let selected = select(game_items, "Select entry").expect("did not select entry");
-    let dir: PathBuf = selected.into();
-
-    entries.iter().find(|e| e.path() == dir).unwrap()
+    // Pick selected item from entries list
+    let path: PathBuf = selected.into();
+    Some(entries.iter().find(|e| e.path() == path).unwrap())
 }
 
-/// Show an interactive selection view for the given list of `items`.
-/// The selected item is returned.  If no item is selected, `None` is returned instead.
-fn select(items: SkimItemReceiver, prompt: &str) -> Option<String> {
-    let prompt = format!("{}: ", prompt);
-    let options = SkimOptionsBuilder::default()
-        .prompt(Some(&prompt))
-        .height(Some("50%"))
-        .multi(false)
-        .build()
-        .unwrap();
-
-    let selected = Skim::run_with(&options, Some(items))
-        .map(|out| out.selected_items)
-        .unwrap_or_else(|| Vec::new());
-
-    // Get the first selected, and return
-    selected.iter().next().map(|i| i.output().to_string())
-}
-
-/// Generate skim `SkimEntry` from given entries.
+/// Generate skim `SkimEntry` items from given entries.
 fn skim_entry_items(entries: &[Entry]) -> SkimItemReceiver {
-    // Transform into skim entries
-    // TODO: do not clone
-    let entries: Vec<SkimEntry> = entries.into_iter().map(|e| e.clone().into()).collect();
+    let entries: Vec<SkimEntry> = entries.iter().cloned().map(|e| e.into()).collect();
 
     let (tx_item, rx_item): (SkimItemSender, SkimItemReceiver) =
         skim::prelude::bounded(entries.len());

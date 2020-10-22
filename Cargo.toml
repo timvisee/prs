@@ -15,6 +15,13 @@ categories = [
 ]
 edition = "2018"
 
+[lib]
+path = "src/lib/lib.rs"
+
+[[bin]]
+name = "passr"
+path = "src/cli/main.rs"
+
 [badges]
 gitlab = { repository = "timvisee/passr", branch = "master" }
 

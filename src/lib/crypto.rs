@@ -2,60 +2,15 @@ use std::error::Error;
 use std::fs;
 use std::path::Path;
 
+use crate::types::{Ciphertext, Plaintext};
+
 use gpgme::{Context, EncryptFlags, Protocol};
-use zeroize::Zeroize;
 
 /// Protocol to use.
 const PROTO: Protocol = Protocol::OpenPgp;
 
-const FILE_GPG_IDS: &str = "~/.password-store/.gpg-id";
-
+/// GPGME encryption flags.
 const ENCRYPT_FLAGS: EncryptFlags = EncryptFlags::ALWAYS_TRUST;
-
-/// Ciphertext.
-#[derive(Zeroize)]
-#[zeroize(drop)]
-pub struct Ciphertext(pub Vec<u8>);
-
-impl Ciphertext {
-    /// New empty ciphertext.
-    pub fn empty() -> Self {
-        Self(vec![])
-    }
-}
-
-/// Plaintext.
-#[derive(Zeroize)]
-#[zeroize(drop)]
-pub struct Plaintext(pub Vec<u8>);
-
-impl Plaintext {
-    /// New empty plaintext.
-    pub fn empty() -> Self {
-        Self(vec![])
-    }
-
-    /// Construct plaintext from given string.
-    pub fn from_string(text: String) -> Self {
-        Self(text.into_bytes())
-    }
-}
-
-impl From<&str> for Plaintext {
-    fn from(s: &str) -> Self {
-        Self(s.as_bytes().into())
-    }
-}
-
-/// Load the recipient fingerprints.
-pub(crate) fn recipient_fingerprints() -> Vec<String> {
-    let path = shellexpand::tilde(FILE_GPG_IDS);
-    fs::read_to_string(path.as_ref())
-        .expect("failed to read GPG ids from file")
-        .lines()
-        .map(|l| l.into())
-        .collect()
-}
 
 /// Encrypt given data, write to given file.
 pub fn encrypt(mut plaintext: Plaintext) -> Result<Ciphertext, Box<dyn Error>> {
@@ -64,7 +19,7 @@ pub fn encrypt(mut plaintext: Plaintext) -> Result<Ciphertext, Box<dyn Error>> {
 
     // Load recipient keys
     // TODO: supply recipients as parameter
-    let recipients = recipient_fingerprints();
+    let recipients = crate::recipient_fingerprints();
     let keys = if !recipients.is_empty() {
         ctx.find_keys(recipients)?
             .filter_map(|x| x.ok())

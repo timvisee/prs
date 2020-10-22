@@ -28,10 +28,10 @@ impl<'a> Show<'a> {
         let store = Store::open(crate::STORE_DEFAULT_ROOT);
 
         // TODO: do not error on none selected
-        let entries = store.entries();
-        let entry = crate::select_entry(&entries).expect("no entry selected");
+        let secrets = store.secrets();
+        let secret = crate::select_secret(&secrets).expect("no secret selected");
 
-        let plaintext = passr::crypto::decrypt_file(entry.path()).expect("failed to decrypt");
+        let plaintext = passr::crypto::decrypt_file(&secret.path).expect("failed to decrypt");
         print_plaintext(plaintext);
 
         Ok(())

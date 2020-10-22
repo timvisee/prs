@@ -8,8 +8,8 @@ use crate::Recipients;
 /// Password store GPG IDs file.
 const STORE_GPG_IDS_FILE: &str = ".gpg-id";
 
-/// Password store entry file suffix.
-const ENTRY_SUFFIX: &str = ".gpg";
+/// Password store secret file suffix.
+const SECRET_SUFFIX: &str = ".gpg";
 
 /// Represents a password store.
 pub struct Store {
@@ -38,62 +38,52 @@ impl Store {
         Recipients::find_from_file(path)
     }
 
-    /// Create entry iterator for this store.
-    pub fn entry_iter(&self) -> EntryIter {
-        EntryIter::new(self.root.clone())
+    /// Create secret iterator for this store.
+    pub fn secret_iter(&self) -> SecretIter {
+        SecretIter::new(self.root.clone())
     }
 
-    /// List store password entries.
-    pub fn entries(&self) -> Vec<Entry> {
-        self.entry_iter().collect()
+    /// List store password secrets.
+    pub fn secrets(&self) -> Vec<Secret> {
+        self.secret_iter().collect()
     }
 }
 
-/// A password store entry.
+/// A password store secret.
 #[derive(Debug, Clone)]
-pub struct Entry {
-    /// Display name of the entry, relative path to the password store root.
-    name: String,
+pub struct Secret {
+    /// Display name of the secret, relative path to the password store root.
+    pub name: String,
 
-    /// Full path to the password store entry.
-    path: PathBuf,
+    /// Full path to the password store secret.
+    pub path: PathBuf,
 }
 
-impl Entry {
-    /// Construct entry at given full path from given store.
+impl Secret {
+    /// Construct secret at given full path from given store.
     pub fn from(store: &Store, path: PathBuf) -> Self {
         Self::in_root(&store.root, path)
     }
 
-    /// Construct entry at given path in the given password store root.
+    /// Construct secret at given path in the given password store root.
     pub fn in_root(root: &Path, path: PathBuf) -> Self {
         // TODO: use path.display() as fallback
         let name: String = path
             .strip_prefix(&root)
             .ok()
             .and_then(|f| f.to_str())
-            .map(|f| f.trim_end_matches(ENTRY_SUFFIX))
+            .map(|f| f.trim_end_matches(SECRET_SUFFIX))
             .unwrap_or_else(|| "?")
             .to_string();
         Self { name, path }
     }
-
-    /// Entry file path.
-    pub fn path(&self) -> &Path {
-        &self.path
-    }
-
-    /// Entry display name.
-    pub fn name(&self) -> &str {
-        &self.name
-    }
 }
 
-/// Iterator that walks through password store entries.
+/// Iterator that walks through password store secrets.
 ///
-/// This walks all password store directories, and yields password entries.
+/// This walks all password store directories, and yields password secrets.
 /// Hidden files or directories are skipped.
-pub struct EntryIter {
+pub struct SecretIter {
     /// Root of the store to walk.
     root: PathBuf,
 
@@ -101,14 +91,14 @@ pub struct EntryIter {
     walker: Box<dyn Iterator<Item = DirEntry>>,
 }
 
-impl EntryIter {
-    /// Create new store entry iterator at given store root.
+impl SecretIter {
+    /// Create new store secret iterator at given store root.
     pub fn new(root: PathBuf) -> Self {
         let walker = WalkDir::new(&root)
             .into_iter()
             .filter_entry(|e| !is_hidden_subdir(e))
             .filter_map(|e| e.ok())
-            .filter(is_entry_file);
+            .filter(is_secret_file);
         Self {
             root,
             walker: Box::new(walker),
@@ -116,13 +106,13 @@ impl EntryIter {
     }
 }
 
-impl Iterator for EntryIter {
-    type Item = Entry;
+impl Iterator for SecretIter {
+    type Item = Secret;
 
     fn next(&mut self) -> Option<Self::Item> {
         self.walker
             .next()
-            .map(|e| Entry::in_root(&self.root, e.path().into()))
+            .map(|e| Secret::in_root(&self.root, e.path().into()))
     }
 }
 
@@ -136,12 +126,12 @@ fn is_hidden_subdir(entry: &DirEntry) -> bool {
             .unwrap_or(false)
 }
 
-/// Check if given dir entry is a GPG file.
-fn is_entry_file(entry: &DirEntry) -> bool {
+/// Check if given WalkDir DirEntry is a secret file.
+fn is_secret_file(entry: &DirEntry) -> bool {
     entry.file_type().is_file()
         && entry
             .file_name()
             .to_str()
-            .map(|s| s.ends_with(ENTRY_SUFFIX))
+            .map(|s| s.ends_with(SECRET_SUFFIX))
             .unwrap_or(false)
 }

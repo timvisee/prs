@@ -13,7 +13,7 @@ use skim::{
     AnsiString, Skim, SkimItem,
 };
 
-use passr::store::{Entry, Store};
+use passr::store::{Secret, Store};
 
 use crate::cmd::Handler;
 
@@ -64,49 +64,49 @@ fn select(items: SkimItemReceiver, prompt: &str) -> Option<String> {
     selected.iter().next().map(|i| i.output().to_string())
 }
 
-/// Wrapped store entry item for skim.
-pub struct SkimEntry(Entry);
+/// Wrapped store secret item for skim.
+pub struct SkimSecret(Secret);
 
-impl From<Entry> for SkimEntry {
-    fn from(entry: Entry) -> Self {
-        Self(entry)
+impl From<Secret> for SkimSecret {
+    fn from(secret: Secret) -> Self {
+        Self(secret)
     }
 }
 
-impl SkimItem for SkimEntry {
+impl SkimItem for SkimSecret {
     fn display(&self) -> Cow<AnsiString> {
-        let s: AnsiString = self.0.name().clone().into();
+        let s: AnsiString = self.0.name.clone().into();
         Cow::Owned(s)
     }
 
     fn text(&self) -> Cow<str> {
-        self.0.name().into()
+        (&self.0.name).into()
     }
 
     fn output(&self) -> Cow<str> {
-        self.0.path().to_string_lossy()
+        self.0.path.to_string_lossy()
     }
 }
 
-/// Select entry.
-fn select_entry(entries: &[Entry]) -> Option<&Entry> {
-    // Let user select entry
-    let items = skim_entry_items(entries);
-    let selected = select(items, "Select entry")?;
+/// Select secret.
+fn select_secret(secrets: &[Secret]) -> Option<&Secret> {
+    // Let user select secret
+    let items = skim_secret_items(secrets);
+    let selected = select(items, "Select secret")?;
 
-    // Pick selected item from entries list
+    // Pick selected item from secrets list
     let path: PathBuf = selected.into();
-    Some(entries.iter().find(|e| e.path() == path).unwrap())
+    Some(secrets.iter().find(|e| e.path == path).unwrap())
 }
 
-/// Generate skim `SkimEntry` items from given entries.
-fn skim_entry_items(entries: &[Entry]) -> SkimItemReceiver {
-    let entries: Vec<SkimEntry> = entries.iter().cloned().map(|e| e.into()).collect();
+/// Generate skim `SkimSecret` items from given secrets.
+fn skim_secret_items(secrets: &[Secret]) -> SkimItemReceiver {
+    let items: Vec<SkimSecret> = secrets.iter().cloned().map(|e| e.into()).collect();
 
     let (tx_item, rx_item): (SkimItemSender, SkimItemReceiver) =
-        skim::prelude::bounded(entries.len());
+        skim::prelude::bounded(items.len());
 
-    entries.into_iter().for_each(|g| {
+    items.into_iter().for_each(|g| {
         let _ = tx_item.send(Arc::new(g));
     });
 

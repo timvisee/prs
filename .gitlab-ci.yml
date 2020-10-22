@@ -24,7 +24,7 @@ cache:
 # Install compiler and OpenSSL dependencies
 before_script:
   - apt-get update
-  - apt-get install -y --no-install-recommends libgpgme-dev
+  - apt-get install -y --no-install-recommends libgpgme-dev build-essential pkg-config
   - |
     rustup install $RUST_VERSION
     rustup default $RUST_VERSION

@@ -13,7 +13,7 @@ use skim::{
     AnsiString, Skim, SkimItem,
 };
 
-use passr::store::{Secret, Store};
+use prs::store::{Secret, Store};
 
 use crate::cmd::Handler;
 

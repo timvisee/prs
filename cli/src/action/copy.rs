@@ -4,7 +4,7 @@ use copypasta_ext::x11_fork::ClipboardContext;
 
 use crate::cmd::matcher::{copy::CopyMatcher, Matcher};
 use crate::Store;
-use passr::types::Plaintext;
+use prs::types::Plaintext;
 
 /// A file copy action.
 pub struct Copy<'a> {
@@ -29,7 +29,7 @@ impl<'a> Copy<'a> {
         let secrets = store.secrets(matcher_copy.query());
         let secret = crate::select_secret(&secrets).expect("no secret selected");
 
-        let mut plaintext = passr::crypto::decrypt_file(&secret.path).expect("failed to decrypt");
+        let mut plaintext = prs::crypto::decrypt_file(&secret.path).expect("failed to decrypt");
 
         // Trim plaintext to first line
         if !matcher_copy.all() {

@@ -1,11 +1,11 @@
 [package]
-name = "passr-cli"
+name = "prs-cli"
 version = "0.1.0"
 authors = ["Tim Visee <3a4fb3964f@sinenomine.email>"]
 license = "GPL-3.0"
 readme = "README.md"
-# homepage = "https://timvisee.com/projects/passr"
-repository = "https://gitlab.com/timvisee/passr"
+# homepage = "https://timvisee.com/projects/prs"
+repository = "https://gitlab.com/timvisee/prs"
 description = "A smart and convenient pass client"
 keywords = ["pass", "passwordstore"]
 categories = [
@@ -16,15 +16,15 @@ categories = [
 edition = "2018"
 
 [badges]
-gitlab = { repository = "timvisee/passr", branch = "master" }
+gitlab = { repository = "timvisee/prs", branch = "master" }
 
 [dependencies]
 clap = "2.33"
 copypasta-ext = { version = "0.3.2", default-features = false, features = ["x11-fork"] }
-passr = { path = "../lib" }
+prs = { path = "../lib" }
 shellexpand = "2.0"
 skim = "0.8"
 
 [[bin]]
-name = "passr"
+name = "prs"
 path = "./src/main.rs"

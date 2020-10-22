@@ -2,14 +2,14 @@
 [![Newest release on crates.io][crate-version-badge]][crate-link]
 [![Project license][crate-license-badge]](LICENSE)
 
-[crate-license-badge]: https://img.shields.io/crates/l/passr.svg
-[crate-link]: https://crates.io/crates/passr
-[crate-version-badge]: https://img.shields.io/crates/v/passr.svg
-[gitlab-ci-link]: https://gitlab.com/timvisee/passr/pipelines
-[gitlab-ci-master-badge]: https://gitlab.com/timvisee/passr/badges/master/pipeline.svg
+[crate-license-badge]: https://img.shields.io/crates/l/prs.svg
+[crate-link]: https://crates.io/crates/prs
+[crate-version-badge]: https://img.shields.io/crates/v/prs.svg
+[gitlab-ci-link]: https://gitlab.com/timvisee/prs/pipelines
+[gitlab-ci-master-badge]: https://gitlab.com/timvisee/prs/badges/master/pipeline.svg
 
-# passr
-A smart and convenient pass client
+# prs
+A smart and convenient pass client in Rust.
 
 ## License
 This project is released under the GNU GPL-3.0 license.

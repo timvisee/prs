@@ -707,27 +707,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "260e51e7efe62b592207e9e13a68e43692a7a279171d6ba57abd208bf23645ad"
 
 [[package]]
-name = "passr"
-version = "0.1.0"
-dependencies = [
- "gpgme",
- "shellexpand",
- "walkdir",
- "zeroize",
-]
-
-[[package]]
-name = "passr-cli"
-version = "0.1.0"
-dependencies = [
- "clap",
- "copypasta-ext",
- "passr",
- "shellexpand",
- "skim",
-]
-
-[[package]]
 name = "pkg-config"
 version = "0.3.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -740,6 +719,27 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1e0704ee1a7e00d7bb417d0770ea303c1bccbabf0ef1667dae92b5967f5f8a71"
 dependencies = [
  "unicode-xid",
+]
+
+[[package]]
+name = "prs"
+version = "0.1.0"
+dependencies = [
+ "gpgme",
+ "shellexpand",
+ "walkdir",
+ "zeroize",
+]
+
+[[package]]
+name = "prs-cli"
+version = "0.1.0"
+dependencies = [
+ "clap",
+ "copypasta-ext",
+ "prs",
+ "shellexpand",
+ "skim",
 ]
 
 [[package]]

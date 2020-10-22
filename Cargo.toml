@@ -1,0 +1,21 @@
+[package]
+name = "pass-rs"
+version = "0.1.0"
+authors = ["Tim Visee <3a4fb3964f@sinenomine.email>"]
+license = "GPL-3.0"
+readme = "README.md"
+# homepage = "https://timvisee.com/projects/pass-rs"
+# repository = "https://gitlab.com/timvisee/pass-rs"
+description = "A smart and convenient pass client"
+keywords = ["pass", "passwordstore"]
+categories = [
+    "authentication",
+    "command-line-utilities",
+    "cryptography",
+]
+edition = "2018"
+
+# [badges]
+# gitlab = { repository = "timvisee/ffsend", branch = "master" }
+
+[dependencies]

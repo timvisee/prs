@@ -1,4 +1,5 @@
 use std::error::Error;
+use std::ffi::OsString;
 use std::fs;
 use std::path::{self, Path, PathBuf};
 
@@ -94,8 +95,13 @@ impl Store {
             path.push(name_hint.unwrap());
         }
 
-        // Set secret extension
-        path.set_extension(SECRET_SUFFIX.trim_start_matches('.'));
+        // Add secret extension if non existent
+        let ext: OsString = SECRET_SUFFIX.trim_start_matches(".").into();
+        if path.extension() != Some(&ext) {
+            let mut tmp = path.as_os_str().to_owned();
+            tmp.push(SECRET_SUFFIX);
+            path = PathBuf::from(tmp);
+        }
 
         // Create parent dir if it doesn't exist
         if create_dirs {

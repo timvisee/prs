@@ -9,12 +9,14 @@ use crate::Recipients;
 const STORE_GPG_IDS_FILE: &str = ".gpg-id";
 
 /// Password store secret file suffix.
-const SECRET_SUFFIX: &str = ".gpg";
+pub const SECRET_SUFFIX: &str = ".gpg";
 
 /// Represents a password store.
 pub struct Store {
     /// Root directory of the password store.
-    root: PathBuf,
+    ///
+    /// This path is always absolute.
+    pub root: PathBuf,
 }
 
 impl Store {

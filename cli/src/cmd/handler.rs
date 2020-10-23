@@ -1,7 +1,7 @@
 use clap::{App, AppSettings, Arg, ArgMatches};
 
-use super::matcher::{CopyMatcher, ListMatcher, Matcher, ShowMatcher};
-use super::subcmd::{CmdCopy, CmdList, CmdShow};
+use super::matcher::{CopyMatcher, DuplicateMatcher, ListMatcher, Matcher, ShowMatcher};
+use super::subcmd::{CmdCopy, CmdDuplicate, CmdList, CmdShow};
 
 /// CLI argument handler.
 pub struct Handler<'a> {
@@ -60,6 +60,7 @@ impl<'a: 'b, 'b> Handler<'a> {
                     .help("Enable verbose information and logging"),
             )
             .subcommand(CmdCopy::build())
+            .subcommand(CmdDuplicate::build())
             .subcommand(CmdList::build())
             .subcommand(CmdShow::build());
 
@@ -86,6 +87,11 @@ impl<'a: 'b, 'b> Handler<'a> {
     /// Get the copy sub command, if matched.
     pub fn copy(&'a self) -> Option<CopyMatcher> {
         CopyMatcher::with(&self.matches)
+    }
+
+    /// Get the duplicate sub command, if matched.
+    pub fn duplicate(&'a self) -> Option<DuplicateMatcher> {
+        DuplicateMatcher::with(&self.matches)
     }
 
     /// Get the list sub command, if matched.

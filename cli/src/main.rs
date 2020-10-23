@@ -42,6 +42,13 @@ fn invoke_action(handler: &Handler) -> Result<(), ()> {
             .map_err(|err| err.into());
     }
 
+    // Match the duplicate command
+    if handler.duplicate().is_some() {
+        return action::duplicate::Duplicate::new(handler.matches())
+            .invoke()
+            .map_err(|err| err.into());
+    }
+
     // Match the show command
     if handler.show().is_some() {
         return action::show::Show::new(handler.matches())

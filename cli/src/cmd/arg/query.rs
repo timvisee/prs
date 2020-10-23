@@ -11,7 +11,7 @@ impl CmdArg for ArgQuery {
     }
 
     fn build<'b, 'c>() -> Arg<'b, 'c> {
-        Arg::with_name("QUERY").help("Secret query").multiple(true)
+        Arg::with_name("QUERY").help("Secret query")
     }
 }
 

@@ -1,3 +1,5 @@
+use std::fs;
+
 use clap::ArgMatches;
 
 use crate::cmd::matcher::{duplicate::DuplicateMatcher, Matcher};
@@ -28,47 +30,16 @@ impl<'a> Duplicate<'a> {
 
         let target = matcher_duplicate.target();
 
+        // TODO: move this into normalize function below
         // TODO: do not unwrap here
         let target = shellexpand::full(target).expect("failed to expand target path");
 
-        use std::fs;
-        use std::path::{self, PathBuf};
-
-        // Take target as base path
-        let mut path = PathBuf::from(target.as_ref());
-        let target_is_dir = path.is_dir() || path::is_separator(target.chars().last().unwrap());
-
-        // Strip store prefix
-        if let Ok(tmp) = path.strip_prefix(&store.root) {
-            path = tmp.into();
-        }
-
-        // Make relative
-        if path.is_absolute() {
-            path = PathBuf::from(format!(".{}{}", path::MAIN_SEPARATOR, path.display()));
-        }
-
-        // Prefix store root
-        let mut tmp = store.root.clone();
-        tmp.push(path);
-        path = tmp;
-
-        // Add current secret name if target is dir
-        if target_is_dir {
-            path.push(secret.path.file_name().unwrap());
-        }
-
-        // Set secret extension
-        path.set_extension(prs::store::SECRET_SUFFIX.trim_start_matches('.'));
-
-        // Create parent dir if it doesn't exist
-        let parent = path.parent().unwrap();
-        if !parent.is_dir() {
-            // TODO: handle errors
-            if let Err(err) = fs::create_dir_all(parent) {
-                eprintln!("Failed to create secret parent directory: {:?}", err);
-            }
-        }
+        // Normalize target path
+        let path = store.normalize_secret_path(
+            target.as_ref(),
+            secret.path.file_name().and_then(|p| p.to_str()),
+            true,
+        );
 
         // Check if target already exists
         if path.is_file() {

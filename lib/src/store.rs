@@ -1,5 +1,6 @@
 use std::error::Error;
-use std::path::{Path, PathBuf};
+use std::fs;
+use std::path::{self, Path, PathBuf};
 
 use walkdir::{DirEntry, WalkDir};
 
@@ -48,6 +49,66 @@ impl Store {
     /// List store password secrets.
     pub fn secrets(&self, filter: Option<String>) -> Vec<Secret> {
         self.secret_iter().filter(filter).collect()
+    }
+
+    /// Normalizes a path for a secret in this store.
+    ///
+    /// - Ensures path is within store.
+    /// - If directory is given, name hint is appended.
+    /// - Sets correct extension.
+    /// - Creates parent directories if non existant (optional).
+    pub fn normalize_secret_path<P: AsRef<Path>>(
+        &self,
+        target: P,
+        name_hint: Option<&str>,
+        create_dirs: bool,
+    ) -> PathBuf {
+        // Take target as base path
+        let mut path = PathBuf::from(target.as_ref());
+        let target_is_dir = path.is_dir()
+            || target
+                .as_ref()
+                .to_str()
+                .and_then(|s| s.chars().last())
+                .map(|s| path::is_separator(s))
+                .unwrap_or(false);
+
+        // Strip store prefix
+        if let Ok(tmp) = path.strip_prefix(&self.root) {
+            path = tmp.into();
+        }
+
+        // Make relative
+        if path.is_absolute() {
+            path = PathBuf::from(format!(".{}{}", path::MAIN_SEPARATOR, path.display()));
+        }
+
+        // Prefix store root
+        let mut tmp = self.root.clone();
+        tmp.push(path);
+        path = tmp;
+
+        // Add current secret name if target is dir
+        if target_is_dir {
+            // TODO: do not unwrap, return proper error
+            path.push(name_hint.unwrap());
+        }
+
+        // Set secret extension
+        path.set_extension(SECRET_SUFFIX.trim_start_matches('.'));
+
+        // Create parent dir if it doesn't exist
+        if create_dirs {
+            let parent = path.parent().unwrap();
+            if !parent.is_dir() {
+                // TODO: handle errors
+                if let Err(err) = fs::create_dir_all(parent) {
+                    eprintln!("Failed to create secret parent directory: {:?}", err);
+                }
+            }
+        }
+
+        path
     }
 }
 

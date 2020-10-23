@@ -9,6 +9,7 @@ impl CmdCopy {
     pub fn build<'a, 'b>() -> App<'a, 'b> {
         SubCommand::with_name("copy")
             .about("Copy secret to clipboard")
+            .alias("cp")
             .alias("c")
             .arg(
                 Arg::with_name("all")

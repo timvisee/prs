@@ -1,6 +1,9 @@
 use zeroize::Zeroize;
 
 /// Ciphertext.
+///
+/// Wraps ciphertext bytes. This type is limited on purpose, to prevent accidentally leaking the
+/// ciphertext. The memory is explicitly zero'd when this is dropped.
 #[derive(Zeroize)]
 #[zeroize(drop)]
 pub struct Ciphertext(pub Vec<u8>);
@@ -13,6 +16,9 @@ impl Ciphertext {
 }
 
 /// Plaintext.
+///
+/// Wraps plaintext bytes. This type is limited on purpose, to prevent accidentally leaking the
+/// plaintext. The memory is explicitly zero'd when this is dropped.
 #[derive(Zeroize)]
 #[zeroize(drop)]
 pub struct Plaintext(pub Vec<u8>);

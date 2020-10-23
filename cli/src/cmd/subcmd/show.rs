@@ -11,7 +11,6 @@ impl CmdShow {
             .about("Display a secret")
             .alias("s")
             .alias("cat")
-            .alias("display")
             .arg(
                 Arg::with_name("first")
                     .long("first")

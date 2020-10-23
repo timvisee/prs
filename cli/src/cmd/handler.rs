@@ -1,7 +1,7 @@
 use clap::{App, AppSettings, Arg, ArgMatches};
 
-use super::matcher::{CopyMatcher, Matcher, ShowMatcher};
-use super::subcmd::{CmdCopy, CmdShow};
+use super::matcher::{CopyMatcher, ListMatcher, Matcher, ShowMatcher};
+use super::subcmd::{CmdCopy, CmdList, CmdShow};
 
 /// CLI argument handler.
 pub struct Handler<'a> {
@@ -59,8 +59,9 @@ impl<'a: 'b, 'b> Handler<'a> {
                     .global(true)
                     .help("Enable verbose information and logging"),
             )
-            .subcommand(CmdShow::build())
-            .subcommand(CmdCopy::build());
+            .subcommand(CmdCopy::build())
+            .subcommand(CmdList::build())
+            .subcommand(CmdShow::build());
 
         // Disable color usage if compiled without color support
         // TODO: do not use feature, pull from env var instead
@@ -82,13 +83,18 @@ impl<'a: 'b, 'b> Handler<'a> {
         &self.matches
     }
 
-    /// Get the show sub command, if matched.
-    pub fn show(&'a self) -> Option<ShowMatcher> {
-        ShowMatcher::with(&self.matches)
-    }
-
     /// Get the copy sub command, if matched.
     pub fn copy(&'a self) -> Option<CopyMatcher> {
         CopyMatcher::with(&self.matches)
+    }
+
+    /// Get the list sub command, if matched.
+    pub fn list(&'a self) -> Option<ListMatcher> {
+        ListMatcher::with(&self.matches)
+    }
+
+    /// Get the show sub command, if matched.
+    pub fn show(&'a self) -> Option<ShowMatcher> {
+        ShowMatcher::with(&self.matches)
     }
 }

@@ -173,12 +173,7 @@ where
 
         let filter = self.filter.as_ref().unwrap();
         while let Some(secret) = self.inner.next() {
-            if secret
-                .path
-                .to_str()
-                .map(|p| p.contains(filter))
-                .unwrap_or(false)
-            {
+            if secret.name.contains(filter) {
                 return Some(secret);
             }
         }

@@ -4,7 +4,7 @@ use clap::ArgMatches;
 
 use crate::cmd::matcher::{show::ShowMatcher, Matcher};
 use crate::Store;
-use prs::types::Plaintext;
+use prs_lib::types::Plaintext;
 
 /// A file show action.
 pub struct Show<'a> {
@@ -30,7 +30,7 @@ impl<'a> Show<'a> {
         let secrets = store.secrets(matcher_show.query());
         let secret = crate::select_secret(&secrets).expect("no secret selected");
 
-        let mut plaintext = prs::crypto::decrypt_file(&secret.path).expect("failed to decrypt");
+        let mut plaintext = prs_lib::crypto::decrypt_file(&secret.path).expect("failed to decrypt");
 
         // Trim plaintext to first line
         if matcher_show.first_line() {

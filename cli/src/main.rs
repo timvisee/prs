@@ -1,8 +1,11 @@
 #[macro_use]
 extern crate clap;
+#[macro_use]
+extern crate derive_builder;
 
 mod action;
 mod cmd;
+mod util;
 
 use std::borrow::Cow;
 use std::path::PathBuf;
@@ -13,7 +16,7 @@ use skim::{
     AnsiString, Skim, SkimItem,
 };
 
-use prs::store::{Secret, Store};
+use prs_lib::store::{Secret, Store};
 
 use crate::cmd::Handler;
 

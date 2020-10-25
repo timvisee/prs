@@ -2,7 +2,8 @@ use std::fs;
 
 use clap::ArgMatches;
 
-use crate::cmd::matcher::{duplicate::DuplicateMatcher, Matcher};
+use crate::cmd::matcher::{duplicate::DuplicateMatcher, MainMatcher, Matcher};
+use crate::util;
 use crate::Store;
 
 /// A file duplicate action.
@@ -20,12 +21,14 @@ impl<'a> Duplicate<'a> {
     // TODO: re-implement error handling
     pub fn invoke(&self) -> Result<(), ()> {
         // Create the command matchers
+        let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
         let matcher_duplicate = DuplicateMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(crate::STORE_DEFAULT_ROOT);
 
         // TODO: do not error on none selected
         let secrets = store.secrets(matcher_duplicate.query());
+        // TODO: show secret name if not equal to input, unless quiet?
         let secret = crate::select_secret(&secrets).expect("no secret selected");
 
         let target = matcher_duplicate.target();
@@ -41,9 +44,13 @@ impl<'a> Duplicate<'a> {
             true,
         );
 
-        // Check if target already exists
-        if path.is_file() {
-            // TODO: show prompt to override?
+        // Check if target already exists if not forcing
+        if !matcher_main.force() && path.is_file() {
+            eprintln!("A secret at '{}' already exists", path.display(),);
+            if !util::prompt_yes("Overwrite?", Some(true), &matcher_main) {
+                println!("Duplication cancelled");
+                util::quit();
+            }
         }
 
         // Copy secret, show error

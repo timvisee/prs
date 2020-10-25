@@ -1,8 +1,9 @@
-use std::error::Error;
 use std::ffi::OsString;
 use std::fs;
 use std::path::{self, Path, PathBuf};
 
+use anyhow::Result;
+use thiserror::Error;
 use walkdir::{DirEntry, WalkDir};
 
 use crate::Recipients;
@@ -23,18 +24,22 @@ pub struct Store {
 
 impl Store {
     /// Open a store at the given path.
-    pub fn open<P: AsRef<str>>(root: P) -> Self {
-        // TODO: make sure path is valid store (exists, contains required files?)
+    pub fn open<P: AsRef<str>>(root: P) -> Result<Self> {
+        let root: PathBuf = shellexpand::full(&root)
+            .map_err(Err::ExpandPath)?
+            .as_ref()
+            .into();
 
-        // Expand path
-        // TODO: do full expand, not just tilde
-        let root = shellexpand::tilde(&root).as_ref().into();
+        // Make sure store directory exists
+        if root.is_dir() {
+            return Err(Err::NoRootDir(root).into());
+        }
 
-        Self { root }
+        Ok(Self { root })
     }
 
     /// Get the recipient keys for this store.
-    pub fn recipients(&self) -> Result<Recipients, Box<dyn Error>> {
+    pub fn recipients(&self) -> Result<Recipients> {
         // TODO: what to do if ids file does not exist?
         // TODO: what to do if recipients is empty?
         let mut path = self.root.clone();
@@ -63,9 +68,19 @@ impl Store {
         target: P,
         name_hint: Option<&str>,
         create_dirs: bool,
-    ) -> PathBuf {
+    ) -> Result<PathBuf> {
         // Take target as base path
         let mut path = PathBuf::from(target.as_ref());
+
+        // Expand path
+        if let Some(path_str) = path.to_str() {
+            path = PathBuf::from(
+                shellexpand::full(path_str)
+                    .map_err(Err::ExpandPath)?
+                    .as_ref(),
+            );
+        }
+
         let target_is_dir = path.is_dir()
             || target
                 .as_ref()
@@ -91,8 +106,7 @@ impl Store {
 
         // Add current secret name if target is dir
         if target_is_dir {
-            // TODO: do not unwrap, return proper error
-            path.push(name_hint.unwrap());
+            path.push(name_hint.ok_or_else(|| Err::TargetDirWithoutNamehint(path.clone()))?);
         }
 
         // Add secret extension if non existent
@@ -107,14 +121,11 @@ impl Store {
         if create_dirs {
             let parent = path.parent().unwrap();
             if !parent.is_dir() {
-                // TODO: handle errors
-                if let Err(err) = fs::create_dir_all(parent) {
-                    eprintln!("Failed to create secret parent directory: {:?}", err);
-                }
+                fs::create_dir_all(parent).map_err(Err::CreateDir)?;
             }
         }
 
-        path
+        Ok(path)
     }
 }
 
@@ -249,4 +260,19 @@ where
 
         None
     }
+}
+
+#[derive(Debug, Error)]
+pub enum Err {
+    #[error("failed to expand store root path")]
+    ExpandPath(#[source] shellexpand::LookupError<std::env::VarError>),
+
+    #[error("failed to open password store, not a directory: {0}")]
+    NoRootDir(PathBuf),
+
+    #[error("failed to create directory")]
+    CreateDir(#[source] std::io::Error),
+
+    #[error("cannot use directory as target without name hint")]
+    TargetDirWithoutNamehint(PathBuf),
 }

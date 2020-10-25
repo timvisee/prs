@@ -27,7 +27,7 @@ impl<'a> Duplicate<'a> {
         let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
         let matcher_duplicate = DuplicateMatcher::with(self.cmd_matches).unwrap();
 
-        let store = Store::open(crate::STORE_DEFAULT_ROOT);
+        let store = Store::open(crate::STORE_DEFAULT_ROOT).map_err(Err::Store)?;
 
         // TODO: show secret name if not equal to input, unless quiet?
         let secrets = store.secrets(matcher_duplicate.query());
@@ -35,21 +35,20 @@ impl<'a> Duplicate<'a> {
 
         let target = matcher_duplicate.target();
 
-        // TODO: move this into normalize function below
-        let target = shellexpand::full(target).map_err(Err::ExpandTarget)?;
-
         // Normalize target path
-        let path = store.normalize_secret_path(
-            target.as_ref(),
-            secret.path.file_name().and_then(|p| p.to_str()),
-            true,
-        );
+        let path = store
+            .normalize_secret_path(
+                target,
+                secret.path.file_name().and_then(|p| p.to_str()),
+                true,
+            )
+            .map_err(Err::NormalizePath)?;
 
         // Check if target already exists if not forcing
         if !matcher_main.force() && path.is_file() {
             eprintln!("A secret at '{}' already exists", path.display(),);
             if !util::prompt_yes("Overwrite?", Some(true), &matcher_main) {
-                println!("Duplication cancelled");
+                eprintln!("Duplication cancelled");
                 util::quit();
             }
         }
@@ -63,11 +62,14 @@ impl<'a> Duplicate<'a> {
 
 #[derive(Debug, Error)]
 pub enum Err {
+    #[error("failed to access password store")]
+    Store(#[source] anyhow::Error),
+
     #[error("no secret selected")]
     NoneSelected,
 
-    #[error("failed to expand target path")]
-    ExpandTarget(#[source] shellexpand::LookupError<std::env::VarError>),
+    #[error("failed to normalize target path")]
+    NormalizePath(#[source] anyhow::Error),
 
     #[error("failed to copy secret file")]
     Copy(#[source] std::io::Error),

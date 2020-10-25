@@ -24,19 +24,16 @@ impl<'a> Copy<'a> {
         // Create the command matchers
         let matcher_copy = CopyMatcher::with(self.cmd_matches).unwrap();
 
-        let store = Store::open(crate::STORE_DEFAULT_ROOT);
+        let store = Store::open(crate::STORE_DEFAULT_ROOT).map_err(Err::Store)?;
 
-        // TODO: do not error on none selected
         let secrets = store.secrets(matcher_copy.query());
         let secret = crate::select_secret(&secrets).ok_or(Err::NoneSelected)?;
 
-        // TODO: attach decrypt error here
-        let mut plaintext =
-            prs_lib::crypto::decrypt_file(&secret.path).map_err(|_| Err::Decrypt)?;
+        let mut plaintext = prs_lib::crypto::decrypt_file(&secret.path).map_err(Err::Decrypt)?;
 
         // Trim plaintext to first line
         if !matcher_copy.all() {
-            plaintext = plaintext.first_line().map_err(Err::FirstLine)?;
+            plaintext = plaintext.first_line()?;
         }
 
         copy(plaintext)
@@ -56,14 +53,14 @@ fn copy(plaintext: Plaintext) -> Result<()> {
 
 #[derive(Debug, Error)]
 pub enum Err {
-    #[error("failed to grab first line of secret")]
-    FirstLine(#[source] std::str::Utf8Error),
+    #[error("failed to access password store")]
+    Store(#[source] anyhow::Error),
 
     #[error("no secret selected")]
     NoneSelected,
 
     #[error("failed to decrypt secret")]
-    Decrypt,
+    Decrypt(#[source] anyhow::Error),
 
     #[error("failed to copy secret to clipboard")]
     Clipboard(#[source] Box<dyn std::error::Error + Send + Sync>),

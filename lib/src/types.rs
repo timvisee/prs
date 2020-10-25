@@ -1,3 +1,5 @@
+use anyhow::Result;
+use thiserror::Error;
 use zeroize::Zeroize;
 
 /// Ciphertext.
@@ -41,9 +43,15 @@ impl Plaintext {
     }
 
     /// Get the first line of this secret as plaintext.
-    pub fn first_line(self) -> Result<Plaintext, std::str::Utf8Error> {
+    pub fn first_line(self) -> Result<Plaintext> {
         Ok(Plaintext(
-            self.to_str()?.lines().next().unwrap().as_bytes().into(),
+            self.to_str()
+                .map_err(Err::FirstLine)?
+                .lines()
+                .next()
+                .unwrap()
+                .as_bytes()
+                .into(),
         ))
     }
 }
@@ -52,4 +60,10 @@ impl From<&str> for Plaintext {
     fn from(s: &str) -> Self {
         Self(s.as_bytes().into())
     }
+}
+
+#[derive(Debug, Error)]
+pub enum Err {
+    #[error("failed to select first line of plaintext")]
+    FirstLine(#[source] std::str::Utf8Error),
 }

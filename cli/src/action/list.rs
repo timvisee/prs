@@ -1,5 +1,6 @@
 use anyhow::Result;
 use clap::ArgMatches;
+use thiserror::Error;
 
 use prs_lib::store::Store;
 
@@ -21,7 +22,7 @@ impl<'a> List<'a> {
         // Create the command matchers
         let matcher_list = ListMatcher::with(self.cmd_matches).unwrap();
 
-        let store = Store::open(crate::STORE_DEFAULT_ROOT);
+        let store = Store::open(crate::STORE_DEFAULT_ROOT).map_err(Err::Store)?;
 
         let mut secrets = store.secrets(matcher_list.query());
         secrets.sort_unstable_by(|a, b| a.name.cmp(&b.name));
@@ -30,4 +31,10 @@ impl<'a> List<'a> {
 
         Ok(())
     }
+}
+
+#[derive(Debug, Error)]
+pub enum Err {
+    #[error("failed to access password store")]
+    Store(#[source] anyhow::Error),
 }

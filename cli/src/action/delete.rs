@@ -51,7 +51,13 @@ impl<'a> Delete<'a> {
         // Delete secret
         fs::remove_file(&secret.path)
             .map(|_| ())
-            .map_err(|err| Err::Remove(err).into())
+            .map_err(|err| Err::Remove(err))?;
+
+        if !matcher_main.quiet() {
+            eprintln!("Secret deleted");
+        }
+
+        Ok(())
     }
 }
 

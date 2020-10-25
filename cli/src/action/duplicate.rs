@@ -58,7 +58,13 @@ impl<'a> Duplicate<'a> {
         // Copy secret
         fs::copy(&secret.path, path)
             .map(|_| ())
-            .map_err(|err| Err::Copy(err).into())
+            .map_err(|err| Err::Copy(err))?;
+
+        if !matcher_main.quiet() {
+            eprintln!("Secret duplicated");
+        }
+
+        Ok(())
     }
 }
 

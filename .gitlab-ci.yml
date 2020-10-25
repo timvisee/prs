@@ -59,6 +59,13 @@ build-x86_64-linux-gnu:
     - check-stable
   script:
     - cargo build --target=$RUST_TARGET --release --verbose
+    - mv target/$RUST_TARGET/release/prs ./prs-$RUST_TARGET
+    - strip -g ./prs-$RUST_TARGET
+  artifacts:
+    name: prs-x86_64-linux-gnu
+    paths:
+      - prs-$RUST_TARGET
+    expire_in: 1 month
 
 # Build a static version
 build-x86_64-linux-musl:
@@ -70,6 +77,16 @@ build-x86_64-linux-musl:
   script:
     - rustup target add $RUST_TARGET
     - cargo build --target=$RUST_TARGET --release --verbose
+
+    # Prepare the release artifact, strip it
+    - find . -name prs -exec ls -lah {} \;
+    - mv target/$RUST_TARGET/release/prs ./prs-$RUST_TARGET
+    - strip -g ./prs-$RUST_TARGET
+  artifacts:
+    name: prs-x86_64-linux-musl
+    paths:
+      - prs-$RUST_TARGET
+    expire_in: 1 month
 
 # Run the unit tests through Cargo
 test-cargo:

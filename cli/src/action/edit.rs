@@ -41,6 +41,20 @@ impl<'a> Edit<'a> {
             }
         };
 
+        // Confirm if empty secret should be stored
+        if !matcher_main.force() && plaintext.is_empty() {
+            if !util::prompt_yes(
+                "The edited secret is empty. Save?",
+                Some(true),
+                &matcher_main,
+            ) {
+                if matcher_main.verbose() {
+                    eprintln!("Secret is unchanged");
+                }
+                util::quit();
+            }
+        }
+
         // Encrypt and write changed plaintext
         // TODO: select proper recipients (use from current file?)
         // TODO: log recipients to encrypt for

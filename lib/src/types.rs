@@ -54,6 +54,17 @@ impl Plaintext {
                 .into(),
         ))
     }
+
+    /// Check whether this plaintext is empty.
+    ///
+    /// - Empty if 0 bytes
+    /// - Empty if bytes parsed as UTF-8 has trimmed length of 0 characters (ignored on encoding failure)
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+            || std::str::from_utf8(&self.0)
+                .map(|s| s.trim().is_empty())
+                .unwrap_or(false)
+    }
 }
 
 impl From<&str> for Plaintext {

@@ -1,4 +1,4 @@
-use clap::{App, Arg, SubCommand};
+use clap::{App, SubCommand};
 
 use crate::cmd::arg::{ArgQuery, CmdArg};
 

@@ -30,7 +30,7 @@ impl<'a> Copy<'a> {
         let secrets = store.secrets(matcher_copy.query());
         let secret = crate::select_secret(&secrets).ok_or(Err::NoneSelected)?;
 
-        let mut plaintext = prs_lib::crypto::decrypt_file(&secret.path).map_err(Err::Decrypt)?;
+        let mut plaintext = prs_lib::crypto::decrypt_file(&secret.path).map_err(Err::Read)?;
 
         // Trim plaintext to first line
         if !matcher_copy.all() {
@@ -63,8 +63,8 @@ pub enum Err {
     #[error("no secret selected")]
     NoneSelected,
 
-    #[error("failed to decrypt secret")]
-    Decrypt(#[source] anyhow::Error),
+    #[error("failed to read secret")]
+    Read(#[source] anyhow::Error),
 
     #[error("failed to copy secret to clipboard")]
     Clipboard(#[source] Box<dyn std::error::Error + Send + Sync>),

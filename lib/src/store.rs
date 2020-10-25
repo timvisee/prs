@@ -31,7 +31,7 @@ impl Store {
             .into();
 
         // Make sure store directory exists
-        if root.is_dir() {
+        if !root.is_dir() {
             return Err(Err::NoRootDir(root).into());
         }
 

@@ -48,7 +48,9 @@ impl<'a> Duplicate<'a> {
         if !matcher_main.force() && path.is_file() {
             eprintln!("A secret at '{}' already exists", path.display(),);
             if !util::prompt_yes("Overwrite?", Some(true), &matcher_main) {
-                eprintln!("Duplication cancelled");
+                if matcher_main.verbose() {
+                    eprintln!("Duplication cancelled");
+                }
                 util::quit();
             }
         }

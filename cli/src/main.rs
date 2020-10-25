@@ -42,6 +42,10 @@ fn invoke_action(handler: &Handler) -> Result<()> {
         return action::copy::Copy::new(handler.matches()).invoke();
     }
 
+    if handler.delete().is_some() {
+        return action::delete::Delete::new(handler.matches()).invoke();
+    }
+
     if handler.duplicate().is_some() {
         return action::duplicate::Duplicate::new(handler.matches()).invoke();
     }

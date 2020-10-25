@@ -1,7 +1,7 @@
 use clap::{App, AppSettings, Arg, ArgMatches};
 
-use super::matcher::{CopyMatcher, DuplicateMatcher, ListMatcher, Matcher, ShowMatcher};
-use super::subcmd::{CmdCopy, CmdDuplicate, CmdList, CmdShow};
+use super::matcher::{self, Matcher};
+use super::subcmd;
 
 /// CLI argument handler.
 pub struct Handler<'a> {
@@ -59,10 +59,11 @@ impl<'a: 'b, 'b> Handler<'a> {
                     .global(true)
                     .help("Enable verbose information and logging"),
             )
-            .subcommand(CmdCopy::build())
-            .subcommand(CmdDuplicate::build())
-            .subcommand(CmdList::build())
-            .subcommand(CmdShow::build());
+            .subcommand(subcmd::CmdCopy::build())
+            .subcommand(subcmd::CmdDelete::build())
+            .subcommand(subcmd::CmdDuplicate::build())
+            .subcommand(subcmd::CmdList::build())
+            .subcommand(subcmd::CmdShow::build());
 
         // Disable color usage if compiled without color support
         // TODO: do not use feature, pull from env var instead
@@ -85,22 +86,27 @@ impl<'a: 'b, 'b> Handler<'a> {
     }
 
     /// Get the copy sub command, if matched.
-    pub fn copy(&'a self) -> Option<CopyMatcher> {
-        CopyMatcher::with(&self.matches)
+    pub fn copy(&'a self) -> Option<matcher::CopyMatcher> {
+        matcher::CopyMatcher::with(&self.matches)
+    }
+
+    /// Get the delete sub command, if matched.
+    pub fn delete(&'a self) -> Option<matcher::DeleteMatcher> {
+        matcher::DeleteMatcher::with(&self.matches)
     }
 
     /// Get the duplicate sub command, if matched.
-    pub fn duplicate(&'a self) -> Option<DuplicateMatcher> {
-        DuplicateMatcher::with(&self.matches)
+    pub fn duplicate(&'a self) -> Option<matcher::DuplicateMatcher> {
+        matcher::DuplicateMatcher::with(&self.matches)
     }
 
     /// Get the list sub command, if matched.
-    pub fn list(&'a self) -> Option<ListMatcher> {
-        ListMatcher::with(&self.matches)
+    pub fn list(&'a self) -> Option<matcher::ListMatcher> {
+        matcher::ListMatcher::with(&self.matches)
     }
 
     /// Get the show sub command, if matched.
-    pub fn show(&'a self) -> Option<ShowMatcher> {
-        ShowMatcher::with(&self.matches)
+    pub fn show(&'a self) -> Option<matcher::ShowMatcher> {
+        matcher::ShowMatcher::with(&self.matches)
     }
 }

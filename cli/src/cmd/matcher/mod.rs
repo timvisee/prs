@@ -1,6 +1,7 @@
 pub mod copy;
 pub mod delete;
 pub mod duplicate;
+pub mod edit;
 pub mod list;
 pub mod main;
 pub mod r#move;
@@ -10,6 +11,7 @@ pub mod show;
 pub use self::copy::CopyMatcher;
 pub use self::delete::DeleteMatcher;
 pub use self::duplicate::DuplicateMatcher;
+pub use self::edit::EditMatcher;
 pub use self::list::ListMatcher;
 pub use self::main::MainMatcher;
 pub use self::r#move::MoveMatcher;

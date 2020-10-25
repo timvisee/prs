@@ -62,8 +62,9 @@ impl<'a: 'b, 'b> Handler<'a> {
             .subcommand(subcmd::CmdCopy::build())
             .subcommand(subcmd::CmdDelete::build())
             .subcommand(subcmd::CmdDuplicate::build())
-            .subcommand(subcmd::CmdMove::build())
+            .subcommand(subcmd::CmdEdit::build())
             .subcommand(subcmd::CmdList::build())
+            .subcommand(subcmd::CmdMove::build())
             .subcommand(subcmd::CmdShow::build());
 
         // Disable color usage if compiled without color support
@@ -99,6 +100,11 @@ impl<'a: 'b, 'b> Handler<'a> {
     /// Get the duplicate sub command, if matched.
     pub fn duplicate(&'a self) -> Option<matcher::DuplicateMatcher> {
         matcher::DuplicateMatcher::with(&self.matches)
+    }
+
+    /// Get the edit sub command, if matched.
+    pub fn edit(&'a self) -> Option<matcher::EditMatcher> {
+        matcher::EditMatcher::with(&self.matches)
     }
 
     /// Get the list sub command, if matched.

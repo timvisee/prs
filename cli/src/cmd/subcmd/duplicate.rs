@@ -13,7 +13,7 @@ impl CmdDuplicate {
             .arg(ArgQuery::build().required(true))
             .arg(
                 Arg::with_name("TARGET")
-                    .help("Secret target name")
+                    .help("Secret target path")
                     .required(true),
             )
     }

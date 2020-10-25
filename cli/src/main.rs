@@ -50,6 +50,10 @@ fn invoke_action(handler: &Handler) -> Result<()> {
         return action::duplicate::Duplicate::new(handler.matches()).invoke();
     }
 
+    if handler.edit().is_some() {
+        return action::edit::Edit::new(handler.matches()).invoke();
+    }
+
     if handler.r#move().is_some() {
         return action::r#move::Move::new(handler.matches()).invoke();
     }

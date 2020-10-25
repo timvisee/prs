@@ -58,7 +58,7 @@ impl<'a> Move<'a> {
         // Move secret
         fs::rename(&secret.path, path)
             .map(|_| ())
-            .map_err(|err| Err::Copy(err))?;
+            .map_err(|err| Err::Move(err))?;
 
         if !matcher_main.quiet() {
             eprintln!("Secret moved");
@@ -79,6 +79,6 @@ pub enum Err {
     #[error("failed to normalize target path")]
     NormalizePath(#[source] anyhow::Error),
 
-    #[error("failed to copy secret file")]
-    Copy(#[source] std::io::Error),
+    #[error("failed to move secret file")]
+    Move(#[source] std::io::Error),
 }

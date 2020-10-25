@@ -1,6 +1,7 @@
 pub mod copy;
 pub mod delete;
 pub mod duplicate;
+pub mod edit;
 pub mod list;
 pub mod r#move;
 pub mod show;
@@ -9,6 +10,7 @@ pub mod show;
 pub use self::copy::CmdCopy;
 pub use self::delete::CmdDelete;
 pub use self::duplicate::CmdDuplicate;
+pub use self::edit::CmdEdit;
 pub use self::list::CmdList;
 pub use self::r#move::CmdMove;
 pub use self::show::CmdShow;

@@ -55,8 +55,7 @@ check-old:
 # Build using Rust stable
 build-x86_64-linux-gnu:
   stage: build
-  needs:
-    - check-stable
+  needs: []
   script:
     - cargo build --target=$RUST_TARGET --release --verbose
     - mv target/$RUST_TARGET/release/prs ./prs-$RUST_TARGET
@@ -70,8 +69,7 @@ build-x86_64-linux-gnu:
 # Build a static version
 build-x86_64-linux-musl:
   stage: build
-  needs:
-    - check-stable
+  needs: []
   variables:
     RUST_TARGET: x86_64-unknown-linux-musl
   script:

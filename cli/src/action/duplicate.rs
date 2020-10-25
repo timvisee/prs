@@ -1,10 +1,13 @@
 use std::fs;
 
+use anyhow::Result;
 use clap::ArgMatches;
+use thiserror::Error;
+
+use prs_lib::store::Store;
 
 use crate::cmd::matcher::{duplicate::DuplicateMatcher, MainMatcher, Matcher};
 use crate::util;
-use crate::Store;
 
 /// A file duplicate action.
 pub struct Duplicate<'a> {
@@ -19,23 +22,21 @@ impl<'a> Duplicate<'a> {
 
     /// Invoke the duplicate action.
     // TODO: re-implement error handling
-    pub fn invoke(&self) -> Result<(), ()> {
+    pub fn invoke(&self) -> Result<()> {
         // Create the command matchers
         let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
         let matcher_duplicate = DuplicateMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(crate::STORE_DEFAULT_ROOT);
 
-        // TODO: do not error on none selected
-        let secrets = store.secrets(matcher_duplicate.query());
         // TODO: show secret name if not equal to input, unless quiet?
-        let secret = crate::select_secret(&secrets).expect("no secret selected");
+        let secrets = store.secrets(matcher_duplicate.query());
+        let secret = crate::select_secret(&secrets).ok_or(Err::NoneSelected)?;
 
         let target = matcher_duplicate.target();
 
         // TODO: move this into normalize function below
-        // TODO: do not unwrap here
-        let target = shellexpand::full(target).expect("failed to expand target path");
+        let target = shellexpand::full(target).map_err(Err::ExpandTarget)?;
 
         // Normalize target path
         let path = store.normalize_secret_path(
@@ -53,50 +54,21 @@ impl<'a> Duplicate<'a> {
             }
         }
 
-        // Copy secret, show error
-        if let Err(err) = fs::copy(&secret.path, path) {
-            // TODO: show proper error here
-            eprintln!("Failed to duplicate secret: {:?}", err);
-        }
-
-        Ok(())
+        // Copy secret
+        fs::copy(&secret.path, path)
+            .map(|_| ())
+            .map_err(|err| Err::Copy(err).into())
     }
 }
 
-// #[derive(Debug, Fail)]
-// pub enum Error {
-//     /// Failed to parse a share URL, it was invalid.
-//     /// This error is not related to a specific action.
-//     #[fail(display = "invalid share link")]
-//     InvalidUrl(#[cause] FileParseError),
+#[derive(Debug, Error)]
+pub enum Err {
+    #[error("no secret selected")]
+    NoneSelected,
 
-//     /// An error occurred while checking if the file exists.
-//     #[fail(display = "failed to check whether the file exists")]
-//     Exists(#[cause] ExistsError),
+    #[error("failed to expand target path")]
+    ExpandTarget(#[source] shellexpand::LookupError<std::env::VarError>),
 
-//     /// An error occurred while fetching the file showrmation.
-//     #[fail(display = "failed to fetch file show")]
-//     Show(#[cause] ShowError),
-
-//     /// The given Send file has expired, or did never exist in the first place.
-//     #[fail(display = "the file has expired or did never exist")]
-//     Expired,
-// }
-
-// impl From<FileParseError> for Error {
-//     fn from(err: FileParseError) -> Error {
-//         Error::InvalidUrl(err)
-//     }
-// }
-
-// impl From<ExistsError> for Error {
-//     fn from(err: ExistsError) -> Error {
-//         Error::Exists(err)
-//     }
-// }
-
-// impl From<ShowError> for Error {
-//     fn from(err: ShowError) -> Error {
-//         Error::Show(err)
-//     }
-// }
+    #[error("failed to copy secret file")]
+    Copy(#[source] std::io::Error),
+}

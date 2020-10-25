@@ -11,8 +11,8 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::process::{exit, ExitStatus};
 
+use anyhow::{anyhow, Error};
 use colored::{ColoredString, Colorize};
-use failure::{err_msg, Fail};
 
 use crate::cmd::matcher::MainMatcher;
 
@@ -23,11 +23,10 @@ pub fn print_success(msg: &str) {
 
 /// Print the given error in a proper format for the user,
 /// with it's causes.
-pub fn print_error<E: Fail>(err: impl Borrow<E>) {
+pub fn print_error(err: Error) {
     // Report each printable error, count them
     let count = err
-        .borrow()
-        .causes()
+        .chain()
         .map(|err| format!("{}", err))
         .filter(|err| !err.is_empty())
         .enumerate()
@@ -56,7 +55,7 @@ pub fn print_error_msg<S>(err: S)
 where
     S: AsRef<str> + Display + Debug + Sync + Send + 'static,
 {
-    print_error(err_msg(err).compat());
+    print_error(anyhow!(err));
 }
 
 /// Print a warning.
@@ -74,7 +73,7 @@ pub fn quit() -> ! {
 
 /// Quit the application with an error code,
 /// and print the given error.
-pub fn quit_error<E: Fail>(err: E, hints: impl Borrow<ErrorHints>) -> ! {
+pub fn quit_error(err: Error, hints: impl Borrow<ErrorHints>) -> ! {
     // Print the error
     print_error(err);
 
@@ -91,7 +90,7 @@ pub fn quit_error_msg<S>(err: S, hints: impl Borrow<ErrorHints>) -> !
 where
     S: AsRef<str> + Display + Debug + Sync + Send + 'static,
 {
-    quit_error(err_msg(err).compat(), hints);
+    quit_error(anyhow!(err), hints);
 }
 
 /// The error hint configuration.
@@ -227,7 +226,10 @@ pub fn prompt(msg: &str, main_matcher: &MainMatcher) -> String {
 
     // Get the input
     let mut input = String::new();
-    if let Err(err) = stdin().read_line(&mut input) {
+    if let Err(err) = stdin()
+        .read_line(&mut input)
+        .map_err(|err| -> Error { err.into() })
+    {
         quit_error(
             err.context("failed to read input from prompt"),
             ErrorHints::default(),

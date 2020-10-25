@@ -11,12 +11,13 @@ use std::borrow::Cow;
 use std::path::PathBuf;
 use std::sync::Arc;
 
+use anyhow::Result;
 use skim::{
     prelude::{SkimItemReceiver, SkimItemSender, SkimOptionsBuilder},
     AnsiString, Skim, SkimItem,
 };
 
-use prs_lib::store::{Secret, Store};
+use prs_lib::store::Secret;
 
 use crate::cmd::Handler;
 
@@ -28,8 +29,7 @@ fn main() {
 
     // Invoke the proper action
     if let Err(err) = invoke_action(&cmd_handler) {
-        panic!("action failure: {:?}", err);
-        // TODO: quit_error(err, ErrorHints::default());
+        util::quit_error(err, util::ErrorHints::default());
     };
 }
 
@@ -37,33 +37,21 @@ fn main() {
 ///
 /// If no proper action is selected, the program will quit with an error
 /// message.
-fn invoke_action(handler: &Handler) -> Result<(), ()> {
-    // Match the copy command
+fn invoke_action(handler: &Handler) -> Result<()> {
     if handler.copy().is_some() {
-        return action::copy::Copy::new(handler.matches())
-            .invoke()
-            .map_err(|err| err.into());
+        return action::copy::Copy::new(handler.matches()).invoke();
     }
 
-    // Match the duplicate command
     if handler.duplicate().is_some() {
-        return action::duplicate::Duplicate::new(handler.matches())
-            .invoke()
-            .map_err(|err| err.into());
+        return action::duplicate::Duplicate::new(handler.matches()).invoke();
     }
 
-    // Match the show command
     if handler.show().is_some() {
-        return action::show::Show::new(handler.matches())
-            .invoke()
-            .map_err(|err| err.into());
+        return action::show::Show::new(handler.matches()).invoke();
     }
 
-    // Match the list command
     if handler.list().is_some() {
-        return action::list::List::new(handler.matches())
-            .invoke()
-            .map_err(|err| err.into());
+        return action::list::List::new(handler.matches()).invoke();
     }
 
     Ok(())

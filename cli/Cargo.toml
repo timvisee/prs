@@ -19,14 +19,15 @@ edition = "2018"
 gitlab = { repository = "timvisee/prs", branch = "master" }
 
 [dependencies]
+anyhow = "1.0"
 clap = "2.33"
 colored = "2.0"
 copypasta-ext = { version = "0.3.2", default-features = false, features = ["x11-fork"] }
 derive_builder = "0.9"
-failure = "0.1"
 prs-lib = { path = "../lib" }
 shellexpand = "2.0"
 skim = "0.8"
+thiserror = "1.0"
 
 [[bin]]
 name = "prs"

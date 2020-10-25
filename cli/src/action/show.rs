@@ -2,9 +2,11 @@ use std::io::Write;
 
 use clap::ArgMatches;
 
+use anyhow::Result;
+use prs_lib::{store::Store, types::Plaintext};
+use thiserror::Error;
+
 use crate::cmd::matcher::{show::ShowMatcher, Matcher};
-use crate::Store;
-use prs_lib::types::Plaintext;
 
 /// A file show action.
 pub struct Show<'a> {
@@ -18,75 +20,50 @@ impl<'a> Show<'a> {
     }
 
     /// Invoke the show action.
-    // TODO: re-implement error handling
-    pub fn invoke(&self) -> Result<(), ()> {
+    pub fn invoke(&self) -> Result<()> {
         // Create the command matchers
-        // TODO: do we need these?
         let matcher_show = ShowMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(crate::STORE_DEFAULT_ROOT);
 
-        // TODO: do not error on none selected
         let secrets = store.secrets(matcher_show.query());
-        let secret = crate::select_secret(&secrets).expect("no secret selected");
+        let secret = crate::select_secret(&secrets).ok_or(Err::NoneSelected)?;
 
-        let mut plaintext = prs_lib::crypto::decrypt_file(&secret.path).expect("failed to decrypt");
+        // TODO: attach decrypt error here
+        let mut plaintext =
+            prs_lib::crypto::decrypt_file(&secret.path).map_err(|_| Err::Decrypt)?;
 
         // Trim plaintext to first line
         if matcher_show.first_line() {
-            plaintext = plaintext
-                .first_line()
-                .expect("failed to get first line of secret");
+            plaintext = plaintext.first_line().map_err(Err::FirstLine)?;
         }
 
-        print(plaintext);
-
-        Ok(())
+        print(plaintext)
     }
 }
 
 /// Print the given plaintext to stdout.
-fn print(plaintext: Plaintext) {
+fn print(plaintext: Plaintext) -> Result<()> {
     eprintln!("=v=v=v=v=v=v=v=v=v=");
-    std::io::stdout().write_all(&plaintext.0).unwrap();
+    std::io::stdout()
+        .write_all(&plaintext.0)
+        .map_err(Err::Print)?;
     let _ = std::io::stdout().flush();
     eprintln!("\n=^=^=^=^=^=^=^=^=^=");
+    Ok(())
 }
 
-// #[derive(Debug, Fail)]
-// pub enum Error {
-//     /// Failed to parse a share URL, it was invalid.
-//     /// This error is not related to a specific action.
-//     #[fail(display = "invalid share link")]
-//     InvalidUrl(#[cause] FileParseError),
+#[derive(Debug, Error)]
+pub enum Err {
+    #[error("failed to grab first line of secret")]
+    FirstLine(#[source] std::str::Utf8Error),
 
-//     /// An error occurred while checking if the file exists.
-//     #[fail(display = "failed to check whether the file exists")]
-//     Exists(#[cause] ExistsError),
+    #[error("no secret selected")]
+    NoneSelected,
 
-//     /// An error occurred while fetching the file showrmation.
-//     #[fail(display = "failed to fetch file show")]
-//     Show(#[cause] ShowError),
+    #[error("failed to decrypt secret")]
+    Decrypt,
 
-//     /// The given Send file has expired, or did never exist in the first place.
-//     #[fail(display = "the file has expired or did never exist")]
-//     Expired,
-// }
-
-// impl From<FileParseError> for Error {
-//     fn from(err: FileParseError) -> Error {
-//         Error::InvalidUrl(err)
-//     }
-// }
-
-// impl From<ExistsError> for Error {
-//     fn from(err: ExistsError) -> Error {
-//         Error::Exists(err)
-//     }
-// }
-
-// impl From<ShowError> for Error {
-//     fn from(err: ShowError) -> Error {
-//         Error::Show(err)
-//     }
-// }
+    #[error("failed to print secret to stdout")]
+    Print(#[source] std::io::Error),
+}

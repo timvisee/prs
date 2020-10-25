@@ -62,6 +62,7 @@ impl<'a: 'b, 'b> Handler<'a> {
             .subcommand(subcmd::CmdCopy::build())
             .subcommand(subcmd::CmdDelete::build())
             .subcommand(subcmd::CmdDuplicate::build())
+            .subcommand(subcmd::CmdMove::build())
             .subcommand(subcmd::CmdList::build())
             .subcommand(subcmd::CmdShow::build());
 
@@ -103,6 +104,11 @@ impl<'a: 'b, 'b> Handler<'a> {
     /// Get the list sub command, if matched.
     pub fn list(&'a self) -> Option<matcher::ListMatcher> {
         matcher::ListMatcher::with(&self.matches)
+    }
+
+    /// Get the move sub command, if matched.
+    pub fn r#move(&'a self) -> Option<matcher::MoveMatcher> {
+        matcher::MoveMatcher::with(&self.matches)
     }
 
     /// Get the show sub command, if matched.

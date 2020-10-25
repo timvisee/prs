@@ -2,7 +2,7 @@ use std::ffi::OsString;
 use std::fs;
 use std::path::{self, Path, PathBuf};
 
-use anyhow::Result;
+use anyhow::{ensure, Result};
 use thiserror::Error;
 use walkdir::{DirEntry, WalkDir};
 
@@ -31,9 +31,7 @@ impl Store {
             .into();
 
         // Make sure store directory exists
-        if !root.is_dir() {
-            return Err(Err::NoRootDir(root).into());
-        }
+        ensure!(root.is_dir(), Err::NoRootDir(root));
 
         Ok(Self { root })
     }

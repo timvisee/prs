@@ -3,6 +3,7 @@ pub mod delete;
 pub mod duplicate;
 pub mod list;
 pub mod main;
+pub mod r#move;
 pub mod show;
 
 // Re-export to matcher module
@@ -11,6 +12,7 @@ pub use self::delete::DeleteMatcher;
 pub use self::duplicate::DuplicateMatcher;
 pub use self::list::ListMatcher;
 pub use self::main::MainMatcher;
+pub use self::r#move::MoveMatcher;
 pub use self::show::ShowMatcher;
 
 use clap::ArgMatches;

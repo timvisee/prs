@@ -50,12 +50,16 @@ fn invoke_action(handler: &Handler) -> Result<()> {
         return action::duplicate::Duplicate::new(handler.matches()).invoke();
     }
 
-    if handler.show().is_some() {
-        return action::show::Show::new(handler.matches()).invoke();
+    if handler.r#move().is_some() {
+        return action::r#move::Move::new(handler.matches()).invoke();
     }
 
     if handler.list().is_some() {
         return action::list::List::new(handler.matches()).invoke();
+    }
+
+    if handler.show().is_some() {
+        return action::show::Show::new(handler.matches()).invoke();
     }
 
     Ok(())

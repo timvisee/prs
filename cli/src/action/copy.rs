@@ -6,7 +6,7 @@ use anyhow::Result;
 use prs_lib::{store::Store, types::Plaintext};
 use thiserror::Error;
 
-use crate::cmd::matcher::{copy::CopyMatcher, Matcher};
+use crate::cmd::matcher::{copy::CopyMatcher, MainMatcher, Matcher};
 
 /// A file copy action.
 pub struct Copy<'a> {
@@ -22,6 +22,7 @@ impl<'a> Copy<'a> {
     /// Invoke the copy action.
     pub fn invoke(&self) -> Result<()> {
         // Create the command matchers
+        let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
         let matcher_copy = CopyMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(crate::STORE_DEFAULT_ROOT).map_err(Err::Store)?;
@@ -36,7 +37,13 @@ impl<'a> Copy<'a> {
             plaintext = plaintext.first_line()?;
         }
 
-        copy(plaintext)
+        copy(plaintext)?;
+
+        if !matcher_main.quiet() {
+            eprintln!("Secret copied to clipboard...");
+        }
+
+        Ok(())
     }
 }
 
@@ -45,10 +52,7 @@ impl<'a> Copy<'a> {
 fn copy(plaintext: Plaintext) -> Result<()> {
     let mut ctx = ClipboardContext::new().map_err(Err::Clipboard)?;
     ctx.set_contents(plaintext.to_str().unwrap().into())
-        .map_err(Err::Clipboard)?;
-
-    eprintln!("Secret copied to clipboard...");
-    Ok(())
+        .map_err(|err| Err::Clipboard(err).into())
 }
 
 #[derive(Debug, Error)]

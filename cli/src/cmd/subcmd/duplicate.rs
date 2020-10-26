@@ -1,6 +1,6 @@
 use clap::{App, Arg, SubCommand};
 
-use crate::cmd::arg::{ArgQuery, CmdArg};
+use crate::cmd::arg::{ArgQuery, ArgStore, CmdArg};
 
 /// The duplicate command definition.
 pub struct CmdDuplicate;
@@ -16,5 +16,6 @@ impl CmdDuplicate {
                     .help("Secret destination path")
                     .required(true),
             )
+            .arg(ArgStore::build())
     }
 }

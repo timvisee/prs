@@ -27,7 +27,7 @@ impl<'a> Move<'a> {
         let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
         let matcher_move = MoveMatcher::with(self.cmd_matches).unwrap();
 
-        let store = Store::open(crate::STORE_DEFAULT_ROOT).map_err(Err::Store)?;
+        let store = Store::open(matcher_move.store()).map_err(Err::Store)?;
         let secret = util::select_secret(&store, matcher_move.query()).ok_or(Err::NoneSelected)?;
 
         // TODO: show secret name if not equal to query, unless quiet?

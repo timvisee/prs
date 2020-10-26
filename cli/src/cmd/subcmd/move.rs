@@ -1,6 +1,6 @@
 use clap::{App, Arg, SubCommand};
 
-use crate::cmd::arg::{ArgQuery, CmdArg};
+use crate::cmd::arg::{ArgQuery, ArgStore, CmdArg};
 
 /// The move command definition.
 pub struct CmdMove;
@@ -19,5 +19,6 @@ impl CmdMove {
                     .help("Secret destination path")
                     .required(true),
             )
+            .arg(ArgStore::build())
     }
 }

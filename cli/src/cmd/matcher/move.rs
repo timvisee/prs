@@ -1,7 +1,7 @@
 use clap::ArgMatches;
 
 use super::Matcher;
-use crate::cmd::arg::{ArgQuery, CmdArgOption};
+use crate::cmd::arg::{ArgQuery, ArgStore, CmdArgOption};
 
 /// The move command matcher.
 pub struct MoveMatcher<'a> {
@@ -17,6 +17,11 @@ impl<'a: 'b, 'b> MoveMatcher<'a> {
     /// Secret destination.
     pub fn destination(&self) -> &str {
         self.matches.value_of("DEST").unwrap()
+    }
+
+    /// The store.
+    pub fn store(&self) -> String {
+        ArgStore::value(self.matches)
     }
 }
 

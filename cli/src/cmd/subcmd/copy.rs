@@ -1,6 +1,6 @@
 use clap::{App, Arg, SubCommand};
 
-use crate::cmd::arg::{ArgQuery, CmdArg};
+use crate::cmd::arg::{ArgQuery, ArgStore, CmdArg};
 
 /// The copy command definition.
 pub struct CmdCopy;
@@ -18,5 +18,6 @@ impl CmdCopy {
                     .help("Copy whole secret, not just first line"),
             )
             .arg(ArgQuery::build())
+            .arg(ArgStore::build())
     }
 }

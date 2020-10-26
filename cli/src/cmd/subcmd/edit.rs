@@ -1,6 +1,6 @@
 use clap::{App, Arg, SubCommand};
 
-use crate::cmd::arg::{ArgQuery, CmdArg};
+use crate::cmd::arg::{ArgQuery, ArgStore, CmdArg};
 
 /// The edit command definition.
 pub struct CmdEdit;
@@ -19,5 +19,6 @@ impl CmdEdit {
                     .help("Read secret from stdin, do not open editor")
                     .conflicts_with("empty"),
             )
+            .arg(ArgStore::build())
     }
 }

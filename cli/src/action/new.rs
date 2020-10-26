@@ -23,7 +23,7 @@ impl<'a> New<'a> {
         let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
         let matcher_new = NewMatcher::with(self.cmd_matches).unwrap();
 
-        let store = Store::open(crate::STORE_DEFAULT_ROOT).map_err(Err::Store)?;
+        let store = Store::open(matcher_new.store()).map_err(Err::Store)?;
 
         let dest = matcher_new.destination();
 

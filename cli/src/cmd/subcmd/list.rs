@@ -1,6 +1,6 @@
 use clap::{App, SubCommand};
 
-use crate::cmd::arg::{ArgQuery, CmdArg};
+use crate::cmd::arg::{ArgQuery, ArgStore, CmdArg};
 
 /// The list command definition.
 pub struct CmdList;
@@ -12,5 +12,6 @@ impl CmdList {
             .alias("l")
             .about("List all secrets")
             .arg(ArgQuery::build())
+            .arg(ArgStore::build())
     }
 }

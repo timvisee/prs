@@ -1,6 +1,6 @@
 use clap::{App, Arg, SubCommand};
 
-use crate::cmd::arg::{ArgQuery, CmdArg};
+use crate::cmd::arg::{ArgQuery, ArgStore, CmdArg};
 
 /// The show command definition.
 pub struct CmdShow;
@@ -18,5 +18,6 @@ impl CmdShow {
                     .help("Show only the first line of the secret"),
             )
             .arg(ArgQuery::build())
+            .arg(ArgStore::build())
     }
 }

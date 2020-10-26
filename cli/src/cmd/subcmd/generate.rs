@@ -1,5 +1,7 @@
 use clap::{App, Arg, SubCommand};
 
+use crate::cmd::arg::{ArgStore, CmdArg};
+
 /// The generate command definition.
 pub struct CmdGenerate;
 
@@ -39,10 +41,10 @@ impl CmdGenerate {
             .arg(
                 Arg::with_name("show")
                     .long("show")
-                    .short("s")
                     .alias("cat")
                     .alias("display")
                     .help("Display secret after generation"),
             )
+            .arg(ArgStore::build())
     }
 }

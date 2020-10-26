@@ -1,7 +1,7 @@
 use clap::ArgMatches;
 
 use super::Matcher;
-use crate::cmd::arg::{ArgQuery, CmdArgOption};
+use crate::cmd::arg::{ArgQuery, ArgStore, CmdArgOption};
 
 /// The copy command matcher.
 pub struct CopyMatcher<'a> {
@@ -17,6 +17,11 @@ impl<'a: 'b, 'b> CopyMatcher<'a> {
     /// The secret query.
     pub fn query(&self) -> Option<String> {
         ArgQuery::value(self.matches)
+    }
+
+    /// The store.
+    pub fn store(&self) -> String {
+        ArgStore::value(self.matches)
     }
 }
 

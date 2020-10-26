@@ -25,7 +25,7 @@ impl<'a> Copy<'a> {
         let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
         let matcher_copy = CopyMatcher::with(self.cmd_matches).unwrap();
 
-        let store = Store::open(crate::STORE_DEFAULT_ROOT).map_err(Err::Store)?;
+        let store = Store::open(matcher_copy.store()).map_err(Err::Store)?;
         let secret = util::select_secret(&store, matcher_copy.query()).ok_or(Err::NoneSelected)?;
 
         let plaintext = prs_lib::crypto::decrypt_file(&secret.path).map_err(Err::Read)?;
@@ -55,7 +55,7 @@ pub(crate) fn smart_copy(
     // Do not copy empty secret
     if error_empty && plaintext.is_empty() {
         util::quit_error_msg(
-            "Secret is empty, did not copy to clipboard",
+            "secret is empty, did not copy to clipboard",
             ErrorHintsBuilder::default().force(true).build().unwrap(),
         )
     }

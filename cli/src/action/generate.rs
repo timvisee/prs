@@ -23,7 +23,7 @@ impl<'a> Generate<'a> {
         let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
         let matcher_generate = GenerateMatcher::with(self.cmd_matches).unwrap();
 
-        let store = Store::open(crate::STORE_DEFAULT_ROOT).map_err(Err::Store)?;
+        let store = Store::open(matcher_generate.store()).map_err(Err::Store)?;
 
         let dest = matcher_generate.destination();
 

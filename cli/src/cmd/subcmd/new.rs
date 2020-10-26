@@ -1,5 +1,7 @@
 use clap::{App, Arg, SubCommand};
 
+use crate::cmd::arg::{ArgStore, CmdArg};
+
 /// The new command definition.
 pub struct CmdNew;
 
@@ -28,5 +30,6 @@ impl CmdNew {
                     .help("Read secret from stdin, do not open editor")
                     .conflicts_with("empty"),
             )
+            .arg(ArgStore::build())
     }
 }

@@ -1,7 +1,7 @@
 use clap::ArgMatches;
 
 use super::Matcher;
-use crate::cmd::arg::{ArgQuery, CmdArgOption};
+use crate::cmd::arg::{ArgQuery, ArgStore, CmdArgOption};
 
 /// The edit command matcher.
 pub struct EditMatcher<'a> {
@@ -17,6 +17,11 @@ impl<'a: 'b, 'b> EditMatcher<'a> {
     /// Check whether to read from stdin.
     pub fn stdin(&self) -> bool {
         self.matches.is_present("stdin")
+    }
+
+    /// The store.
+    pub fn store(&self) -> String {
+        ArgStore::value(self.matches)
     }
 }
 

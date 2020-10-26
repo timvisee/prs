@@ -1,7 +1,7 @@
 use clap::ArgMatches;
 
 use super::Matcher;
-use crate::cmd::arg::{ArgQuery, CmdArgOption};
+use crate::cmd::arg::{ArgQuery, ArgStore, CmdArgOption};
 
 /// The show command matcher.
 pub struct ShowMatcher<'a> {
@@ -17,6 +17,11 @@ impl<'a: 'b, 'b> ShowMatcher<'a> {
     /// The secret query.
     pub fn query(&self) -> Option<String> {
         ArgQuery::value(self.matches)
+    }
+
+    /// The store.
+    pub fn store(&self) -> String {
+        ArgStore::value(self.matches)
     }
 }
 

@@ -22,7 +22,7 @@ impl<'a> List<'a> {
         // Create the command matchers
         let matcher_list = ListMatcher::with(self.cmd_matches).unwrap();
 
-        let store = Store::open(crate::STORE_DEFAULT_ROOT).map_err(Err::Store)?;
+        let store = Store::open(matcher_list.store()).map_err(Err::Store)?;
 
         let mut secrets = store.secrets(matcher_list.query());
         secrets.sort_unstable_by(|a, b| a.name.cmp(&b.name));

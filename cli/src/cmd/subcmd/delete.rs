@@ -1,6 +1,6 @@
 use clap::{App, SubCommand};
 
-use crate::cmd::arg::{ArgQuery, CmdArg};
+use crate::cmd::arg::{ArgQuery, ArgStore, CmdArg};
 
 /// The delete command definition.
 pub struct CmdDelete;
@@ -13,5 +13,6 @@ impl CmdDelete {
             .alias("rm")
             .about("Delete a secret")
             .arg(ArgQuery::build())
+            .arg(ArgStore::build())
     }
 }

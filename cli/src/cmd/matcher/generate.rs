@@ -1,6 +1,7 @@
 use clap::ArgMatches;
 
 use super::Matcher;
+use crate::cmd::arg::{ArgStore, CmdArgOption};
 
 /// The generate command matcher.
 pub struct GenerateMatcher<'a> {
@@ -31,6 +32,11 @@ impl<'a: 'b, 'b> GenerateMatcher<'a> {
     /// Check whether to read from show.
     pub fn show(&self) -> bool {
         self.matches.is_present("show")
+    }
+
+    /// The store.
+    pub fn store(&self) -> String {
+        ArgStore::value(self.matches)
     }
 }
 

@@ -1,6 +1,7 @@
 use clap::ArgMatches;
 
 use super::Matcher;
+use crate::cmd::arg::{ArgStore, CmdArgOption};
 
 /// The new command matcher.
 pub struct NewMatcher<'a> {
@@ -21,6 +22,11 @@ impl<'a: 'b, 'b> NewMatcher<'a> {
     /// Check whether to read from stdin.
     pub fn stdin(&self) -> bool {
         self.matches.is_present("stdin")
+    }
+
+    /// The store.
+    pub fn store(&self) -> String {
+        ArgStore::value(self.matches)
     }
 }
 

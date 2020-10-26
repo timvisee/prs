@@ -33,15 +33,19 @@ impl<'a> New<'a> {
             .normalize_secret_path(dest, None, true)
             .map_err(Err::NormalizePath)?;
 
-        let plaintext = match util::edit(Plaintext::empty()).map_err(Err::Edit)? {
-            Some(changed) => changed,
-            None => Plaintext::empty(),
-        };
+        let mut plaintext = Plaintext::empty();
 
-        // Confirm if empty secret should be stored
-        if !matcher_main.force() && plaintext.is_empty() {
-            if !util::prompt_yes("New secret is empty. Create?", Some(true), &matcher_main) {
-                util::quit();
+        if !matcher_new.empty() {
+            plaintext = match util::edit(plaintext).map_err(Err::Edit)? {
+                Some(changed) => changed,
+                None => Plaintext::empty(),
+            };
+
+            // Confirm if empty secret should be stored
+            if !matcher_main.force() && plaintext.is_empty() {
+                if !util::prompt_yes("New secret is empty. Create?", Some(true), &matcher_main) {
+                    util::quit();
+                }
             }
         }
 

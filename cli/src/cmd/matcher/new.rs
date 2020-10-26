@@ -12,6 +12,11 @@ impl<'a: 'b, 'b> NewMatcher<'a> {
     pub fn destination(&self) -> &str {
         self.matches.value_of("DEST").unwrap()
     }
+
+    /// Check whether to create an empty secret.
+    pub fn empty(&self) -> bool {
+        self.matches.is_present("empty")
+    }
 }
 
 impl<'a> Matcher<'a> for NewMatcher<'a> {

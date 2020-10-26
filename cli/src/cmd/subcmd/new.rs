@@ -13,5 +13,11 @@ impl CmdNew {
                     .help("Secret destination path")
                     .required(true),
             )
+            .arg(
+                Arg::with_name("empty")
+                    .long("empty")
+                    .short("e")
+                    .help("Create empty secret, do not edit"),
+            )
     }
 }

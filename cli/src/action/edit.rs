@@ -1,7 +1,7 @@
 use clap::ArgMatches;
 
 use anyhow::Result;
-use prs_lib::{store::Store, types::Plaintext};
+use prs_lib::store::Store;
 use thiserror::Error;
 
 use crate::cmd::matcher::{edit::EditMatcher, MainMatcher, Matcher};
@@ -31,7 +31,7 @@ impl<'a> Edit<'a> {
 
         let plaintext = prs_lib::crypto::decrypt_file(&secret.path).map_err(Err::Read)?;
 
-        let plaintext = match edit(plaintext)? {
+        let plaintext = match util::edit(plaintext).map_err(Err::Edit)? {
             Some(changed) => changed,
             None => {
                 if !matcher_main.quiet() {
@@ -63,18 +63,6 @@ impl<'a> Edit<'a> {
 
         Ok(())
     }
-}
-
-/// Print the given plaintext to stdout.
-// TODO: duplicate function, extract
-fn edit(plaintext: Plaintext) -> Result<Option<Plaintext>> {
-    edit::edit_bytes(&plaintext.0)
-        .map(|data| {
-            Some(data)
-                .filter(|data| &plaintext.0 != data)
-                .map(Plaintext)
-        })
-        .map_err(|err| Err::Edit(err).into())
 }
 
 #[derive(Debug, Error)]

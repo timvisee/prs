@@ -33,7 +33,7 @@ impl<'a> New<'a> {
             .normalize_secret_path(dest, None, true)
             .map_err(Err::NormalizePath)?;
 
-        let plaintext = match edit(Plaintext::empty())? {
+        let plaintext = match util::edit(Plaintext::empty()).map_err(Err::Edit)? {
             Some(changed) => changed,
             None => Plaintext::empty(),
         };
@@ -57,18 +57,6 @@ impl<'a> New<'a> {
 
         Ok(())
     }
-}
-
-/// Print the given plaintext to stdout.
-// TODO: duplicate function, extract
-fn edit(plaintext: Plaintext) -> Result<Option<Plaintext>> {
-    edit::edit_bytes(&plaintext.0)
-        .map(|data| {
-            Some(data)
-                .filter(|data| &plaintext.0 != data)
-                .map(Plaintext)
-        })
-        .map_err(|err| Err::Edit(err).into())
 }
 
 #[derive(Debug, Error)]

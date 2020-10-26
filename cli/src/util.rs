@@ -14,6 +14,8 @@ use std::process::{exit, ExitStatus};
 use anyhow::{anyhow, Error};
 use colored::{ColoredString, Colorize};
 
+use prs_lib::types::Plaintext;
+
 use crate::cmd::matcher::MainMatcher;
 
 /// Print a success message.
@@ -319,4 +321,13 @@ fn derive_bool(input: &str) -> Option<bool> {
 
     // The answer could not be determined, return none
     None
+}
+
+/// Edit given plaintext in default editor.
+pub fn edit(plaintext: Plaintext) -> Result<Option<Plaintext>, std::io::Error> {
+    edit::edit_bytes(&plaintext.0).map(|data| {
+        Some(data)
+            .filter(|data| &plaintext.0 != data)
+            .map(Plaintext)
+    })
 }

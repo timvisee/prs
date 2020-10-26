@@ -8,7 +8,7 @@ use thiserror::Error;
 
 use crate::cmd::matcher::{copy::CopyMatcher, MainMatcher, Matcher};
 
-/// A file copy action.
+/// Copy secret to clipboard action.
 pub struct Copy<'a> {
     cmd_matches: &'a ArgMatches<'a>,
 }

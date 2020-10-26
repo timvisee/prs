@@ -9,7 +9,7 @@ use prs_lib::store::Store;
 use crate::cmd::matcher::{delete::DeleteMatcher, MainMatcher, Matcher};
 use crate::util;
 
-/// A file delete action.
+/// Delete secret action.
 pub struct Delete<'a> {
     cmd_matches: &'a ArgMatches<'a>,
 }

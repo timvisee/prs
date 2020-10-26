@@ -9,7 +9,7 @@ use prs_lib::store::Store;
 use crate::cmd::matcher::{r#move::MoveMatcher, MainMatcher, Matcher};
 use crate::util;
 
-/// A file move action.
+/// Move secret action.
 pub struct Move<'a> {
     cmd_matches: &'a ArgMatches<'a>,
 }

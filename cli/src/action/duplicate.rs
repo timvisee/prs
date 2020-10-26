@@ -9,7 +9,7 @@ use prs_lib::store::Store;
 use crate::cmd::matcher::{duplicate::DuplicateMatcher, MainMatcher, Matcher};
 use crate::util;
 
-/// A file duplicate action.
+/// Duplicate secret action.
 pub struct Duplicate<'a> {
     cmd_matches: &'a ArgMatches<'a>,
 }

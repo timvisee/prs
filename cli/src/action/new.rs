@@ -4,49 +4,43 @@ use anyhow::Result;
 use prs_lib::{store::Store, types::Plaintext};
 use thiserror::Error;
 
-use crate::cmd::matcher::{edit::EditMatcher, MainMatcher, Matcher};
+use crate::cmd::matcher::{new::NewMatcher, MainMatcher, Matcher};
 use crate::util;
 
-/// Edit secret plaintext action.
-pub struct Edit<'a> {
+/// New secret action.
+pub struct New<'a> {
     cmd_matches: &'a ArgMatches<'a>,
 }
 
-impl<'a> Edit<'a> {
-    /// Construct a new edit action.
+impl<'a> New<'a> {
+    /// Construct a new new action.
     pub fn new(cmd_matches: &'a ArgMatches<'a>) -> Self {
         Self { cmd_matches }
     }
 
-    /// Invoke the edit action.
+    /// Invoke the new action.
     pub fn invoke(&self) -> Result<()> {
         // Create the command matchers
         let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
-        let matcher_edit = EditMatcher::with(self.cmd_matches).unwrap();
+        let matcher_new = NewMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(crate::STORE_DEFAULT_ROOT).map_err(Err::Store)?;
 
-        let secrets = store.secrets(matcher_edit.query());
-        let secret = crate::select_secret(&secrets).ok_or(Err::NoneSelected)?;
+        let dest = matcher_new.destination();
 
-        let plaintext = prs_lib::crypto::decrypt_file(&secret.path).map_err(Err::Read)?;
+        // Normalize destination path
+        let path = store
+            .normalize_secret_path(dest, None, true)
+            .map_err(Err::NormalizePath)?;
 
-        let plaintext = match edit(plaintext)? {
+        let plaintext = match edit(Plaintext::empty())? {
             Some(changed) => changed,
-            None => {
-                if !matcher_main.quiet() {
-                    eprintln!("Secret is unchanged");
-                }
-                util::quit();
-            }
+            None => Plaintext::empty(),
         };
 
         // Confirm if empty secret should be stored
         if !matcher_main.force() && plaintext.is_empty() {
-            if !util::prompt_yes("Edited secret is empty. Save?", Some(true), &matcher_main) {
-                if matcher_main.verbose() {
-                    eprintln!("Secret is unchanged");
-                }
+            if !util::prompt_yes("New secret is empty. Create?", Some(true), &matcher_main) {
                 util::quit();
             }
         }
@@ -55,10 +49,10 @@ impl<'a> Edit<'a> {
         // TODO: select proper recipients (use from current file?)
         // TODO: log recipients to encrypt for
         let recipients = store.recipients()?;
-        prs_lib::crypto::encrypt_file(&recipients, plaintext, &secret.path).map_err(Err::Write)?;
+        prs_lib::crypto::encrypt_file(&recipients, plaintext, &path).map_err(Err::Write)?;
 
         if !matcher_main.quiet() {
-            println!("Secret updated");
+            println!("Secret created");
         }
 
         Ok(())
@@ -82,11 +76,8 @@ pub enum Err {
     #[error("failed to access password store")]
     Store(#[source] anyhow::Error),
 
-    #[error("no secret selected")]
-    NoneSelected,
-
-    #[error("failed to read secret")]
-    Read(#[source] anyhow::Error),
+    #[error("failed to normalize destination path")]
+    NormalizePath(#[source] anyhow::Error),
 
     #[error("failed to edit secret in editor")]
     Edit(#[source] std::io::Error),

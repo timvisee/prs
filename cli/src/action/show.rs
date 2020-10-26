@@ -8,7 +8,7 @@ use thiserror::Error;
 
 use crate::cmd::matcher::{show::ShowMatcher, Matcher};
 
-/// A file show action.
+/// Show secret action.
 pub struct Show<'a> {
     cmd_matches: &'a ArgMatches<'a>,
 }

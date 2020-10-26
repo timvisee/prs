@@ -6,7 +6,7 @@ use prs_lib::store::Store;
 
 use crate::cmd::matcher::{list::ListMatcher, Matcher};
 
-/// A file list action.
+/// List secrets action.
 pub struct List<'a> {
     cmd_matches: &'a ArgMatches<'a>,
 }

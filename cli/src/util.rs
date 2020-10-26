@@ -1,20 +1,27 @@
 // TODO: remove this when somewhat feature complete
 #![allow(unused)]
 
-use std::borrow::Borrow;
+use std::borrow::{Borrow, Cow};
 use std::env::{self, current_exe, var_os};
 use std::ffi::OsStr;
 use std::fmt::{Debug, Display};
 use std::io::{stderr, stdin, Error as IoError, Write};
 use std::iter;
-use std::path::Path;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::{exit, ExitStatus};
+use std::sync::Arc;
 
 use anyhow::{anyhow, Error};
 use colored::{ColoredString, Colorize};
+use skim::{
+    prelude::{SkimItemReceiver, SkimItemSender, SkimOptionsBuilder},
+    AnsiString, Skim, SkimItem,
+};
 
-use prs_lib::types::Plaintext;
+use prs_lib::{
+    store::{FindSecret, Secret, Store},
+    types::Plaintext,
+};
 
 use crate::cmd::matcher::MainMatcher;
 
@@ -330,4 +337,89 @@ pub fn edit(plaintext: Plaintext) -> Result<Option<Plaintext>, std::io::Error> {
             .filter(|data| &plaintext.0 != data)
             .map(Plaintext)
     })
+}
+
+/// Find and select a secret in the given store.
+///
+/// If no exact secret is found, the user will be able to choose.
+///
+/// `None` is returned if no secret was found or selected.
+pub fn select_secret(store: &Store, query: Option<String>) -> Option<Secret> {
+    match store.find(query) {
+        FindSecret::Exact(secret) => Some(secret),
+        FindSecret::Many(secrets) => skim_select_secret(&secrets).cloned(),
+    }
+}
+
+/// Show an interactive selection view for the given list of `items`.
+/// The selected item is returned.  If no item is selected, `None` is returned instead.
+fn skim_select(items: SkimItemReceiver, prompt: &str) -> Option<String> {
+    let prompt = format!("{}: ", prompt);
+    let options = SkimOptionsBuilder::default()
+        .prompt(Some(&prompt))
+        .height(Some("50%"))
+        .multi(false)
+        .build()
+        .unwrap();
+
+    let selected = Skim::run_with(&options, Some(items))
+        .map(|out| out.selected_items)
+        .unwrap_or_else(|| Vec::new());
+
+    // Get the first selected, and return
+    selected.iter().next().map(|i| i.output().to_string())
+}
+
+/// Wrapped store secret item for skim.
+pub struct SkimSecret(Secret);
+
+impl From<Secret> for SkimSecret {
+    fn from(secret: Secret) -> Self {
+        Self(secret)
+    }
+}
+
+impl SkimItem for SkimSecret {
+    fn display(&self) -> Cow<AnsiString> {
+        let s: AnsiString = self.0.name.clone().into();
+        Cow::Owned(s)
+    }
+
+    fn text(&self) -> Cow<str> {
+        (&self.0.name).into()
+    }
+
+    fn output(&self) -> Cow<str> {
+        self.0.path.to_string_lossy()
+    }
+}
+
+/// Select secret.
+fn skim_select_secret(secrets: &[Secret]) -> Option<&Secret> {
+    // Return if theres just one to choose
+    if secrets.len() == 1 {
+        return secrets.get(0);
+    }
+
+    // Let user select secret
+    let items = skim_secret_items(secrets);
+    let selected = skim_select(items, "Select secret")?;
+
+    // Pick selected item from secrets list
+    let path: PathBuf = selected.into();
+    Some(secrets.iter().find(|e| e.path == path).unwrap())
+}
+
+/// Generate skim `SkimSecret` items from given secrets.
+fn skim_secret_items(secrets: &[Secret]) -> SkimItemReceiver {
+    let items: Vec<SkimSecret> = secrets.iter().cloned().map(|e| e.into()).collect();
+
+    let (tx_item, rx_item): (SkimItemSender, SkimItemReceiver) =
+        skim::prelude::bounded(items.len());
+
+    items.into_iter().for_each(|g| {
+        let _ = tx_item.send(Arc::new(g));
+    });
+
+    rx_item
 }

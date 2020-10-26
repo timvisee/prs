@@ -27,9 +27,8 @@ impl<'a> Delete<'a> {
         let matcher_delete = DeleteMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(crate::STORE_DEFAULT_ROOT).map_err(Err::Store)?;
-
-        let secrets = store.secrets(matcher_delete.query());
-        let secret = crate::select_secret(&secrets).ok_or(Err::NoneSelected)?;
+        let secret =
+            util::select_secret(&store, matcher_delete.query()).ok_or(Err::NoneSelected)?;
 
         // Cofnirm deletion
         if !matcher_main.force() {

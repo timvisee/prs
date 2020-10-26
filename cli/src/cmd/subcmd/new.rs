@@ -8,6 +8,7 @@ impl CmdNew {
         SubCommand::with_name("new")
             .about("New secret")
             .alias("n")
+            .alias("create")
             .arg(
                 Arg::with_name("DEST")
                     .help("Secret destination path")

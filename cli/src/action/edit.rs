@@ -25,9 +25,7 @@ impl<'a> Edit<'a> {
         let matcher_edit = EditMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(crate::STORE_DEFAULT_ROOT).map_err(Err::Store)?;
-
-        let secrets = store.secrets(matcher_edit.query());
-        let secret = crate::select_secret(&secrets).ok_or(Err::NoneSelected)?;
+        let secret = util::select_secret(&store, matcher_edit.query()).ok_or(Err::NoneSelected)?;
 
         let plaintext = prs_lib::crypto::decrypt_file(&secret.path).map_err(Err::Read)?;
 

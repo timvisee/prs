@@ -55,6 +55,44 @@ impl Store {
         self.secret_iter().filter(filter).collect()
     }
 
+    /// Try to find matching secret at path.
+    pub fn find_at(&self, path: &str) -> Option<Secret> {
+        // Build path
+        let mut base = self.root.clone();
+        base.push(path);
+        let path = base.to_str()?;
+
+        // Try path with secret file suffix
+        let with_suffix = PathBuf::from(format!("{}{}", path, SECRET_SUFFIX));
+        if with_suffix.is_file() {
+            return Some(Secret::from(&self, with_suffix));
+        }
+
+        // Try path without secret file suffix
+        let without_suffix = Path::new(path);
+        if without_suffix.is_file() {
+            return Some(Secret::from(&self, without_suffix.to_path_buf()));
+        }
+
+        None
+    }
+
+    /// Try to find matching secrets for given query.
+    ///
+    /// If secret is found at exact query path, `FindSecret::Found` is returned.
+    /// Otherwise any number of closely matching secrets is returned as `FindSecret::Many`.
+    pub fn find(&self, query: Option<String>) -> FindSecret {
+        // Try to find exact secret match
+        if let Some(query) = &query {
+            if let Some(secret) = self.find_at(&query) {
+                return FindSecret::Exact(secret);
+            }
+        }
+
+        // Find all closely matching
+        FindSecret::Many(self.secrets(query))
+    }
+
     /// Normalizes a path for a secret in this store.
     ///
     /// - Ensures path is within store.
@@ -125,6 +163,15 @@ impl Store {
 
         Ok(path)
     }
+}
+
+/// Find secret result.
+pub enum FindSecret {
+    /// Found exact secret match.
+    Exact(Secret),
+
+    /// Found any number of non-exact secret matches.
+    Many(Vec<Secret>),
 }
 
 /// A password store secret.

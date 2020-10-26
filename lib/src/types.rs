@@ -2,6 +2,12 @@ use anyhow::Result;
 use thiserror::Error;
 use zeroize::Zeroize;
 
+/// Newline character(s) on this platform.
+#[cfg(not(windows))]
+pub const NEWLINE: &str = "\n";
+#[cfg(windows)]
+pub const NEWLINE: &str = "\r\n";
+
 /// Ciphertext.
 ///
 /// Wraps ciphertext bytes. This type is limited on purpose, to prevent accidentally leaking the
@@ -54,6 +60,31 @@ impl Plaintext {
                 .map(|l| l.as_bytes().into())
                 .unwrap_or_else(|| vec![]),
         ))
+    }
+
+    /// Get all lines execpt the first one.
+    ///
+    /// Returns empty plaintext if there are no lines.
+    pub fn except_first_line(self) -> Result<Plaintext> {
+        Ok(Plaintext(
+            self.to_str()
+                .map_err(Err::FirstLine)?
+                .lines()
+                .skip(1)
+                .collect::<Vec<&str>>()
+                .join(NEWLINE)
+                .into_bytes(),
+        ))
+    }
+
+    /// Append other plaintext.
+    ///
+    /// Optionally adds platform newline.
+    pub fn append(&mut self, other: Plaintext, newline: bool) {
+        if newline {
+            self.0.extend_from_slice(NEWLINE.as_bytes());
+        }
+        self.0.extend_from_slice(&other.0);
     }
 
     /// Check whether this plaintext is empty.

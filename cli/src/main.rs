@@ -44,6 +44,10 @@ fn invoke_action(handler: &Handler) -> Result<()> {
         return action::edit::Edit::new(handler.matches()).invoke();
     }
 
+    if handler.generate().is_some() {
+        return action::generate::Generate::new(handler.matches()).invoke();
+    }
+
     if handler.r#move().is_some() {
         return action::r#move::Move::new(handler.matches()).invoke();
     }

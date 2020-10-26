@@ -331,7 +331,9 @@ fn derive_bool(input: &str) -> Option<bool> {
 }
 
 /// Edit given plaintext in default editor.
-pub fn edit(plaintext: Plaintext) -> Result<Option<Plaintext>, std::io::Error> {
+///
+/// Only returns `Plaintext` if changed.
+pub fn edit(plaintext: &Plaintext) -> Result<Option<Plaintext>, std::io::Error> {
     edit::edit_bytes(&plaintext.0).map(|data| {
         Some(data)
             .filter(|data| &plaintext.0 != data)

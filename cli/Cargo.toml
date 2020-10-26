@@ -20,6 +20,7 @@ gitlab = { repository = "timvisee/prs", branch = "master" }
 
 [dependencies]
 anyhow = "1.0"
+chbs = "0.0.10"
 clap = "2.33"
 colored = "2.0"
 copypasta-ext = { version = "0.3.2", default-features = false, features = ["x11-fork"] }

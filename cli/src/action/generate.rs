@@ -4,59 +4,77 @@ use anyhow::Result;
 use prs_lib::{store::Store, types::Plaintext};
 use thiserror::Error;
 
-use crate::cmd::matcher::{new::NewMatcher, MainMatcher, Matcher};
+use crate::cmd::matcher::{generate::GenerateMatcher, MainMatcher, Matcher};
 use crate::util;
 
-/// New secret action.
-pub struct New<'a> {
+/// Generate secret action.
+pub struct Generate<'a> {
     cmd_matches: &'a ArgMatches<'a>,
 }
 
-impl<'a> New<'a> {
-    /// Construct a new new action.
+impl<'a> Generate<'a> {
+    /// Construct a new generate action.
     pub fn new(cmd_matches: &'a ArgMatches<'a>) -> Self {
         Self { cmd_matches }
     }
 
-    /// Invoke the new action.
+    /// Invoke the generate action.
     pub fn invoke(&self) -> Result<()> {
         // Create the command matchers
         let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
-        let matcher_new = NewMatcher::with(self.cmd_matches).unwrap();
+        let matcher_generate = GenerateMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(crate::STORE_DEFAULT_ROOT).map_err(Err::Store)?;
 
-        let dest = matcher_new.destination();
+        let dest = matcher_generate.destination();
 
         // Normalize destination path
         let path = store
             .normalize_secret_path(dest, None, true)
             .map_err(Err::NormalizePath)?;
 
-        let mut plaintext = Plaintext::empty();
+        // Generate secure passphrase plaintext
+        let mut plaintext = Plaintext::from_string(chbs::passphrase());
 
-        if matcher_new.stdin() {
-            plaintext = util::stdin_read_plaintext(!matcher_main.quiet());
-        } else if !matcher_new.empty() {
+        // Check if destination already exists, ask to merge if so
+        if !matcher_main.force() && path.is_file() {
+            eprintln!("A secret at '{}' already exists", path.display(),);
+            if !util::prompt_yes("Merge?", Some(true), &matcher_main) {
+                if !matcher_main.quiet() {
+                    eprintln!("No secret generated");
+                }
+                util::quit();
+            }
+
+            // Append existing secret exept first line to new secret
+            let existing = prs_lib::crypto::decrypt_file(&path)
+                .and_then(|p| p.except_first_line())
+                .map_err(Err::Read)?;
+            if !existing.is_empty() {
+                plaintext.append(existing, true);
+            }
+        }
+
+        // Append from stdin
+        if matcher_generate.stdin() {
+            let extra = util::stdin_read_plaintext(!matcher_main.quiet());
+            plaintext.append(extra, true);
+        }
+
+        // Edit in editor
+        if matcher_generate.edit() {
             if let Some(changed) = util::edit(&plaintext).map_err(Err::Edit)? {
                 plaintext = changed;
             }
         }
 
-        // Check if destination already exists if not forcing
-        if !matcher_main.force() && path.is_file() {
-            eprintln!("A secret at '{}' already exists", path.display(),);
-            if !util::prompt_yes("Overwrite?", Some(true), &matcher_main) {
-                if matcher_main.verbose() {
-                    eprintln!("No secret created");
-                }
-                util::quit();
-            }
-        }
-
         // Confirm if empty secret should be stored
-        if !matcher_main.force() && !matcher_new.empty() && plaintext.is_empty() {
-            if !util::prompt_yes("New secret is empty. Create?", Some(true), &matcher_main) {
+        if !matcher_main.force() && plaintext.is_empty() {
+            if !util::prompt_yes(
+                "Generated secret is empty. Save?",
+                Some(true),
+                &matcher_main,
+            ) {
                 util::quit();
             }
         }
@@ -85,6 +103,9 @@ pub enum Err {
 
     #[error("failed to edit secret in editor")]
     Edit(#[source] std::io::Error),
+
+    #[error("failed to read existing secret")]
+    Read(#[source] anyhow::Error),
 
     #[error("failed to write changed secret")]
     Write(#[source] anyhow::Error),

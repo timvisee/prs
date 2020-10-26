@@ -32,7 +32,7 @@ impl<'a> Edit<'a> {
         if matcher_edit.stdin() {
             plaintext = util::stdin_read_plaintext(!matcher_main.quiet());
         } else {
-            plaintext = match util::edit(plaintext).map_err(Err::Edit)? {
+            plaintext = match util::edit(&plaintext).map_err(Err::Edit)? {
                 Some(changed) => changed,
                 None => {
                     if !matcher_main.quiet() {

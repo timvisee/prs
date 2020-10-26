@@ -7,7 +7,7 @@ use prs_lib::store::Store;
 use thiserror::Error;
 
 use crate::cmd::matcher::{init::InitMatcher, MainMatcher, Matcher};
-use crate::util::{self, ErrorHints};
+use crate::util::{self, ErrorHintsBuilder};
 
 /// Init store action.
 pub struct Init<'a> {
@@ -38,7 +38,13 @@ impl<'a> Init<'a> {
         // TODO: initialize sync with git
 
         // Open the store to test
-        Store::open(path.as_ref()).map_err(Err::Store)?;
+        let store = Store::open(path.as_ref()).map_err(Err::Store)?;
+
+        // Use all keyring recipients by default, write to store
+        let recipients = prs_lib::all()?;
+        recipients.write_to_file(store.gpg_ids_file())?;
+
+        // TODO: also write public keys to store
 
         if !matcher_main.quiet() {
             eprintln!("Store initialized");
@@ -68,7 +74,7 @@ fn ensure_dir_free(path: &Path) -> Result<()> {
             "cannot initialize store, directory already exists: {}",
             path.display(),
         ),
-        ErrorHints::default(),
+        ErrorHintsBuilder::default().store(true).build().unwrap(),
     )
 }
 

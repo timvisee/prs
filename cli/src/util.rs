@@ -347,6 +347,7 @@ pub fn edit(plaintext: &Plaintext) -> Result<Option<Plaintext>, std::io::Error> 
 ///
 /// `None` is returned if no secret was found or selected.
 pub fn select_secret(store: &Store, query: Option<String>) -> Option<Secret> {
+    // TODO: do not use interactive selection with --no-interact mode
     match store.find(query) {
         FindSecret::Exact(secret) => Some(secret),
         FindSecret::Many(secrets) => skim_select_secret(&secrets).cloned(),

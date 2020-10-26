@@ -46,14 +46,44 @@ impl Recipients {
         )
     }
 
+    /// Write this list of recipients to a file.
+    ///
+    /// Overwrites any existing file.
+    pub fn write_to_file<P: AsRef<Path>>(&self, path: P) -> Result<()> {
+        fs::write(
+            path,
+            self.keys
+                .iter()
+                .map(|k| k.fingerprint().unwrap())
+                .collect::<Vec<&str>>()
+                .join("\n"),
+        )
+        .map_err(|err| Err::WriteFile(err).into())
+    }
+
     /// Get the list of recipient keys.
     pub fn keys(&self) -> &[Key] {
         &self.keys
     }
 }
 
+/// Select all public keys in keyring as recipients.
+// TODO: remove this, add better method for obtaining all keyring keys
+pub fn all() -> Result<Recipients> {
+    Ok(Recipients::from(
+        crypto::context()?
+            .keys()?
+            .into_iter()
+            .filter_map(|k| k.ok())
+            .collect(),
+    ))
+}
+
 #[derive(Debug, Error)]
 pub enum Err {
     #[error("failed to read file")]
     ReadFile(#[source] std::io::Error),
+
+    #[error("failed to write file")]
+    WriteFile(#[source] std::io::Error),
 }

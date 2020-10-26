@@ -13,6 +13,11 @@ impl<'a: 'b, 'b> EditMatcher<'a> {
     pub fn query(&self) -> Option<String> {
         ArgQuery::value(self.matches)
     }
+
+    /// Check whether to read from stdin.
+    pub fn stdin(&self) -> bool {
+        self.matches.is_present("stdin")
+    }
 }
 
 impl<'a> Matcher<'a> for EditMatcher<'a> {

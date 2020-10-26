@@ -5,7 +5,7 @@ use std::borrow::{Borrow, Cow};
 use std::env::{self, current_exe, var_os};
 use std::ffi::OsStr;
 use std::fmt::{Debug, Display};
-use std::io::{stderr, stdin, Error as IoError, Write};
+use std::io::{self, stderr, stdin, Error as IoError, Read, Write};
 use std::iter;
 use std::path::{Path, PathBuf};
 use std::process::{exit, ExitStatus};
@@ -422,4 +422,20 @@ fn skim_secret_items(secrets: &[Secret]) -> SkimItemReceiver {
     });
 
     rx_item
+}
+
+/// Read file from stdin.
+fn stdin_read_file(prompt: bool) -> Vec<u8> {
+    if prompt {
+        eprintln!("Enter input. Use [CTRL+D] to stop:");
+    }
+
+    let mut data = vec![];
+    io::stdin().lock().read_to_end(&mut data);
+    data
+}
+
+/// Read plaintext from stdin.
+pub fn stdin_read_plaintext(prompt: bool) -> Plaintext {
+    Plaintext(stdin_read_file(prompt))
 }

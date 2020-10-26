@@ -27,17 +27,21 @@ impl<'a> Edit<'a> {
         let store = Store::open(crate::STORE_DEFAULT_ROOT).map_err(Err::Store)?;
         let secret = util::select_secret(&store, matcher_edit.query()).ok_or(Err::NoneSelected)?;
 
-        let plaintext = prs_lib::crypto::decrypt_file(&secret.path).map_err(Err::Read)?;
+        let mut plaintext = prs_lib::crypto::decrypt_file(&secret.path).map_err(Err::Read)?;
 
-        let plaintext = match util::edit(plaintext).map_err(Err::Edit)? {
-            Some(changed) => changed,
-            None => {
-                if !matcher_main.quiet() {
-                    eprintln!("Secret is unchanged");
+        if matcher_edit.stdin() {
+            plaintext = util::stdin_read_plaintext(!matcher_main.quiet());
+        } else {
+            plaintext = match util::edit(plaintext).map_err(Err::Edit)? {
+                Some(changed) => changed,
+                None => {
+                    if !matcher_main.quiet() {
+                        eprintln!("Secret is unchanged");
+                    }
+                    util::quit();
                 }
-                util::quit();
-            }
-        };
+            };
+        }
 
         // Confirm if empty secret should be stored
         if !matcher_main.force() && plaintext.is_empty() {
@@ -56,7 +60,7 @@ impl<'a> Edit<'a> {
         prs_lib::crypto::encrypt_file(&recipients, plaintext, &secret.path).map_err(Err::Write)?;
 
         if !matcher_main.quiet() {
-            println!("Secret updated");
+            eprintln!("Secret updated");
         }
 
         Ok(())

@@ -1,4 +1,4 @@
-use clap::{App, SubCommand};
+use clap::{App, Arg, SubCommand};
 
 use crate::cmd::arg::{ArgQuery, CmdArg};
 
@@ -11,5 +11,13 @@ impl CmdEdit {
             .about("Edit a secret")
             .alias("e")
             .arg(ArgQuery::build())
+            .arg(
+                Arg::with_name("stdin")
+                    .long("stdin")
+                    .short("S")
+                    .alias("from-stdin")
+                    .help("Read secret from stdin, do not open editor")
+                    .conflicts_with("empty"),
+            )
     }
 }

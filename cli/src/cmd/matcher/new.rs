@@ -17,6 +17,11 @@ impl<'a: 'b, 'b> NewMatcher<'a> {
     pub fn empty(&self) -> bool {
         self.matches.is_present("empty")
     }
+
+    /// Check whether to read from stdin.
+    pub fn stdin(&self) -> bool {
+        self.matches.is_present("stdin")
+    }
 }
 
 impl<'a> Matcher<'a> for NewMatcher<'a> {

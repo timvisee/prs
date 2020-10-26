@@ -20,5 +20,13 @@ impl CmdNew {
                     .short("e")
                     .help("Create empty secret, do not edit"),
             )
+            .arg(
+                Arg::with_name("stdin")
+                    .long("stdin")
+                    .short("S")
+                    .alias("from-stdin")
+                    .help("Read secret from stdin, do not open editor")
+                    .conflicts_with("empty"),
+            )
     }
 }

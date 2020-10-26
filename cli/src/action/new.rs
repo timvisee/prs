@@ -35,17 +35,30 @@ impl<'a> New<'a> {
 
         let mut plaintext = Plaintext::empty();
 
-        if !matcher_new.empty() {
+        if matcher_new.stdin() {
+            plaintext = util::stdin_read_plaintext(!matcher_main.quiet());
+        } else if !matcher_new.empty() {
             plaintext = match util::edit(plaintext).map_err(Err::Edit)? {
                 Some(changed) => changed,
                 None => Plaintext::empty(),
             };
+        }
 
-            // Confirm if empty secret should be stored
-            if !matcher_main.force() && plaintext.is_empty() {
-                if !util::prompt_yes("New secret is empty. Create?", Some(true), &matcher_main) {
-                    util::quit();
+        // Check if destination already exists if not forcing
+        if !matcher_main.force() && path.is_file() {
+            eprintln!("A secret at '{}' already exists", path.display(),);
+            if !util::prompt_yes("Overwrite?", Some(true), &matcher_main) {
+                if matcher_main.verbose() {
+                    eprintln!("");
                 }
+                util::quit();
+            }
+        }
+
+        // Confirm if empty secret should be stored
+        if !matcher_main.force() && !matcher_new.empty() && plaintext.is_empty() {
+            if !util::prompt_yes("New secret is empty. Create?", Some(true), &matcher_main) {
+                util::quit();
             }
         }
 
@@ -56,7 +69,7 @@ impl<'a> New<'a> {
         prs_lib::crypto::encrypt_file(&recipients, plaintext, &path).map_err(Err::Write)?;
 
         if !matcher_main.quiet() {
-            println!("Secret created");
+            eprintln!("Secret created");
         }
 
         Ok(())

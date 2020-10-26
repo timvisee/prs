@@ -7,6 +7,7 @@ use prs_lib::{store::Store, types::Plaintext};
 use thiserror::Error;
 
 use crate::cmd::matcher::{copy::CopyMatcher, MainMatcher, Matcher};
+use crate::util::{self, ErrorHintsBuilder};
 
 /// Copy secret to clipboard action.
 pub struct Copy<'a> {
@@ -35,6 +36,14 @@ impl<'a> Copy<'a> {
         // Trim plaintext to first line
         if !matcher_copy.all() {
             plaintext = plaintext.first_line()?;
+        }
+
+        // Do not copy empty secret
+        if !matcher_main.force() && plaintext.is_empty() {
+            util::quit_error_msg(
+                "Secret is empty, did not copy to clipboard",
+                ErrorHintsBuilder::default().force(true).build().unwrap(),
+            )
         }
 
         copy(plaintext)?;

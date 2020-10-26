@@ -27,7 +27,7 @@ impl Ciphertext {
 ///
 /// Wraps plaintext bytes. This type is limited on purpose, to prevent accidentally leaking the
 /// plaintext. The memory is explicitly zero'd when this is dropped.
-#[derive(Zeroize)]
+#[derive(Zeroize, Clone)]
 #[zeroize(drop)]
 pub struct Plaintext(pub Vec<u8>);
 

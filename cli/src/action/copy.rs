@@ -29,32 +29,49 @@ impl<'a> Copy<'a> {
         let store = Store::open(crate::STORE_DEFAULT_ROOT).map_err(Err::Store)?;
         let secret = util::select_secret(&store, matcher_copy.query()).ok_or(Err::NoneSelected)?;
 
-        let mut plaintext = prs_lib::crypto::decrypt_file(&secret.path).map_err(Err::Read)?;
+        let plaintext = prs_lib::crypto::decrypt_file(&secret.path).map_err(Err::Read)?;
 
-        // Trim plaintext to first line
-        if !matcher_copy.all() {
-            plaintext = plaintext.first_line()?;
-        }
-
-        // Do not copy empty secret
-        if !matcher_main.force() && plaintext.is_empty() {
-            util::quit_error_msg(
-                "Secret is empty, did not copy to clipboard",
-                ErrorHintsBuilder::default().force(true).build().unwrap(),
-            )
-        }
-
-        copy(plaintext)?;
-
-        if !matcher_main.quiet() {
-            eprintln!("Secret copied to clipboard...");
-        }
-
-        Ok(())
+        smart_copy(
+            plaintext,
+            !matcher_copy.all(),
+            !matcher_main.force(),
+            !matcher_main.quiet(),
+        )
     }
 }
 
 /// Copy the given plain text to the user clipboard.
+// TODO: move to shared module
+// TODO: clear clipboard after timeout
+pub(crate) fn smart_copy(
+    mut plaintext: Plaintext,
+    first_line: bool,
+    error_empty: bool,
+    report_copied: bool,
+) -> Result<()> {
+    if first_line {
+        plaintext = plaintext.first_line()?;
+    }
+
+    // Do not copy empty secret
+    if error_empty && plaintext.is_empty() {
+        util::quit_error_msg(
+            "Secret is empty, did not copy to clipboard",
+            ErrorHintsBuilder::default().force(true).build().unwrap(),
+        )
+    }
+
+    copy(plaintext)?;
+
+    if report_copied {
+        eprintln!("Secret copied to clipboard...");
+    }
+
+    Ok(())
+}
+
+/// Copy the given plain text to the user clipboard.
+// TODO: move to shared module
 // TODO: clear clipboard after timeout
 fn copy(plaintext: Plaintext) -> Result<()> {
     let mut ctx = ClipboardContext::new().map_err(Err::Clipboard)?;

@@ -40,7 +40,8 @@ impl<'a> Show<'a> {
 }
 
 /// Print the given plaintext to stdout.
-fn print(plaintext: Plaintext) -> Result<()> {
+// TODO: move to shared module
+pub(crate) fn print(plaintext: Plaintext) -> Result<()> {
     std::io::stdout()
         .write_all(&plaintext.0)
         .map_err(Err::Print)?;

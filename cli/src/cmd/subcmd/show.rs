@@ -10,6 +10,7 @@ impl CmdShow {
         SubCommand::with_name("show")
             .alias("s")
             .alias("cat")
+            .alias("display")
             .about("Display a secret")
             .arg(
                 Arg::with_name("first")

@@ -29,5 +29,20 @@ impl CmdGenerate {
                     .help("Append to generated secret from stdin")
                     .conflicts_with("edit"),
             )
+            .arg(
+                Arg::with_name("copy")
+                    .long("copy")
+                    .short("c")
+                    .alias("cp")
+                    .help("Copy secret to clipboard"),
+            )
+            .arg(
+                Arg::with_name("show")
+                    .long("show")
+                    .short("s")
+                    .alias("cat")
+                    .alias("display")
+                    .help("Display secret after generation"),
+            )
     }
 }

@@ -22,6 +22,16 @@ impl<'a: 'b, 'b> GenerateMatcher<'a> {
     pub fn stdin(&self) -> bool {
         self.matches.is_present("stdin")
     }
+
+    /// Check whether to read from copy.
+    pub fn copy(&self) -> bool {
+        self.matches.is_present("copy")
+    }
+
+    /// Check whether to read from show.
+    pub fn show(&self) -> bool {
+        self.matches.is_present("show")
+    }
 }
 
 impl<'a> Matcher<'a> for GenerateMatcher<'a> {

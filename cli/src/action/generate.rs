@@ -83,9 +83,26 @@ impl<'a> Generate<'a> {
         // TODO: select proper recipients (use from current file?)
         // TODO: log recipients to encrypt for
         let recipients = store.recipients()?;
-        prs_lib::crypto::encrypt_file(&recipients, plaintext, &path).map_err(Err::Write)?;
+        prs_lib::crypto::encrypt_file(&recipients, plaintext.clone(), &path).map_err(Err::Write)?;
 
-        if !matcher_main.quiet() {
+        // Copy to clipboard
+        if matcher_generate.copy() {
+            super::copy::smart_copy(
+                plaintext.clone(),
+                true,
+                !matcher_main.force(),
+                !matcher_main.quiet(),
+            )?;
+        }
+
+        // Show in stdout
+        if matcher_generate.show() {
+            super::show::print(plaintext)?;
+        }
+
+        if matcher_main.verbose()
+            || (!matcher_generate.copy() && matcher_generate.show() && !matcher_main.quiet())
+        {
             eprintln!("Secret created");
         }
 

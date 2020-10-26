@@ -8,9 +8,9 @@ pub struct CmdList;
 impl CmdList {
     pub fn build<'a, 'b>() -> App<'a, 'b> {
         SubCommand::with_name("list")
-            .about("List all secrets")
             .alias("ls")
             .alias("l")
+            .about("List all secrets")
             .arg(ArgQuery::build())
     }
 }

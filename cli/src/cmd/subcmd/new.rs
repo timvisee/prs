@@ -6,9 +6,9 @@ pub struct CmdNew;
 impl CmdNew {
     pub fn build<'a, 'b>() -> App<'a, 'b> {
         SubCommand::with_name("new")
-            .about("New secret")
             .alias("n")
             .alias("create")
+            .about("Create new secret")
             .arg(
                 Arg::with_name("DEST")
                     .help("Secret destination path")

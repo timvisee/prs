@@ -15,8 +15,8 @@ impl CmdMove {
             .alias("ren")
             .arg(ArgQuery::build().required(true))
             .arg(
-                Arg::with_name("TARGET")
-                    .help("Secret target path")
+                Arg::with_name("DEST")
+                    .help("Secret destination path")
                     .required(true),
             )
     }

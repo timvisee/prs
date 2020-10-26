@@ -59,8 +59,7 @@ impl<'a> Edit<'a> {
         // TODO: select proper recipients (use from current file?)
         // TODO: log recipients to encrypt for
         let recipients = store.recipients()?;
-        prs_lib::crypto::encrypt_file(&recipients, plaintext, &secret.path)
-            .map_err(Err::Encrypt)?;
+        prs_lib::crypto::encrypt_file(&recipients, plaintext, &secret.path).map_err(Err::Write)?;
 
         if !matcher_main.quiet() {
             println!("Secret updated");
@@ -96,6 +95,6 @@ pub enum Err {
     #[error("failed to edit secret in editor")]
     Edit(#[source] std::io::Error),
 
-    #[error("failed to encrypt changed secret")]
-    Encrypt(#[source] anyhow::Error),
+    #[error("failed to write changed secret")]
+    Write(#[source] anyhow::Error),
 }

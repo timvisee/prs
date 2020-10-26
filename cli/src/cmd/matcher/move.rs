@@ -14,9 +14,9 @@ impl<'a: 'b, 'b> MoveMatcher<'a> {
         ArgQuery::value(self.matches)
     }
 
-    /// Secret target.
-    pub fn target(&self) -> &str {
-        self.matches.value_of("TARGET").unwrap()
+    /// Secret destination.
+    pub fn destination(&self) -> &str {
+        self.matches.value_of("DEST").unwrap()
     }
 }
 

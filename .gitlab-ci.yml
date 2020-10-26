@@ -89,8 +89,7 @@ build-x86_64-linux-musl:
 # Run the unit tests through Cargo
 test-cargo:
   stage: test
-  needs:
-    - check-stable
+  needs: []
   dependencies: []
   script:
     - cargo test --verbose

@@ -5,7 +5,7 @@ use thiserror::Error;
 use gpgme::Key;
 use prs_lib::store::Store;
 
-use crate::cmd::matcher::{recipients::list::ListMatcher, Matcher};
+use crate::cmd::matcher::{recipients::RecipientsMatcher, Matcher};
 
 /// A recipients list action.
 pub struct List<'a> {
@@ -21,9 +21,9 @@ impl<'a> List<'a> {
     /// Invoke the list action.
     pub fn invoke(&self) -> Result<()> {
         // Create the command matchers
-        let matcher_list = ListMatcher::with(self.cmd_matches).unwrap();
+        let matcher_recipients = RecipientsMatcher::with(self.cmd_matches).unwrap();
 
-        let store = Store::open(matcher_list.store()).map_err(Err::Store)?;
+        let store = Store::open(matcher_recipients.store()).map_err(Err::Store)?;
         let recipients = store.recipients().map_err(Err::List)?;
 
         recipients.keys().iter().for_each(print_recipient);

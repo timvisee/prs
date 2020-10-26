@@ -2,6 +2,8 @@ pub mod list;
 
 use clap::{App, AppSettings, SubCommand};
 
+use crate::cmd::arg::{ArgStore, CmdArg};
+
 use list::CmdList;
 
 /// The recipients command definition.
@@ -18,5 +20,6 @@ impl CmdRecipients {
             .alias("kes")
             .setting(AppSettings::SubcommandRequiredElseHelp)
             .subcommand(CmdList::build())
+            .arg(ArgStore::build())
     }
 }

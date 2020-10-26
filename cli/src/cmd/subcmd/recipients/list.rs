@@ -1,7 +1,5 @@
 use clap::{App, SubCommand};
 
-use crate::cmd::arg::{ArgStore, CmdArg};
-
 /// The recipient list command definition.
 pub struct CmdList;
 
@@ -11,6 +9,5 @@ impl CmdList {
             .alias("ls")
             .alias("l")
             .about("List store recipients")
-            .arg(ArgStore::build())
     }
 }

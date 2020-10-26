@@ -48,6 +48,10 @@ fn invoke_action(handler: &Handler) -> Result<()> {
         return action::generate::Generate::new(handler.matches()).invoke();
     }
 
+    if handler.git().is_some() {
+        return action::git::Git::new(handler.matches()).invoke();
+    }
+
     if handler.r#move().is_some() {
         return action::r#move::Move::new(handler.matches()).invoke();
     }

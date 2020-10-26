@@ -3,6 +3,7 @@ pub mod delete;
 pub mod duplicate;
 pub mod edit;
 pub mod generate;
+pub mod git;
 pub mod init;
 pub mod list;
 pub mod r#move;

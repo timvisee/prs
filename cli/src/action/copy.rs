@@ -1,8 +1,7 @@
+use anyhow::Result;
 use clap::ArgMatches;
 use copypasta_ext::prelude::*;
 use copypasta_ext::x11_fork::ClipboardContext;
-
-use anyhow::Result;
 use prs_lib::{store::Store, types::Plaintext};
 use thiserror::Error;
 

@@ -1,8 +1,7 @@
 use std::io::Write;
 
-use clap::ArgMatches;
-
 use anyhow::Result;
+use clap::ArgMatches;
 use prs_lib::{store::Store, types::Plaintext};
 use thiserror::Error;
 

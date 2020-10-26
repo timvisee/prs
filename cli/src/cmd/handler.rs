@@ -64,6 +64,7 @@ impl<'a: 'b, 'b> Handler<'a> {
             .subcommand(subcmd::CmdDuplicate::build())
             .subcommand(subcmd::CmdEdit::build())
             .subcommand(subcmd::CmdGenerate::build())
+            .subcommand(subcmd::CmdInit::build())
             .subcommand(subcmd::CmdList::build())
             .subcommand(subcmd::CmdMove::build())
             .subcommand(subcmd::CmdNew::build())
@@ -112,6 +113,11 @@ impl<'a: 'b, 'b> Handler<'a> {
     /// Get the generate sub command, if matched.
     pub fn generate(&'a self) -> Option<matcher::GenerateMatcher> {
         matcher::GenerateMatcher::with(&self.matches)
+    }
+
+    /// Get the init sub command, if matched.
+    pub fn init(&'a self) -> Option<matcher::InitMatcher> {
+        matcher::InitMatcher::with(&self.matches)
     }
 
     /// Get the list sub command, if matched.

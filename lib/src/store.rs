@@ -40,9 +40,7 @@ impl Store {
     pub fn recipients(&self) -> Result<Recipients> {
         // TODO: what to do if ids file does not exist?
         // TODO: what to do if recipients is empty?
-        let mut path = self.root.clone();
-        path.push(STORE_GPG_IDS_FILE);
-        Recipients::find_from_file(path)
+        Recipients::find_from_file(self.root.as_path().join(STORE_GPG_IDS_FILE))
     }
 
     /// Create secret iterator for this store.
@@ -58,9 +56,8 @@ impl Store {
     /// Try to find matching secret at path.
     pub fn find_at(&self, path: &str) -> Option<Secret> {
         // Build path
-        let mut base = self.root.clone();
-        base.push(path);
-        let path = base.to_str()?;
+        let path = self.root.as_path().join(path);
+        let path = path.to_str()?;
 
         // Try path with secret file suffix
         let with_suffix = PathBuf::from(format!("{}{}", path, SECRET_SUFFIX));
@@ -136,9 +133,7 @@ impl Store {
         }
 
         // Prefix store root
-        let mut tmp = self.root.clone();
-        tmp.push(path);
-        path = tmp;
+        path = self.root.as_path().join(path);
 
         // Add current secret name if target is dir
         if target_is_dir {

@@ -1,6 +1,5 @@
-use clap::ArgMatches;
-
 use anyhow::Result;
+use clap::ArgMatches;
 use prs_lib::store::Store;
 use thiserror::Error;
 

@@ -35,7 +35,7 @@ impl<'a> Git<'a> {
 pub fn git(store: &Store, cmd: String, verbose: bool) -> Result<()> {
     let git_cmd = format!("git -C {:?} {}", store.root.display(), cmd);
     if verbose {
-        eprintln!("Invoking: {}", git_cmd);
+        eprintln!("Invoking: {}\n", git_cmd);
     }
 
     // Invoke command

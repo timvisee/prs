@@ -9,6 +9,7 @@ pub mod list;
 pub mod main;
 pub mod r#move;
 pub mod new;
+pub mod recipients;
 pub mod show;
 
 // Re-export to matcher module
@@ -23,6 +24,7 @@ pub use self::list::ListMatcher;
 pub use self::main::MainMatcher;
 pub use self::new::NewMatcher;
 pub use self::r#move::MoveMatcher;
+pub use self::recipients::RecipientsMatcher;
 pub use self::show::ShowMatcher;
 
 use clap::ArgMatches;

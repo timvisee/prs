@@ -8,4 +8,5 @@ pub mod init;
 pub mod list;
 pub mod r#move;
 pub mod new;
+pub mod recipients;
 pub mod show;

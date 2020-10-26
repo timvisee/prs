@@ -849,6 +849,7 @@ dependencies = [
  "copypasta-ext",
  "derive_builder",
  "edit",
+ "gpgme",
  "prs-lib",
  "shellexpand",
  "skim",

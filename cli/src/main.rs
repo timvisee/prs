@@ -68,6 +68,10 @@ fn invoke_action(handler: &Handler) -> Result<()> {
         return action::new::New::new(handler.matches()).invoke();
     }
 
+    if handler.recipients().is_some() {
+        return action::recipients::Recipients::new(handler.matches()).invoke();
+    }
+
     if handler.show().is_some() {
         return action::show::Show::new(handler.matches()).invoke();
     }

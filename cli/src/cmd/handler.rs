@@ -69,6 +69,7 @@ impl<'a: 'b, 'b> Handler<'a> {
             .subcommand(subcmd::CmdList::build())
             .subcommand(subcmd::CmdMove::build())
             .subcommand(subcmd::CmdNew::build())
+            .subcommand(subcmd::CmdRecipients::build())
             .subcommand(subcmd::CmdShow::build());
 
         // Disable color usage if compiled without color support
@@ -139,6 +140,11 @@ impl<'a: 'b, 'b> Handler<'a> {
     /// Get the move sub command, if matched.
     pub fn r#move(&'a self) -> Option<matcher::MoveMatcher> {
         matcher::MoveMatcher::with(&self.matches)
+    }
+
+    /// Get the recipients sub command, if matched.
+    pub fn recipients(&'a self) -> Option<matcher::RecipientsMatcher> {
+        matcher::RecipientsMatcher::with(&self.matches)
     }
 
     /// Get the show sub command, if matched.

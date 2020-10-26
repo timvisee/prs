@@ -8,6 +8,7 @@ pub mod init;
 pub mod list;
 pub mod r#move;
 pub mod new;
+pub mod recipients;
 pub mod show;
 
 // Re-export to cmd module
@@ -21,4 +22,5 @@ pub use self::init::CmdInit;
 pub use self::list::CmdList;
 pub use self::new::CmdNew;
 pub use self::r#move::CmdMove;
+pub use self::recipients::CmdRecipients;
 pub use self::show::CmdShow;

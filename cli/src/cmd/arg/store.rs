@@ -15,6 +15,7 @@ impl CmdArg for ArgStore {
             .long("store")
             .short("s")
             .value_name("PATH")
+            .global(true)
             .help("Password store to use")
             .default_value(crate::STORE_DEFAULT_ROOT)
     }

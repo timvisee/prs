@@ -36,11 +36,16 @@ impl Store {
         Ok(Self { root })
     }
 
+    /// Get the path to the GPG IDs file.
+    pub fn gpg_ids_file(&self) -> PathBuf {
+        self.root.as_path().join(STORE_GPG_IDS_FILE)
+    }
+
     /// Get the recipient keys for this store.
     pub fn recipients(&self) -> Result<Recipients> {
         // TODO: what to do if ids file does not exist?
         // TODO: what to do if recipients is empty?
-        Recipients::find_from_file(self.root.as_path().join(STORE_GPG_IDS_FILE))
+        Recipients::find_from_file(self.gpg_ids_file())
     }
 
     /// Create secret iterator for this store.

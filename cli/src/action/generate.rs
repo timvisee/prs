@@ -100,7 +100,7 @@ impl<'a> Generate<'a> {
         }
 
         if matcher_main.verbose()
-            || (!matcher_generate.copy() && matcher_generate.show() && !matcher_main.quiet())
+            || (!(matcher_generate.copy() || matcher_generate.show()) && !matcher_main.quiet())
         {
             eprintln!("Secret created");
         }

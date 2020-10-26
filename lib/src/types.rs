@@ -43,15 +43,16 @@ impl Plaintext {
     }
 
     /// Get the first line of this secret as plaintext.
+    ///
+    /// Returns empty plaintext if there are no lines.
     pub fn first_line(self) -> Result<Plaintext> {
         Ok(Plaintext(
             self.to_str()
                 .map_err(Err::FirstLine)?
                 .lines()
                 .next()
-                .unwrap()
-                .as_bytes()
-                .into(),
+                .map(|l| l.as_bytes().into())
+                .unwrap_or_else(|| vec![]),
         ))
     }
 

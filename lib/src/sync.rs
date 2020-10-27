@@ -1,4 +1,5 @@
 use std::path::Path;
+use std::time::Duration;
 
 use anyhow::Result;
 use thiserror::Error;
@@ -7,6 +8,12 @@ use crate::store::Store;
 
 /// Store git directory.
 pub const STORE_GIT_DIR: &str = ".git/";
+
+/// Duration after which pull refs are considered outdated.
+///
+/// If the last pull is within this duration, some operations such as a push may be optimized away
+/// if not needed.
+pub const GIT_PULL_OUTDATED: Duration = Duration::from_secs(30);
 
 /// Sync helper for given store.
 pub struct Sync<'a> {
@@ -180,8 +187,6 @@ fn is_dirty(repo: &Path) -> Result<bool> {
 
 /// Check whether we need to push to the remote.
 ///
-/// Warning: Only use this is recently pulled last remote changes.
-///
 /// This defaults to true on error.
 fn safe_need_to_push(repo: &Path) -> bool {
     match need_to_push(repo) {
@@ -198,12 +203,15 @@ fn safe_need_to_push(repo: &Path) -> bool {
 
 /// Check whether we need to push to the remote.
 ///
-/// Warning: Only use this is recently pulled last remote changes.
-///
 /// If the upstream branch is unknown, this always returns true.
-// TODO: check if pull is recent enough?
-// TODO: see: https://stackoverflow.com/a/9229377/1000145 (stat -c %Y .git/FETCH_HEAD)
 fn need_to_push(repo: &Path) -> Result<bool> {
+    // If last pull is outdated, always push
+    let last_pulled = crate::git::git_last_pull_time(repo)?;
+    if last_pulled.elapsed()? > GIT_PULL_OUTDATED {
+        return Ok(true);
+    }
+
+    // Get branch and upstream branch name
     let branch = crate::git::git_current_branch(repo)?;
     let upstream = match crate::git::git_branch_upstream(repo, &branch)? {
         Some(upstream) => upstream,

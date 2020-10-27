@@ -1,8 +1,12 @@
 use std::path::Path;
 use std::process::{Command, Output};
+use std::time::SystemTime;
 
 use anyhow::Result;
 use thiserror::Error;
+
+/// The git FETCH_HEAD file.
+const GIT_FETCH_HEAD_FILE: &str = ".git/FETCH_HEAD";
 
 /// Invoke git pull.
 pub fn git_pull(repo: &Path) -> Result<()> {
@@ -49,6 +53,17 @@ pub fn git_ref_hash<S: AsRef<str>>(repo: &Path, reference: S) -> Result<String> 
     Ok(hash.into())
 }
 
+/// Get system time the repository was last pulled.
+/// See: https://stackoverflow.com/a/9229377/1000145 (stat -c %Y .git/FETCH_HEAD)
+pub fn git_last_pull_time(repo: &Path) -> Result<SystemTime> {
+    Ok(repo
+        .join(GIT_FETCH_HEAD_FILE)
+        .metadata()
+        .map_err(Err::Other)?
+        .modified()
+        .map_err(Err::Other)?)
+}
+
 /// Invoke a git command.
 fn git<S: AsRef<str>>(repo: &Path, cmd: S) -> Result<()> {
     system(
@@ -68,6 +83,7 @@ fn git_output<S: AsRef<str>>(repo: &Path, cmd: S) -> Result<Output> {
 }
 
 /// Invoke the given system command.
+// TODO: do not create two subprocesses here (sh & git)
 fn system(cmd: String, dir: Option<&Path>) -> Result<()> {
     // Invoke command
     // TODO: make this compatible with Windows
@@ -87,6 +103,7 @@ fn system(cmd: String, dir: Option<&Path>) -> Result<()> {
 }
 
 /// Invoke the given system command.
+// TODO: do not create two subprocesses here (sh & git)
 fn system_output(cmd: String, dir: Option<&Path>) -> Result<Output> {
     // Invoke command
     // TODO: make this compatible with Windows
@@ -107,6 +124,9 @@ fn system_output(cmd: String, dir: Option<&Path>) -> Result<Output> {
 
 #[derive(Debug, Error)]
 pub enum Err {
+    #[error("failed to complete git operation")]
+    Other(#[source] std::io::Error),
+
     #[error("failed to complete git operation")]
     GitCli(#[source] anyhow::Error),
 

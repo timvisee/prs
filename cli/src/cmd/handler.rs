@@ -65,6 +65,7 @@ impl<'a: 'b, 'b> Handler<'a> {
             .subcommand(subcmd::CmdEdit::build())
             .subcommand(subcmd::CmdGenerate::build())
             .subcommand(subcmd::CmdGit::build())
+            .subcommand(subcmd::CmdHousekeeping::build())
             .subcommand(subcmd::CmdInit::build())
             .subcommand(subcmd::CmdList::build())
             .subcommand(subcmd::CmdMove::build())
@@ -92,14 +93,14 @@ impl<'a: 'b, 'b> Handler<'a> {
         &self.matches
     }
 
+    /// Get the add sub command, if matched.
+    pub fn add(&'a self) -> Option<matcher::AddMatcher> {
+        matcher::AddMatcher::with(&self.matches)
+    }
+
     /// Get the copy sub command, if matched.
     pub fn copy(&'a self) -> Option<matcher::CopyMatcher> {
         matcher::CopyMatcher::with(&self.matches)
-    }
-
-    /// Get the remove sub command, if matched.
-    pub fn remove(&'a self) -> Option<matcher::RemoveMatcher> {
-        matcher::RemoveMatcher::with(&self.matches)
     }
 
     /// Get the duplicate sub command, if matched.
@@ -122,6 +123,11 @@ impl<'a: 'b, 'b> Handler<'a> {
         matcher::GitMatcher::with(&self.matches)
     }
 
+    /// Get the housekeeping sub command, if matched.
+    pub fn housekeeping(&'a self) -> Option<matcher::HousekeepingMatcher> {
+        matcher::HousekeepingMatcher::with(&self.matches)
+    }
+
     /// Get the init sub command, if matched.
     pub fn init(&'a self) -> Option<matcher::InitMatcher> {
         matcher::InitMatcher::with(&self.matches)
@@ -132,11 +138,6 @@ impl<'a: 'b, 'b> Handler<'a> {
         matcher::ListMatcher::with(&self.matches)
     }
 
-    /// Get the add sub command, if matched.
-    pub fn add(&'a self) -> Option<matcher::AddMatcher> {
-        matcher::AddMatcher::with(&self.matches)
-    }
-
     /// Get the move sub command, if matched.
     pub fn r#move(&'a self) -> Option<matcher::MoveMatcher> {
         matcher::MoveMatcher::with(&self.matches)
@@ -145,6 +146,11 @@ impl<'a: 'b, 'b> Handler<'a> {
     /// Get the recipients sub command, if matched.
     pub fn recipients(&'a self) -> Option<matcher::RecipientsMatcher> {
         matcher::RecipientsMatcher::with(&self.matches)
+    }
+
+    /// Get the remove sub command, if matched.
+    pub fn remove(&'a self) -> Option<matcher::RemoveMatcher> {
+        matcher::RemoveMatcher::with(&self.matches)
     }
 
     /// Get the show sub command, if matched.

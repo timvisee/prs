@@ -21,6 +21,7 @@ use skim::{
 use prs_lib::{
     store::{FindSecret, Secret, Store},
     types::Plaintext,
+    Key,
 };
 
 use crate::cmd::matcher::MainMatcher;
@@ -413,10 +414,43 @@ fn skim_select_secret(secrets: &[Secret]) -> Option<&Secret> {
     Some(secrets.iter().find(|e| e.path == path).unwrap())
 }
 
+/// Select key.
+pub fn skim_select_key(keys: &[Key]) -> Option<&Key> {
+    // Let user select secret
+    let items = skim_key_items(keys);
+    let selected = skim_select(items, "Select key")?;
+
+    // Pick selected item from keys list
+    Some(
+        keys.iter()
+            .find(|e| e.fingerprint(false) == selected)
+            .unwrap(),
+    )
+}
+
 /// Generate skim `SkimSecret` items from given secrets.
 fn skim_secret_items(secrets: &[Secret]) -> SkimItemReceiver {
-    let items: Vec<SkimSecret> = secrets.iter().cloned().map(|e| e.into()).collect();
+    skim_items(
+        secrets
+            .iter()
+            .cloned()
+            .map(|e| e.into())
+            .collect::<Vec<SkimSecret>>(),
+    )
+}
 
+/// Generate skim `SkimSecret` items from given secrets.
+fn skim_key_items(keys: &[Key]) -> SkimItemReceiver {
+    skim_items(
+        keys.iter()
+            .cloned()
+            .map(|e| e.into())
+            .collect::<Vec<SkimKey>>(),
+    )
+}
+
+/// Create `SkimItemReceiver` from given array.
+fn skim_items<I: SkimItem>(items: Vec<I>) -> SkimItemReceiver {
     let (tx_item, rx_item): (SkimItemSender, SkimItemReceiver) =
         skim::prelude::bounded(items.len());
 
@@ -425,6 +459,30 @@ fn skim_secret_items(secrets: &[Secret]) -> SkimItemReceiver {
     });
 
     rx_item
+}
+
+/// Wrapped store key item for skim.
+pub struct SkimKey(Key);
+
+impl From<Key> for SkimKey {
+    fn from(key: Key) -> Self {
+        Self(key)
+    }
+}
+
+impl SkimItem for SkimKey {
+    fn display(&self) -> Cow<AnsiString> {
+        let s: AnsiString = format!("{}", self.0).into();
+        Cow::Owned(s)
+    }
+
+    fn text(&self) -> Cow<str> {
+        format!("{}", self.0).into()
+    }
+
+    fn output(&self) -> Cow<str> {
+        self.0.fingerprint(false).into()
+    }
 }
 
 /// Read file from stdin.

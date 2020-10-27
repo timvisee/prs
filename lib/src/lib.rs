@@ -66,9 +66,26 @@ impl Recipients {
     pub fn keys(&self) -> &[Key] {
         &self.keys
     }
+
+    /// Add the given key.
+    ///
+    /// Does not add if already existant.
+    pub fn add(&mut self, key: Key) {
+        if !self.keys.contains(&key) {
+            self.keys.push(key);
+        }
+    }
+
+    /// Remove the given keys.
+    ///
+    /// Keys that are not found are ignored.
+    pub fn remove_many(&mut self, keys: &[Key]) {
+        self.keys.retain(|k| !keys.contains(k));
+    }
 }
 
 /// Recipient key.
+#[derive(Clone)]
 pub struct Key(pub gpgme::Key);
 
 impl Key {
@@ -109,6 +126,12 @@ impl Key {
     }
 }
 
+impl PartialEq for Key {
+    fn eq(&self, other: &Self) -> bool {
+        self.0.id_raw() == other.0.id_raw() && self.0.fingerprint_raw() == other.0.fingerprint_raw()
+    }
+}
+
 impl fmt::Display for Key {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{} - {}", self.fingerprint(true), self.user_display())
@@ -121,7 +144,8 @@ impl From<gpgme::Key> for Key {
     }
 }
 
-/// Select all public keys in keyring as recipients.
+/// Select all public keys from keychain usable as recipient.
+// TODO: does this include private keys for encrypting?
 // TODO: remove this, add better method for obtaining all keyring keys
 pub fn all() -> Result<Recipients> {
     Ok(Recipients::from(
@@ -129,6 +153,7 @@ pub fn all() -> Result<Recipients> {
             .keys()?
             .into_iter()
             .filter_map(|k| k.ok())
+            .filter(|k| k.can_encrypt())
             .map(|k| k.into())
             .collect(),
     ))

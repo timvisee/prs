@@ -1,3 +1,4 @@
+pub mod add;
 pub mod list;
 
 use clap::ArgMatches;
@@ -5,7 +6,6 @@ use clap::ArgMatches;
 use crate::cmd::arg::{ArgStore, CmdArgOption};
 
 use super::Matcher;
-use list::ListMatcher;
 
 /// The recipients matcher.
 pub struct RecipientsMatcher<'a> {
@@ -14,9 +14,14 @@ pub struct RecipientsMatcher<'a> {
 }
 
 impl<'a: 'b, 'b> RecipientsMatcher<'a> {
+    /// Get the recipient add sub command, if matched.
+    pub fn add(&'a self) -> Option<add::AddMatcher> {
+        add::AddMatcher::with(&self.root)
+    }
+
     /// Get the recipient list sub command, if matched.
-    pub fn list(&'a self) -> Option<ListMatcher> {
-        ListMatcher::with(&self.root)
+    pub fn list(&'a self) -> Option<list::ListMatcher> {
+        list::ListMatcher::with(&self.root)
     }
 
     /// The store.

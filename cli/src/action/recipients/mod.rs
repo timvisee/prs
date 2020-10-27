@@ -1,10 +1,10 @@
+pub mod add;
 pub mod list;
 
 use anyhow::Result;
 use clap::ArgMatches;
 
 use crate::cmd::matcher::{Matcher, RecipientsMatcher};
-use list::List;
 
 /// A file recipients action.
 pub struct Recipients<'a> {
@@ -18,13 +18,16 @@ impl<'a> Recipients<'a> {
     }
 
     /// Invoke the recipients action.
-    // TODO: create a trait for this method
     pub fn invoke(&self) -> Result<()> {
         // Create the command matcher
         let matcher_recipients = RecipientsMatcher::with(self.cmd_matches).unwrap();
 
+        if matcher_recipients.add().is_some() {
+            return add::Add::new(self.cmd_matches).invoke();
+        }
+
         if matcher_recipients.list().is_some() {
-            return List::new(self.cmd_matches).invoke();
+            return list::List::new(self.cmd_matches).invoke();
         }
 
         // Unreachable, clap will print help for missing sub command instead

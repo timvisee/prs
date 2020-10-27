@@ -11,6 +11,12 @@ use thiserror::Error;
 
 use crate::store::Store;
 
+/// Password store GPG IDs file.
+const STORE_GPG_IDS_FILE: &str = ".gpg-id";
+
+/// Password store public key directory.
+const STORE_PUB_KEY_DIR: &str = ".public-keys/";
+
 /// List of recipient keys.
 pub struct Recipients {
     keys: Vec<Key>,
@@ -86,16 +92,15 @@ impl Recipients {
         // TODO: what to do if ids file does not exist?
         // TODO: what to do if recipients is empty?
         // TODO: what to do if key listed in file is not found, attempt to install?
-        Recipients::find_from_file(store.gpg_ids_file())
+        Recipients::find_from_file(store.root.join(STORE_GPG_IDS_FILE))
     }
 
     /// Save this list of recipients to the store.
     ///
     /// This overwrites any existing recipient list.
     pub fn save(&self, store: &Store) -> Result<()> {
-        self.write_to_file(store.gpg_ids_file())?;
+        self.write_to_file(store.root.join(STORE_GPG_IDS_FILE))?;
         self.sync_public_key_files(store)
-
         // TODO: import missing keys to system?
     }
 
@@ -104,8 +109,8 @@ impl Recipients {
     /// - Removes obsolete keys that are not a selected recipient
     /// - Adds missing keys that are a recipient
     fn sync_public_key_files(&self, store: &Store) -> Result<()> {
-        // Get public keys directory, make sure it exists
-        let dir = store.root.clone().join(".public-keys");
+        // Get public keys directory, ensure it exists
+        let dir = store.root.clone().join(STORE_PUB_KEY_DIR);
         fs::create_dir_all(&dir).map_err(Err::SyncKeyFiles)?;
 
         // List key files in keys directory
@@ -113,7 +118,7 @@ impl Recipients {
             .read_dir()
             .map_err(Err::SyncKeyFiles)?
             .filter_map(|e| e.ok())
-            .filter(|e| e.file_type().map(|f| f.is_dir()).unwrap_or(false))
+            .filter(|e| e.file_type().map(|f| f.is_file()).unwrap_or(false))
             .filter_map(|e| {
                 e.file_name()
                     .to_str()
@@ -127,16 +132,23 @@ impl Recipients {
         }
 
         // Add missing keys
-        let mut context = crypto::context()?;
+        let mut context: Option<_> = None;
         for (key, fp) in self
             .keys
             .iter()
             .map(|k| (k, k.fingerprint(false)))
             .filter(|(_, fp)| !files.iter().any(|(_, other)| fp == other))
         {
+            // Lazy load context
+            if context.is_none() {
+                context = Some(crypto::context()?);
+            }
+
             // Export public key
             let mut data: Vec<u8> = vec![];
             context
+                .as_mut()
+                .unwrap()
                 .export_keys(&[key.0.clone()], gpgme::ExportMode::empty(), &mut data)
                 .unwrap();
 

@@ -8,9 +8,6 @@ use walkdir::{DirEntry, WalkDir};
 
 use crate::Recipients;
 
-/// Password store GPG IDs file.
-const STORE_GPG_IDS_FILE: &str = ".gpg-id";
-
 /// Password store secret file suffix.
 pub const SECRET_SUFFIX: &str = ".gpg";
 
@@ -34,11 +31,6 @@ impl Store {
         ensure!(root.is_dir(), Err::NoRootDir(root));
 
         Ok(Self { root })
-    }
-
-    /// Get the path to the GPG IDs file.
-    pub fn gpg_ids_file(&self) -> PathBuf {
-        self.root.as_path().join(STORE_GPG_IDS_FILE)
     }
 
     /// Get the recipient keys for this store.

@@ -26,9 +26,10 @@ pub fn context() -> Result<Context> {
 /// Encrypt given data, write to given file.
 pub fn encrypt(recipients: &Recipients, mut plaintext: Plaintext) -> Result<Ciphertext> {
     let mut ciphertext = Ciphertext::empty();
+    let recipients: Vec<_> = recipients.keys().iter().map(|k| k.0.clone()).collect();
     context()?
         .encrypt_with_flags(
-            recipients.keys(),
+            &recipients,
             &mut plaintext.0,
             &mut ciphertext.0,
             ENCRYPT_FLAGS,

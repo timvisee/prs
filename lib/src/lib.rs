@@ -2,11 +2,11 @@ pub mod crypto;
 pub mod store;
 pub mod types;
 
+use std::fmt;
 use std::fs;
 use std::path::Path;
 
 use anyhow::Result;
-use gpgme::Key;
 use thiserror::Error;
 
 /// List of recipient keys.
@@ -29,6 +29,7 @@ impl Recipients {
                 .find_keys(fingerprints)?
                 .filter_map(|x| x.ok())
                 .filter(|k| k.can_encrypt())
+                .map(|k| k.into())
                 .collect()
         };
         Ok(Recipients::from(keys))
@@ -54,7 +55,7 @@ impl Recipients {
             path,
             self.keys
                 .iter()
-                .map(|k| k.fingerprint().unwrap())
+                .map(|k| k.fingerprint(false))
                 .collect::<Vec<&str>>()
                 .join("\n"),
         )
@@ -67,6 +68,59 @@ impl Recipients {
     }
 }
 
+/// Recipient key.
+pub struct Key(pub gpgme::Key);
+
+impl Key {
+    /// Get fingerprint.
+    pub fn fingerprint(&self, short: bool) -> &str {
+        let fp = self.0.fingerprint().expect("key does not have fingerprint");
+        if short {
+            return &fp[fp.len() - 16..];
+        }
+        fp
+    }
+
+    /// Format user data to displayable string.
+    pub fn user_display(&self) -> String {
+        self.0
+            .user_ids()
+            .map(|user| {
+                let mut parts = vec![];
+                if let Ok(name) = user.name() {
+                    if !name.trim().is_empty() {
+                        parts.push(name.into());
+                    }
+                }
+                if let Ok(comment) = user.comment() {
+                    if !comment.trim().is_empty() {
+                        parts.push(format!("({})", comment));
+                    }
+                }
+                if let Ok(email) = user.email() {
+                    if !email.trim().is_empty() {
+                        parts.push(format!("<{}>", email));
+                    }
+                }
+                parts.join(" ")
+            })
+            .collect::<Vec<_>>()
+            .join("; ")
+    }
+}
+
+impl fmt::Display for Key {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{} - {}", self.fingerprint(true), self.user_display())
+    }
+}
+
+impl From<gpgme::Key> for Key {
+    fn from(key: gpgme::Key) -> Self {
+        Self(key)
+    }
+}
+
 /// Select all public keys in keyring as recipients.
 // TODO: remove this, add better method for obtaining all keyring keys
 pub fn all() -> Result<Recipients> {
@@ -75,6 +129,7 @@ pub fn all() -> Result<Recipients> {
             .keys()?
             .into_iter()
             .filter_map(|k| k.ok())
+            .map(|k| k.into())
             .collect(),
     ))
 }

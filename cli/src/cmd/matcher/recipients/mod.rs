@@ -1,5 +1,6 @@
 pub mod add;
 pub mod list;
+pub mod remove;
 
 use clap::ArgMatches;
 
@@ -22,6 +23,11 @@ impl<'a: 'b, 'b> RecipientsMatcher<'a> {
     /// Get the recipient list sub command, if matched.
     pub fn list(&'a self) -> Option<list::ListMatcher> {
         list::ListMatcher::with(&self.root)
+    }
+
+    /// Get the recipient remove sub command, if matched.
+    pub fn remove(&'a self) -> Option<remove::RemoveMatcher> {
+        remove::RemoveMatcher::with(&self.root)
     }
 
     /// The store.

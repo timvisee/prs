@@ -76,6 +76,11 @@ impl Recipients {
         }
     }
 
+    /// Remove the given key if existant.
+    pub fn remove(&mut self, key: &Key) {
+        self.keys.retain(|k| k != key);
+    }
+
     /// Remove the given keys.
     ///
     /// Keys that are not found are ignored.

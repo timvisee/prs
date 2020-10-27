@@ -1,5 +1,6 @@
 pub mod add;
 pub mod list;
+pub mod remove;
 
 use anyhow::Result;
 use clap::ArgMatches;
@@ -28,6 +29,10 @@ impl<'a> Recipients<'a> {
 
         if matcher_recipients.list().is_some() {
             return list::List::new(self.cmd_matches).invoke();
+        }
+
+        if matcher_recipients.remove().is_some() {
+            return remove::Remove::new(self.cmd_matches).invoke();
         }
 
         // Unreachable, clap will print help for missing sub command instead

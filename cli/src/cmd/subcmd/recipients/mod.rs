@@ -1,5 +1,6 @@
 pub mod add;
 pub mod list;
+pub mod remove;
 
 use clap::{App, AppSettings, SubCommand};
 
@@ -20,6 +21,7 @@ impl CmdRecipients {
             .setting(AppSettings::SubcommandRequiredElseHelp)
             .subcommand(add::CmdAdd::build())
             .subcommand(list::CmdList::build())
+            .subcommand(remove::CmdRemove::build())
             .arg(ArgStore::build())
     }
 }

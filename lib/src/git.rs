@@ -5,31 +5,64 @@ use anyhow::Result;
 use thiserror::Error;
 
 /// Invoke git pull.
-pub fn git_pull(repository: &Path) -> Result<()> {
-    git(repository, "pull -q")
+pub fn git_pull(repo: &Path) -> Result<()> {
+    git(repo, "pull -q")
 }
 
 /// Check if repository has remote configured.
-pub fn git_has_remote(repository: &Path) -> Result<bool> {
-    let output = git_output(repository, "remote")?;
+pub fn git_has_remote(repo: &Path) -> Result<bool> {
+    let output = git_output(repo, "remote")?;
     let stdout = String::from_utf8(output.stdout)?;
     Ok(!stdout.trim().is_empty())
 }
 
+/// Get the current git branch name.
+pub fn git_current_branch(repo: &Path) -> Result<String> {
+    let output = git_output(repo, "rev-parse --abbrev-ref HEAD")?;
+    let branch = std::str::from_utf8(&output.stdout)?.trim();
+    assert!(!branch.is_empty(), "git returned invalid branch name");
+    Ok(branch.into())
+}
+
+/// Get upstream branch for given branch if there is any.
+pub fn git_branch_upstream<S: AsRef<str>>(repo: &Path, reference: S) -> Result<Option<String>> {
+    let output = git_output(
+        repo,
+        format!("rev-parse --abbrev-ref {}@{{upstream}}", reference.as_ref()),
+    )?;
+    let upstream = std::str::from_utf8(&output.stdout)?.trim();
+    if upstream.is_empty() {
+        return Ok(None);
+    }
+    assert!(
+        upstream.contains("/"),
+        "git returned invalid upstream branch name"
+    );
+    Ok(Some(upstream.into()))
+}
+
+/// Get the hash of a reference.
+pub fn git_ref_hash<S: AsRef<str>>(repo: &Path, reference: S) -> Result<String> {
+    let output = git_output(repo, format!("rev-parse {}", reference.as_ref()))?;
+    let hash = std::str::from_utf8(&output.stdout)?.trim();
+    assert_eq!(hash.len(), 40, "git returned invalid hash");
+    Ok(hash.into())
+}
+
 /// Invoke a git command.
-fn git<S: AsRef<str>>(repository: &Path, cmd: S) -> Result<()> {
+fn git<S: AsRef<str>>(repo: &Path, cmd: S) -> Result<()> {
     system(
-        format!("git -C {:?} {}", repository.display(), cmd.as_ref()),
-        Some(&repository),
+        format!("git -C {:?} {}", repo.display(), cmd.as_ref()),
+        Some(&repo),
     )
     .map_err(|err| Err::GitCli(err).into())
 }
 
 /// Invoke a git command.
-fn git_output<S: AsRef<str>>(repository: &Path, cmd: S) -> Result<Output> {
+fn git_output<S: AsRef<str>>(repo: &Path, cmd: S) -> Result<Output> {
     system_output(
-        format!("git -C {:?} {}", repository.display(), cmd.as_ref()),
-        Some(&repository),
+        format!("git -C {:?} {}", repo.display(), cmd.as_ref()),
+        Some(&repo),
     )
     .map_err(|err| Err::GitCli(err).into())
 }

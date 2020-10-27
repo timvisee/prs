@@ -30,6 +30,8 @@ impl Store {
         // Make sure store directory exists
         ensure!(root.is_dir(), Err::NoRootDir(root));
 
+        // TODO: check if .gpg-ids exists?
+
         Ok(Self { root })
     }
 

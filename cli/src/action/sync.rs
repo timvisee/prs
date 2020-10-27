@@ -39,6 +39,8 @@ impl<'a> Sync<'a> {
 
         // TODO: assert not-dirty state?
 
+        // TODO: sync keys
+
         if !matcher_main.quiet() {
             eprintln!("Sync complete");
         }
@@ -59,15 +61,16 @@ fn ensure_ready(sync: &StoreSync) {
         }
     };
 
-    let msg = match readyness {
-        Readyness::Ready | Readyness::NoSync => return,
-        Readyness::Dirty => "store git repository has uncommitted changes".into(),
-        Readyness::GitState(state) => {
-            format!("store git repository is in unfinished state: {:?}", state)
-        }
-    };
-
-    util::quit_error_msg(msg, ErrorHintsBuilder::default().git(true).build().unwrap());
+    util::quit_error_msg(
+        match readyness {
+            Readyness::Ready | Readyness::NoSync => return,
+            Readyness::Dirty => "store git repository has uncommitted changes".into(),
+            Readyness::GitState(state) => {
+                format!("store git repository is in unfinished state: {:?}", state)
+            }
+        },
+        ErrorHintsBuilder::default().git(true).build().unwrap(),
+    );
 }
 
 #[derive(Debug, Error)]

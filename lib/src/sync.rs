@@ -85,8 +85,8 @@ impl<'a> Sync<'a> {
             self.commit_all(msg)?;
         }
 
-        // Push if remote
-        if self.has_remote()? {
+        // Push if remote and out of sync
+        if self.has_remote()? && safe_need_to_push(self.path()) {
             self.push()?;
         }
 
@@ -138,6 +138,11 @@ impl<'a> Sync<'a> {
     }
 }
 
+/// Defines readyness of store sync.
+///
+/// Some states block sync usage, including:
+/// - Sync not initialized
+/// - Git repository is dirty
 // TODO: add NoRemote state?
 #[derive(Debug)]
 pub enum Readyness {
@@ -171,6 +176,42 @@ fn is_dirty(repo: &Path) -> Result<bool> {
     let repo = git2::Repository::open(repo).map_err(Err::Git2)?;
     let statuses = repo.statuses(None).map_err(Err::Git2)?;
     Ok(!statuses.is_empty())
+}
+
+/// Check whether we need to push to the remote.
+///
+/// Warning: Only use this is recently pulled last remote changes.
+///
+/// This defaults to true on error.
+fn safe_need_to_push(repo: &Path) -> bool {
+    match need_to_push(repo) {
+        Ok(push) => push,
+        Err(err) => {
+            eprintln!(
+                "failed to test if local branch is different than remote, ignoring: {}",
+                err,
+            );
+            true
+        }
+    }
+}
+
+/// Check whether we need to push to the remote.
+///
+/// Warning: Only use this is recently pulled last remote changes.
+///
+/// If the upstream branch is unknown, this always returns true.
+// TODO: check if pull is recent enough?
+// TODO: see: https://stackoverflow.com/a/9229377/1000145 (stat -c %Y .git/FETCH_HEAD)
+fn need_to_push(repo: &Path) -> Result<bool> {
+    let branch = crate::git::git_current_branch(repo)?;
+    let upstream = match crate::git::git_branch_upstream(repo, &branch)? {
+        Some(upstream) => upstream,
+        None => return Ok(true),
+    };
+
+    // Compare local and remote branch hashes
+    Ok(crate::git::git_ref_hash(repo, branch)? != crate::git::git_ref_hash(repo, upstream)?)
 }
 
 #[derive(Debug, Error)]

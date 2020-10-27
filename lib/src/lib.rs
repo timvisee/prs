@@ -239,7 +239,7 @@ impl fmt::Display for Key {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "GPG: {} - {}",
+            "[GPG] {} - {}",
             self.fingerprint(true),
             self.user_display()
         )

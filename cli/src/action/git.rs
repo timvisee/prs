@@ -1,12 +1,10 @@
-use std::process::Command;
-
 use anyhow::Result;
 use clap::ArgMatches;
 use prs_lib::store::Store;
 use thiserror::Error;
 
 use crate::cmd::matcher::{git::GitMatcher, MainMatcher, Matcher};
-use crate::util::{self, ErrorHints};
+use crate::util;
 
 /// Git action.
 pub struct Git<'a> {
@@ -33,33 +31,12 @@ impl<'a> Git<'a> {
 
 /// Invoke a git command.
 pub fn git(store: &Store, cmd: String, verbose: bool) -> Result<()> {
-    let git_cmd = format!("git -C {:?} {}", store.root.display(), cmd);
-    if verbose {
-        eprintln!("Invoking: {}\n", git_cmd);
-    }
-
-    // Invoke command
-    // TODO: make this compatible with Windows
-    let status = Command::new("sh")
-        .arg("-c")
-        .arg(&git_cmd)
-        .current_dir(&store.root)
-        .status()
-        .map_err(Err::Invoke)?;
-
-    // Report status errors
-    if !status.success() {
-        eprintln!();
-        util::quit_error_msg(
-            format!(
-                "git exited with status code {}",
-                status.code().unwrap_or(-1)
-            ),
-            ErrorHints::default(),
-        );
-    }
-
-    Ok(())
+    util::invoke_cmd(
+        format!("git -C {:?} {}", store.root.display(), cmd),
+        Some(&store.root),
+        verbose,
+    )
+    .map_err(|err| Err::Invoke(err).into())
 }
 
 #[derive(Debug, Error)]

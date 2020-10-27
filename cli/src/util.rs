@@ -8,10 +8,11 @@ use std::fmt::{Debug, Display};
 use std::io::{self, stderr, stdin, Error as IoError, Read, Write};
 use std::iter;
 use std::path::{Path, PathBuf};
+use std::process::Command;
 use std::process::{exit, ExitStatus};
 use std::sync::Arc;
 
-use anyhow::{anyhow, Error};
+use anyhow::{anyhow, Error, Result};
 use colored::{ColoredString, Colorize};
 use skim::{
     prelude::{SkimItemReceiver, SkimItemSender, SkimOptionsBuilder},
@@ -499,4 +500,37 @@ fn stdin_read_file(prompt: bool) -> Vec<u8> {
 /// Read plaintext from stdin.
 pub fn stdin_read_plaintext(prompt: bool) -> Plaintext {
     Plaintext(stdin_read_file(prompt))
+}
+
+/// Invoke a command.
+///
+/// Quit on error.
+pub fn invoke_cmd(cmd: String, dir: Option<&Path>, verbose: bool) -> Result<(), std::io::Error> {
+    if verbose {
+        eprintln!("Invoking: {}\n", cmd);
+    }
+
+    // Invoke command
+    // TODO: make this compatible with Windows
+    let mut process = Command::new("sh");
+    process.arg("-c").arg(&cmd);
+    if let Some(dir) = dir {
+        process.current_dir(dir);
+    }
+    let status = process.status()?;
+
+    // Report status errors
+    if !status.success() {
+        eprintln!();
+        quit_error_msg(
+            format!(
+                "{} exited with status code {}",
+                cmd.trim_start().split(" ").next().unwrap_or("command"),
+                status.code().unwrap_or(-1)
+            ),
+            ErrorHints::default(),
+        );
+    }
+
+    Ok(())
 }

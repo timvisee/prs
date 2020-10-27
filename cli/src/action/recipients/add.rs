@@ -33,8 +33,7 @@ impl<'a> Add<'a> {
         let key = util::skim_select_key(tmp.keys()).ok_or(Err::NoneSelected)?;
         recipients.add(key.clone());
 
-        // TODO: also sync list of keys in store
-        recipients.write_to_file(store.gpg_ids_file())?;
+        recipients.save(&store)?;
 
         if !matcher_main.quiet() {
             eprintln!("Added recipient: {}", key);

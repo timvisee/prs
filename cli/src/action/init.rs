@@ -42,7 +42,7 @@ impl<'a> Init<'a> {
 
         // Use all keyring recipients by default, write to store
         let recipients = prs_lib::all()?;
-        recipients.write_to_file(store.gpg_ids_file())?;
+        recipients.save(&store)?;
 
         // TODO: also write public keys to store
 

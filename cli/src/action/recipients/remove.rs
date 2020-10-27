@@ -33,8 +33,7 @@ impl<'a> Remove<'a> {
             .clone();
         recipients.remove(&key);
 
-        // TODO: also sync list of keys in store
-        recipients.write_to_file(store.gpg_ids_file())?;
+        recipients.save(&store)?;
 
         if !matcher_main.quiet() {
             eprintln!("Removed recipient: {}", key);

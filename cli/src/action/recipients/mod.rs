@@ -1,4 +1,5 @@
 pub mod add;
+pub mod export;
 pub mod generate;
 pub mod list;
 pub mod remove;
@@ -26,6 +27,10 @@ impl<'a> Recipients<'a> {
 
         if matcher_recipients.add().is_some() {
             return add::Add::new(self.cmd_matches).invoke();
+        }
+
+        if matcher_recipients.export().is_some() {
+            return export::Export::new(self.cmd_matches).invoke();
         }
 
         if matcher_recipients.generate().is_some() {

@@ -1,4 +1,5 @@
 pub mod add;
+pub mod export;
 pub mod generate;
 pub mod list;
 pub mod remove;
@@ -21,6 +22,7 @@ impl CmdRecipients {
             .alias("kes")
             .setting(AppSettings::SubcommandRequiredElseHelp)
             .subcommand(add::CmdAdd::build())
+            .subcommand(export::CmdExport::build())
             .subcommand(generate::CmdGenerate::build())
             .subcommand(list::CmdList::build())
             .subcommand(remove::CmdRemove::build())

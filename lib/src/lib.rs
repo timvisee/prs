@@ -7,6 +7,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 use anyhow::Result;
+use gpgme::Context;
 use thiserror::Error;
 
 use crate::store::Store;
@@ -145,23 +146,7 @@ impl Recipients {
             }
 
             // Export public key
-            let mut data: Vec<u8> = vec![];
-            context
-                .as_mut()
-                .unwrap()
-                .export_keys(&[key.0.clone()], gpgme::ExportMode::empty(), &mut data)
-                .unwrap();
-
-            // Assert we're exporting a public key
-            let data_str = std::str::from_utf8(&data).expect("exported key is invalid UTF-8");
-            assert!(
-                !data_str.contains("PRIVATE"),
-                "exported key contains PRIVATE, blocked to prevent accidentally leaking secret key"
-            );
-            assert!(
-                data_str.contains("PUBLIC"),
-                "exported key must contain PUBLIC, blocked to prevent accidentally leaking secret key"
-            );
+            let data = export_key(context.as_mut().unwrap(), key).map_err(Err::Export)?;
 
             // Write public key to disk
             let path = dir.join(&fp);
@@ -185,6 +170,25 @@ impl Recipients {
         )
         .map_err(|err| Err::WriteFile(err).into())
     }
+}
+
+/// Export the given key as bytes.
+pub fn export_key(context: &mut Context, key: &Key) -> Result<Vec<u8>, gpgme::Error> {
+    // Export public key
+    let mut data: Vec<u8> = vec![];
+    context.export_keys(&[key.0.clone()], gpgme::ExportMode::empty(), &mut data)?;
+
+    // Assert we're exporting a public key
+    let data_str = std::str::from_utf8(&data).expect("exported key is invalid UTF-8");
+    assert!(
+        !data_str.contains("PRIVATE"),
+        "exported key contains PRIVATE, blocked to prevent accidentally leaking secret key"
+    );
+    assert!(
+        data_str.contains("PUBLIC"),
+        "exported key must contain PUBLIC, blocked to prevent accidentally leaking secret key"
+    );
+    Ok(data)
 }
 
 /// Recipient key.
@@ -283,4 +287,7 @@ pub enum Err {
 
     #[error("failed to sync public key files")]
     SyncKeyFiles(#[source] std::io::Error),
+
+    #[error("failed to export key")]
+    Export(#[source] gpgme::Error),
 }

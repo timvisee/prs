@@ -1,4 +1,5 @@
 pub mod add;
+pub mod export;
 pub mod generate;
 pub mod list;
 pub mod remove;
@@ -19,6 +20,11 @@ impl<'a: 'b, 'b> RecipientsMatcher<'a> {
     /// Get the recipient add sub command, if matched.
     pub fn add(&'a self) -> Option<add::AddMatcher> {
         add::AddMatcher::with(&self.root)
+    }
+
+    /// Get the recipient export sub command, if matched.
+    pub fn export(&'a self) -> Option<export::ExportMatcher> {
+        export::ExportMatcher::with(&self.root)
     }
 
     /// Get the recipient generate sub command, if matched.

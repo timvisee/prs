@@ -32,6 +32,7 @@ impl<'a> Generate<'a> {
 
         // Generate new key through GPG
         let new = gpg_generate(matcher_main.verbose())?;
+        let new_keys = new.keys();
 
         if !matcher_generate.skip_add() {
             if new.keys().is_empty() {
@@ -49,13 +50,13 @@ impl<'a> Generate<'a> {
 
             // Add new keys to store
             let mut recipients = store.recipients().map_err(Err::Load)?;
-            for key in new.keys() {
+            for key in new_keys {
                 recipients.add(key.clone());
             }
             recipients.save(&store)?;
 
             if !matcher_main.quiet() {
-                for key in new.keys() {
+                for key in new_keys {
                     eprintln!("Added recipient: {}", key);
                 }
             }

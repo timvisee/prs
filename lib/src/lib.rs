@@ -46,14 +46,7 @@ impl Recipients {
 
     /// Find recipients based on fingerprints listed in given file.
     pub fn find_from_file<P: AsRef<Path>>(path: P) -> Result<Recipients> {
-        Self::find(
-            fs::read_to_string(path)
-                .map_err(Err::ReadFile)?
-                .lines()
-                .filter(|fp| !fp.trim().is_empty())
-                .map(|fp| fp.into())
-                .collect(),
-        )
+        Self::find(read_fingerprints_file(path)?)
     }
 
     /// Get the list of recipient keys.
@@ -93,14 +86,14 @@ impl Recipients {
         // TODO: what to do if ids file does not exist?
         // TODO: what to do if recipients is empty?
         // TODO: what to do if key listed in file is not found, attempt to install?
-        Recipients::find_from_file(store.root.join(STORE_GPG_IDS_FILE))
+        Recipients::find_from_file(store_gpg_ids_file(&store))
     }
 
     /// Save this list of recipients to the store.
     ///
     /// This overwrites any existing recipient list.
     pub fn save(&self, store: &Store) -> Result<()> {
-        self.write_to_file(store.root.join(STORE_GPG_IDS_FILE))?;
+        self.write_to_file(store_gpg_ids_file(store))?;
         self.sync_public_key_files(store)
         // TODO: import missing keys to system?
     }
@@ -109,9 +102,9 @@ impl Recipients {
     ///
     /// - Removes obsolete keys that are not a selected recipient
     /// - Adds missing keys that are a recipient
-    fn sync_public_key_files(&self, store: &Store) -> Result<()> {
+    pub fn sync_public_key_files(&self, store: &Store) -> Result<()> {
         // Get public keys directory, ensure it exists
-        let dir = store.root.clone().join(STORE_PUB_KEY_DIR);
+        let dir = store_public_keys_dir(store);
         fs::create_dir_all(&dir).map_err(Err::SyncKeyFiles)?;
 
         // List key files in keys directory
@@ -170,6 +163,37 @@ impl Recipients {
         )
         .map_err(|err| Err::WriteFile(err).into())
     }
+}
+
+/// Read GPG fingerprints from the given file.
+pub fn read_fingerprints_file<P: AsRef<Path>>(path: P) -> Result<Vec<String>> {
+    Ok(fs::read_to_string(path)
+        .map_err(Err::ReadFile)?
+        .lines()
+        .filter(|fp| !fp.trim().is_empty())
+        .map(|fp| fp.into())
+        .collect())
+}
+
+/// Filter list of fingerprints.
+///
+/// Keep list of unimported fingerprints.
+pub fn filter_imported_fingerprints(fingerprints: Vec<String>) -> Result<Vec<String>> {
+    let mut context = crypto::context()?;
+    Ok(fingerprints
+        .into_iter()
+        .filter(|fp| context.get_key(fp).is_err())
+        .collect())
+}
+
+/// Get the GPG IDs file for a store.
+pub fn store_gpg_ids_file(store: &Store) -> PathBuf {
+    store.root.join(STORE_GPG_IDS_FILE)
+}
+
+/// Get the public keys directory for a store.
+pub fn store_public_keys_dir(store: &Store) -> PathBuf {
+    store.root.join(STORE_PUB_KEY_DIR)
 }
 
 /// Export the given key as bytes.

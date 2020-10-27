@@ -1,4 +1,5 @@
 pub mod recrypt;
+pub mod sync_keys;
 
 use anyhow::Result;
 use clap::ArgMatches;
@@ -23,6 +24,10 @@ impl<'a> Housekeeping<'a> {
 
         if matcher_housekeeping.recrypt().is_some() {
             return recrypt::Recrypt::new(self.cmd_matches).invoke();
+        }
+
+        if matcher_housekeeping.sync_keys().is_some() {
+            return sync_keys::SyncKeys::new(self.cmd_matches).invoke();
         }
 
         // Unreachable, clap will print help for missing sub command instead

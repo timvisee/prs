@@ -6,54 +6,54 @@ use thiserror::Error;
 
 use prs_lib::store::Store;
 
-use crate::cmd::matcher::{delete::DeleteMatcher, MainMatcher, Matcher};
+use crate::cmd::matcher::{remove::RemoveMatcher, MainMatcher, Matcher};
 use crate::util;
 
-/// Delete secret action.
-pub struct Delete<'a> {
+/// Remove secret action.
+pub struct Remove<'a> {
     cmd_matches: &'a ArgMatches<'a>,
 }
 
-impl<'a> Delete<'a> {
-    /// Construct a new delete action.
+impl<'a> Remove<'a> {
+    /// Construct a new remove action.
     pub fn new(cmd_matches: &'a ArgMatches<'a>) -> Self {
         Self { cmd_matches }
     }
 
-    /// Invoke the delete action.
+    /// Invoke the remove action.
     pub fn invoke(&self) -> Result<()> {
         // Create the command matchers
         let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
-        let matcher_delete = DeleteMatcher::with(self.cmd_matches).unwrap();
+        let matcher_remove = RemoveMatcher::with(self.cmd_matches).unwrap();
 
-        let store = Store::open(matcher_delete.store()).map_err(Err::Store)?;
+        let store = Store::open(matcher_remove.store()).map_err(Err::Store)?;
         let secret =
-            util::select_secret(&store, matcher_delete.query()).ok_or(Err::NoneSelected)?;
+            util::select_secret(&store, matcher_remove.query()).ok_or(Err::NoneSelected)?;
 
         // Cofnirm deletion
         if !matcher_main.force() {
             if !util::prompt_yes(
                 &format!(
-                    "Are you sure you want to delete '{}'?",
+                    "Are you sure you want to remove '{}'?",
                     secret.path.display()
                 ),
                 Some(true),
                 &matcher_main,
             ) {
                 if matcher_main.verbose() {
-                    eprintln!("Deletion cancelled");
+                    eprintln!("Removal cancelled");
                 }
                 util::quit();
             }
         }
 
-        // Delete secret
+        // Remove secret
         fs::remove_file(&secret.path)
             .map(|_| ())
             .map_err(|err| Err::Remove(err))?;
 
         if !matcher_main.quiet() {
-            eprintln!("Secret deleted");
+            eprintln!("Secret removed");
         }
 
         Ok(())

@@ -28,12 +28,12 @@ fn main() {
 /// If no proper action is selected, the program will quit with an error
 /// message.
 fn invoke_action(handler: &Handler) -> Result<()> {
-    if handler.copy().is_some() {
-        return action::copy::Copy::new(handler.matches()).invoke();
+    if handler.add().is_some() {
+        return action::add::Add::add(handler.matches()).invoke();
     }
 
-    if handler.delete().is_some() {
-        return action::delete::Delete::new(handler.matches()).invoke();
+    if handler.copy().is_some() {
+        return action::copy::Copy::new(handler.matches()).invoke();
     }
 
     if handler.duplicate().is_some() {
@@ -64,12 +64,12 @@ fn invoke_action(handler: &Handler) -> Result<()> {
         return action::list::List::new(handler.matches()).invoke();
     }
 
-    if handler.new().is_some() {
-        return action::new::New::new(handler.matches()).invoke();
-    }
-
     if handler.recipients().is_some() {
         return action::recipients::Recipients::new(handler.matches()).invoke();
+    }
+
+    if handler.remove().is_some() {
+        return action::remove::Remove::new(handler.matches()).invoke();
     }
 
     if handler.show().is_some() {

@@ -59,8 +59,8 @@ impl<'a: 'b, 'b> Handler<'a> {
                     .global(true)
                     .help("Enable verbose information and logging"),
             )
+            .subcommand(subcmd::CmdAdd::build())
             .subcommand(subcmd::CmdCopy::build())
-            .subcommand(subcmd::CmdDelete::build())
             .subcommand(subcmd::CmdDuplicate::build())
             .subcommand(subcmd::CmdEdit::build())
             .subcommand(subcmd::CmdGenerate::build())
@@ -68,8 +68,8 @@ impl<'a: 'b, 'b> Handler<'a> {
             .subcommand(subcmd::CmdInit::build())
             .subcommand(subcmd::CmdList::build())
             .subcommand(subcmd::CmdMove::build())
-            .subcommand(subcmd::CmdNew::build())
             .subcommand(subcmd::CmdRecipients::build())
+            .subcommand(subcmd::CmdRemove::build())
             .subcommand(subcmd::CmdShow::build());
 
         // Disable color usage if compiled without color support
@@ -97,9 +97,9 @@ impl<'a: 'b, 'b> Handler<'a> {
         matcher::CopyMatcher::with(&self.matches)
     }
 
-    /// Get the delete sub command, if matched.
-    pub fn delete(&'a self) -> Option<matcher::DeleteMatcher> {
-        matcher::DeleteMatcher::with(&self.matches)
+    /// Get the remove sub command, if matched.
+    pub fn remove(&'a self) -> Option<matcher::RemoveMatcher> {
+        matcher::RemoveMatcher::with(&self.matches)
     }
 
     /// Get the duplicate sub command, if matched.
@@ -132,9 +132,9 @@ impl<'a: 'b, 'b> Handler<'a> {
         matcher::ListMatcher::with(&self.matches)
     }
 
-    /// Get the new sub command, if matched.
-    pub fn new(&'a self) -> Option<matcher::NewMatcher> {
-        matcher::NewMatcher::with(&self.matches)
+    /// Get the add sub command, if matched.
+    pub fn add(&'a self) -> Option<matcher::AddMatcher> {
+        matcher::AddMatcher::with(&self.matches)
     }
 
     /// Get the move sub command, if matched.

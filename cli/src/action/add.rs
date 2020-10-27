@@ -3,29 +3,29 @@ use clap::ArgMatches;
 use prs_lib::{store::Store, types::Plaintext};
 use thiserror::Error;
 
-use crate::cmd::matcher::{new::NewMatcher, MainMatcher, Matcher};
+use crate::cmd::matcher::{add::AddMatcher, MainMatcher, Matcher};
 use crate::util;
 
-/// New secret action.
-pub struct New<'a> {
+/// Add secret action.
+pub struct Add<'a> {
     cmd_matches: &'a ArgMatches<'a>,
 }
 
-impl<'a> New<'a> {
-    /// Construct a new new action.
-    pub fn new(cmd_matches: &'a ArgMatches<'a>) -> Self {
+impl<'a> Add<'a> {
+    /// Construct a new add action.
+    pub fn add(cmd_matches: &'a ArgMatches<'a>) -> Self {
         Self { cmd_matches }
     }
 
-    /// Invoke the new action.
+    /// Invoke the add action.
     pub fn invoke(&self) -> Result<()> {
         // Create the command matchers
         let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
-        let matcher_new = NewMatcher::with(self.cmd_matches).unwrap();
+        let matcher_add = AddMatcher::with(self.cmd_matches).unwrap();
 
-        let store = Store::open(matcher_new.store()).map_err(Err::Store)?;
+        let store = Store::open(matcher_add.store()).map_err(Err::Store)?;
 
-        let dest = matcher_new.destination();
+        let dest = matcher_add.destination();
 
         // Normalize destination path
         let path = store
@@ -34,9 +34,9 @@ impl<'a> New<'a> {
 
         let mut plaintext = Plaintext::empty();
 
-        if matcher_new.stdin() {
+        if matcher_add.stdin() {
             plaintext = util::stdin_read_plaintext(!matcher_main.quiet());
-        } else if !matcher_new.empty() {
+        } else if !matcher_add.empty() {
             if let Some(changed) = util::edit(&plaintext).map_err(Err::Edit)? {
                 plaintext = changed;
             }
@@ -47,15 +47,15 @@ impl<'a> New<'a> {
             eprintln!("A secret at '{}' already exists", path.display(),);
             if !util::prompt_yes("Overwrite?", Some(true), &matcher_main) {
                 if matcher_main.verbose() {
-                    eprintln!("No secret created");
+                    eprintln!("Addition cancelled");
                 }
                 util::quit();
             }
         }
 
         // Confirm if empty secret should be stored
-        if !matcher_main.force() && !matcher_new.empty() && plaintext.is_empty() {
-            if !util::prompt_yes("New secret is empty. Create?", Some(true), &matcher_main) {
+        if !matcher_main.force() && !matcher_add.empty() && plaintext.is_empty() {
+            if !util::prompt_yes("Secret is empty. Add?", Some(true), &matcher_main) {
                 util::quit();
             }
         }
@@ -67,7 +67,7 @@ impl<'a> New<'a> {
         prs_lib::crypto::encrypt_file(&recipients, plaintext, &path).map_err(Err::Write)?;
 
         if !matcher_main.quiet() {
-            eprintln!("Secret created");
+            eprintln!("Secret added");
         }
 
         Ok(())

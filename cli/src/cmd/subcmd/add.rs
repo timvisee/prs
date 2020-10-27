@@ -2,15 +2,17 @@ use clap::{App, Arg, SubCommand};
 
 use crate::cmd::arg::{ArgStore, CmdArg};
 
-/// The new command definition.
-pub struct CmdNew;
+/// The add command definition.
+pub struct CmdAdd;
 
-impl CmdNew {
+impl CmdAdd {
     pub fn build<'a, 'b>() -> App<'a, 'b> {
-        SubCommand::with_name("new")
+        SubCommand::with_name("add")
+            .alias("a")
+            .alias("new")
             .alias("n")
             .alias("create")
-            .about("Create new secret")
+            .about("Add a secret")
             .arg(
                 Arg::with_name("DEST")
                     .help("Secret destination path")
@@ -20,7 +22,7 @@ impl CmdNew {
                 Arg::with_name("empty")
                     .long("empty")
                     .short("e")
-                    .help("Create empty secret, do not edit"),
+                    .help("Add empty secret, do not edit"),
             )
             .arg(
                 Arg::with_name("stdin")

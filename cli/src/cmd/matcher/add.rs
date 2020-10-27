@@ -3,12 +3,12 @@ use clap::ArgMatches;
 use super::Matcher;
 use crate::cmd::arg::{ArgStore, CmdArgOption};
 
-/// The new command matcher.
-pub struct NewMatcher<'a> {
+/// The add command matcher.
+pub struct AddMatcher<'a> {
     matches: &'a ArgMatches<'a>,
 }
 
-impl<'a: 'b, 'b> NewMatcher<'a> {
+impl<'a: 'b, 'b> AddMatcher<'a> {
     /// Secret destination.
     pub fn destination(&self) -> &str {
         self.matches.value_of("DEST").unwrap()
@@ -30,10 +30,10 @@ impl<'a: 'b, 'b> NewMatcher<'a> {
     }
 }
 
-impl<'a> Matcher<'a> for NewMatcher<'a> {
+impl<'a> Matcher<'a> for AddMatcher<'a> {
     fn with(matches: &'a ArgMatches) -> Option<Self> {
         matches
-            .subcommand_matches("new")
-            .map(|matches| NewMatcher { matches })
+            .subcommand_matches("add")
+            .map(|matches| AddMatcher { matches })
     }
 }

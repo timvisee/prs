@@ -2,16 +2,16 @@ use clap::{App, SubCommand};
 
 use crate::cmd::arg::{ArgQuery, ArgStore, CmdArg};
 
-/// The delete command definition.
-pub struct CmdDelete;
+/// The remove command definition.
+pub struct CmdRemove;
 
-impl CmdDelete {
+impl CmdRemove {
     pub fn build<'a, 'b>() -> App<'a, 'b> {
-        SubCommand::with_name("delete")
-            .alias("del")
-            .alias("remove")
+        SubCommand::with_name("remove")
             .alias("rm")
-            .about("Delete a secret")
+            .alias("delete")
+            .alias("del")
+            .about("Remove a secret")
             .arg(ArgQuery::build())
             .arg(ArgStore::build())
     }

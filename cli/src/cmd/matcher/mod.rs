@@ -12,6 +12,7 @@ pub mod r#move;
 pub mod recipients;
 pub mod remove;
 pub mod show;
+pub mod sync;
 
 // Re-export to matcher module
 pub use self::add::AddMatcher;
@@ -28,6 +29,7 @@ pub use self::r#move::MoveMatcher;
 pub use self::recipients::RecipientsMatcher;
 pub use self::remove::RemoveMatcher;
 pub use self::show::ShowMatcher;
+pub use self::sync::SyncMatcher;
 
 use clap::ArgMatches;
 

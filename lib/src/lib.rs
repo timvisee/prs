@@ -1,5 +1,7 @@
 pub mod crypto;
+pub mod git;
 pub mod store;
+pub mod sync;
 pub mod types;
 
 use std::fmt;

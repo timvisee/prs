@@ -80,5 +80,9 @@ fn invoke_action(handler: &Handler) -> Result<()> {
         return action::show::Show::new(handler.matches()).invoke();
     }
 
+    if handler.sync().is_some() {
+        return action::sync::Sync::new(handler.matches()).invoke();
+    }
+
     Ok(())
 }

@@ -11,6 +11,7 @@ pub mod r#move;
 pub mod recipients;
 pub mod remove;
 pub mod show;
+pub mod sync;
 
 // Re-export to cmd module
 pub use self::add::CmdAdd;
@@ -26,3 +27,4 @@ pub use self::r#move::CmdMove;
 pub use self::recipients::CmdRecipients;
 pub use self::remove::CmdRemove;
 pub use self::show::CmdShow;
+pub use self::sync::CmdSync;

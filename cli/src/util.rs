@@ -114,6 +114,9 @@ pub struct ErrorHints {
     /// Show about the sync action.
     sync: bool,
 
+    /// Show abuot the git action.
+    git: bool,
+
     /// Show about the force flag.
     force: bool,
 
@@ -127,7 +130,7 @@ pub struct ErrorHints {
 impl ErrorHints {
     /// Check whether any hint should be printed.
     pub fn any(&self) -> bool {
-        self.sync || self.force || self.verbose || self.help
+        self.sync || self.git || self.force || self.verbose || self.help
     }
 
     /// Print the error hints.
@@ -145,11 +148,18 @@ impl ErrorHints {
         eprint!("\n");
 
         // Print hints
+        // TODO: use corret app name
+        let app = "prs";
         if self.sync {
             eprintln!(
                 "To sync your your password store use '{}'",
-                // TODO: use current program name here
-                highlight(&format!("{} sync", crate_name!()))
+                highlight(&format!("{} sync", app))
+            );
+        }
+        if self.git {
+            eprintln!(
+                "Use '{}' to resolve this issue",
+                highlight(&format!("{} git", app))
             );
         }
         if self.force {
@@ -172,6 +182,7 @@ impl Default for ErrorHints {
         ErrorHints {
             info: Vec::new(),
             sync: false,
+            git: false,
             force: false,
             verbose: true,
             help: true,

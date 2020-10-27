@@ -11,3 +11,4 @@ pub mod r#move;
 pub mod recipients;
 pub mod remove;
 pub mod show;
+pub mod sync;

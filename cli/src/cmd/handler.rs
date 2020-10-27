@@ -71,7 +71,8 @@ impl<'a: 'b, 'b> Handler<'a> {
             .subcommand(subcmd::CmdMove::build())
             .subcommand(subcmd::CmdRecipients::build())
             .subcommand(subcmd::CmdRemove::build())
-            .subcommand(subcmd::CmdShow::build());
+            .subcommand(subcmd::CmdShow::build())
+            .subcommand(subcmd::CmdSync::build());
 
         // Disable color usage if compiled without color support
         // TODO: do not use feature, pull from env var instead
@@ -156,5 +157,10 @@ impl<'a: 'b, 'b> Handler<'a> {
     /// Get the show sub command, if matched.
     pub fn show(&'a self) -> Option<matcher::ShowMatcher> {
         matcher::ShowMatcher::with(&self.matches)
+    }
+
+    /// Get the sync sub command, if matched.
+    pub fn sync(&'a self) -> Option<matcher::SyncMatcher> {
+        matcher::SyncMatcher::with(&self.matches)
     }
 }

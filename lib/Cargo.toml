@@ -20,8 +20,10 @@ gitlab = { repository = "timvisee/prs", branch = "master" }
 
 [dependencies]
 anyhow = "1.0"
+git2 = "0.13"
 gpgme = "0.9.2"
 shellexpand = "2.0"
 thiserror = "1.0"
 walkdir = "2.0"
 zeroize = { version = "1.1", features = ["zeroize_derive"]}
+rustygit = "0.4"

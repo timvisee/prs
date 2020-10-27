@@ -4,7 +4,10 @@ use thiserror::Error;
 
 use prs_lib::store::Store;
 
-use crate::cmd::matcher::{recipients::RecipientsMatcher, MainMatcher, Matcher};
+use crate::cmd::matcher::{
+    recipients::{add::AddMatcher, RecipientsMatcher},
+    MainMatcher, Matcher,
+};
 use crate::util;
 
 /// A recipients add action.
@@ -23,6 +26,7 @@ impl<'a> Add<'a> {
         // Create the command matchers
         let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
         let matcher_recipients = RecipientsMatcher::with(self.cmd_matches).unwrap();
+        let matcher_add = AddMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(matcher_recipients.store()).map_err(Err::Store)?;
         let mut recipients = store.recipients().map_err(Err::Load)?;
@@ -35,11 +39,21 @@ impl<'a> Add<'a> {
 
         recipients.save(&store)?;
 
+        // Recrypt secrets
+        if !matcher_add.no_recrypt() {
+            crate::action::housekeeping::recrypt::recrypt_all(
+                &store,
+                matcher_main.quiet(),
+                matcher_main.verbose(),
+            )
+            .map_err(Err::Recrypt)?;
+        }
+
+        // TODO: sync
+
         if !matcher_main.quiet() {
             eprintln!("Added recipient: {}", key);
         }
-
-        // TODO: recrypt everything for new recipient
 
         Ok(())
     }
@@ -55,4 +69,7 @@ pub enum Err {
 
     #[error("failed to load usable keys from keychain")]
     Load(#[source] anyhow::Error),
+
+    #[error("failed to re-encrypt secrets in store")]
+    Recrypt(#[source] anyhow::Error),
 }

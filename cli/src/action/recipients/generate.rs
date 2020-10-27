@@ -34,7 +34,7 @@ impl<'a> Generate<'a> {
         let new = gpg_generate(matcher_main.verbose())?;
         let new_keys = new.keys();
 
-        if !matcher_generate.skip_add() {
+        if !matcher_generate.no_add() {
             if new.keys().is_empty() {
                 util::quit_error_msg(
                     "not adding recipient to store because no new keys are found",
@@ -55,13 +55,23 @@ impl<'a> Generate<'a> {
             }
             recipients.save(&store)?;
 
+            // Recrypt secrets
+            if !matcher_generate.no_recrypt() {
+                crate::action::housekeeping::recrypt::recrypt_all(
+                    &store,
+                    matcher_main.quiet(),
+                    matcher_main.verbose(),
+                )
+                .map_err(Err::Recrypt)?;
+            }
+
+            // TODO: sync
+
             if !matcher_main.quiet() {
                 for key in new_keys {
                     eprintln!("Added recipient: {}", key);
                 }
             }
-
-            // TODO: recrypt everything for new recipient
         }
 
         Ok(())
@@ -94,4 +104,7 @@ pub enum Err {
 
     #[error("failed to invoke gpg command")]
     Invoke(#[source] std::io::Error),
+
+    #[error("failed to re-encrypt secrets in store")]
+    Recrypt(#[source] anyhow::Error),
 }

@@ -1,4 +1,4 @@
-use clap::{App, SubCommand};
+use clap::{App, Arg, SubCommand};
 
 /// The recipient add command definition.
 pub struct CmdAdd;
@@ -8,5 +8,13 @@ impl CmdAdd {
         SubCommand::with_name("add")
             .alias("a")
             .about("Add store recipient")
+            .arg(
+                Arg::with_name("no-recrypt")
+                    .long("no-recrypt")
+                    .alias("no-reencrypt")
+                    .alias("skip-recrypt")
+                    .alias("skip-reencrypt")
+                    .help("Skip re-encrypting all secrets"),
+            )
     }
 }

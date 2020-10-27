@@ -9,8 +9,13 @@ pub struct GenerateMatcher<'a> {
 
 impl<'a: 'b, 'b> GenerateMatcher<'a> {
     /// Check whether to skip adding key to store.
-    pub fn skip_add(&self) -> bool {
-        self.matches.is_present("skip-add")
+    pub fn no_add(&self) -> bool {
+        self.matches.is_present("no-add")
+    }
+
+    /// Check whether to skip re-encrypting secrets.
+    pub fn no_recrypt(&self) -> bool {
+        self.matches.is_present("no-recrypt")
     }
 }
 

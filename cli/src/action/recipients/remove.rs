@@ -4,7 +4,10 @@ use thiserror::Error;
 
 use prs_lib::store::Store;
 
-use crate::cmd::matcher::{recipients::RecipientsMatcher, MainMatcher, Matcher};
+use crate::cmd::matcher::{
+    recipients::{remove::RemoveMatcher, RecipientsMatcher},
+    MainMatcher, Matcher,
+};
 use crate::util;
 
 /// A recipients remove action.
@@ -23,6 +26,7 @@ impl<'a> Remove<'a> {
         // Create the command matchers
         let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
         let matcher_recipients = RecipientsMatcher::with(self.cmd_matches).unwrap();
+        let matcher_remove = RemoveMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(matcher_recipients.store()).map_err(Err::Store)?;
         let mut recipients = store.recipients().map_err(Err::Load)?;
@@ -35,11 +39,21 @@ impl<'a> Remove<'a> {
 
         recipients.save(&store)?;
 
+        // Recrypt secrets
+        if matcher_remove.recrypt() {
+            crate::action::housekeeping::recrypt::recrypt_all(
+                &store,
+                matcher_main.quiet(),
+                matcher_main.verbose(),
+            )
+            .map_err(Err::Recrypt)?;
+        }
+
+        // TODO: sync
+
         if !matcher_main.quiet() {
             eprintln!("Removed recipient: {}", key);
         }
-
-        // TODO: recrypt everything for new recipient
 
         Ok(())
     }
@@ -55,4 +69,7 @@ pub enum Err {
 
     #[error("failed to load existing keys from store")]
     Load(#[source] anyhow::Error),
+
+    #[error("failed to re-encrypt secrets in store")]
+    Recrypt(#[source] anyhow::Error),
 }

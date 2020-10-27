@@ -30,16 +30,30 @@ impl<'a> Recrypt<'a> {
         let store = Store::open(matcher_housekeeping.store()).map_err(Err::Store)?;
         let secrets = store.secrets(matcher_recrypt.query());
 
-        recrypt(&store, &secrets, matcher_main.quiet())
+        recrypt(
+            &store,
+            &secrets,
+            matcher_main.quiet(),
+            matcher_main.verbose(),
+        )
     }
 }
 
+/// Re-encrypt all secrets in the given store.
+pub fn recrypt_all(store: &Store, quiet: bool, verbose: bool) -> Result<()> {
+    recrypt(store, &store.secrets(None), quiet, verbose)
+}
+
 /// Re-encrypt all given secrets.
-pub fn recrypt(store: &Store, secrets: &[Secret], quiet: bool) -> Result<()> {
+pub fn recrypt(store: &Store, secrets: &[Secret], quiet: bool, verbose: bool) -> Result<()> {
     let recipients = store.recipients().map_err(Err::Store)?;
     let len = secrets.len();
 
     for (i, secret) in secrets.into_iter().enumerate() {
+        if verbose {
+            eprintln!("[{}/{}] Re-encrypting: {}", i + 1, len, secret.name);
+        }
+
         let path = &secret.path;
         let plaintext = prs_lib::crypto::decrypt_file(path).map_err(Err::Read)?;
         prs_lib::crypto::encrypt_file(&recipients, plaintext, path).map_err(Err::Write)?;

@@ -14,7 +14,7 @@ impl<'a: 'b, 'b> RecryptMatcher<'a> {
         ArgQuery::value(self.matches)
     }
 
-    pub fn all(&self) -> bool {
+    pub fn _all(&self) -> bool {
         self.matches.is_present("all")
     }
 }

@@ -237,7 +237,12 @@ impl PartialEq for Key {
 
 impl fmt::Display for Key {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} - {}", self.fingerprint(true), self.user_display())
+        write!(
+            f,
+            "GPG: {} - {}",
+            self.fingerprint(true),
+            self.user_display()
+        )
     }
 }
 

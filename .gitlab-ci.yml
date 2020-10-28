@@ -24,7 +24,7 @@ cache:
 # Install compiler and OpenSSL dependencies
 before_script:
   - apt-get update
-  - apt-get install -y --no-install-recommends libgpgme-dev build-essential pkg-config xorg-dev python3 libx11-xcb-dev libgl1-mesa-dev
+  - apt-get install -y --no-install-recommends libgpgme-dev build-essential pkg-config xorg-dev python3 libx11-xcb-dev libgl1-mesa-dev libdbus-1-dev
     # TODO: remove this installation when git2 dependency is removed
   - apt-get install -y --no-install-recommends libssl-dev
   - |

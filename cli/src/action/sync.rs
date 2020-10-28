@@ -2,7 +2,10 @@ use anyhow::Result;
 use clap::ArgMatches;
 use thiserror::Error;
 
-use prs_lib::{store::Store, sync::Sync as StoreSync};
+use prs_lib::{
+    store::Store,
+    sync::{Readyness, Sync as StoreSync},
+};
 
 use crate::{
     cmd::matcher::{sync::SyncMatcher, MainMatcher, Matcher},
@@ -28,6 +31,21 @@ impl<'a> Sync<'a> {
 
         let store = Store::open(matcher_sync.store()).map_err(Err::Store)?;
         let sync = StoreSync::new(&store);
+
+        // Don't sync if not initialized or no remote, show help on how to set up
+        match sync.readyness()? {
+            Readyness::NoSync => {
+                println!("Sync not configured, to initialize use: prs git init");
+                crate::util::error::quit();
+            }
+            _ if !sync.has_remote()? => {
+                println!(
+                    "Sync remote not configured, to set use: prs git remote add origin <GIT_URL>"
+                );
+                crate::util::error::quit();
+            }
+            _ => {}
+        }
 
         sync::ensure_ready(&sync);
 

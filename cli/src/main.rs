@@ -153,7 +153,7 @@ pub fn print_main_info() -> ! {
         println!();
     }
 
-    println!("To show all subcommands, features and other help:");
+    println!("Show all subcommands, features and other help:");
     println!(
         "    {}",
         style::highlight(&format!("{} help [SUBCOMMAND]", bin))

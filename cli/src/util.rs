@@ -12,12 +12,14 @@ use std::process::Command;
 use std::process::{exit, ExitStatus};
 use std::sync::Arc;
 
-use anyhow::{anyhow, Error, Result};
+use anyhow::{anyhow, Result};
 use colored::{ColoredString, Colorize};
+use copypasta_ext::{prelude::*, x11_fork::ClipboardContext};
 use skim::{
     prelude::{SkimItemReceiver, SkimItemSender, SkimOptionsBuilder},
     AnsiString, Skim, SkimItem,
 };
+use thiserror::Error;
 
 use prs_lib::{
     store::{FindSecret, Secret, Store},
@@ -34,7 +36,7 @@ pub fn print_success(msg: &str) {
 
 /// Print the given error in a proper format for the user,
 /// with it's causes.
-pub fn print_error(err: Error) {
+pub fn print_error(err: anyhow::Error) {
     // Report each printable error, count them
     let count = err
         .chain()
@@ -84,7 +86,7 @@ pub fn quit() -> ! {
 
 /// Quit the application with an error code,
 /// and print the given error.
-pub fn quit_error(err: Error, hints: impl Borrow<ErrorHints>) -> ! {
+pub fn quit_error(err: anyhow::Error, hints: impl Borrow<ErrorHints>) -> ! {
     // Print the error
     print_error(err);
 
@@ -250,7 +252,7 @@ pub fn prompt(msg: &str, main_matcher: &MainMatcher) -> String {
     let mut input = String::new();
     if let Err(err) = stdin()
         .read_line(&mut input)
-        .map_err(|err| -> Error { err.into() })
+        .map_err(|err| -> anyhow::Error { err.into() })
     {
         quit_error(
             err.context("failed to read input from prompt"),
@@ -544,4 +546,28 @@ pub fn invoke_cmd(cmd: String, dir: Option<&Path>, verbose: bool) -> Result<(), 
     }
 
     Ok(())
+}
+
+/// Copy the given plain text to the user clipboard.
+// TODO: move to clipboard module
+// TODO: create function to copy with timeout
+pub fn copy(data: &[u8]) -> Result<()> {
+    let mut ctx = ClipboardContext::new().map_err(Err::Clipboard)?;
+    ctx.set_contents(std::str::from_utf8(data).unwrap().into())
+        .map_err(|err| Err::Clipboard(err).into())
+}
+
+#[derive(Debug, Error)]
+pub enum Err {
+    #[error("failed to access password store")]
+    Store(#[source] anyhow::Error),
+
+    #[error("no secret selected")]
+    NoneSelected,
+
+    #[error("failed to read secret")]
+    Read(#[source] anyhow::Error),
+
+    #[error("failed to copy secret to clipboard")]
+    Clipboard(#[source] Box<dyn std::error::Error + Send + Sync>),
 }

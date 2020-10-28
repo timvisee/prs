@@ -42,15 +42,25 @@ impl<'a> Export<'a> {
         let mut context = prs_lib::crypto::context()?;
         let data = prs_lib::export_key(&mut context, &key)?;
 
-        // Output to stdout or file
-        match matcher_export.output_file() {
-            Some(path) => {
-                fs::write(path, data).map_err(Err::Output)?;
-                if !matcher_main.quiet() {
-                    eprintln!("Key exported to: {}", path);
-                }
+        let mut stdout = true;
+
+        // Output to file
+        if let Some(path) = matcher_export.output_file() {
+            stdout = false;
+            fs::write(path, &data).map_err(Err::Output)?;
+            if !matcher_main.quiet() {
+                eprintln!("Key exported to: {}", path);
             }
-            None => std::io::stdout().write_all(&data).map_err(Err::Output)?,
+        }
+
+        // Copy to clipboard
+        if matcher_export.copy() {
+            stdout = false;
+            util::copy(&data).map_err(Err::Clipboard)?;
+        }
+
+        if stdout {
+            std::io::stdout().write_all(&data).map_err(Err::Output)?;
         }
 
         Ok(())
@@ -70,4 +80,7 @@ pub enum Err {
 
     #[error("failed to write key to file")]
     Output(#[source] std::io::Error),
+
+    #[error("failed to copy key to clipboard")]
+    Clipboard(#[source] anyhow::Error),
 }

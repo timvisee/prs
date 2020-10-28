@@ -11,6 +11,7 @@ impl CmdRemove {
             .alias("rm")
             .alias("delete")
             .alias("del")
+            .alias("yeet")
             .about("Remove a secret")
             .arg(ArgQuery::build())
             .arg(ArgStore::build())

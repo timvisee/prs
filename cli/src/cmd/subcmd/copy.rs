@@ -10,6 +10,7 @@ impl CmdCopy {
         SubCommand::with_name("copy")
             .alias("cp")
             .alias("c")
+            .alias("yank")
             .about("Copy secret to clipboard")
             .arg(
                 Arg::with_name("all")

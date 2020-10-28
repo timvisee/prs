@@ -18,5 +18,12 @@ impl CmdExport {
                     .value_name("PATH")
                     .help("Write recipient key to file instead of stdout"),
             )
+            .arg(
+                Arg::with_name("copy")
+                    .long("copy")
+                    .short("c")
+                    .alias("yank")
+                    .help("Copy recipient key to clipboard instead of stdout"),
+            )
     }
 }

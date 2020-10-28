@@ -1,7 +1,5 @@
 use anyhow::Result;
 use clap::ArgMatches;
-use copypasta_ext::prelude::*;
-use copypasta_ext::x11_fork::ClipboardContext;
 use prs_lib::{store::Store, types::Plaintext};
 use thiserror::Error;
 
@@ -73,9 +71,7 @@ pub(crate) fn smart_copy(
 // TODO: move to shared module
 // TODO: clear clipboard after timeout
 fn copy(plaintext: Plaintext) -> Result<()> {
-    let mut ctx = ClipboardContext::new().map_err(Err::Clipboard)?;
-    ctx.set_contents(plaintext.to_str().unwrap().into())
-        .map_err(|err| Err::Clipboard(err).into())
+    util::copy(&plaintext.0).map_err(|err| Err::Clipboard(err).into())
 }
 
 #[derive(Debug, Error)]
@@ -90,5 +86,5 @@ pub enum Err {
     Read(#[source] anyhow::Error),
 
     #[error("failed to copy secret to clipboard")]
-    Clipboard(#[source] Box<dyn std::error::Error + Send + Sync>),
+    Clipboard(#[source] anyhow::Error),
 }

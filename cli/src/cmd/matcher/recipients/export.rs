@@ -12,6 +12,11 @@ impl<'a: 'b, 'b> ExportMatcher<'a> {
     pub fn output_file(&self) -> Option<&str> {
         self.matches.value_of("output-file")
     }
+
+    /// Check whether to copy the key.
+    pub fn copy(&self) -> bool {
+        self.matches.is_present("copy")
+    }
 }
 
 impl<'a> Matcher<'a> for ExportMatcher<'a> {

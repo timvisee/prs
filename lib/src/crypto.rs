@@ -18,9 +18,7 @@ const ENCRYPT_FLAGS: EncryptFlags = EncryptFlags::ALWAYS_TRUST;
 
 /// Create GNUME context.
 pub fn context() -> Result<Context> {
-    let mut ctx = Context::from_protocol(PROTO).map_err(Err::Context)?;
-    ctx.set_armor(true);
-    Ok(ctx)
+    Context::from_protocol(PROTO).map_err(|err| Err::Context(err).into())
 }
 
 /// Encrypt given data, write to given file.

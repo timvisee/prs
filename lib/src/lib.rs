@@ -202,7 +202,12 @@ pub fn store_public_keys_dir(store: &Store) -> PathBuf {
 pub fn export_key(context: &mut Context, key: &Key) -> Result<Vec<u8>, gpgme::Error> {
     // Export public key
     let mut data: Vec<u8> = vec![];
+
+    // Export key to memory with armor enabled
+    let armor = context.armor();
+    context.set_armor(true);
     context.export_keys(&[key.0.clone()], gpgme::ExportMode::empty(), &mut data)?;
+    context.set_armor(armor);
 
     // Assert we're exporting a public key
     let data_str = std::str::from_utf8(&data).expect("exported key is invalid UTF-8");

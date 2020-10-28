@@ -19,6 +19,9 @@ It features [GPG][gpg] to securely store your details and integrates
 features a built-in password generator, recipient management, history tracking,
 rollbacks, housekeeping utilities and more.
 
+[![prs usage demo][usage-demo-svg]][usage-demo-asciinema]  
+_No demo visible here? View it on [asciinema][usage-demo-asciinema]._
+
 `prs` is heavily inspired by [`pass`][pass] and uses the same file structure
 with some additions. `prs` therefore works alongside with `pass` and all other
 compatible clients, extensions and migration scripts.
@@ -153,6 +156,8 @@ Check out the [LICENSE](LICENSE) file for more information.
 The library portion of this project is licensed under the MIT license.
 Check out the [lib/LICENSE](lib/LICENSE) file for more information.
 
+[usage-demo-asciinema]: https://asciinema.org/a/368611
+[usage-demo-svg]: ./res/demo.svg
 [git]: https://git-scm.com/
 [gpg]: https://gnupg.org/
 [pass]: https://www.passwordstore.org/

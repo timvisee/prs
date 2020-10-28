@@ -6,9 +6,12 @@ use thiserror::Error;
 
 use prs_lib::store::Store;
 
-use crate::cmd::matcher::{
-    housekeeping::{sync_keys::SyncKeysMatcher, HousekeepingMatcher},
-    MainMatcher, Matcher,
+use crate::{
+    cmd::matcher::{
+        housekeeping::{sync_keys::SyncKeysMatcher, HousekeepingMatcher},
+        MainMatcher, Matcher,
+    },
+    util::sync,
 };
 
 /// A housekeeping sync-keys action.
@@ -34,6 +37,10 @@ impl<'a> SyncKeys<'a> {
         }
 
         let store = Store::open(matcher_housekeeping.store()).map_err(Err::Store)?;
+        let sync = store.sync();
+
+        sync::ensure_ready(&sync);
+        sync.prepare()?;
 
         // Import missing keys into keychain
         if !matcher_sync_keys.no_import() {
@@ -44,7 +51,7 @@ impl<'a> SyncKeys<'a> {
         let recipients = store.recipients().map_err(Err::Load)?;
         recipients.sync_public_key_files(&store)?;
 
-        // TODO: sync
+        sync.finalize("Sync keys")?;
 
         if !matcher_main.quiet() {
             eprintln!("Keys synced");

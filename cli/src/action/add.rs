@@ -1,10 +1,13 @@
 use anyhow::Result;
 use clap::ArgMatches;
-use prs_lib::{store::Store, types::Plaintext};
+use prs_lib::{
+    store::{Secret, Store},
+    types::Plaintext,
+};
 use thiserror::Error;
 
 use crate::cmd::matcher::{add::AddMatcher, MainMatcher, Matcher};
-use crate::util::{cli, error, stdin};
+use crate::util::{cli, error, stdin, sync};
 
 /// Add secret action.
 pub struct Add<'a> {
@@ -24,12 +27,17 @@ impl<'a> Add<'a> {
         let matcher_add = AddMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(matcher_add.store()).map_err(Err::Store)?;
+        let sync = store.sync();
         let dest = matcher_add.destination();
+
+        sync::ensure_ready(&sync);
+        sync.prepare()?;
 
         // Normalize destination path
         let path = store
             .normalize_secret_path(dest, None, true)
             .map_err(Err::NormalizePath)?;
+        let secret = Secret::from(&store, path.to_path_buf());
 
         let mut plaintext = Plaintext::empty();
 
@@ -64,6 +72,8 @@ impl<'a> Add<'a> {
         // TODO: log recipients to encrypt for
         let recipients = store.recipients()?;
         prs_lib::crypto::encrypt_file(&recipients, plaintext, &path).map_err(Err::Write)?;
+
+        sync.finalize(format!("Add secret to {}", secret.name))?;
 
         if !matcher_main.quiet() {
             eprintln!("Secret added");

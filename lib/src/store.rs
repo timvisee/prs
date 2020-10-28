@@ -6,7 +6,7 @@ use anyhow::{ensure, Result};
 use thiserror::Error;
 use walkdir::{DirEntry, WalkDir};
 
-use crate::Recipients;
+use crate::{sync::Sync, Recipients};
 
 /// Password store secret file suffix.
 pub const SECRET_SUFFIX: &str = ".gpg";
@@ -38,6 +38,11 @@ impl Store {
     /// Get the recipient keys for this store.
     pub fn recipients(&self) -> Result<Recipients> {
         Recipients::load(&self)
+    }
+
+    /// Get a sync helper for this store.
+    pub fn sync(&self) -> Sync {
+        Sync::new(&self)
     }
 
     /// Create secret iterator for this store.

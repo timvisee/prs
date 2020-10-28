@@ -11,7 +11,7 @@ use crate::cmd::matcher::{
 use crate::util::{
     self,
     error::{self, ErrorHintsBuilder},
-    style,
+    style, sync,
 };
 
 /// A recipients generate action.
@@ -33,6 +33,10 @@ impl<'a> Generate<'a> {
         let matcher_generate = GenerateMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(matcher_recipients.store()).map_err(Err::Store)?;
+        let sync = store.sync();
+
+        sync::ensure_ready(&sync);
+        sync.prepare()?;
 
         // Generate new key through GPG
         let new = gpg_generate(matcher_main.verbose())?;
@@ -67,9 +71,16 @@ impl<'a> Generate<'a> {
                     matcher_main.verbose(),
                 )
                 .map_err(Err::Recrypt)?;
-            }
+            };
 
-            // TODO: sync
+            sync.finalize(format!(
+                "Generate and add recipient {}",
+                new_keys
+                    .into_iter()
+                    .map(|k| k.fingerprint(true))
+                    .collect::<Vec<_>>()
+                    .join(", "),
+            ))?;
 
             if !matcher_main.quiet() {
                 for key in new_keys {

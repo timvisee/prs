@@ -4,9 +4,12 @@ use thiserror::Error;
 
 use prs_lib::store::{Secret, Store};
 
-use crate::cmd::matcher::{
-    housekeeping::{recrypt::RecryptMatcher, HousekeepingMatcher},
-    MainMatcher, Matcher,
+use crate::{
+    cmd::matcher::{
+        housekeeping::{recrypt::RecryptMatcher, HousekeepingMatcher},
+        MainMatcher, Matcher,
+    },
+    util::sync,
 };
 
 /// A housekeeping recrypt action.
@@ -28,6 +31,11 @@ impl<'a> Recrypt<'a> {
         let matcher_recrypt = RecryptMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(matcher_housekeeping.store()).map_err(Err::Store)?;
+        let sync = store.sync();
+
+        sync::ensure_ready(&sync);
+        sync.prepare()?;
+
         let secrets = store.secrets(matcher_recrypt.query());
 
         recrypt(
@@ -35,7 +43,11 @@ impl<'a> Recrypt<'a> {
             &secrets,
             matcher_main.quiet(),
             matcher_main.verbose(),
-        )
+        )?;
+
+        sync.finalize("Re-encrypt secrets")?;
+
+        Ok(())
     }
 }
 

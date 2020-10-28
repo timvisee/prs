@@ -8,7 +8,7 @@ use crate::cmd::matcher::{
     recipients::{add::AddMatcher, RecipientsMatcher},
     MainMatcher, Matcher,
 };
-use crate::util::skim;
+use crate::util::{skim, sync};
 
 /// A recipients add action.
 pub struct Add<'a> {
@@ -29,6 +29,11 @@ impl<'a> Add<'a> {
         let matcher_add = AddMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(matcher_recipients.store()).map_err(Err::Store)?;
+        let sync = store.sync();
+
+        sync::ensure_ready(&sync);
+        sync.prepare()?;
+
         let mut recipients = store.recipients().map_err(Err::Load)?;
 
         // Find unused keys, select one and add to recipients
@@ -49,7 +54,7 @@ impl<'a> Add<'a> {
             .map_err(Err::Recrypt)?;
         }
 
-        // TODO: sync
+        sync.finalize(format!("Add recipient {}", key.fingerprint(true)))?;
 
         if !matcher_main.quiet() {
             eprintln!("Added recipient: {}", key);

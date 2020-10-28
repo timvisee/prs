@@ -4,7 +4,7 @@ use prs_lib::store::Store;
 use thiserror::Error;
 
 use crate::cmd::matcher::{edit::EditMatcher, MainMatcher, Matcher};
-use crate::util::{cli, error, skim, stdin};
+use crate::util::{cli, error, skim, stdin, sync};
 
 /// Edit secret plaintext action.
 pub struct Edit<'a> {
@@ -24,6 +24,11 @@ impl<'a> Edit<'a> {
         let matcher_edit = EditMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(matcher_edit.store()).map_err(Err::Store)?;
+        let sync = store.sync();
+
+        sync::ensure_ready(&sync);
+        sync.prepare()?;
+
         let secret = skim::select_secret(&store, matcher_edit.query()).ok_or(Err::NoneSelected)?;
 
         let mut plaintext = prs_lib::crypto::decrypt_file(&secret.path).map_err(Err::Read)?;
@@ -57,6 +62,8 @@ impl<'a> Edit<'a> {
         // TODO: log recipients to encrypt for
         let recipients = store.recipients()?;
         prs_lib::crypto::encrypt_file(&recipients, plaintext, &secret.path).map_err(Err::Write)?;
+
+        sync.finalize(format!("Edit secret {}", secret.name))?;
 
         if !matcher_main.quiet() {
             eprintln!("Secret updated");

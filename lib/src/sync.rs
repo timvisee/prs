@@ -115,13 +115,11 @@ impl<'a> Sync<'a> {
 
     /// Pull changes from remote.
     fn pull(&self) -> Result<()> {
-        // TODO: do not pull if no remote set?
         crate::git::git_pull(self.path())
     }
 
     /// Push changes to remote.
     fn push(&self) -> Result<()> {
-        // TODO: do not push if no remote set?
         let repo = rustygit::Repository::new(self.path());
         repo.push().map_err(Err::RustyGit)?;
         Ok(())

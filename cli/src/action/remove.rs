@@ -7,7 +7,7 @@ use thiserror::Error;
 use prs_lib::store::Store;
 
 use crate::cmd::matcher::{remove::RemoveMatcher, MainMatcher, Matcher};
-use crate::util::{cli, error, skim};
+use crate::util::{cli, error, skim, sync};
 
 /// Remove secret action.
 pub struct Remove<'a> {
@@ -27,6 +27,11 @@ impl<'a> Remove<'a> {
         let matcher_remove = RemoveMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(matcher_remove.store()).map_err(Err::Store)?;
+        let sync = store.sync();
+
+        sync::ensure_ready(&sync);
+        sync.prepare()?;
+
         let secret =
             skim::select_secret(&store, matcher_remove.query()).ok_or(Err::NoneSelected)?;
 
@@ -51,6 +56,8 @@ impl<'a> Remove<'a> {
         fs::remove_file(&secret.path)
             .map(|_| ())
             .map_err(|err| Err::Remove(err))?;
+
+        sync.finalize(format!("Remove secret from {}", secret.name))?;
 
         if !matcher_main.quiet() {
             eprintln!("Secret removed");

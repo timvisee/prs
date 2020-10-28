@@ -4,10 +4,10 @@ use anyhow::Result;
 use clap::ArgMatches;
 use thiserror::Error;
 
-use prs_lib::store::Store;
+use prs_lib::store::{Secret, Store};
 
 use crate::cmd::matcher::{r#move::MoveMatcher, MainMatcher, Matcher};
-use crate::util::{cli, error, skim};
+use crate::util::{cli, error, skim, sync};
 
 /// Move secret action.
 pub struct Move<'a> {
@@ -28,6 +28,11 @@ impl<'a> Move<'a> {
         let matcher_move = MoveMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(matcher_move.store()).map_err(Err::Store)?;
+        let sync = store.sync();
+
+        sync::ensure_ready(&sync);
+        sync.prepare()?;
+
         let secret = skim::select_secret(&store, matcher_move.query()).ok_or(Err::NoneSelected)?;
 
         // TODO: show secret name if not equal to query, unless quiet?
@@ -38,6 +43,7 @@ impl<'a> Move<'a> {
         let path = store
             .normalize_secret_path(dest, secret.path.file_name().and_then(|p| p.to_str()), true)
             .map_err(Err::NormalizePath)?;
+        let new_secret = Secret::from(&store, path.to_path_buf());
 
         // Check if destination already exists if not forcing
         if !matcher_main.force() && path.is_file() {
@@ -54,6 +60,8 @@ impl<'a> Move<'a> {
         fs::rename(&secret.path, path)
             .map(|_| ())
             .map_err(|err| Err::Move(err))?;
+
+        sync.finalize(format!("Move from {} to {}", secret.name, new_secret.name))?;
 
         if !matcher_main.quiet() {
             eprintln!("Secret moved");

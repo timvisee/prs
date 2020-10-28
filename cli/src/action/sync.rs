@@ -33,7 +33,7 @@ impl<'a> Sync<'a> {
 
         // Prepare, commit, finalize
         sync.prepare()?;
-        sync.finalize(format!("Sync dirty changes with {}", crate_name!()))?;
+        sync.finalize("Sync dirty changes")?;
 
         // TODO: assert not-dirty state?
 

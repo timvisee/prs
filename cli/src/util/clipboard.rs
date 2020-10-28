@@ -22,6 +22,14 @@ pub fn copy_timeout(data: &[u8], timeout: u64) -> Result<()> {
         return copy(data);
     }
 
+    #[cfg(all(
+        unix,
+        not(any(target_os = "macos", target_os = "android", target_os = "emscripten"))
+    ))]
+    {
+        return copy_timeout_x11(data, timeout);
+    }
+    #[allow(unreachable_code)]
     copy_timeout_fallback(data, timeout)
 }
 
@@ -42,6 +50,98 @@ fn copy_timeout_fallback(data: &[u8], timeout: u64) -> Result<()> {
 
     ctx.set_contents("".into()).map_err(Err::Clipboard)?;
     let _ = notify_cleared();
+
+    Ok(())
+}
+
+/// Copy with timeout on X11.
+///
+/// This forks and leaks a background processj to manage the clipboard timeout.
+/// Based on: https://docs.rs/copypasta-ext/0.3.2/copypasta_ext/x11_fork/index.html
+// TODO: add support for Wayland on Linux as well
+#[cfg(all(
+    unix,
+    not(any(target_os = "macos", target_os = "android", target_os = "emscripten"))
+))]
+fn copy_timeout_x11(data: &[u8], timeout: u64) -> Result<()> {
+    use copypasta_ext::{
+        copypasta::x11_clipboard::{Clipboard, Selection},
+        x11_fork::{ClipboardContext, Error},
+    };
+    use x11_clipboard::Clipboard as X11Clipboard;
+
+    // Remember previous clipboard contents
+    let mut ctx = ClipboardContext::new().map_err(Err::Clipboard)?;
+    let previous = ctx.get_contents().map_err(Err::Clipboard)?;
+
+    // Detach fork to set given clipboard contents, keeps in clipboard until changed
+    let setter_pid = match unsafe { libc::fork() } {
+        -1 => return Err(Error::Fork.into()),
+        0 => {
+            // Obtain new X11 clipboard context, set clipboard contents
+            let clip = X11Clipboard::new().expect(&format!(
+                "{}: failed to obtain X11 clipboard context",
+                crate::APP_NAME
+            ));
+            clip.store(
+                Clipboard::atom(&clip.setter.atoms),
+                clip.setter.atoms.utf8_string,
+                data,
+            )
+            .expect(&format!(
+                "{}: failed to set clipboard contents through forked process",
+                crate::APP_NAME
+            ));
+
+            // Wait for clipboard to change, then kill fork
+            clip.load_wait(
+                Clipboard::atom(&clip.getter.atoms),
+                clip.getter.atoms.utf8_string,
+                clip.getter.atoms.property,
+            )
+            .expect(&format!(
+                "{}: failed to wait on new clipboard value in forked process",
+                crate::APP_NAME
+            ));
+
+            // Update cleared state, show notification
+            let _ = notify_cleared();
+
+            error::quit();
+        }
+        pid => pid,
+    };
+
+    // Detach fork to revert clipboard after timeout unless changed
+    match unsafe { libc::fork() } {
+        -1 => return Err(Error::Fork.into()),
+        0 => {
+            thread::sleep(Duration::from_secs(timeout));
+
+            // Determine if clipboard is already cleared, which is the case if the fork that set
+            // the clipboard has died
+            let cleared = unsafe {
+                let pid_search_status = libc::kill(setter_pid, 0);
+                let errno = *libc::__errno_location() as i32;
+                pid_search_status == -1 && errno == libc::ESRCH
+            };
+
+            // Revert to previous clipboard contents if not yet cleared
+            if !cleared {
+                let mut ctx = ClipboardContext::new().expect(&format!(
+                    "{}: failed to obtain X11 clipboard context",
+                    crate::APP_NAME
+                ));
+                ctx.set_contents(previous).expect(&format!(
+                    "{}: failed to revert clipboard contents through forked process",
+                    crate::APP_NAME
+                ));
+            }
+
+            error::quit();
+        }
+        _pid => {}
+    }
 
     Ok(())
 }

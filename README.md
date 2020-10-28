@@ -14,7 +14,7 @@
 > synchronisation.
 
 `prs` is a fast, secure and convenient password manager for the terminal.
-It features `GPG`[gpg] to securely store your details and integrates
+It features [GPG][gpg] to securely store your details and integrates
 [`git`][git] for automatic synchronisation between multiple machines. It also
 features a built-in password generator, recipient management, history tracking,
 rollbacks, housekeeping utilities and more.
@@ -44,39 +44,39 @@ compatible clients, extensions and migration scripts.
 ## Usage
 ```bash
 # Easily add, modify and remove secrets with your default editor:
-$ prs add site/gitlab.com
-$ prs edit site/gitlab.com
-$ prs duplicate my/secret extra/secret
-$ prs move my/secret extra/secret
-$ prs remove site/gitlab.com
+prs add site/gitlab.com
+prs edit site/gitlab.com
+prs duplicate my/secret extra/secret
+prs move my/secret extra/secret
+prs remove site/gitlab.com
 
 # Or generate a new secure password
-$ prs generate site/gitlab.com
+prs generate site/gitlab.com
 
 # Temporary show or copy secrets to clipboard:
-$ prs show
-$ prs show site/gitlab.com
-$ prs copy
-$ prs copy site/gitlab.com
+prs show
+prs show site/gitlab.com
+prs copy
+prs copy site/gitlab.com
 
 # Manually synchronise password store with remote repository or do some housekeeping
-$ prs sync
-$ prs housekeeping recrypt
-$ prs housekeeping sync-keys
+prs sync
+prs housekeeping recrypt
+prs housekeeping sync-keys
 
 # Manage recipients when using multiple machines
-$ prs recipients add
-$ prs recipients list
-$ prs recipients remove
-$ prs recipients generate
-$ prs recipients export
+prs recipients add
+prs recipients list
+prs recipients remove
+prs recipients generate
+prs recipients export
 
-# All commands support shorter commands or aliases
-$ prs a secret  # add
-$ prs c         # copy
-$ prs s         # show
-$ prs rm        # remove
-$ prs yeet      # remove
+# All commands support shorter/conventional commands and aliases
+prs a secret  # add
+prs c         # copy
+prs s         # show
+prs rm        # remove
+prs yeet      # remove
 ```
 
 ## Requirements

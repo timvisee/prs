@@ -56,7 +56,11 @@ fn copy_timeout_fallback(data: &[u8], timeout: u64) -> Result<()> {
 
 /// Copy with timeout on X11.
 ///
-/// This forks and leaks a background processj to manage the clipboard timeout.
+/// Keeps clipboard contents in clipboard even if application quits. Doesn't fuck with other
+/// clipboard contents and reverts back to previous contents once a timeout is reached.
+///
+/// Forks & detaches two processes to set/keep clipboard contents and to drive the timeout.
+///
 /// Based on: https://docs.rs/copypasta-ext/0.3.2/copypasta_ext/x11_fork/index.html
 // TODO: add support for Wayland on Linux as well
 #[cfg(all(

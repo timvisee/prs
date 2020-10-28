@@ -94,5 +94,69 @@ fn invoke_action(handler: &Handler) -> Result<()> {
         return action::sync::Sync::new(handler.matches()).invoke();
     }
 
+    // Get the main matcher
+    let matcher_main = MainMatcher::with(handler.matches()).unwrap();
+    if !matcher_main.quiet() {
+        print_main_info();
+    }
+
     Ok(())
+}
+
+/// Print the main info, shown when no subcommands were supplied.
+pub fn print_main_info() -> ! {
+    // Get the name of the used executable
+    let bin = util::bin_name();
+
+    use util::style;
+
+    // Attempt to load default store
+    let store = Store::open(crate::STORE_DEFAULT_ROOT).ok();
+    let has_sync = store
+        .as_ref()
+        .map(|s| s.sync().is_sync_init())
+        .unwrap_or(false);
+
+    // Print the main info
+    println!("{} {}", crate_name!(), crate_version!());
+    println!("Usage: {} [FLAGS] <SUBCOMMAND> ...", bin);
+    println!(crate_description!());
+    println!();
+
+    if store.is_none() {
+        println!("Initialize a new password store or clone an existing one:");
+        println!("    {}", style::highlight(&format!("{} init", bin)));
+        println!(
+            "    {}",
+            style::highlight(&format!("{} clone <GIT_URL>", bin))
+        );
+        println!();
+    } else {
+        println!("Show or copy a secret:");
+        println!("    {}", style::highlight(&format!("{} show [NAME]", bin)));
+        println!("    {}", style::highlight(&format!("{} copy [NAME]", bin)));
+        println!();
+        println!("Add, edit or remove secrets:");
+        println!("    {}", style::highlight(&format!("{} add <NAME>", bin)));
+        println!("    {}", style::highlight(&format!("{} edit [NAME]", bin)));
+        println!(
+            "    {}",
+            style::highlight(&format!("{} remove [NAME]", bin))
+        );
+        println!();
+    }
+
+    if has_sync {
+        println!("Sync your password store:");
+        println!("    {}", style::highlight(&format!("{} sync", bin)));
+        println!();
+    }
+
+    println!("To show all subcommands, features and other help:");
+    println!(
+        "    {}",
+        style::highlight(&format!("{} help [SUBCOMMAND]", bin))
+    );
+
+    process::exit(1)
 }

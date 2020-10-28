@@ -19,7 +19,6 @@ impl<'a: 'b, 'b> Handler<'a> {
             .about(crate_description!())
             .global_setting(AppSettings::GlobalVersion)
             .global_setting(AppSettings::VersionlessSubcommands)
-            .setting(AppSettings::SubcommandRequiredElseHelp)
             .arg(
                 Arg::with_name("force")
                     .long("force")

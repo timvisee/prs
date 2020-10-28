@@ -7,21 +7,22 @@ mod action;
 mod cmd;
 mod util;
 
+use std::process;
+
 use anyhow::Result;
+use prs_lib::store::Store;
 
 use crate::{
+    cmd::matcher::{MainMatcher, Matcher},
     cmd::Handler,
     util::error::{quit_error, ErrorHints},
 };
-
-/// Application name.
-const APP_NAME: &str = "prs";
 
 /// Default password store directory.
 const STORE_DEFAULT_ROOT: &str = "~/.password-store";
 
 /// Clipboard timeout in seconds.
-const CLIPBOARD_TIMEOUT_STR: &str = "7";
+const CLIPBOARD_TIMEOUT_STR: &str = "20";
 
 fn main() {
     // Parse CLI arguments

@@ -78,15 +78,15 @@ fn copy_timeout_x11(data: &[u8], timeout: u64) -> Result<()> {
     let mut ctx = ClipboardContext::new().map_err(Err::Clipboard)?;
     let previous = ctx.get_contents().map_err(Err::Clipboard)?;
 
+    let bin = crate::util::bin_name();
+
     // Detach fork to set given clipboard contents, keeps in clipboard until changed
     let setter_pid = match unsafe { libc::fork() } {
         -1 => return Err(Error::Fork.into()),
         0 => {
             // Obtain new X11 clipboard context, set clipboard contents
-            let clip = X11Clipboard::new().expect(&format!(
-                "{}: failed to obtain X11 clipboard context",
-                crate::APP_NAME
-            ));
+            let clip = X11Clipboard::new()
+                .expect(&format!("{}: failed to obtain X11 clipboard context", bin,));
             clip.store(
                 Clipboard::atom(&clip.setter.atoms),
                 clip.setter.atoms.utf8_string,
@@ -94,7 +94,7 @@ fn copy_timeout_x11(data: &[u8], timeout: u64) -> Result<()> {
             )
             .expect(&format!(
                 "{}: failed to set clipboard contents through forked process",
-                crate::APP_NAME
+                bin,
             ));
 
             // Wait for clipboard to change, then kill fork
@@ -105,7 +105,7 @@ fn copy_timeout_x11(data: &[u8], timeout: u64) -> Result<()> {
             )
             .expect(&format!(
                 "{}: failed to wait on new clipboard value in forked process",
-                crate::APP_NAME
+                bin,
             ));
 
             // Update cleared state, show notification
@@ -132,13 +132,11 @@ fn copy_timeout_x11(data: &[u8], timeout: u64) -> Result<()> {
 
             // Revert to previous clipboard contents if not yet cleared
             if !cleared {
-                let mut ctx = ClipboardContext::new().expect(&format!(
-                    "{}: failed to obtain X11 clipboard context",
-                    crate::APP_NAME
-                ));
+                let mut ctx = ClipboardContext::new()
+                    .expect(&format!("{}: failed to obtain X11 clipboard context", bin,));
                 ctx.set_contents(previous).expect(&format!(
                     "{}: failed to revert clipboard contents through forked process",
-                    crate::APP_NAME
+                    bin,
                 ));
             }
 
@@ -174,7 +172,10 @@ pub(crate) fn plaintext_copy(
 
     // TODO: move into copy function, what to do?
     if report_copied {
-        eprintln!("Secret copied to clipboard...");
+        eprintln!(
+            "Secret copied to clipboard, clears after {} seconds...",
+            timeout
+        );
     }
 
     Ok(())
@@ -183,8 +184,8 @@ pub(crate) fn plaintext_copy(
 /// Show notification to user about cleared clipboard.
 fn notify_cleared() -> Result<()> {
     Notification::new()
-        .appname(crate::APP_NAME)
-        .summary(&format!("Clipboard cleared - {}", crate::APP_NAME))
+        .appname(&crate::util::bin_name())
+        .summary(&format!("Clipboard cleared - {}", crate::util::bin_name()))
         .body("Secret cleared from clipboard")
         .auto_icon()
         .icon("lock")

@@ -101,7 +101,7 @@ impl<'a> Sync<'a> {
     }
 
     /// Check whether sync has been initialized in this store.
-    fn is_sync_init(&self) -> bool {
+    pub fn is_sync_init(&self) -> bool {
         self.path().join(STORE_GIT_DIR).is_dir()
     }
 

@@ -42,7 +42,7 @@ impl<'a> Sync<'a> {
         // TODO: sync keys
 
         if !matcher_main.quiet() {
-            eprintln!("Sync complete");
+            eprintln!("Already up to date");
         }
 
         Ok(())

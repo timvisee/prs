@@ -38,10 +38,7 @@ impl<'a> Remove<'a> {
         // Confirm removal
         if !matcher_main.force() {
             if !cli::prompt_yes(
-                &format!(
-                    "Are you sure you want to remove '{}'?",
-                    secret.path.display()
-                ),
+                &format!("Remove '{}'?", secret.path.display()),
                 Some(true),
                 &matcher_main,
             ) {

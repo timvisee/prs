@@ -45,7 +45,7 @@ impl CmdGenerate {
                     .alias("display")
                     .help("Display secret after generation"),
             )
-            .arg(ArgTimeout::build().requires("copy"))
+            .arg(ArgTimeout::build())
             .arg(ArgStore::build())
     }
 }

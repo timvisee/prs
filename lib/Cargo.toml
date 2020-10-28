@@ -6,7 +6,7 @@ license = "MIT"
 readme = "README.md"
 # homepage = "https://timvisee.com/projects/prs"
 repository = "https://gitlab.com/timvisee/prs"
-description = "Secure, fast & convenient password manager with GPG & git"
+description = "Secure, fast & convenient password manager CLI with GPG & git"
 keywords = ["pass", "passwordstore"]
 categories = [
     "authentication",

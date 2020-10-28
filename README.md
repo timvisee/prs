@@ -10,12 +10,11 @@
 
 # prs
 
-> A secure, fast & convenient password manager using GPG and git for
-> synchronisation.
+> A secure, fast & convenient password manager CLI using GPG and git to sync.
 
 `prs` is a secure, fast and convenient password manager for the terminal.
-It features [GPG][gpg] to securely store your details and integrates
-[`git`][git] for automatic synchronisation between multiple machines. It also
+It features [GPG][gpg] to securely store your secrets and integrates
+[`git`][git] for automatic synchronization between multiple machines. It also
 features a built-in password generator, recipient management, history tracking,
 rollbacks, housekeeping utilities and more.
 
@@ -37,7 +36,7 @@ compatible clients, extensions and migration scripts.
 - Fully featured fast & friendly command line tool
 - Temporary copy secrets to clipboard
 - Uses the battle-tested [GPG][gpg] to secure your secrets
-- Automatic synchronisation with [`git`][git] including history tracking
+- Automatic synchronization with [`git`][git] including history tracking
 - Supports multiple machines with easy recipient management
 - Easily edit secrets using your default editor
 - Compatible with [`pass`][pass]
@@ -69,7 +68,7 @@ prs show site/gitlab.com
 prs copy
 prs copy site/gitlab.com
 
-# Manually synchronise password store with remote repository or do some housekeeping
+# Manually synchronize password store with remote repository or do some housekeeping
 prs sync
 prs housekeeping recrypt
 prs housekeeping sync-keys
@@ -81,12 +80,15 @@ prs recipients remove
 prs recipients generate
 prs recipients export
 
-# All commands support shorter/conventional commands and aliases
+# Commands support shorter/conventional commands and aliases
 prs a secret  # add
 prs c         # copy
 prs s         # show
 prs rm        # remove
 prs yeet      # remove
+
+# List all commands and help
+prs help
 ```
 
 ## Requirements

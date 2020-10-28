@@ -131,16 +131,17 @@ impl ErrorHints {
         eprint!("\n");
 
         // Print hints
+        let bin = crate::util::bin_name();
         if self.sync {
             eprintln!(
                 "To sync your your password store use '{}'",
-                highlight(&format!("{} sync", crate::APP_NAME))
+                highlight(&format!("{} sync", bin))
             );
         }
         if self.git {
             eprintln!(
                 "Use '{}' to resolve this issue",
-                highlight(&format!("{} git", crate::APP_NAME))
+                highlight(&format!("{} git", bin))
             );
         }
         if self.force {

@@ -45,10 +45,7 @@ impl<'a> Remove<'a> {
         if !matcher_main.force() {
             eprintln!("{}", key);
             if !cli::prompt_yes(
-                &format!(
-                    "Are you sure you want to remove '{}'?",
-                    key.fingerprint(true),
-                ),
+                &format!("Remove '{}'?", key.fingerprint(true),),
                 Some(true),
                 &matcher_main,
             ) {

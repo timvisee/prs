@@ -14,8 +14,14 @@ use crate::{
     util::error::{quit_error, ErrorHints},
 };
 
+/// Application name.
+const APP_NAME: &str = "prs";
+
 /// Default password store directory.
 const STORE_DEFAULT_ROOT: &str = "~/.password-store";
+
+/// Clipboard timeout in seconds.
+const CLIPBOARD_TIMEOUT_STR: &str = "7";
 
 fn main() {
     // Parse CLI arguments

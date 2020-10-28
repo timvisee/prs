@@ -35,7 +35,7 @@ impl<'a> Remove<'a> {
         let secret =
             skim::select_secret(&store, matcher_remove.query()).ok_or(Err::NoneSelected)?;
 
-        // Cofnirm deletion
+        // Confirm removal
         if !matcher_main.force() {
             if !cli::prompt_yes(
                 &format!(

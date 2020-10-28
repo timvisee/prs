@@ -7,7 +7,7 @@ use prs_lib::{
 use thiserror::Error;
 
 use crate::cmd::matcher::{generate::GenerateMatcher, MainMatcher, Matcher};
-use crate::util::{cli, error, stdin, sync};
+use crate::util::{cli, clipboard, error, stdin, sync};
 
 /// Generate secret action.
 pub struct Generate<'a> {
@@ -93,11 +93,12 @@ impl<'a> Generate<'a> {
 
         // Copy to clipboard
         if matcher_generate.copy() {
-            super::copy::smart_copy(
+            clipboard::plaintext_copy(
                 plaintext.clone(),
                 true,
                 !matcher_main.force(),
                 !matcher_main.quiet(),
+                matcher_generate.timeout()?,
             )?;
         }
 

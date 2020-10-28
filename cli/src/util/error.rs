@@ -131,18 +131,16 @@ impl ErrorHints {
         eprint!("\n");
 
         // Print hints
-        // TODO: use corret app name
-        let app = "prs";
         if self.sync {
             eprintln!(
                 "To sync your your password store use '{}'",
-                highlight(&format!("{} sync", app))
+                highlight(&format!("{} sync", crate::APP_NAME))
             );
         }
         if self.git {
             eprintln!(
                 "Use '{}' to resolve this issue",
-                highlight(&format!("{} git", app))
+                highlight(&format!("{} git", crate::APP_NAME))
             );
         }
         if self.force {

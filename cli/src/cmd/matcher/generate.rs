@@ -1,7 +1,8 @@
+use anyhow::Result;
 use clap::ArgMatches;
 
 use super::Matcher;
-use crate::cmd::arg::{ArgStore, CmdArgOption};
+use crate::cmd::arg::{ArgStore, ArgTimeout, CmdArgOption};
 
 /// The generate command matcher.
 pub struct GenerateMatcher<'a> {
@@ -27,6 +28,11 @@ impl<'a: 'b, 'b> GenerateMatcher<'a> {
     /// Check whether to read from copy.
     pub fn copy(&self) -> bool {
         self.matches.is_present("copy")
+    }
+
+    /// Clipboard timeout in seconds.
+    pub fn timeout(&self) -> Result<u64> {
+        ArgTimeout::value(self.matches)
     }
 
     /// Check whether to read from show.

@@ -1,14 +1,10 @@
 use anyhow::Result;
 use clap::ArgMatches;
-use prs_lib::{store::Store, types::Plaintext};
+use prs_lib::store::Store;
 use thiserror::Error;
 
 use crate::cmd::matcher::{copy::CopyMatcher, MainMatcher, Matcher};
-use crate::util::{
-    clipboard,
-    error::{self, ErrorHintsBuilder},
-    skim,
-};
+use crate::util::{clipboard, skim};
 
 /// Copy secret to clipboard action.
 pub struct Copy<'a> {
@@ -32,50 +28,14 @@ impl<'a> Copy<'a> {
 
         let plaintext = prs_lib::crypto::decrypt_file(&secret.path).map_err(Err::Read)?;
 
-        smart_copy(
+        clipboard::plaintext_copy(
             plaintext,
             !matcher_copy.all(),
             !matcher_main.force(),
             !matcher_main.quiet(),
+            matcher_copy.timeout()?,
         )
     }
-}
-
-/// Copy the given plain text to the user clipboard.
-// TODO: move to shared module
-// TODO: clear clipboard after timeout
-pub(crate) fn smart_copy(
-    mut plaintext: Plaintext,
-    first_line: bool,
-    error_empty: bool,
-    report_copied: bool,
-) -> Result<()> {
-    if first_line {
-        plaintext = plaintext.first_line()?;
-    }
-
-    // Do not copy empty secret
-    if error_empty && plaintext.is_empty() {
-        error::quit_error_msg(
-            "secret is empty, did not copy to clipboard",
-            ErrorHintsBuilder::default().force(true).build().unwrap(),
-        )
-    }
-
-    copy(plaintext)?;
-
-    if report_copied {
-        eprintln!("Secret copied to clipboard...");
-    }
-
-    Ok(())
-}
-
-/// Copy the given plain text to the user clipboard.
-// TODO: move to shared module
-// TODO: clear clipboard after timeout
-fn copy(plaintext: Plaintext) -> Result<()> {
-    clipboard::copy(&plaintext.0).map_err(|err| Err::Clipboard(err).into())
 }
 
 #[derive(Debug, Error)]
@@ -88,7 +48,4 @@ pub enum Err {
 
     #[error("failed to read secret")]
     Read(#[source] anyhow::Error),
-
-    #[error("failed to copy secret to clipboard")]
-    Clipboard(#[source] anyhow::Error),
 }

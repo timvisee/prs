@@ -1,7 +1,8 @@
+use anyhow::Result;
 use clap::ArgMatches;
 
 use super::Matcher;
-use crate::cmd::arg::{ArgQuery, ArgStore, CmdArgOption};
+use crate::cmd::arg::{ArgQuery, ArgStore, ArgTimeout, CmdArgOption};
 
 /// The copy command matcher.
 pub struct CopyMatcher<'a> {
@@ -17,6 +18,11 @@ impl<'a: 'b, 'b> CopyMatcher<'a> {
     /// The secret query.
     pub fn query(&self) -> Option<String> {
         ArgQuery::value(self.matches)
+    }
+
+    /// Clipboard timeout in seconds.
+    pub fn timeout(&self) -> Result<u64> {
+        ArgTimeout::value(self.matches)
     }
 
     /// The store.

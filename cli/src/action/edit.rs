@@ -4,7 +4,7 @@ use prs_lib::store::Store;
 use thiserror::Error;
 
 use crate::cmd::matcher::{edit::EditMatcher, MainMatcher, Matcher};
-use crate::util;
+use crate::util::{cli, error, skim, stdin};
 
 /// Edit secret plaintext action.
 pub struct Edit<'a> {
@@ -24,31 +24,31 @@ impl<'a> Edit<'a> {
         let matcher_edit = EditMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(matcher_edit.store()).map_err(Err::Store)?;
-        let secret = util::select_secret(&store, matcher_edit.query()).ok_or(Err::NoneSelected)?;
+        let secret = skim::select_secret(&store, matcher_edit.query()).ok_or(Err::NoneSelected)?;
 
         let mut plaintext = prs_lib::crypto::decrypt_file(&secret.path).map_err(Err::Read)?;
 
         if matcher_edit.stdin() {
-            plaintext = util::stdin_read_plaintext(!matcher_main.quiet());
+            plaintext = stdin::read_plaintext(!matcher_main.quiet())?;
         } else {
-            plaintext = match util::edit(&plaintext).map_err(Err::Edit)? {
+            plaintext = match cli::edit(&plaintext).map_err(Err::Edit)? {
                 Some(changed) => changed,
                 None => {
                     if !matcher_main.quiet() {
                         eprintln!("Secret is unchanged");
                     }
-                    util::quit();
+                    error::quit();
                 }
             };
         }
 
         // Confirm if empty secret should be stored
         if !matcher_main.force() && plaintext.is_empty() {
-            if !util::prompt_yes("Edited secret is empty. Save?", Some(true), &matcher_main) {
+            if !cli::prompt_yes("Edited secret is empty. Save?", Some(true), &matcher_main) {
                 if matcher_main.verbose() {
                     eprintln!("Secret is unchanged");
                 }
-                util::quit();
+                error::quit();
             }
         }
 

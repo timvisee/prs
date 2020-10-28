@@ -4,7 +4,11 @@ use prs_lib::{store::Store, types::Plaintext};
 use thiserror::Error;
 
 use crate::cmd::matcher::{copy::CopyMatcher, MainMatcher, Matcher};
-use crate::util::{self, ErrorHintsBuilder};
+use crate::util::{
+    clipboard,
+    error::{self, ErrorHintsBuilder},
+    skim,
+};
 
 /// Copy secret to clipboard action.
 pub struct Copy<'a> {
@@ -24,7 +28,7 @@ impl<'a> Copy<'a> {
         let matcher_copy = CopyMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(matcher_copy.store()).map_err(Err::Store)?;
-        let secret = util::select_secret(&store, matcher_copy.query()).ok_or(Err::NoneSelected)?;
+        let secret = skim::select_secret(&store, matcher_copy.query()).ok_or(Err::NoneSelected)?;
 
         let plaintext = prs_lib::crypto::decrypt_file(&secret.path).map_err(Err::Read)?;
 
@@ -52,7 +56,7 @@ pub(crate) fn smart_copy(
 
     // Do not copy empty secret
     if error_empty && plaintext.is_empty() {
-        util::quit_error_msg(
+        error::quit_error_msg(
             "secret is empty, did not copy to clipboard",
             ErrorHintsBuilder::default().force(true).build().unwrap(),
         )
@@ -71,7 +75,7 @@ pub(crate) fn smart_copy(
 // TODO: move to shared module
 // TODO: clear clipboard after timeout
 fn copy(plaintext: Plaintext) -> Result<()> {
-    util::copy(&plaintext.0).map_err(|err| Err::Clipboard(err).into())
+    clipboard::copy(&plaintext.0).map_err(|err| Err::Clipboard(err).into())
 }
 
 #[derive(Debug, Error)]

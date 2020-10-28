@@ -7,7 +7,7 @@ use prs_lib::store::Store;
 use thiserror::Error;
 
 use crate::cmd::matcher::{init::InitMatcher, MainMatcher, Matcher};
-use crate::util::{self, ErrorHints};
+use crate::util::error::{self, ErrorHints};
 
 /// Init store action.
 pub struct Init<'a> {
@@ -69,7 +69,7 @@ fn ensure_dir_free(path: &Path) -> Result<()> {
         return Ok(());
     }
 
-    util::quit_error_msg(
+    error::quit_error_msg(
         format!(
             "cannot initialize store, directory already exists: {}",
             path.display(),

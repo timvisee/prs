@@ -7,7 +7,7 @@ use thiserror::Error;
 use prs_lib::store::Store;
 
 use crate::cmd::matcher::{duplicate::DuplicateMatcher, MainMatcher, Matcher};
-use crate::util;
+use crate::util::{cli, error, skim};
 
 /// Duplicate secret action.
 pub struct Duplicate<'a> {
@@ -29,7 +29,7 @@ impl<'a> Duplicate<'a> {
 
         let store = Store::open(matcher_duplicate.store()).map_err(Err::Store)?;
         let secret =
-            util::select_secret(&store, matcher_duplicate.query()).ok_or(Err::NoneSelected)?;
+            skim::select_secret(&store, matcher_duplicate.query()).ok_or(Err::NoneSelected)?;
 
         // TODO: show secret name if not equal to query, unless quiet?
 
@@ -43,11 +43,11 @@ impl<'a> Duplicate<'a> {
         // Check if destination already exists if not forcing
         if !matcher_main.force() && path.is_file() {
             eprintln!("A secret at '{}' already exists", path.display(),);
-            if !util::prompt_yes("Overwrite?", Some(true), &matcher_main) {
+            if !cli::prompt_yes("Overwrite?", Some(true), &matcher_main) {
                 if matcher_main.verbose() {
                     eprintln!("Duplication cancelled");
                 }
-                util::quit();
+                error::quit();
             }
         }
 

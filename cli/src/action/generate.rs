@@ -4,7 +4,7 @@ use prs_lib::{store::Store, types::Plaintext};
 use thiserror::Error;
 
 use crate::cmd::matcher::{generate::GenerateMatcher, MainMatcher, Matcher};
-use crate::util;
+use crate::util::{cli, error, stdin};
 
 /// Generate secret action.
 pub struct Generate<'a> {
@@ -38,11 +38,11 @@ impl<'a> Generate<'a> {
         // Check if destination already exists, ask to merge if so
         if !matcher_main.force() && path.is_file() {
             eprintln!("A secret at '{}' already exists", path.display(),);
-            if !util::prompt_yes("Merge?", Some(true), &matcher_main) {
+            if !cli::prompt_yes("Merge?", Some(true), &matcher_main) {
                 if !matcher_main.quiet() {
                     eprintln!("No secret generated");
                 }
-                util::quit();
+                error::quit();
             }
 
             // Append existing secret exept first line to new secret
@@ -56,25 +56,25 @@ impl<'a> Generate<'a> {
 
         // Append from stdin
         if matcher_generate.stdin() {
-            let extra = util::stdin_read_plaintext(!matcher_main.quiet());
+            let extra = stdin::read_plaintext(!matcher_main.quiet())?;
             plaintext.append(extra, true);
         }
 
         // Edit in editor
         if matcher_generate.edit() {
-            if let Some(changed) = util::edit(&plaintext).map_err(Err::Edit)? {
+            if let Some(changed) = cli::edit(&plaintext).map_err(Err::Edit)? {
                 plaintext = changed;
             }
         }
 
         // Confirm if empty secret should be stored
         if !matcher_main.force() && plaintext.is_empty() {
-            if !util::prompt_yes(
+            if !cli::prompt_yes(
                 "Generated secret is empty. Save?",
                 Some(true),
                 &matcher_main,
             ) {
-                util::quit();
+                error::quit();
             }
         }
 

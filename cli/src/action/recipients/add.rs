@@ -8,7 +8,7 @@ use crate::cmd::matcher::{
     recipients::{add::AddMatcher, RecipientsMatcher},
     MainMatcher, Matcher,
 };
-use crate::util;
+use crate::util::skim;
 
 /// A recipients add action.
 pub struct Add<'a> {
@@ -34,7 +34,7 @@ impl<'a> Add<'a> {
         // Find unused keys, select one and add to recipients
         let mut tmp = prs_lib::all().map_err(Err::Load)?;
         tmp.remove_many(recipients.keys());
-        let key = util::skim_select_key(tmp.keys()).ok_or(Err::NoneSelected)?;
+        let key = skim::skim_select_key(tmp.keys()).ok_or(Err::NoneSelected)?;
         recipients.add(key.clone());
 
         recipients.save(&store)?;

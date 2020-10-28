@@ -7,7 +7,7 @@ use thiserror::Error;
 use prs_lib::store::Store;
 
 use crate::cmd::matcher::{remove::RemoveMatcher, MainMatcher, Matcher};
-use crate::util;
+use crate::util::{cli, error, skim};
 
 /// Remove secret action.
 pub struct Remove<'a> {
@@ -28,11 +28,11 @@ impl<'a> Remove<'a> {
 
         let store = Store::open(matcher_remove.store()).map_err(Err::Store)?;
         let secret =
-            util::select_secret(&store, matcher_remove.query()).ok_or(Err::NoneSelected)?;
+            skim::select_secret(&store, matcher_remove.query()).ok_or(Err::NoneSelected)?;
 
         // Cofnirm deletion
         if !matcher_main.force() {
-            if !util::prompt_yes(
+            if !cli::prompt_yes(
                 &format!(
                     "Are you sure you want to remove '{}'?",
                     secret.path.display()
@@ -43,7 +43,7 @@ impl<'a> Remove<'a> {
                 if matcher_main.verbose() {
                     eprintln!("Removal cancelled");
                 }
-                util::quit();
+                error::quit();
             }
         }
 

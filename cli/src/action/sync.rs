@@ -2,14 +2,12 @@ use anyhow::Result;
 use clap::ArgMatches;
 use thiserror::Error;
 
-use prs_lib::{
-    store::Store,
-    sync::{Readyness, Sync as StoreSync},
+use prs_lib::{store::Store, sync::Sync as StoreSync};
+
+use crate::{
+    cmd::matcher::{sync::SyncMatcher, MainMatcher, Matcher},
+    util::sync,
 };
-
-use crate::cmd::matcher::{sync::SyncMatcher, MainMatcher, Matcher};
-
-use crate::util::{self, ErrorHintsBuilder};
 
 /// Sync secrets action.
 pub struct Sync<'a> {
@@ -31,7 +29,7 @@ impl<'a> Sync<'a> {
         let store = Store::open(matcher_sync.store()).map_err(Err::Store)?;
         let sync = StoreSync::new(&store);
 
-        ensure_ready(&sync);
+        sync::ensure_ready(&sync);
 
         // Prepare, commit, finalize
         sync.prepare()?;
@@ -47,30 +45,6 @@ impl<'a> Sync<'a> {
 
         Ok(())
     }
-}
-
-/// Ensure the store is ready, otherwise quit.
-fn ensure_ready(sync: &StoreSync) {
-    let readyness = match sync.readyness() {
-        Ok(readyness) => readyness,
-        Err(err) => {
-            util::quit_error(
-                err.context("failed to query store sync readyness state"),
-                ErrorHintsBuilder::default().git(true).build().unwrap(),
-            );
-        }
-    };
-
-    util::quit_error_msg(
-        match readyness {
-            Readyness::Ready | Readyness::NoSync => return,
-            Readyness::Dirty => "store git repository has uncommitted changes".into(),
-            Readyness::GitState(state) => {
-                format!("store git repository is in unfinished state: {:?}", state)
-            }
-        },
-        ErrorHintsBuilder::default().git(true).build().unwrap(),
-    );
 }
 
 #[derive(Debug, Error)]

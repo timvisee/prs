@@ -8,7 +8,7 @@ use crate::cmd::matcher::{
     recipients::{remove::RemoveMatcher, RecipientsMatcher},
     MainMatcher, Matcher,
 };
-use crate::util;
+use crate::util::skim;
 
 /// A recipients remove action.
 pub struct Remove<'a> {
@@ -32,7 +32,7 @@ impl<'a> Remove<'a> {
         let mut recipients = store.recipients().map_err(Err::Load)?;
 
         // Select key to remove
-        let key = util::skim_select_key(recipients.keys())
+        let key = skim::skim_select_key(recipients.keys())
             .ok_or(Err::NoneSelected)?
             .clone();
         recipients.remove(&key);

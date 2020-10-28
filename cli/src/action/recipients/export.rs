@@ -11,7 +11,7 @@ use crate::cmd::matcher::{
     recipients::{export::ExportMatcher, RecipientsMatcher},
     MainMatcher, Matcher,
 };
-use crate::util;
+use crate::util::{clipboard, skim};
 
 /// A recipients export action.
 pub struct Export<'a> {
@@ -34,7 +34,7 @@ impl<'a> Export<'a> {
         let store = Store::open(matcher_recipients.store()).map_err(Err::Store)?;
         let recipients = store.recipients().map_err(Err::Load)?;
 
-        let key = util::skim_select_key(recipients.keys())
+        let key = skim::skim_select_key(recipients.keys())
             .ok_or(Err::NoneSelected)?
             .clone();
 
@@ -56,7 +56,7 @@ impl<'a> Export<'a> {
         // Copy to clipboard
         if matcher_export.copy() {
             stdout = false;
-            util::copy(&data).map_err(Err::Clipboard)?;
+            clipboard::copy(&data).map_err(Err::Clipboard)?;
         }
 
         if stdout {

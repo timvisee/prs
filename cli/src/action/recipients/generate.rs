@@ -8,7 +8,11 @@ use crate::cmd::matcher::{
     recipients::{generate::GenerateMatcher, RecipientsMatcher},
     MainMatcher, Matcher,
 };
-use crate::util::{self, ErrorHintsBuilder};
+use crate::util::{
+    self,
+    error::{self, ErrorHintsBuilder},
+    style,
+};
 
 /// A recipients generate action.
 pub struct Generate<'a> {
@@ -36,12 +40,12 @@ impl<'a> Generate<'a> {
 
         if !matcher_generate.no_add() {
             if new.keys().is_empty() {
-                util::quit_error_msg(
+                error::quit_error_msg(
                     "not adding recipient to store because no new keys are found",
                     ErrorHintsBuilder::default()
                         .add_info(format!(
                             "Use '{}' to add a recipient",
-                            util::highlight("prs recipients add")
+                            style::highlight("prs recipients add")
                         ))
                         .build()
                         .unwrap(),

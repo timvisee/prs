@@ -4,7 +4,7 @@ use prs_lib::{store::Store, types::Plaintext};
 use thiserror::Error;
 
 use crate::cmd::matcher::{add::AddMatcher, MainMatcher, Matcher};
-use crate::util;
+use crate::util::{cli, error, stdin};
 
 /// Add secret action.
 pub struct Add<'a> {
@@ -24,7 +24,6 @@ impl<'a> Add<'a> {
         let matcher_add = AddMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(matcher_add.store()).map_err(Err::Store)?;
-
         let dest = matcher_add.destination();
 
         // Normalize destination path
@@ -35,9 +34,9 @@ impl<'a> Add<'a> {
         let mut plaintext = Plaintext::empty();
 
         if matcher_add.stdin() {
-            plaintext = util::stdin_read_plaintext(!matcher_main.quiet());
+            plaintext = stdin::read_plaintext(!matcher_main.quiet())?;
         } else if !matcher_add.empty() {
-            if let Some(changed) = util::edit(&plaintext).map_err(Err::Edit)? {
+            if let Some(changed) = cli::edit(&plaintext).map_err(Err::Edit)? {
                 plaintext = changed;
             }
         }
@@ -45,18 +44,18 @@ impl<'a> Add<'a> {
         // Check if destination already exists if not forcing
         if !matcher_main.force() && path.is_file() {
             eprintln!("A secret at '{}' already exists", path.display(),);
-            if !util::prompt_yes("Overwrite?", Some(true), &matcher_main) {
+            if !cli::prompt_yes("Overwrite?", Some(true), &matcher_main) {
                 if matcher_main.verbose() {
                     eprintln!("Addition cancelled");
                 }
-                util::quit();
+                error::quit();
             }
         }
 
         // Confirm if empty secret should be stored
         if !matcher_main.force() && !matcher_add.empty() && plaintext.is_empty() {
-            if !util::prompt_yes("Secret is empty. Add?", Some(true), &matcher_main) {
-                util::quit();
+            if !cli::prompt_yes("Secret is empty. Add?", Some(true), &matcher_main) {
+                error::quit();
             }
         }
 

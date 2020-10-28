@@ -6,7 +6,7 @@ use prs_lib::{store::Store, types::Plaintext};
 use thiserror::Error;
 
 use crate::cmd::matcher::{show::ShowMatcher, Matcher};
-use crate::util;
+use crate::util::skim;
 
 /// Show secret action.
 pub struct Show<'a> {
@@ -25,7 +25,7 @@ impl<'a> Show<'a> {
         let matcher_show = ShowMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(matcher_show.store()).map_err(Err::Store)?;
-        let secret = util::select_secret(&store, matcher_show.query()).ok_or(Err::NoneSelected)?;
+        let secret = skim::select_secret(&store, matcher_show.query()).ok_or(Err::NoneSelected)?;
 
         let mut plaintext = prs_lib::crypto::decrypt_file(&secret.path).map_err(Err::Read)?;
 

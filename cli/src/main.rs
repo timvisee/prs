@@ -9,8 +9,12 @@ mod util;
 
 use anyhow::Result;
 
-use crate::cmd::Handler;
+use crate::{
+    cmd::Handler,
+    util::error::{quit_error, ErrorHints},
+};
 
+/// Default password store directory.
 const STORE_DEFAULT_ROOT: &str = "~/.password-store";
 
 fn main() {
@@ -19,7 +23,7 @@ fn main() {
 
     // Invoke the proper action
     if let Err(err) = invoke_action(&cmd_handler) {
-        util::quit_error(err, util::ErrorHints::default());
+        quit_error(err, ErrorHints::default());
     };
 }
 

@@ -8,7 +8,7 @@ use crate::cmd::matcher::{
     recipients::{remove::RemoveMatcher, RecipientsMatcher},
     MainMatcher, Matcher,
 };
-use crate::util::{skim, sync};
+use crate::util::{cli, error, skim, sync};
 
 /// A recipients remove action.
 pub struct Remove<'a> {
@@ -40,8 +40,26 @@ impl<'a> Remove<'a> {
         let key = skim::skim_select_key(recipients.keys())
             .ok_or(Err::NoneSelected)?
             .clone();
-        recipients.remove(&key);
 
+        // Confirm removal
+        if !matcher_main.force() {
+            eprintln!("{}", key);
+            if !cli::prompt_yes(
+                &format!(
+                    "Are you sure you want to remove '{}'?",
+                    key.fingerprint(true),
+                ),
+                Some(true),
+                &matcher_main,
+            ) {
+                if matcher_main.verbose() {
+                    eprintln!("Removal cancelled");
+                }
+                error::quit();
+            }
+        }
+
+        recipients.remove(&key);
         recipients.save(&store)?;
 
         // Recrypt secrets

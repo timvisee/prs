@@ -10,17 +10,17 @@
 
 # prs
 
-> A fast, secure & convenient password manager using GPG and git for
+> A secure, fast & convenient password manager using GPG and git for
 > synchronisation.
 
-`prs` is a fast, secure and convenient password manager for the terminal.
+`prs` is a secure, fast and convenient password manager for the terminal.
 It features [GPG][gpg] to securely store your details and integrates
 [`git`][git] for automatic synchronisation between multiple machines. It also
 features a built-in password generator, recipient management, history tracking,
 rollbacks, housekeeping utilities and more.
 
 `prs` is heavily inspired by [`pass`][pass] and uses the same file structure
-with some additions. `pr` therefore works together with `pass` and all other
+with some additions. `prs` therefore works alongside with `pass` and all other
 compatible clients, extensions and migration scripts.
 
 - [Features](#features)
@@ -40,6 +40,11 @@ compatible clients, extensions and migration scripts.
 - Compatible with [`pass`][pass]
 - Scriptable with `-y`, `-f`, `-I` flags
 - Accurate & useful error reporting
+
+`prs` includes some awesome tweaks and optimizations:
+- Greatly improved synchronisation speed through `git`
+- Prevents messing with your clipboard
+- Short, conventional and aliased commands
 
 ## Usage
 ```bash
@@ -107,7 +112,7 @@ $ prs help
 
 prs-cli 0.1.0
 Tim Visee <3a4fb3964f@sinenomine.email>
-Fast, secure & convenient password manager with GPG & git
+Secure, fast & convenient password manager with GPG & git
 
 USAGE:
     prs [FLAGS] <SUBCOMMAND>

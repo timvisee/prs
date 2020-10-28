@@ -31,6 +31,8 @@ impl<'a> Sync<'a> {
 
         sync::ensure_ready(&sync);
 
+        // TODO: show error if sync is not initialized
+
         // Prepare, commit, finalize
         sync.prepare()?;
         sync.finalize("Sync dirty changes")?;

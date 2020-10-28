@@ -207,12 +207,12 @@ pub fn export_key(context: &mut Context, key: &Key) -> Result<Vec<u8>, gpgme::Er
     // Assert we're exporting a public key
     let data_str = std::str::from_utf8(&data).expect("exported key is invalid UTF-8");
     assert!(
-        !data_str.contains("PRIVATE"),
-        "exported key contains PRIVATE, blocked to prevent accidentally leaking secret key"
+        !data_str.contains("PRIVATE KEY"),
+        "exported key contains PRIVATE KEY, blocked to prevent accidentally leaking secret key"
     );
     assert!(
-        data_str.contains("PUBLIC"),
-        "exported key must contain PUBLIC, blocked to prevent accidentally leaking secret key"
+        data_str.contains("PUBLIC KEY"),
+        "exported key must contain PUBLIC KEY, blocked to prevent accidentally leaking secret key"
     );
     Ok(data)
 }

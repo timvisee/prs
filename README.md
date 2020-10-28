@@ -42,9 +42,11 @@ compatible clients, extensions and migration scripts.
 - Accurate & useful error reporting
 
 `prs` includes some awesome tweaks and optimizations:
-- Greatly improved synchronisation speed through `git`
-- Prevents messing with your clipboard
-- Short, conventional and aliased commands
+
+- Greatly improved synchronisation speed through `git` with connection reuse
+- Super fast secret/recipient selection through [`skim`][skim]
+- Prevents messing with your clipboard with unexpected overwrites
+- Commands have short and conventional aliases for faster and more convenient usage
 
 ## Usage
 ```bash
@@ -154,3 +156,4 @@ Check out the [lib/LICENSE](lib/LICENSE) file for more information.
 [git]: https://git-scm.com/
 [gpg]: https://gnupg.org/
 [pass]: https://www.passwordstore.org/
+[skim]: https://github.com/lotabout/skim

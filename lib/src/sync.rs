@@ -89,7 +89,7 @@ impl<'a> Sync<'a> {
 
         // Commit changes if dirty
         if is_dirty(self.path())? {
-            self.commit_all(msg)?;
+            self.commit_all(msg, false)?;
         }
 
         // Push if remote and out of sync
@@ -97,6 +97,13 @@ impl<'a> Sync<'a> {
             self.push()?;
         }
 
+        Ok(())
+    }
+
+    /// Initialize sync.
+    pub fn init(&self) -> Result<()> {
+        crate::git::git_init(self.path())?;
+        self.commit_all("Initialize sync with git", true)?;
         Ok(())
     }
 
@@ -126,20 +133,10 @@ impl<'a> Sync<'a> {
     }
 
     /// Add all changes and commit them.
-    fn commit_all<M: AsRef<str>>(&self, msg: M) -> Result<()> {
-        // let repo = git2::Repository::open(&self.root).map_err(Err::Git)?;
-        // let mut index = repo.index().map_err(Err::Git)?;
-        // index
-        //     .add_all(["*"].iter(), git2::IndexAddOption::DEFAULT, None)
-        //     .map_err(Err::Git)?;
-        // index.write().map_err(Err::Git)?;
-
-        // Stage all files and commit
-        let repo = rustygit::Repository::new(self.path());
-        repo.add(vec!["*"]).map_err(Err::RustyGit)?;
-        repo.commit_all(msg.as_ref()).map_err(Err::RustyGit)?;
-
-        Ok(())
+    fn commit_all<M: AsRef<str>>(&self, msg: M, commit_empty: bool) -> Result<()> {
+        let path = self.path();
+        crate::git::git_add_all(path)?;
+        crate::git::git_commit(path, msg.as_ref(), commit_empty)
     }
 }
 

@@ -25,23 +25,23 @@ impl<'a> Recipients<'a> {
         // Create the command matcher
         let matcher_recipients = RecipientsMatcher::with(self.cmd_matches).unwrap();
 
-        if matcher_recipients.add().is_some() {
+        if matcher_recipients.cmd_add().is_some() {
             return add::Add::new(self.cmd_matches).invoke();
         }
 
-        if matcher_recipients.export().is_some() {
+        if matcher_recipients.cmd_export().is_some() {
             return export::Export::new(self.cmd_matches).invoke();
         }
 
-        if matcher_recipients.generate().is_some() {
+        if matcher_recipients.cmd_generate().is_some() {
             return generate::Generate::new(self.cmd_matches).invoke();
         }
 
-        if matcher_recipients.list().is_some() {
+        if matcher_recipients.cmd_list().is_some() {
             return list::List::new(self.cmd_matches).invoke();
         }
 
-        if matcher_recipients.remove().is_some() {
+        if matcher_recipients.cmd_remove().is_some() {
             return remove::Remove::new(self.cmd_matches).invoke();
         }
 

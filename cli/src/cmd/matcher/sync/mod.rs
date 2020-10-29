@@ -1,3 +1,5 @@
+pub mod init;
+
 use clap::ArgMatches;
 
 use super::Matcher;
@@ -5,10 +7,16 @@ use crate::cmd::arg::{ArgStore, CmdArgOption};
 
 /// The sync command matcher.
 pub struct SyncMatcher<'a> {
+    root: &'a ArgMatches<'a>,
     matches: &'a ArgMatches<'a>,
 }
 
 impl<'a: 'b, 'b> SyncMatcher<'a> {
+    /// Get the sync init sub command, if matched.
+    pub fn cmd_init(&'a self) -> Option<init::InitMatcher> {
+        init::InitMatcher::with(&self.root)
+    }
+
     /// The store.
     pub fn store(&self) -> String {
         ArgStore::value(self.matches)
@@ -16,9 +24,8 @@ impl<'a: 'b, 'b> SyncMatcher<'a> {
 }
 
 impl<'a> Matcher<'a> for SyncMatcher<'a> {
-    fn with(matches: &'a ArgMatches) -> Option<Self> {
-        matches
-            .subcommand_matches("sync")
-            .map(|matches| SyncMatcher { matches })
+    fn with(root: &'a ArgMatches) -> Option<Self> {
+        root.subcommand_matches("sync")
+            .map(|matches| SyncMatcher { root, matches })
     }
 }

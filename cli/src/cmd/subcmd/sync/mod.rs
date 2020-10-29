@@ -1,3 +1,5 @@
+pub mod init;
+
 use clap::{App, SubCommand};
 
 use crate::cmd::arg::{ArgStore, CmdArg};
@@ -10,6 +12,7 @@ impl CmdSync {
         SubCommand::with_name("sync")
             .alias("s")
             .about("Sync password store")
+            .subcommand(init::CmdInit::build())
             .arg(ArgStore::build())
     }
 }

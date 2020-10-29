@@ -22,9 +22,39 @@ const GIT_ENV_SSH: &str = "GIT_SSH_COMMAND";
 #[cfg(not(windows))]
 const GIT_ENV_SSH_CMD: &str = "ssh -o 'ControlMaster auto' -o 'ControlPath /tmp/.prs-session--%r@%h:%p' -o 'ControlPersist 1h'";
 
+/// Invoke git init.
+pub fn git_init(repo: &Path) -> Result<()> {
+    git(repo, &["init", "-q"])
+}
+
+/// Git stage all files and changes.
+pub fn git_add_all(repo: &Path) -> Result<()> {
+    git(repo, &["add", "."])
+}
+
+/// Invoke git commit.
+pub fn git_commit(repo: &Path, msg: &str, commit_empty: bool) -> Result<()> {
+    // Quit if no changes and we don't allow empty commit
+    if !commit_empty && git_has_changes(repo)? {
+        return Ok(());
+    }
+
+    // TODO: add -q
+    let mut args = vec!["commit", "-q", "--no-edit", "-m", msg];
+    if commit_empty {
+        args.push("--allow-empty");
+    }
+    git(repo, &args)
+}
+
 /// Invoke git pull.
 pub fn git_pull(repo: &Path) -> Result<()> {
     git(repo, &["pull", "-q"])
+}
+
+/// Check if repository has (staged/unstaged) changes.
+pub fn git_has_changes(repo: &Path) -> Result<bool> {
+    Ok(!git_stdout(repo, &["status", "-s"])?.is_empty())
 }
 
 /// Check if repository has remote configured.

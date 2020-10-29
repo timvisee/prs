@@ -1,3 +1,5 @@
+pub mod init;
+
 use anyhow::Result;
 use clap::ArgMatches;
 use thiserror::Error;
@@ -29,27 +31,34 @@ impl<'a> Sync<'a> {
         let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
         let matcher_sync = SyncMatcher::with(self.cmd_matches).unwrap();
 
+        if matcher_sync.cmd_init().is_some() {
+            return init::Init::new(self.cmd_matches).invoke();
+        }
+
         let store = Store::open(matcher_sync.store()).map_err(Err::Store)?;
         let sync = StoreSync::new(&store);
 
         // Don't sync if not initialized or no remote, show help on how to set up
         match sync.readyness()? {
             Readyness::NoSync => {
-                println!("Sync not configured, to initialize use: prs git init");
+                if !matcher_main.quiet() {
+                    println!("Sync not configured, to initialize use: prs sync init");
+                }
                 crate::util::error::quit();
             }
             _ if !sync.has_remote()? => {
-                println!(
-                    "Sync remote not configured, to set use: prs git remote add origin <GIT_URL>"
-                );
+                // TODO: this should be a warning instead, should continue
+                if !matcher_main.quiet() {
+                    println!(
+                        "Sync remote not configured, to set use: prs sync set-remote <GIT_URL>"
+                    );
+                }
                 crate::util::error::quit();
             }
             _ => {}
         }
 
         sync::ensure_ready(&sync);
-
-        // TODO: show error if sync is not initialized
 
         // Prepare, commit, finalize
         sync.prepare()?;
@@ -60,7 +69,10 @@ impl<'a> Sync<'a> {
         // TODO: sync keys
 
         if !matcher_main.quiet() {
-            eprintln!("Already up to date");
+            eprintln!("Sync complete");
+
+            // TODO: Show if nothing was synced
+            // eprintln!("Already up to date");
         }
 
         Ok(())

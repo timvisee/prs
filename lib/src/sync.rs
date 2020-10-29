@@ -108,12 +108,12 @@ impl<'a> Sync<'a> {
     }
 
     /// Clone sync from a remote URL.
-    pub fn clone(&self, url: &str) -> Result<()> {
+    pub fn clone(&self, url: &str, quiet: bool) -> Result<()> {
         let path = self
             .path()
             .to_str()
             .expect("failed to determine clone path");
-        crate::git::git_clone(self.path(), url, path)?;
+        crate::git::git_clone(self.path(), url, path, quiet)?;
         Ok(())
     }
 

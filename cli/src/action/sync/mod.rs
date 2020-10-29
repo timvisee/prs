@@ -1,4 +1,5 @@
 pub mod init;
+pub mod remote;
 
 use anyhow::Result;
 use clap::ArgMatches;
@@ -35,6 +36,10 @@ impl<'a> Sync<'a> {
             return init::Init::new(self.cmd_matches).invoke();
         }
 
+        if matcher_sync.cmd_remote().is_some() {
+            return remote::Remote::new(self.cmd_matches).invoke();
+        }
+
         let store = Store::open(matcher_sync.store()).map_err(Err::Store)?;
         let sync = StoreSync::new(&store);
 
@@ -49,9 +54,7 @@ impl<'a> Sync<'a> {
             _ if !sync.has_remote()? => {
                 // TODO: this should be a warning instead, should continue
                 if !matcher_main.quiet() {
-                    println!(
-                        "Sync remote not configured, to set use: prs sync set-remote <GIT_URL>"
-                    );
+                    println!("Sync remote not configured, to set use: prs sync remote <GIT_URL>");
                 }
                 crate::util::error::quit();
             }

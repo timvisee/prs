@@ -62,6 +62,29 @@ pub fn git_has_remote(repo: &Path) -> Result<bool> {
     Ok(!git_stdout(repo, &["remote"])?.is_empty())
 }
 
+/// Git get remote list.
+pub fn git_remote(repo: &Path) -> Result<Vec<String>> {
+    Ok(git_stdout(repo, &["remote"])?
+        .lines()
+        .map(|r| r.into())
+        .collect())
+}
+
+/// Get get remote URL.
+pub fn git_remote_get_url(repo: &Path, remote: &str) -> Result<String> {
+    Ok(git_stdout(repo, &["remote", "get-url", remote])?)
+}
+
+/// Get add remote URL.
+pub fn git_remote_add_url(repo: &Path, remote: &str, url: &str) -> Result<()> {
+    Ok(git(repo, &["remote", "add", remote, url])?)
+}
+
+/// Get set remote URL.
+pub fn git_remote_set_url(repo: &Path, remote: &str, url: &str) -> Result<()> {
+    Ok(git(repo, &["remote", "set-url", remote, url])?)
+}
+
 /// Get the current git branch name.
 pub fn git_current_branch(repo: &Path) -> Result<String> {
     let branch = git_stdout(repo, &["rev-parse", "--abbrev-ref", "HEAD"])?;

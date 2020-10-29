@@ -1,4 +1,5 @@
 pub mod init;
+pub mod remote;
 
 use clap::{App, SubCommand};
 
@@ -13,6 +14,7 @@ impl CmdSync {
             .alias("s")
             .about("Sync password store")
             .subcommand(init::CmdInit::build())
+            .subcommand(remote::CmdRemote::build())
             .arg(ArgStore::build())
     }
 }

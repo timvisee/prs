@@ -4,7 +4,7 @@ use super::Matcher;
 
 /// The sync init command matcher.
 pub struct InitMatcher<'a> {
-    matches: &'a ArgMatches<'a>,
+    _matches: &'a ArgMatches<'a>,
 }
 
 impl<'a: 'b, 'b> InitMatcher<'a> {}
@@ -14,6 +14,6 @@ impl<'a> Matcher<'a> for InitMatcher<'a> {
         matches
             .subcommand_matches("sync")?
             .subcommand_matches("init")
-            .map(|matches| InitMatcher { matches })
+            .map(|matches| InitMatcher { _matches: matches })
     }
 }

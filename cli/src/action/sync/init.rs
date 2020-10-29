@@ -7,10 +7,7 @@ use prs_lib::{
     sync::{Readyness, Sync},
 };
 
-use crate::cmd::matcher::{
-    sync::{init::InitMatcher, SyncMatcher},
-    MainMatcher, Matcher,
-};
+use crate::cmd::matcher::{sync::SyncMatcher, MainMatcher, Matcher};
 
 /// A sync init action.
 pub struct Init<'a> {
@@ -61,7 +58,7 @@ impl<'a> Init<'a> {
 /// Show a no remote configured notice with instructions.
 fn no_remote_message(sync: &Sync) -> Result<()> {
     if !sync.has_remote()? {
-        eprintln!("Sync remote not configured, to set use: prs sync set-remote <GIT_URL>");
+        eprintln!("Sync remote not configured, to set use: prs sync remote <GIT_URL>");
     }
     Ok(())
 }

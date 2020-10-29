@@ -78,9 +78,6 @@ impl<'a> Clone<'a> {
             }
         }
 
-        // TODO: ask user to recrypt on other machine, if recipient is added, if not crypted for
-        // TODO: this secret yet?
-
         Ok(())
     }
 }

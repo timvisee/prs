@@ -55,6 +55,23 @@ pub fn decrypt_file(path: &Path) -> Result<Plaintext> {
     decrypt(Ciphertext(fs::read(path).map_err(Err::ReadFile)?))
 }
 
+/// Check whether we can decrypt a file.
+///
+/// This checks whether we own the proper secret key to decrypt it.
+pub fn can_decrypt(mut ciphertext: Ciphertext) -> Result<bool> {
+    let mut plaintext = Plaintext::empty();
+    match context()?.decrypt(&mut ciphertext.0, &mut plaintext.0) {
+        Ok(_) => Ok(true),
+        Err(err) if gpgme::error::Error::NO_SECKEY.code() == err.code() => Ok(false),
+        _ => Ok(true),
+    }
+}
+
+/// Check whether we can decrypt a file at the given path.
+pub fn can_decrypt_file(path: &Path) -> Result<bool> {
+    can_decrypt(Ciphertext(fs::read(path).map_err(Err::ReadFile)?))
+}
+
 #[derive(Debug, Error)]
 pub enum Err {
     #[error("failed to obtain GPGME cryptography context")]

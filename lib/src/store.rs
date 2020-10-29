@@ -263,6 +263,19 @@ fn is_secret_file(entry: &DirEntry) -> bool {
             .unwrap_or(false)
 }
 
+/// Check whether we can decrypt the first secret in the store.
+///
+/// If decryption fails, and this returns false, it means we don't own any compatible secret key.
+///
+/// Returns true if there is no secret.
+pub fn can_decrypt(store: &Store) -> bool {
+    if let Some(secret) = store.secret_iter().next() {
+        crate::crypto::can_decrypt_file(&secret.path).unwrap_or(true)
+    } else {
+        true
+    }
+}
+
 /// Iterator that wraps a `SecretIter` with a filter.
 pub struct FilterSecretIter<I>
 where

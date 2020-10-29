@@ -2,7 +2,10 @@ use anyhow::Result;
 use clap::ArgMatches;
 use thiserror::Error;
 
-use prs_lib::store::{Secret, Store};
+use prs_lib::{
+    store::{Secret, Store},
+    Recipients,
+};
 
 use crate::{
     cmd::matcher::{
@@ -35,6 +38,9 @@ impl<'a> Recrypt<'a> {
 
         sync::ensure_ready(&sync);
         sync.prepare()?;
+
+        // Import new keys
+        Recipients::import_missing_keys_from_store(&store).map_err(Err::ImportRecipients)?;
 
         let secrets = store.secrets(matcher_recrypt.query());
 
@@ -88,4 +94,7 @@ pub enum Err {
 
     #[error("failed to write changed secret")]
     Write(#[source] anyhow::Error),
+
+    #[error("failed to import store recipients")]
+    ImportRecipients(#[source] anyhow::Error),
 }

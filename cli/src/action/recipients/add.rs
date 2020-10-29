@@ -8,7 +8,7 @@ use crate::cmd::matcher::{
     recipients::{add::AddMatcher, RecipientsMatcher},
     MainMatcher, Matcher,
 };
-use crate::util::{skim, sync};
+use crate::util::{self, error, skim, style, sync};
 
 /// A recipients add action.
 pub struct Add<'a> {
@@ -44,14 +44,21 @@ impl<'a> Add<'a> {
 
         recipients.save(&store)?;
 
-        // Recrypt secrets
-        if !matcher_add.no_recrypt() {
-            crate::action::housekeeping::recrypt::recrypt_all(
-                &store,
-                matcher_main.quiet(),
-                matcher_main.verbose(),
-            )
-            .map_err(Err::Recrypt)?;
+        if prs_lib::store::can_decrypt(&store) {
+            // Recrypt secrets
+            // TODO: do not quit on error, finish sync, ask to revert instead?
+            if !matcher_add.no_recrypt() {
+                crate::action::housekeeping::recrypt::recrypt_all(
+                    &store,
+                    matcher_main.quiet(),
+                    matcher_main.verbose(),
+                )
+                .map_err(Err::Recrypt)?;
+            }
+        } else {
+            if !matcher_main.quiet() {
+                cannot_decrypt_show_recrypt_hints();
+            }
         }
 
         sync.finalize(format!("Add recipient {}", key.fingerprint(true)))?;
@@ -62,6 +69,26 @@ impl<'a> Add<'a> {
 
         Ok(())
     }
+}
+
+/// Cannot decrypt on this machine, show recrypt hints.
+// TODO: move this somewhere central
+pub(crate) fn cannot_decrypt_show_recrypt_hints() {
+    // TODO: only show this if adding secret key
+    error::print_warning("cannot read secrets on this machine");
+    error::print_warning("re-encrypt secrets on another machine with this store to fix");
+
+    let bin = util::bin_name();
+    println!();
+    println!("Run this on another machine to re-encrypt secrets:");
+    println!(
+        "    {}",
+        style::highlight(&format!("{} housekeeping recrypt", bin))
+    );
+    println!();
+    println!("When done, pull in the re-encrypted secrets here with:");
+    println!("    {}", style::highlight(&format!("{} sync", bin)));
+    println!();
 }
 
 #[derive(Debug, Error)]

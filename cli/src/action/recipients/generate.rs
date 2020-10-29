@@ -63,15 +63,22 @@ impl<'a> Generate<'a> {
             }
             recipients.save(&store)?;
 
-            // Recrypt secrets
-            if !matcher_generate.no_recrypt() {
-                crate::action::housekeeping::recrypt::recrypt_all(
-                    &store,
-                    matcher_main.quiet(),
-                    matcher_main.verbose(),
-                )
-                .map_err(Err::Recrypt)?;
-            };
+            if prs_lib::store::can_decrypt(&store) {
+                // Recrypt secrets
+                // TODO: do not quit on error, finish sync, ask to revert instead?
+                if !matcher_generate.no_recrypt() {
+                    crate::action::housekeeping::recrypt::recrypt_all(
+                        &store,
+                        matcher_main.quiet(),
+                        matcher_main.verbose(),
+                    )
+                    .map_err(Err::Recrypt)?;
+                };
+            } else {
+                if !matcher_main.quiet() {
+                    super::add::cannot_decrypt_show_recrypt_hints();
+                }
+            }
 
             sync.finalize(format!(
                 "Generate and add recipient {}",

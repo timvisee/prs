@@ -158,9 +158,7 @@ impl<'a> Sync<'a> {
 
     /// Push changes to remote.
     fn push(&self) -> Result<()> {
-        let repo = rustygit::Repository::new(self.path());
-        repo.push().map_err(Err::RustyGit)?;
-        Ok(())
+        crate::git::git_push(self.path())
     }
 
     /// Add all changes and commit them.
@@ -250,9 +248,7 @@ fn need_to_push(repo: &Path) -> Result<bool> {
 
 #[derive(Debug, Error)]
 pub enum Err {
+    // TODO: show prepare/finalize errors here?
     #[error("failed to complete git operation")]
     Git2(#[source] git2::Error),
-
-    #[error("failed to complete git operation")]
-    RustyGit(#[source] rustygit::error::GitError),
 }

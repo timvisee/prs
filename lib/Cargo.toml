@@ -27,4 +27,3 @@ shellexpand = "2.0"
 thiserror = "1.0"
 walkdir = "2.0"
 zeroize = { version = "1.1", features = ["zeroize_derive"]}
-rustygit = "0.4"

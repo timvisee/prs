@@ -1033,7 +1033,6 @@ dependencies = [
  "anyhow",
  "git2",
  "gpgme",
- "rustygit",
  "shellexpand",
  "thiserror",
  "walkdir",
@@ -1188,16 +1187,6 @@ name = "rustc-demangle"
 version = "0.1.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6e3bad0ee36814ca07d7968269dd4b7ec89ec2da10c4bb613928d3077083c232"
-
-[[package]]
-name = "rustygit"
-version = "0.4.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4ed2fd7e6bdbf8d16c3b0c161abc23ee6266f4342d8d5ac5b3b677ee20305f4b"
-dependencies = [
- "regex",
- "thiserror",
-]
 
 [[package]]
 name = "same-file"

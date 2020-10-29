@@ -47,7 +47,7 @@ pub fn git_add_all(repo: &Path) -> Result<()> {
 /// Invoke git commit.
 pub fn git_commit(repo: &Path, msg: &str, commit_empty: bool) -> Result<()> {
     // Quit if no changes and we don't allow empty commit
-    if !commit_empty && git_has_changes(repo)? {
+    if !commit_empty && !git_has_changes(repo)? {
         return Ok(());
     }
 

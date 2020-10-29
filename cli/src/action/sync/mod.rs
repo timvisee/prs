@@ -8,6 +8,7 @@ use thiserror::Error;
 use prs_lib::{
     store::Store,
     sync::{Readyness, Sync as StoreSync},
+    Recipients,
 };
 
 use crate::{
@@ -67,15 +68,24 @@ impl<'a> Sync<'a> {
         sync.prepare()?;
         sync.finalize("Sync dirty changes")?;
 
-        // TODO: assert not-dirty state?
+        // TODO: assume changed for now, fetch this state from syncer
+        let changed = true;
 
-        // TODO: sync keys
+        // Were done if nothing was changed
+        if !changed {
+            if !matcher_main.quiet() {
+                eprintln!("Already up to date");
+            }
+            return Ok(());
+        }
+
+        // Import new keys
+        Recipients::import_missing_keys_from_store(&store).map_err(Err::ImportRecipients)?;
+
+        // TODO: assert not-dirty state?
 
         if !matcher_main.quiet() {
             eprintln!("Sync complete");
-
-            // TODO: Show if nothing was synced
-            // eprintln!("Already up to date");
         }
 
         Ok(())
@@ -86,4 +96,7 @@ impl<'a> Sync<'a> {
 pub enum Err {
     #[error("failed to access password store")]
     Store(#[source] anyhow::Error),
+
+    #[error("failed to import store recipients")]
+    ImportRecipients(#[source] anyhow::Error),
 }

@@ -217,9 +217,12 @@ impl Recipients {
 
 /// Check whether the given recipients contain any key that we have a secret key in our keychain
 /// for.
-pub fn contains_own_secret_key(mut recipients: Recipients) -> Result<bool> {
-    recipients.remove_many(all(true)?.keys());
-    Ok(!recipients.keys().is_empty())
+pub fn contains_own_secret_key(recipients: &Recipients) -> Result<bool> {
+    let secrets = all(true)?;
+    Ok(recipients
+        .keys()
+        .iter()
+        .any(|k| secrets.has_fingerprint(&k.fingerprint(false))))
 }
 
 /// Read GPG fingerprints from the given file.

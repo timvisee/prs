@@ -15,7 +15,10 @@ use prs_lib::store::Store;
 use crate::{
     cmd::matcher::{MainMatcher, Matcher},
     cmd::Handler,
-    util::error::{quit_error, ErrorHints},
+    util::{
+        error::{quit_error, ErrorHints},
+        style,
+    },
 };
 
 /// Default password store directory.
@@ -113,8 +116,6 @@ pub fn print_main_info() -> ! {
     // Get the name of the used executable
     let bin = util::bin_name();
 
-    use util::style;
-
     // Attempt to load default store
     let store = Store::open(crate::STORE_DEFAULT_ROOT).ok();
     let has_sync = store.as_ref().map(|s| s.sync().is_init()).unwrap_or(false);
@@ -134,19 +135,55 @@ pub fn print_main_info() -> ! {
         );
         println!();
     } else {
-        println!("Show or copy a secret:");
-        println!("    {}", style::highlight(&format!("{} show [NAME]", bin)));
-        println!("    {}", style::highlight(&format!("{} copy [NAME]", bin)));
-        println!();
-        println!("Add, edit or remove secrets:");
-        println!("    {}", style::highlight(&format!("{} add <NAME>", bin)));
-        println!("    {}", style::highlight(&format!("{} edit [NAME]", bin)));
-        println!(
-            "    {}",
-            style::highlight(&format!("{} remove [NAME]", bin))
-        );
-        println!();
+        let store = store.unwrap();
 
+        // Hint user to add ourselves as recipient if it doesn't have recipient we own
+        let we_own_any_recipient = store
+            .recipients()
+            .and_then(|recip| prs_lib::contains_own_secret_key(&recip))
+            .unwrap_or(false);
+        if !we_own_any_recipient {
+            let system_has_secret = action::clone::has_secret_key_in_keychain().unwrap_or(true);
+            if system_has_secret {
+                println!("Add your own key as recipient or generate a new one:");
+            } else {
+                println!("Generate and add a new recipient key for yourself:");
+            }
+            if system_has_secret {
+                println!(
+                    "    {}",
+                    style::highlight(&format!("{} recipients add --secret", bin))
+                );
+            }
+            println!(
+                "    {}",
+                style::highlight(&format!("{} recipients generate", bin))
+            );
+            println!();
+        }
+
+        // Hint show/copy commands if user has secret
+        let has_secret = store.secret_iter().next().is_some();
+        if has_secret {
+            println!("Show or copy a secret:");
+            println!("    {}", style::highlight(&format!("{} show [NAME]", bin)));
+            println!("    {}", style::highlight(&format!("{} copy [NAME]", bin)));
+            println!();
+        }
+
+        // Hint add/edit/remove commands if store has recipient we own
+        if we_own_any_recipient {
+            println!("Add, edit or remove secrets:");
+            println!("    {}", style::highlight(&format!("{} add <NAME>", bin)));
+            println!("    {}", style::highlight(&format!("{} edit [NAME]", bin)));
+            println!(
+                "    {}",
+                style::highlight(&format!("{} remove [NAME]", bin))
+            );
+            println!();
+        }
+
+        // Hint about sync
         if has_sync {
             println!("Sync your password store:");
             println!("    {}", style::highlight(&format!("{} sync", bin)));

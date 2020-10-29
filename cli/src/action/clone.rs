@@ -48,7 +48,7 @@ impl<'a> Clone<'a> {
         // Check whether the store has any key we own the secret for, default to false
         let store_has_our_secret = store
             .recipients()
-            .and_then(|recipients| prs_lib::contains_own_secret_key(recipients))
+            .and_then(|recipients| prs_lib::contains_own_secret_key(&recipients))
             .unwrap_or(false);
 
         // Hint user to add our recipient key
@@ -87,7 +87,7 @@ impl<'a> Clone<'a> {
 
 /// Check whether the user has any secret key in his keychain.
 // TODO: duplicate, also use in init
-fn has_secret_key_in_keychain() -> Result<bool> {
+pub(crate) fn has_secret_key_in_keychain() -> Result<bool> {
     Ok(!prs_lib::all(true)?.keys().is_empty())
 }
 
@@ -109,7 +109,7 @@ fn ensure_dir_free(path: &Path) -> Result<()> {
 
     error::quit_error_msg(
         format!(
-            "cannot initialize store, directory already exists: {}",
+            "cannot clone store, directory already exists: {}",
             path.display(),
         ),
         ErrorHints::default(),

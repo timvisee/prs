@@ -1,4 +1,5 @@
 pub mod add;
+pub mod clone;
 pub mod copy;
 pub mod duplicate;
 pub mod edit;

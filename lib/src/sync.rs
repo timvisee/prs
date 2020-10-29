@@ -107,6 +107,16 @@ impl<'a> Sync<'a> {
         Ok(())
     }
 
+    /// Clone sync from a remote URL.
+    pub fn clone(&self, url: &str) -> Result<()> {
+        let path = self
+            .path()
+            .to_str()
+            .expect("failed to determine clone path");
+        crate::git::git_clone(self.path(), url, path)?;
+        Ok(())
+    }
+
     /// Check whether sync has been initialized in this store.
     // TODO: make private?
     pub fn is_init(&self) -> bool {

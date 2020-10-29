@@ -43,6 +43,10 @@ fn invoke_action(handler: &Handler) -> Result<()> {
         return action::add::Add::add(handler.matches()).invoke();
     }
 
+    if handler.clone().is_some() {
+        return action::clone::Clone::new(handler.matches()).invoke();
+    }
+
     if handler.copy().is_some() {
         return action::copy::Copy::new(handler.matches()).invoke();
     }
@@ -142,13 +146,19 @@ pub fn print_main_info() -> ! {
             style::highlight(&format!("{} remove [NAME]", bin))
         );
         println!();
+
+        if has_sync {
+            println!("Sync your password store:");
+            println!("    {}", style::highlight(&format!("{} sync", bin)));
+            println!();
+        } else {
+            println!("Enable sync for your password store:");
+            println!("    {}", style::highlight(&format!("{} sync init", bin)));
+            println!();
+        }
     }
 
-    if has_sync {
-        println!("Sync your password store:");
-        println!("    {}", style::highlight(&format!("{} sync", bin)));
-        println!();
-    }
+    // TODO: suggest user to add recipient if there is none
 
     println!("Show all subcommands, features and other help:");
     println!(

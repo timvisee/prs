@@ -6,48 +6,51 @@ use clap::ArgMatches;
 use prs_lib::store::Store;
 use thiserror::Error;
 
-use crate::cmd::matcher::{init::InitMatcher, MainMatcher, Matcher};
+use crate::cmd::matcher::{clone::CloneMatcher, MainMatcher, Matcher};
 use crate::util::error::{self, ErrorHints};
 
-/// Init store action.
-pub struct Init<'a> {
+/// Clone store action.
+pub struct Clone<'a> {
     cmd_matches: &'a ArgMatches<'a>,
 }
 
-impl<'a> Init<'a> {
-    /// Construct a new init action.
+impl<'a> Clone<'a> {
+    /// Construct a new clone action.
     pub fn new(cmd_matches: &'a ArgMatches<'a>) -> Self {
         Self { cmd_matches }
     }
 
-    /// Invoke the init action.
+    /// Invoke the clone action.
     pub fn invoke(&self) -> Result<()> {
         // Create the command matchers
         let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
-        let matcher_init = InitMatcher::with(self.cmd_matches).unwrap();
+        let matcher_clone = CloneMatcher::with(self.cmd_matches).unwrap();
 
-        let path = shellexpand::full(matcher_init.path()).map_err(Err::ExpandPath)?;
+        let path = matcher_clone.store();
+        let path = shellexpand::full(&path).map_err(Err::ExpandPath)?;
 
         ensure_dir_free(&Path::new(path.as_ref()))?;
 
-        // Initialize store
+        // Create store dir, open it and clone
         fs::create_dir_all(path.as_ref()).map_err(Err::Init)?;
-
-        // TODO: assign store recipients
-
-        // TODO: initialize sync with git
-
-        // Open the store to test
         let store = Store::open(path.as_ref()).map_err(Err::Store)?;
+        let sync = store.sync();
+        sync.clone(matcher_clone.git_url()).map_err(Err::Clone)?;
 
-        // Use all keyring recipients by default, write to store
-        let recipients = prs_lib::all()?;
-        recipients.save(&store)?;
+        // TODO: load repo recipients
+
+        // TODO: ask user to add key (if not yet added)
+
+        // // Use all keyring recipients by default, write to store
+        // // let recipients = prs_lib::all()?;
+        // use prs_lib::Recipients;
+        // let recipients = Recipients::find(vec!["748AFACE1FD3E5096EAE227262DCCA730294C439".into()])?;
+        // recipients.save(&store)?;
 
         // TODO: also write public keys to store
 
         if !matcher_main.quiet() {
-            eprintln!("Store initialized");
+            eprintln!("Store cloned");
         }
 
         Ok(())
@@ -89,4 +92,7 @@ pub enum Err {
 
     #[error("failed to access initialized password store")]
     Store(#[source] anyhow::Error),
+
+    #[error("failed to clone remote store")]
+    Clone(#[source] anyhow::Error),
 }

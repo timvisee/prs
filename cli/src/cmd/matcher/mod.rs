@@ -1,4 +1,5 @@
 pub mod add;
+pub mod clone;
 pub mod copy;
 pub mod duplicate;
 pub mod edit;
@@ -16,6 +17,7 @@ pub mod sync;
 
 // Re-export to matcher module
 pub use self::add::AddMatcher;
+pub use self::clone::CloneMatcher;
 pub use self::copy::CopyMatcher;
 pub use self::duplicate::DuplicateMatcher;
 pub use self::edit::EditMatcher;

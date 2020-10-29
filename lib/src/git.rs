@@ -27,6 +27,11 @@ pub fn git_init(repo: &Path) -> Result<()> {
     git(repo, &["init", "-q"])
 }
 
+/// Invoke git clone.
+pub fn git_clone(repo: &Path, url: &str, path: &str) -> Result<()> {
+    git(repo, &["clone", "-q", "--progress", url, path])
+}
+
 /// Git stage all files and changes.
 pub fn git_add_all(repo: &Path) -> Result<()> {
     git(repo, &["add", "."])

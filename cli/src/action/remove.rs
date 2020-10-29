@@ -54,7 +54,7 @@ impl<'a> Remove<'a> {
             .map(|_| ())
             .map_err(|err| Err::Remove(err))?;
 
-        sync.finalize(format!("Remove secret from {}", secret.name))?;
+        sync.finalize(format!("Remove secret {}", secret.name))?;
 
         if !matcher_main.quiet() {
             eprintln!("Secret removed");

@@ -159,7 +159,7 @@ impl ErrorHints {
         if self.sync_remote {
             eprintln!(
                 "Use '{}' to get or set a remote sync URL",
-                highlight(&format!("{} sync remote [URL]", bin))
+                highlight(&format!("{} sync remote [GIT_URL]", bin))
             );
         }
         if self.git {

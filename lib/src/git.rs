@@ -62,7 +62,7 @@ pub fn git_commit(repo: &Path, msg: &str, commit_empty: bool) -> Result<()> {
 /// Invoke git push.
 pub fn git_push(repo: &Path) -> Result<()> {
     // TODO: do not set -q flag if in verbose mode
-    git(repo, &["push", "-q", "--progress"])
+    git(repo, &["push", "-q"])
 }
 
 /// Invoke git pull.

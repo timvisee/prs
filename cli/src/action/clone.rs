@@ -7,7 +7,11 @@ use prs_lib::{store::Store, Recipients};
 use thiserror::Error;
 
 use crate::cmd::matcher::{clone::CloneMatcher, MainMatcher, Matcher};
-use crate::util::error::{self, ErrorHints};
+use crate::util::{
+    self,
+    error::{self, ErrorHints},
+    style,
+};
 
 /// Clone store action.
 pub struct Clone<'a> {
@@ -41,14 +45,50 @@ impl<'a> Clone<'a> {
         // Import repo recipients missing in keychain
         Recipients::import_missing_keys_from_store(&store).map_err(Err::ImportRecipients)?;
 
-        // TODO: ask user to add key (if not yet added)
+        // Check whether the store has any key we own the secret for, default to false
+        let store_has_our_secret = store
+            .recipients()
+            .and_then(|recipients| prs_lib::contains_own_secret_key(recipients))
+            .unwrap_or(false);
 
+        // Hint user to add our recipient key
         if !matcher_main.quiet() {
-            eprintln!("Store cloned");
+            if !store_has_our_secret {
+                let bin = util::bin_name();
+                let system_has_secret = has_secret_key_in_keychain().unwrap_or(true);
+
+                if system_has_secret {
+                    println!("Now add your own key as recipient or generate a new one:");
+                } else {
+                    println!("Now generate and add a new recipient key for yourself:");
+                }
+                if system_has_secret {
+                    println!(
+                        "    {}",
+                        style::highlight(&format!("{} recipients add --secret", bin))
+                    );
+                }
+                println!(
+                    "    {}",
+                    style::highlight(&format!("{} recipients generate", bin))
+                );
+                println!();
+            } else {
+                eprintln!("Store cloned");
+            }
         }
+
+        // TODO: ask user to recrypt on other machine, if recipient is added, if not crypted for
+        // TODO: this secret yet?
 
         Ok(())
     }
+}
+
+/// Check whether the user has any secret key in his keychain.
+// TODO: duplicate, also use in init
+fn has_secret_key_in_keychain() -> Result<bool> {
+    Ok(!prs_lib::all(true)?.keys().is_empty())
 }
 
 /// Ensure the given path is a free directory.

@@ -9,6 +9,12 @@ impl CmdAdd {
             .alias("a")
             .about("Add store recipient")
             .arg(
+                Arg::with_name("secret")
+                    .long("secret")
+                    .alias("private")
+                    .help("Add public key we have private key for"),
+            )
+            .arg(
                 Arg::with_name("no-recrypt")
                     .long("no-recrypt")
                     .alias("no-reencrypt")

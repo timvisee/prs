@@ -37,7 +37,7 @@ impl<'a> Add<'a> {
         let mut recipients = store.recipients().map_err(Err::Load)?;
 
         // Find unused keys, select one and add to recipients
-        let mut tmp = prs_lib::all().map_err(Err::Load)?;
+        let mut tmp = prs_lib::all(matcher_add.secret()).map_err(Err::Load)?;
         tmp.remove_many(recipients.keys());
         let key = skim::skim_select_key(tmp.keys()).ok_or(Err::NoneSelected)?;
         recipients.add(key.clone());

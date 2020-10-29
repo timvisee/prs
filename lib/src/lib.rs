@@ -85,10 +85,17 @@ impl Recipients {
 
     /// Load recipients from a store.
     pub fn load(store: &Store) -> Result<Self> {
+        let path = store_gpg_ids_file(&store);
+
+        // Return empty if GPG IDs file does not exist
+        if !path.is_file() {
+            return Ok(Recipients::from(vec![]));
+        }
+
         // TODO: what to do if ids file does not exist?
         // TODO: what to do if recipients is empty?
         // TODO: what to do if key listed in file is not found, attempt to install?
-        Recipients::find_from_file(store_gpg_ids_file(&store))
+        Recipients::find_from_file(path)
     }
 
     /// Save this list of recipients to the store.
@@ -124,7 +131,7 @@ impl Recipients {
             .collect();
 
         // Filter to missing keys
-        let all = all()?;
+        let all = all(true)?;
         let missing: Vec<_> = files
             .into_iter()
             .filter(|(_, fp)| !all.has_fingerprint(fp))
@@ -206,6 +213,13 @@ impl Recipients {
         )
         .map_err(|err| Err::WriteFile(err).into())
     }
+}
+
+/// Check whether the given recipients contain any key that we have a secret key in our keychain
+/// for.
+pub fn contains_own_secret_key(mut recipients: Recipients) -> Result<bool> {
+    recipients.remove_many(all(true)?.keys());
+    Ok(!recipients.keys().is_empty())
 }
 
 /// Read GPG fingerprints from the given file.
@@ -357,14 +371,18 @@ impl From<gpgme::Key> for Key {
     }
 }
 
-/// Select all public keys from keychain usable as recipient.
-// TODO: does this include private keys for encrypting?
+/// Select all public or private keys from keychain usable as recipient.
 // TODO: remove this, add better method for obtaining all keyring keys
-pub fn all() -> Result<Recipients> {
+pub fn all(secret: bool) -> Result<Recipients> {
+    let mut context = crypto::context()?;
+    let keys = if !secret {
+        context.keys()?
+    } else {
+        context.secret_keys()?
+    };
+
     Ok(Recipients::from(
-        crypto::context()?
-            .keys()?
-            .into_iter()
+        keys.into_iter()
             .filter_map(|k| k.ok())
             .filter(|k| k.can_encrypt())
             .map(|k| k.into())

@@ -98,13 +98,13 @@ impl<'a> Generate<'a> {
 /// Return new keys as recipients.
 pub fn gpg_generate(verbose: bool) -> Result<Recipients> {
     // List recipients before
-    let before = prs_lib::all()?;
+    let before = prs_lib::all(true)?;
 
     // Generate key through GPG
     util::invoke_cmd("gpg --full-generate-key".into(), None, verbose).map_err(Err::Invoke)?;
 
     // List recipients after, keep new keys
-    let mut diff = prs_lib::all()?;
+    let mut diff = prs_lib::all(true)?;
     diff.remove_many(before.keys());
     Ok(diff)
 }

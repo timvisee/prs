@@ -7,7 +7,11 @@ use prs_lib::store::Store;
 use thiserror::Error;
 
 use crate::cmd::matcher::{init::InitMatcher, MainMatcher, Matcher};
-use crate::util::error::{self, ErrorHints};
+use crate::util::{
+    self,
+    error::{self, ErrorHints},
+    style,
+};
 
 /// Init store action.
 pub struct Init<'a> {
@@ -33,25 +37,42 @@ impl<'a> Init<'a> {
         // Initialize store
         fs::create_dir_all(path.as_ref()).map_err(Err::Init)?;
 
-        // TODO: assign store recipients
-
-        // TODO: initialize sync with git
+        // TODO: initialize sync here?
 
         // Open the store to test
-        let store = Store::open(path.as_ref()).map_err(Err::Store)?;
+        Store::open(path.as_ref()).map_err(Err::Store)?;
 
-        // Use all keyring recipients by default, write to store
-        let recipients = prs_lib::all()?;
-        recipients.save(&store)?;
-
-        // TODO: also write public keys to store
-
+        // Hint user to add our recipient key
         if !matcher_main.quiet() {
-            eprintln!("Store initialized");
+            let bin = util::bin_name();
+            let system_has_secret = has_secret_key_in_keychain().unwrap_or(true);
+
+            if system_has_secret {
+                println!("Now add your own key as recipient or generate a new one:");
+            } else {
+                println!("Now generate and add a new recipient key for yourself:");
+            }
+            if system_has_secret {
+                println!(
+                    "    {}",
+                    style::highlight(&format!("{} recipients add --secret", bin))
+                );
+            }
+            println!(
+                "    {}",
+                style::highlight(&format!("{} recipients generate", bin))
+            );
+            println!();
         }
 
         Ok(())
     }
+}
+
+/// Check whether the user has any secret key in his keychain.
+// TODO: duplicate, also use in clone
+fn has_secret_key_in_keychain() -> Result<bool> {
+    Ok(!prs_lib::all(true)?.keys().is_empty())
 }
 
 /// Ensure the given path is a free directory.

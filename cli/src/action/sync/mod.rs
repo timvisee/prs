@@ -13,7 +13,10 @@ use prs_lib::{
 
 use crate::{
     cmd::matcher::{sync::SyncMatcher, MainMatcher, Matcher},
-    util::sync,
+    util::{
+        error::{self, ErrorHintsBuilder},
+        sync,
+    },
 };
 
 /// Sync secrets action.
@@ -47,17 +50,20 @@ impl<'a> Sync<'a> {
         // Don't sync if not initialized or no remote, show help on how to set up
         match sync.readyness()? {
             Readyness::NoSync => {
-                if !matcher_main.quiet() {
-                    println!("Sync not configured, to initialize use: prs sync init");
-                }
-                crate::util::error::quit();
+                error::quit_error_msg(
+                    "sync not configured",
+                    ErrorHintsBuilder::default()
+                        .sync_init(true)
+                        .build()
+                        .unwrap(),
+                );
             }
             _ if !sync.has_remote()? => {
-                // TODO: this should be a warning instead, should continue
                 if !matcher_main.quiet() {
-                    println!("Sync remote not configured, to set use: prs sync remote <GIT_URL>");
+                    error::print_warning(
+                        "no sync remote configured, set using: prs sync remote <GIT_URL>",
+                    );
                 }
-                crate::util::error::quit();
             }
             _ => {}
         }
@@ -74,7 +80,7 @@ impl<'a> Sync<'a> {
         // Were done if nothing was changed
         if !changed {
             if !matcher_main.quiet() {
-                eprintln!("Already up to date");
+                eprintln!("Everything up-to-date");
             }
             return Ok(());
         }

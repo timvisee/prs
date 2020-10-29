@@ -173,7 +173,11 @@ pub fn print_main_info() -> ! {
 
         // Hint add/edit/remove commands if store has recipient we own
         if we_own_any_recipient {
-            println!("Add, edit or remove secrets:");
+            println!("Generate, add, edit or remove secrets:");
+            println!(
+                "    {}",
+                style::highlight(&format!("{} generate <NAME>", bin))
+            );
             println!("    {}", style::highlight(&format!("{} add <NAME>", bin)));
             println!("    {}", style::highlight(&format!("{} edit [NAME]", bin)));
             println!(
@@ -194,8 +198,6 @@ pub fn print_main_info() -> ! {
             println!();
         }
     }
-
-    // TODO: suggest user to add recipient if there is none
 
     println!("Show all subcommands, features and other help:");
     println!(

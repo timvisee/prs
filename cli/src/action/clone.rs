@@ -35,7 +35,8 @@ impl<'a> Clone<'a> {
         fs::create_dir_all(path.as_ref()).map_err(Err::Init)?;
         let store = Store::open(path.as_ref()).map_err(Err::Store)?;
         let sync = store.sync();
-        sync.clone(matcher_clone.git_url()).map_err(Err::Clone)?;
+        sync.clone(matcher_clone.git_url(), matcher_main.quiet())
+            .map_err(Err::Clone)?;
 
         // TODO: load repo recipients
 

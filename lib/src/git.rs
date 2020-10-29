@@ -28,8 +28,15 @@ pub fn git_init(repo: &Path) -> Result<()> {
 }
 
 /// Invoke git clone.
-pub fn git_clone(repo: &Path, url: &str, path: &str) -> Result<()> {
-    git(repo, &["clone", "-q", "--progress", url, path])
+///
+/// Shows progress unless `quiet` is set.
+pub fn git_clone(repo: &Path, url: &str, path: &str, quiet: bool) -> Result<()> {
+    let mut args = vec!["clone", "-q"];
+    if quiet {
+        args.push("--progress");
+    }
+    args.extend_from_slice(&[url, path]);
+    git(repo, &args)
 }
 
 /// Git stage all files and changes.

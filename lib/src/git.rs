@@ -32,7 +32,7 @@ pub fn git_init(repo: &Path) -> Result<()> {
 /// Shows progress unless `quiet` is set.
 pub fn git_clone(repo: &Path, url: &str, path: &str, quiet: bool) -> Result<()> {
     let mut args = vec!["clone", "-q"];
-    if quiet {
+    if !quiet {
         args.push("--progress");
     }
     args.extend_from_slice(&[url, path]);

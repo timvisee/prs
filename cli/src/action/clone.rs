@@ -3,7 +3,7 @@ use std::path::Path;
 
 use anyhow::Result;
 use clap::ArgMatches;
-use prs_lib::store::Store;
+use prs_lib::{store::Store, Recipients};
 use thiserror::Error;
 
 use crate::cmd::matcher::{clone::CloneMatcher, MainMatcher, Matcher};
@@ -38,17 +38,10 @@ impl<'a> Clone<'a> {
         sync.clone(matcher_clone.git_url(), matcher_main.quiet())
             .map_err(Err::Clone)?;
 
-        // TODO: load repo recipients
+        // Import repo recipients missing in keychain
+        Recipients::import_missing_keys_from_store(&store).map_err(Err::ImportRecipients)?;
 
         // TODO: ask user to add key (if not yet added)
-
-        // // Use all keyring recipients by default, write to store
-        // // let recipients = prs_lib::all()?;
-        // use prs_lib::Recipients;
-        // let recipients = Recipients::find(vec!["748AFACE1FD3E5096EAE227262DCCA730294C439".into()])?;
-        // recipients.save(&store)?;
-
-        // TODO: also write public keys to store
 
         if !matcher_main.quiet() {
             eprintln!("Store cloned");
@@ -96,4 +89,7 @@ pub enum Err {
 
     #[error("failed to clone remote store")]
     Clone(#[source] anyhow::Error),
+
+    #[error("failed to import store recipients")]
+    ImportRecipients(#[source] anyhow::Error),
 }

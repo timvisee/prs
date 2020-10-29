@@ -100,6 +100,48 @@ impl Recipients {
         // TODO: import missing keys to system?
     }
 
+    /// Import keys from store that are missing in the keychain.
+    pub fn import_missing_keys_from_store(store: &Store) -> Result<()> {
+        // Get public keys directory, ensure it exists
+        let dir = store_public_keys_dir(store);
+        if !dir.is_dir() {
+            return Ok(());
+        }
+
+        // List key files in keys directory
+        // TODO: this is duplicate, use share function
+        // TODO: only list files that match fingerprint format (file name)
+        let files: Vec<(PathBuf, String)> = dir
+            .read_dir()
+            .map_err(Err::SyncKeyFiles)?
+            .filter_map(|e| e.ok())
+            .filter(|e| e.file_type().map(|f| f.is_file()).unwrap_or(false))
+            .filter_map(|e| {
+                e.file_name()
+                    .to_str()
+                    .map(|fp| (e.path(), format_fingerprint(fp)))
+            })
+            .collect();
+
+        // Filter to missing keys
+        let all = all()?;
+        let missing: Vec<_> = files
+            .into_iter()
+            .filter(|(_, fp)| !all.has_fingerprint(fp))
+            .collect();
+        if missing.is_empty() {
+            return Ok(());
+        }
+
+        // Import keys
+        let mut context = crypto::context()?;
+        for (path, _) in missing {
+            import_key_file(&mut context, &path)?;
+        }
+
+        Ok(())
+    }
+
     /// Sync public key files in store with selected recipients.
     ///
     /// - Removes obsolete keys that are not a selected recipient
@@ -110,6 +152,8 @@ impl Recipients {
         fs::create_dir_all(&dir).map_err(Err::SyncKeyFiles)?;
 
         // List key files in keys directory
+        // TODO: this is duplicate, use share function
+        // TODO: only list files that match fingerprint format (file name)
         let files: Vec<(PathBuf, String)> = dir
             .read_dir()
             .map_err(Err::SyncKeyFiles)?
@@ -140,12 +184,9 @@ impl Recipients {
                 context = Some(crypto::context()?);
             }
 
-            // Export public key
-            let data = export_key(context.as_mut().unwrap(), key).map_err(Err::Export)?;
-
-            // Write public key to disk
+            // Export public key to disk
             let path = dir.join(&fp);
-            fs::write(path, data).map_err(Err::SyncKeyFiles)?;
+            export_key_file(context.as_mut().unwrap(), key, &path)?;
         }
 
         Ok(())
@@ -198,6 +239,29 @@ pub fn store_public_keys_dir(store: &Store) -> PathBuf {
     store.root.join(STORE_PUB_KEY_DIR)
 }
 
+/// Import the given key from bytes.
+pub fn import_key(context: &mut Context, key: &[u8]) -> Result<(), gpgme::Error> {
+    // Assert we're importing a public key
+    let key_str = std::str::from_utf8(&key).expect("exported key is invalid UTF-8");
+    assert!(
+        !key_str.contains("PRIVATE KEY"),
+        "imported key contains PRIVATE KEY, blocked to prevent accidentally leaked secret key"
+    );
+    assert!(
+        key_str.contains("PUBLIC KEY"),
+        "imported key must contain PUBLIC KEY, blocked to prevent accidentally leaked secret key"
+    );
+
+    // Import the key
+    context.import(key).map(|_| ())
+}
+
+/// Import the given key from a file.
+pub fn import_key_file(context: &mut Context, path: &Path) -> Result<()> {
+    import_key(context, &fs::read(path).map_err(Err::ReadKey)?)
+        .map_err(|err| Err::Import(err).into())
+}
+
 /// Export the given key as bytes.
 pub fn export_key(context: &mut Context, key: &Key) -> Result<Vec<u8>, gpgme::Error> {
     // Export public key
@@ -220,6 +284,12 @@ pub fn export_key(context: &mut Context, key: &Key) -> Result<Vec<u8>, gpgme::Er
         "exported key must contain PUBLIC KEY, blocked to prevent accidentally leaking secret key"
     );
     Ok(data)
+}
+
+/// Export the given key to a file.
+pub fn export_key_file(context: &mut Context, key: &Key, path: &Path) -> Result<()> {
+    fs::write(path, export_key(context, key).map_err(Err::Export)?)
+        .map_err(|err| Err::WriteKey(err).into())
 }
 
 /// Recipient key.
@@ -318,6 +388,15 @@ pub enum Err {
 
     #[error("failed to sync public key files")]
     SyncKeyFiles(#[source] std::io::Error),
+
+    #[error("failed to read public key")]
+    ReadKey(#[source] std::io::Error),
+
+    #[error("failed to write public key")]
+    WriteKey(#[source] std::io::Error),
+
+    #[error("failed to import key")]
+    Import(#[source] gpgme::Error),
 
     #[error("failed to export key")]
     Export(#[source] gpgme::Error),

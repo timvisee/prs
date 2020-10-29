@@ -40,7 +40,7 @@ impl<'a> Sync<'a> {
     pub fn readyness(&self) -> Result<Readyness> {
         let path = self.path();
 
-        if !self.is_sync_init() {
+        if !self.is_init() {
             return Ok(Readyness::NoSync);
         }
 
@@ -64,7 +64,7 @@ impl<'a> Sync<'a> {
         // TODO: return error if dirty?
 
         // Skip if no sync
-        if !self.is_sync_init() {
+        if !self.is_init() {
             return Ok(());
         }
 
@@ -83,7 +83,7 @@ impl<'a> Sync<'a> {
     /// - If sync remote is set, it pushes changes.
     pub fn finalize<M: AsRef<str>>(&self, msg: M) -> Result<()> {
         // Skip if no sync
-        if !self.is_sync_init() {
+        if !self.is_init() {
             return Ok(());
         }
 
@@ -108,13 +108,34 @@ impl<'a> Sync<'a> {
     }
 
     /// Check whether sync has been initialized in this store.
-    pub fn is_sync_init(&self) -> bool {
+    // TODO: make private?
+    pub fn is_init(&self) -> bool {
         self.path().join(STORE_GIT_DIR).is_dir()
+    }
+
+    /// Get a list of sync remotes.
+    pub fn remotes(&self) -> Result<Vec<String>> {
+        crate::git::git_remote(self.path())
+    }
+
+    /// Get the URL of the given remote.
+    pub fn remote_url(&self, remote: &str) -> Result<String> {
+        crate::git::git_remote_get_url(self.path(), remote)
+    }
+
+    /// Add the URL of the given remote.
+    pub fn add_remote_url(&self, remote: &str, url: &str) -> Result<()> {
+        crate::git::git_remote_add_url(self.path(), remote, url)
+    }
+
+    /// Set the URL of the given remote.
+    pub fn set_remote_url(&self, remote: &str, url: &str) -> Result<()> {
+        crate::git::git_remote_set_url(self.path(), remote, url)
     }
 
     /// Check whether this store has a remote configured.
     pub fn has_remote(&self) -> Result<bool> {
-        if !self.is_sync_init() {
+        if !self.is_init() {
             return Ok(false);
         }
         crate::git::git_has_remote(self.path())

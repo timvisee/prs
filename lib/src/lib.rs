@@ -1,5 +1,5 @@
 pub mod crypto;
-pub mod git;
+pub(crate) mod git;
 pub mod store;
 pub mod sync;
 pub mod types;

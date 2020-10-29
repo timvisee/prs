@@ -113,10 +113,7 @@ pub fn print_main_info() -> ! {
 
     // Attempt to load default store
     let store = Store::open(crate::STORE_DEFAULT_ROOT).ok();
-    let has_sync = store
-        .as_ref()
-        .map(|s| s.sync().is_sync_init())
-        .unwrap_or(false);
+    let has_sync = store.as_ref().map(|s| s.sync().is_init()).unwrap_or(false);
 
     // Print the main info
     println!("{} {}", crate_name!(), crate_version!());

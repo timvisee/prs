@@ -2,14 +2,14 @@ use anyhow::Result;
 use clap::ArgMatches;
 use thiserror::Error;
 
-use prs_lib::{store::Store, sync::Readyness};
+use prs_lib::store::Store;
 
 use crate::{
     cmd::matcher::{
         sync::{remote::RemoteMatcher, SyncMatcher},
         MainMatcher, Matcher,
     },
-    util::error,
+    util::error::{self, ErrorHintsBuilder},
 };
 
 /// A sync remote action.
@@ -33,48 +33,47 @@ impl<'a> Remote<'a> {
         let store = Store::open(matcher_sync.store()).map_err(Err::Store)?;
         let sync = store.sync();
 
-        // Do not set remote if sync is not initialized
-        match sync.readyness()? {
-            Readyness::NoSync => {
-                // TODO: show as error?
-                println!("Sync not configured, to initialize use: prs sync init");
-                crate::util::error::quit();
-            }
-            _ => {}
+        if !sync.is_init() {
+            error::quit_error_msg(
+                "sync is not configured",
+                ErrorHintsBuilder::default()
+                    .sync_init(true)
+                    .build()
+                    .unwrap(),
+            );
         }
 
         // Get or set remote
-        let repo = &store.root;
-        let remotes = prs_lib::git::git_remote(repo)?;
+        let remotes = sync.remotes()?;
         match matcher_remote.git_url() {
             Some(url) => {
                 match remotes.len() {
-                    0 => {
-                        prs_lib::git::git_remote_add_url(repo, "origin", url)?;
-                    }
-                    1 => {
-                        prs_lib::git::git_remote_set_url(repo, &remotes[0], url)?;
-                    }
-                    _ => {
-                        eprintln!("Multiple remotes available, cannot set automatically, inspect using: prs git remote");
-                        error::quit();
-                    }
+                    0 => sync.add_remote_url("origin", url)?,
+                    1 => sync.set_remote_url(&remotes[0], url)?,
+                    _ => error::quit_error_msg(
+                        "multiple remotes configured, cannot set automatically",
+                        ErrorHintsBuilder::default().git(true).build().unwrap(),
+                    ),
                 }
-                if !matcher_main.quiet() {
+                if matcher_main.verbose() {
                     eprintln!("Sync remote set");
                 }
             }
             None => match remotes.len() {
-                0 => eprintln!("No remote configured"),
-                1 => {
-                    let url = prs_lib::git::git_remote_get_url(repo, &remotes[0])?;
-                    eprintln!("{}", url);
-                }
-                _ => eprintln!("Multiple remotes configured, inspect using: prs git remote"),
+                0 => error::quit_error_msg(
+                    "no remote configured",
+                    ErrorHintsBuilder::default()
+                        .sync_remote(true)
+                        .build()
+                        .unwrap(),
+                ),
+                1 => println!("{}", sync.remote_url(&remotes[0])?),
+                _ => error::quit_error_msg(
+                    "multiple remotes configured, cannot decide automatically",
+                    ErrorHintsBuilder::default().git(true).build().unwrap(),
+                ),
             },
         }
-
-        // TODO: sync if remote is changed?
 
         Ok(())
     }

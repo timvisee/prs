@@ -97,6 +97,12 @@ pub struct ErrorHints {
     /// Show about the sync action.
     sync: bool,
 
+    /// Show about the sync init action.
+    sync_init: bool,
+
+    /// Show about the sync remote action.
+    sync_remote: bool,
+
     /// Show abuot the git action.
     git: bool,
 
@@ -113,7 +119,13 @@ pub struct ErrorHints {
 impl ErrorHints {
     /// Check whether any hint should be printed.
     pub fn any(&self) -> bool {
-        self.sync || self.git || self.force || self.verbose || self.help
+        self.sync
+            || self.sync_init
+            || self.sync_remote
+            || self.git
+            || self.force
+            || self.verbose
+            || self.help
     }
 
     /// Print the error hints.
@@ -134,13 +146,25 @@ impl ErrorHints {
         let bin = crate::util::bin_name();
         if self.sync {
             eprintln!(
-                "To sync your your password store use '{}'",
+                "To sync your password store use '{}'",
                 highlight(&format!("{} sync", bin))
+            );
+        }
+        if self.sync_init {
+            eprintln!(
+                "To initialize sync for your password store use '{}'",
+                highlight(&format!("{} sync init", bin))
+            );
+        }
+        if self.sync_remote {
+            eprintln!(
+                "Use '{}' to get or set a remote sync URL",
+                highlight(&format!("{} sync remote [URL]", bin))
             );
         }
         if self.git {
             eprintln!(
-                "Use '{}' to resolve this issue",
+                "Use '{}' to inspect or resolve this issue",
                 highlight(&format!("{} git", bin))
             );
         }
@@ -164,6 +188,8 @@ impl Default for ErrorHints {
         ErrorHints {
             info: Vec::new(),
             sync: false,
+            sync_init: false,
+            sync_remote: false,
             git: false,
             force: false,
             verbose: true,

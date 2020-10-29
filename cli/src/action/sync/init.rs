@@ -2,12 +2,12 @@ use anyhow::Result;
 use clap::ArgMatches;
 use thiserror::Error;
 
-use prs_lib::{
-    store::Store,
-    sync::{Readyness, Sync},
-};
+use prs_lib::store::Store;
 
-use crate::cmd::matcher::{sync::SyncMatcher, MainMatcher, Matcher};
+use crate::{
+    cmd::matcher::{sync::SyncMatcher, MainMatcher, Matcher},
+    util::error::{self, ErrorHintsBuilder},
+};
 
 /// A sync init action.
 pub struct Init<'a> {
@@ -29,16 +29,11 @@ impl<'a> Init<'a> {
         let store = Store::open(matcher_sync.store()).map_err(Err::Store)?;
         let sync = store.sync();
 
-        // Don't sync if not initialized or no remote, show help on how to set up
-        match sync.readyness()? {
-            Readyness::NoSync => {}
-            _ => {
-                if !matcher_main.quiet() {
-                    println!("Sync already initialized, to sync use: prs sync");
-                    no_remote_message(&sync)?;
-                }
-                crate::util::error::quit();
-            }
+        if sync.is_init() {
+            error::quit_error_msg(
+                "sync is already initialized",
+                ErrorHintsBuilder::default().sync(true).build().unwrap(),
+            );
         }
 
         // TODO: add default files (.gitattributes, etc)
@@ -48,19 +43,13 @@ impl<'a> Init<'a> {
 
         if !matcher_main.quiet() {
             eprintln!("Sync initialized");
-            no_remote_message(&sync)?;
+            if !sync.has_remote()? {
+                eprintln!("Sync remote not configured, to set use: prs sync remote <GIT_URL>");
+            }
         }
 
         Ok(())
     }
-}
-
-/// Show a no remote configured notice with instructions.
-fn no_remote_message(sync: &Sync) -> Result<()> {
-    if !sync.has_remote()? {
-        eprintln!("Sync remote not configured, to set use: prs sync remote <GIT_URL>");
-    }
-    Ok(())
 }
 
 #[derive(Debug, Error)]

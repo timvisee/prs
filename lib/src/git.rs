@@ -1,7 +1,7 @@
 use std::env;
 use std::ffi::OsStr;
 use std::path::Path;
-use std::process::{Command, ExitStatus};
+use std::process::{Command, ExitStatus, Output};
 use std::time::SystemTime;
 
 use anyhow::Result;
@@ -60,30 +60,47 @@ pub fn git_commit(repo: &Path, msg: &str, commit_empty: bool) -> Result<()> {
 }
 
 /// Invoke git push.
-pub fn git_push(repo: &Path) -> Result<()> {
-    // TODO: do not set -q flag if in verbose mode
-    git(repo, &["push", "-q"])
+pub fn git_push(repo: &Path, set_branch: Option<&str>, set_upstream: Option<&str>) -> Result<()> {
+    // TODO: do not set -q flag if in verbose mode?
+    let mut args = vec!["push", "-q"];
+    if let Some(upstream) = set_upstream {
+        args.extend_from_slice(&["--set-upstream", upstream]);
+    }
+    if let Some(branch) = set_branch {
+        args.push(branch);
+    }
+    git(repo, &args)
 }
 
 /// Invoke git pull.
 pub fn git_pull(repo: &Path) -> Result<()> {
-    // TODO: do not set -q flag if in verbose mode
+    // TODO: do not set -q flag if in verbose mode?
     git(repo, &["pull", "-q"])
+}
+
+/// Invoke git fetch.
+pub fn git_fetch(repo: &Path, reference: Option<&str>) -> Result<()> {
+    // TODO: do not set -q flag if in verbose mode?
+    let mut args = vec!["fetch", "-q"];
+    if let Some(reference) = reference {
+        args.push(reference);
+    }
+    git(repo, &args)
 }
 
 /// Check if repository has (staged/unstaged) changes.
 pub fn git_has_changes(repo: &Path) -> Result<bool> {
-    Ok(!git_stdout(repo, &["status", "-s"])?.is_empty())
+    Ok(!git_stdout_ok(repo, &["status", "-s"])?.is_empty())
 }
 
 /// Check if repository has remote configured.
 pub fn git_has_remote(repo: &Path) -> Result<bool> {
-    Ok(!git_stdout(repo, &["remote"])?.is_empty())
+    Ok(!git_stdout_ok(repo, &["remote"])?.is_empty())
 }
 
 /// Git get remote list.
 pub fn git_remote(repo: &Path) -> Result<Vec<String>> {
-    Ok(git_stdout(repo, &["remote"])?
+    Ok(git_stdout_ok(repo, &["remote"])?
         .lines()
         .map(|r| r.into())
         .collect())
@@ -91,30 +108,47 @@ pub fn git_remote(repo: &Path) -> Result<Vec<String>> {
 
 /// Get get remote URL.
 pub fn git_remote_get_url(repo: &Path, remote: &str) -> Result<String> {
-    Ok(git_stdout(repo, &["remote", "get-url", remote])?)
+    Ok(git_stdout_ok(repo, &["remote", "get-url", remote])?)
 }
 
 /// Get add remote URL.
-pub fn git_remote_add_url(repo: &Path, remote: &str, url: &str) -> Result<()> {
+pub fn git_remote_add(repo: &Path, remote: &str, url: &str) -> Result<()> {
     Ok(git(repo, &["remote", "add", remote, url])?)
 }
 
-/// Get set remote URL.
-pub fn git_remote_set_url(repo: &Path, remote: &str, url: &str) -> Result<()> {
-    Ok(git(repo, &["remote", "set-url", remote, url])?)
+/// Get remove remote URL.
+pub fn git_remote_remove(repo: &Path, remote: &str) -> Result<()> {
+    Ok(git(repo, &["remote", "remove", remote])?)
 }
 
 /// Get the current git branch name.
 pub fn git_current_branch(repo: &Path) -> Result<String> {
-    let branch = git_stdout(repo, &["rev-parse", "--abbrev-ref", "HEAD"])?;
+    let branch = git_stdout_ok(repo, &["rev-parse", "--abbrev-ref", "HEAD"])?;
     assert!(!branch.is_empty(), "git returned empty branch name");
     assert!(!branch.contains("\n"), "git returned multiple branches");
     Ok(branch.into())
 }
 
+/// List remote git branches.
+pub fn git_branch_remote(repo: &Path) -> Result<Vec<String>> {
+    Ok(git_stdout_ok(repo, &["branch", "-r", "--no-color"])?
+        .lines()
+        .map(|r| {
+            match r.strip_prefix("* ") {
+                Some(r) => r,
+                None => r,
+            }
+            .to_string()
+        })
+        .collect())
+}
+
 /// Get upstream branch for given branch if there is any.
+///
+/// If there is none, `None` is returned.
 pub fn git_branch_upstream<S: AsRef<str>>(repo: &Path, reference: S) -> Result<Option<String>> {
-    let upstream = git_stdout(
+    // Invoke command
+    let output = git_output(
         repo,
         &[
             "rev-parse",
@@ -122,6 +156,22 @@ pub fn git_branch_upstream<S: AsRef<str>>(repo: &Path, reference: S) -> Result<O
             &format!("{}@{{upstream}}", reference.as_ref()),
         ],
     )?;
+
+    // Scan stderr for 'no upstream' messages
+    let stderr = std::str::from_utf8(&output.stderr)
+        .map_err(|err| Err::GitCli(err.into()))?
+        .trim();
+    if stderr.contains("fatal: no upstream configured for branch") {
+        return Ok(None);
+    }
+
+    // Assert status
+    cmd_assert_status(output.status)?;
+
+    // Find upstream branch
+    let upstream = std::str::from_utf8(&output.stdout)
+        .map_err(|err| Err::GitCli(err.into()))?
+        .trim();
     if upstream.is_empty() {
         return Ok(None);
     }
@@ -132,9 +182,18 @@ pub fn git_branch_upstream<S: AsRef<str>>(repo: &Path, reference: S) -> Result<O
     Ok(Some(upstream.into()))
 }
 
+/// Set upstream branch for the given branch.
+pub fn git_branch_set_upstream(repo: &Path, reference: Option<&str>, upstream: &str) -> Result<()> {
+    let mut args = vec!["branch", "--set-upstream-to", &upstream];
+    if let Some(reference) = reference {
+        args.push(reference);
+    }
+    git(repo, &args)
+}
+
 /// Get the hash of a reference.
 pub fn git_ref_hash<S: AsRef<str>>(repo: &Path, reference: S) -> Result<String> {
-    let hash = git_stdout(repo, &["rev-parse", reference.as_ref()])?;
+    let hash = git_stdout_ok(repo, &["rev-parse", reference.as_ref()])?;
     assert_eq!(hash.len(), 40, "git returned invalid hash");
     Ok(hash.into())
 }
@@ -160,13 +219,24 @@ where
     cmd_assert_status(cmd_git(args, Some(repo)).status().map_err(Err::System)?)
 }
 
-/// Invoke a git command with the given arguments, return stdout.
-fn git_stdout<I, S>(repo: &Path, args: I) -> Result<String>
+/// Invoke a git command, returns output.
+fn git_output<I, S>(repo: &Path, args: I) -> Result<Output>
 where
     I: IntoIterator<Item = S>,
     S: AsRef<OsStr>,
 {
-    let output = cmd_git(args, Some(repo)).output().map_err(Err::System)?;
+    cmd_git(args, Some(repo))
+        .output()
+        .map_err(|err| Err::System(err).into())
+}
+
+/// Invoke a git command with the given arguments, return stdout on success.
+fn git_stdout_ok<I, S>(repo: &Path, args: I) -> Result<String>
+where
+    I: IntoIterator<Item = S>,
+    S: AsRef<OsStr>,
+{
+    let output = git_output(repo, args)?;
     cmd_assert_status(output.status)?;
 
     Ok(std::str::from_utf8(&output.stdout)
@@ -198,6 +268,10 @@ where
     }
 
     cmd.args(args);
+
+    // Debug invoked git commands
+    // eprintln!("Invoked: {:?}", &cmd);
+
     cmd
 }
 

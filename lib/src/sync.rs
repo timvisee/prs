@@ -68,10 +68,42 @@ impl<'a> Sync<'a> {
             return Ok(());
         }
 
-        // Pull if remote
-        if self.has_remote()? {
-            self.pull()?;
+        // We're done if we don't have a remote
+        if !self.has_remote()? {
+            return Ok(());
         }
+
+        // We must have upstream set, otherwise try to automatically set or don't pull
+        let repo = self.path();
+        if crate::git::git_branch_upstream(repo, "HEAD")?.is_none() {
+            // Get remotes, we cannot decide upstream if we don't have exactly one
+            let remotes = crate::git::git_remote(repo)?;
+            if remotes.len() != 1 {
+                return Ok(());
+            }
+
+            // Fetch remote branches
+            let remote = &remotes[0];
+            crate::git::git_fetch(repo, Some(remote))?;
+
+            // List remote branches, stop if there are none
+            let remote_branches = crate::git::git_branch_remote(repo)?;
+            if remote_branches.is_empty() {
+                return Ok(());
+            }
+
+            // Determine upstream reference
+            let branch = crate::git::git_current_branch(repo)?;
+            let upstream_ref = format!("{}/{}", remote, branch);
+
+            // Set upstream reference if available on remote, otherwise stop
+            if !remote_branches.contains(&upstream_ref) {
+                return Ok(());
+            }
+            crate::git::git_branch_set_upstream(repo, None, &upstream_ref)?;
+        }
+
+        self.pull()?;
 
         Ok(())
     }
@@ -92,10 +124,37 @@ impl<'a> Sync<'a> {
             self.commit_all(msg, false)?;
         }
 
-        // Push if remote and out of sync
-        if self.has_remote()? && safe_need_to_push(self.path()) {
-            self.push()?;
+        // Do not push  if no remote or not out of sync
+        if !self.has_remote()? || !safe_need_to_push(self.path()) {
+            return Ok(());
         }
+
+        // We must have upstream set, otherwise try to automatically set or don't push
+        let mut set_branch = None;
+        let mut set_upstream = None;
+        let repo = self.path();
+        if crate::git::git_branch_upstream(repo, "HEAD")?.is_none() {
+            // Get remotes, we cannot decide upstream if we don't have exactly one
+            let remotes = crate::git::git_remote(repo)?;
+            if remotes.len() == 1 {
+                // Fetch and list remote branches
+                let remote = &remotes[0];
+                crate::git::git_fetch(repo, Some(remote))?;
+                let remote_branches = crate::git::git_branch_remote(repo)?;
+
+                // Determine upstream reference
+                let branch = crate::git::git_current_branch(repo)?;
+                let upstream_ref = format!("{}/{}", remote, branch);
+
+                // Set upstream reference if not yet used on remote
+                if !remote_branches.contains(&upstream_ref) {
+                    set_branch = Some(branch);
+                    set_upstream = Some(remote.to_string());
+                }
+            }
+        }
+
+        self.push(set_branch.as_deref(), set_upstream.as_deref())?;
 
         Ok(())
     }
@@ -135,12 +194,14 @@ impl<'a> Sync<'a> {
 
     /// Add the URL of the given remote.
     pub fn add_remote_url(&self, remote: &str, url: &str) -> Result<()> {
-        crate::git::git_remote_add_url(self.path(), remote, url)
+        crate::git::git_remote_add(self.path(), remote, url)
     }
 
     /// Set the URL of the given remote.
     pub fn set_remote_url(&self, remote: &str, url: &str) -> Result<()> {
-        crate::git::git_remote_set_url(self.path(), remote, url)
+        // Do not set but remove and add to flush any fetched remote data
+        crate::git::git_remote_remove(self.path(), remote)?;
+        self.add_remote_url(remote, url)
     }
 
     /// Check whether this store has a remote configured.
@@ -157,8 +218,8 @@ impl<'a> Sync<'a> {
     }
 
     /// Push changes to remote.
-    fn push(&self) -> Result<()> {
-        crate::git::git_push(self.path())
+    fn push(&self, set_branch: Option<&str>, set_upstream: Option<&str>) -> Result<()> {
+        crate::git::git_push(self.path(), set_branch, set_upstream)
     }
 
     /// Add all changes and commit them.

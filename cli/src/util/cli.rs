@@ -128,7 +128,7 @@ fn derive_bool(input: &str) -> Option<bool> {
 pub fn edit(plaintext: &Plaintext) -> Result<Option<Plaintext>, std::io::Error> {
     edit::edit_bytes(plaintext.unsecure_ref()).map(|data| {
         Some(data)
-            .filter(|data| &plaintext.unsecure_ref() != data)
+            .filter(|data| &plaintext.unsecure_ref() != &data.as_slice())
             .map(|data| data.into())
     })
 }

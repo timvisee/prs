@@ -122,8 +122,8 @@ due to leaked secrets or other issues.
 Please read the [Security](#security) section.
 
 #### How do I use sync with git?
-If you already have a remote password store repository that is compatible with `prs`,
-clone it using:
+If you already have a remote password store repository that is
+[compatible](#is-prs-compatible-with-pass) with `prs`, clone it using:
 
 ```bash
 # Clone existing remote password store, automatically enables sync
@@ -133,8 +133,8 @@ prs clone MY_GIT_URL
 prs list
 ```
 
-If you do not have a remote password store repository yet, create one (a private
-repository on GitHub or GitLab for example), and run the following:
+If you do not have a remote password store repository yet, create one (an empty
+private repository on GitHub or GitLab for example), and run the following:
 
 ```bash
 # Initialize new password store (if you haven't done so yet)
@@ -233,6 +233,8 @@ should be able to view and edit your secrets.
 
 `prs` does add additional files and settings, some `prs` features might not work
 with other `pass` clients.
+
+See a list of compatible `pass` clients [here][pass-compatible-clients].
 
 ## Help
 ```

@@ -1,6 +1,7 @@
 use clap::ArgMatches;
 
 use super::Matcher;
+use crate::cmd::arg::{ArgStore, CmdArgOption};
 
 /// The init command matcher.
 pub struct InitMatcher<'a> {
@@ -8,9 +9,9 @@ pub struct InitMatcher<'a> {
 }
 
 impl<'a: 'b, 'b> InitMatcher<'a> {
-    /// Store path.
-    pub fn path(&self) -> &str {
-        self.matches.value_of("PATH").unwrap()
+    /// The store.
+    pub fn store(&self) -> String {
+        ArgStore::value(self.matches)
     }
 }
 

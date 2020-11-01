@@ -30,17 +30,19 @@ impl<'a> Init<'a> {
         let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
         let matcher_init = InitMatcher::with(self.cmd_matches).unwrap();
 
-        let path = shellexpand::full(matcher_init.path()).map_err(Err::ExpandPath)?;
+        let path = shellexpand::full(&matcher_init.store())
+            .map_err(Err::ExpandPath)?
+            .to_string();
 
-        ensure_dir_free(&Path::new(path.as_ref()))?;
+        ensure_dir_free(&Path::new(&path))?;
 
         // Initialize store
-        fs::create_dir_all(path.as_ref()).map_err(Err::Init)?;
+        fs::create_dir_all(&path).map_err(Err::Init)?;
 
         // TODO: initialize sync here?
 
         // Open the store to test
-        Store::open(path.as_ref()).map_err(Err::Store)?;
+        Store::open(&path).map_err(Err::Store)?;
 
         // Hint user to add our recipient key
         if !matcher_main.quiet() {

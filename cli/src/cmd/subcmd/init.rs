@@ -1,4 +1,6 @@
-use clap::{App, Arg, SubCommand};
+use clap::{App, SubCommand};
+
+use crate::cmd::arg::{ArgStore, CmdArg};
 
 /// The init command definition.
 pub struct CmdInit;
@@ -8,11 +10,6 @@ impl CmdInit {
         SubCommand::with_name("init")
             .alias("initialize")
             .about("Initialize new password store")
-            .arg(
-                Arg::with_name("PATH")
-                    .help("Password store path")
-                    .default_value(crate::STORE_DEFAULT_ROOT)
-                    .required(true),
-            )
+            .arg(ArgStore::build())
     }
 }

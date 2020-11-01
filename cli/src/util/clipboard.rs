@@ -168,7 +168,7 @@ pub(crate) fn plaintext_copy(
         )
     }
 
-    copy_timeout(&plaintext.0, timeout).map_err(Err::CopySecret)?;
+    copy_timeout(plaintext.unsecure_ref(), timeout).map_err(Err::CopySecret)?;
 
     // TODO: move into copy function, what to do?
     if report_copied {

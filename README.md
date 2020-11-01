@@ -47,9 +47,10 @@ compatible clients, extensions and migration scripts.
 `prs` includes some awesome tweaks and optimizations:
 
 - Greatly improved synchronisation speed through `git` with connection reuse
-- Super fast secret/recipient selection through [`skim`][skim]
+- Super fast interactive secret/recipient selection through [`skim`][skim]
 - Prevents messing with your clipboard with unexpected overwrites
 - Commands have short and conventional aliases for faster and more convenient usage
+- Uses security best practices (secrets: zeroed, `mlock`, `madvice`, no format, [etc](#security))
 
 ## Usage
 ```bash
@@ -108,12 +109,34 @@ prs help
 Security is backed by [`gpg`][gpg] which is used all over the world and
 has been battle-tested for more than 20 years.
 
-`prs` is secure to keep your deepest secrets when assuming the following:
+In summary, `prs` is secure to keep your deepest secrets when assuming the following:
 
 - You keep the password store directory (`~/.password-store`) safe
 - When using sync with `git`: you keep your remote repository safe
 - You use secure GPG keys
 - Your machines are secure
+
+The content of secrets is encrypted and secured. Secrets are stored as encrypted
+GPG files. Some metadata is visible without decryption however.
+The name of a secret (file name), modification time (file modification time) and
+encrypted size (file size) are visible when you have access to the password
+store directory.
+
+Security best practices are used in `prs` to prevent accidentally leaking
+any secret data. Sensitive data such as plaintext, ciphertext and others are
+referred to as 'secret' here.
+
+Secrets are/use:
+
+- Zeroed on drop
+- Locked to physical memory, cannot leak to swap/disk ([`mlock`][security-mlock])
+- Locked into memory, cannot be dumped/not included in core ([`madvice`][security-mlock])
+- String formatting is blocked
+- Constant time comparison to prevent time based attacks
+- Minimally cloned
+
+[security-mlock]: https://man7.org/linux/man-pages/man2/mlock.2.html
+[security-madvice]: https://man7.org/linux/man-pages/man2/madvise.2.html
 
 Note: `prs` does not provide any warranty in any way, shape or form for damage
 due to leaked secrets or other issues.

@@ -20,7 +20,7 @@ fn read_file(prompt: bool) -> Result<Vec<u8>> {
 
 /// Read plaintext from stdin.
 pub fn read_plaintext(prompt: bool) -> Result<Plaintext> {
-    Ok(Plaintext(read_file(prompt).map_err(Err::Plaintext)?))
+    Ok(read_file(prompt).map_err(Err::Plaintext)?.into())
 }
 
 #[derive(Debug, Error)]

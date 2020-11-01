@@ -4,6 +4,7 @@ use std::path::Path;
 use anyhow::Result;
 use gpgme::{Context, EncryptFlags, Protocol};
 use thiserror::Error;
+use zeroize::Zeroize;
 
 use crate::{
     types::{Ciphertext, Plaintext},
@@ -22,45 +23,66 @@ pub fn context() -> Result<Context> {
 }
 
 /// Encrypt given data, write to given file.
-pub fn encrypt(recipients: &Recipients, mut plaintext: Plaintext) -> Result<Ciphertext> {
-    let mut ciphertext = Ciphertext::empty();
+pub fn encrypt(recipients: &Recipients, plaintext: Plaintext) -> Result<Ciphertext> {
+    // TODO: do not use temporary (unsecure) buffer here
+    let mut ciphertext = vec![];
+
     let recipients: Vec<_> = recipients.keys().iter().map(|k| k.0.clone()).collect();
     context()?
         .encrypt_with_flags(
             &recipients,
-            &mut plaintext.0,
-            &mut ciphertext.0,
+            plaintext.unsecure_ref(),
+            &mut ciphertext,
             ENCRYPT_FLAGS,
         )
         .map_err(Err::Encrypt)?;
-    Ok(ciphertext)
+
+    // Explicit zeroing of unsecure buffer required
+    let result = ciphertext.to_vec().into();
+    ciphertext.zeroize();
+    Ok(result)
 }
 
 /// Encrypt the plaintext and write it to the file.
 pub fn encrypt_file(recipients: &Recipients, plaintext: Plaintext, path: &Path) -> Result<()> {
-    fs::write(path, &encrypt(recipients, plaintext)?.0).map_err(|err| Err::WriteFile(err).into())
+    fs::write(path, encrypt(recipients, plaintext)?.unsecure_ref())
+        .map_err(|err| Err::WriteFile(err).into())
 }
 
 /// Decrypt the given ciphertext.
-pub fn decrypt(mut ciphertext: Ciphertext) -> Result<Plaintext> {
-    let mut plaintext = Plaintext::empty();
+pub fn decrypt(ciphertext: Ciphertext) -> Result<Plaintext> {
+    // TODO: do not use temporary (unsecure) buffer here
+    let mut plaintext = vec![];
+
     context()?
-        .decrypt(&mut ciphertext.0, &mut plaintext.0)
+        .decrypt(ciphertext.unsecure_ref(), &mut plaintext)
         .map_err(Err::Decrypt)?;
-    Ok(plaintext)
+
+    // Explicit zeroing of unsecure buffer required
+    let result = Ok(plaintext.to_vec().into());
+    plaintext.zeroize();
+    result
 }
 
 /// Decrypt the file at the given path.
 pub fn decrypt_file(path: &Path) -> Result<Plaintext> {
-    decrypt(Ciphertext(fs::read(path).map_err(Err::ReadFile)?))
+    decrypt(fs::read(path).map_err(Err::ReadFile)?.into())
 }
 
 /// Check whether we can decrypt a file.
 ///
 /// This checks whether we own the proper secret key to decrypt it.
-pub fn can_decrypt(mut ciphertext: Ciphertext) -> Result<bool> {
-    let mut plaintext = Plaintext::empty();
-    match context()?.decrypt(&mut ciphertext.0, &mut plaintext.0) {
+///
+/// To check this, actual decryption is attempted, see this if this can be improved:
+/// https://stackoverflow.com/q/64633736/1000145
+pub fn can_decrypt(ciphertext: Ciphertext) -> Result<bool> {
+    // Try to decrypt, explicit zeroing of unsecure buffer required
+    // TODO: do not use temporary (unsecure) buffer here
+    let mut plaintext = vec![];
+    let result = context()?.decrypt(ciphertext.unsecure_ref(), &mut plaintext);
+    plaintext.zeroize();
+
+    match result {
         Ok(_) => Ok(true),
         Err(err) if gpgme::error::Error::NO_SECKEY.code() == err.code() => Ok(false),
         _ => Ok(true),
@@ -69,7 +91,7 @@ pub fn can_decrypt(mut ciphertext: Ciphertext) -> Result<bool> {
 
 /// Check whether we can decrypt a file at the given path.
 pub fn can_decrypt_file(path: &Path) -> Result<bool> {
-    can_decrypt(Ciphertext(fs::read(path).map_err(Err::ReadFile)?))
+    can_decrypt(fs::read(path).map_err(Err::ReadFile)?.into())
 }
 
 #[derive(Debug, Error)]

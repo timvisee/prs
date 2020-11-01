@@ -42,7 +42,7 @@ impl<'a> Show<'a> {
 // TODO: move to shared module
 pub(crate) fn print(plaintext: Plaintext) -> Result<()> {
     std::io::stdout()
-        .write_all(&plaintext.0)
+        .write_all(plaintext.unsecure_ref())
         .map_err(Err::Print)?;
     let _ = std::io::stdout().flush();
     Ok(())

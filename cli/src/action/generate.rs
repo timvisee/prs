@@ -40,7 +40,7 @@ impl<'a> Generate<'a> {
         let secret = Secret::from(&store, path.to_path_buf());
 
         // Generate secure passphrase plaintext
-        let mut plaintext = Plaintext::from_string(chbs::passphrase());
+        let mut plaintext: Plaintext = chbs::passphrase().into();
 
         // Check if destination already exists, ask to merge if so
         if !matcher_main.force() && path.is_file() {

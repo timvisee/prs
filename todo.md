@@ -1,10 +1,13 @@
-- find better way to see if we own key to decrypt secrets (can_decrypt)
+- find better way to see if we own key to decrypt secrets (can_decrypt) (https://stackoverflow.com/q/64633736/1000145)
+- update dependencies
 
 Next feature:
+- do we have panic protection for secure types (such as `lib::types::Plaintext`)
 - generate pass to stdout with --stdout
 - copy specific property instead of first line
 - sync init set branch
 - gtk copy client
+- check which gpgme version to require (require_gpgme_version macro)
 
 Ideas:
 - annotate commits, to allow easy filtering later on, useful to filter things

@@ -74,8 +74,9 @@ prs copy site/gitlab.com
 
 # Manually synchronize password store with remote repository or do some housekeeping
 prs sync
+prs housekeeping
+prs housekeeping run
 prs housekeeping recrypt
-prs housekeeping sync-keys
 
 # Manage recipients when using multiple machines
 prs recipients add

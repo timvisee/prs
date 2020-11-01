@@ -74,6 +74,8 @@ impl<'a> Sync<'a> {
         sync.prepare()?;
         sync.finalize("Sync dirty changes")?;
 
+        // TODO: do housekeeping?
+
         // TODO: assume changed for now, fetch this state from syncer
         let changed = true;
 

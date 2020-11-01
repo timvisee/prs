@@ -33,7 +33,7 @@ impl<'a> Run<'a> {
 
         housekeeping(&store)?;
 
-        if matcher_main.verbose() {
+        if !matcher_main.quiet() {
             eprintln!("Housekeeping done");
         }
 

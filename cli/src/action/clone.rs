@@ -45,6 +45,9 @@ impl<'a> Clone<'a> {
         // Import repo recipients missing in keychain
         Recipients::import_missing_keys_from_store(&store).map_err(Err::ImportRecipients)?;
 
+        // Run housekeeping
+        crate::action::housekeeping::run::housekeeping(&store).map_err(Err::Housekeeping)?;
+
         // Check whether the store has any key we own the secret for, default to false
         let store_has_our_secret = store
             .recipients()
@@ -129,4 +132,7 @@ pub enum Err {
 
     #[error("failed to import store recipients")]
     ImportRecipients(#[source] anyhow::Error),
+
+    #[error("failed to run housekeeping tasks")]
+    Housekeeping(#[source] anyhow::Error),
 }

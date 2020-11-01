@@ -41,8 +41,11 @@ impl<'a> Init<'a> {
 
         // TODO: initialize sync here?
 
-        // Open the store to test
-        Store::open(&path).map_err(Err::Store)?;
+        // Open new store
+        let store = Store::open(&path).map_err(Err::Store)?;
+
+        // Run housekeeping
+        crate::action::housekeeping::run::housekeeping(&store).map_err(Err::Housekeeping)?;
 
         // Hint user to add our recipient key
         if !matcher_main.quiet() {
@@ -112,4 +115,7 @@ pub enum Err {
 
     #[error("failed to access initialized password store")]
     Store(#[source] anyhow::Error),
+
+    #[error("failed to run housekeeping tasks")]
+    Housekeeping(#[source] anyhow::Error),
 }

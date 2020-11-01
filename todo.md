@@ -1,8 +1,3 @@
-- cmd:
-  - housekeeping
-    - add .gitattributes
-    - add .gitignore
-    - ensure secure permissions for .password-store
 - find better way to see if we own key to decrypt secrets (can_decrypt)
 
 Next feature:

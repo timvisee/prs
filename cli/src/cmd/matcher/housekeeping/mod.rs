@@ -1,4 +1,5 @@
 pub mod recrypt;
+pub mod run;
 pub mod sync_keys;
 
 use clap::ArgMatches;
@@ -17,6 +18,11 @@ impl<'a: 'b, 'b> HousekeepingMatcher<'a> {
     /// Get the housekepeing recrypt sub command, if matched.
     pub fn recrypt(&'a self) -> Option<recrypt::RecryptMatcher> {
         recrypt::RecryptMatcher::with(&self.root)
+    }
+
+    /// Get the housekepeing run sub command, if matched.
+    pub fn run(&'a self) -> Option<run::RunMatcher> {
+        run::RunMatcher::with(&self.root)
     }
 
     /// Get the housekepeing sync-keys sub command, if matched.

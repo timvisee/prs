@@ -1,4 +1,5 @@
 pub mod recrypt;
+pub mod run;
 pub mod sync_keys;
 
 use clap::{App, AppSettings, SubCommand};
@@ -16,6 +17,7 @@ impl CmdHousekeeping {
             .alias("hk")
             .setting(AppSettings::SubcommandRequiredElseHelp)
             .subcommand(recrypt::CmdRecrypt::build())
+            .subcommand(run::CmdRun::build())
             .subcommand(sync_keys::CmdSyncKeys::build())
             .arg(ArgStore::build())
     }

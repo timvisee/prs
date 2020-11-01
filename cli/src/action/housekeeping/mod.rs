@@ -1,4 +1,5 @@
 pub mod recrypt;
+pub mod run;
 pub mod sync_keys;
 
 use anyhow::Result;
@@ -24,6 +25,10 @@ impl<'a> Housekeeping<'a> {
 
         if matcher_housekeeping.recrypt().is_some() {
             return recrypt::Recrypt::new(self.cmd_matches).invoke();
+        }
+
+        if matcher_housekeeping.run().is_some() {
+            return run::Run::new(self.cmd_matches).invoke();
         }
 
         if matcher_housekeeping.sync_keys().is_some() {

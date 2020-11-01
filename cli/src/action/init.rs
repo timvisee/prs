@@ -50,21 +50,21 @@ impl<'a> Init<'a> {
             let system_has_secret = has_secret_key_in_keychain().unwrap_or(true);
 
             if system_has_secret {
-                println!("Now add your own key as recipient or generate a new one:");
+                eprintln!("Now add your own key as recipient or generate a new one:");
             } else {
-                println!("Now generate and add a new recipient key for yourself:");
+                eprintln!("Now generate and add a new recipient key for yourself:");
             }
             if system_has_secret {
-                println!(
+                eprintln!(
                     "    {}",
                     style::highlight(&format!("{} recipients add --secret", bin))
                 );
             }
-            println!(
+            eprintln!(
                 "    {}",
                 style::highlight(&format!("{} recipients generate", bin))
             );
-            println!();
+            eprintln!();
         }
 
         Ok(())

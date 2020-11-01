@@ -194,7 +194,7 @@ recipient:
 
 ```bash
 # On existing machine: re-encrypt all secrets
-prs housekeeping recrypt
+prs housekeeping recrypt --all
 ```
 
 This may take a while. Once done, sync on your new machine to pull in the

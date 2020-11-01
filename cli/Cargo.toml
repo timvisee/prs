@@ -29,7 +29,7 @@ edit = "0.1"
 notify-rust = "4.0"
 prs-lib = { path = "../lib" }
 shellexpand = "2.0"
-skim = "0.8"
+skim = "0.9"
 thiserror = "1.0"
 
 [target.'cfg(all(unix, not(any(target_os="macos", target_os="android", target_os="emscripten"))))'.dependencies]

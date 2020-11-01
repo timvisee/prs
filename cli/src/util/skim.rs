@@ -8,7 +8,7 @@ use prs_lib::{
 };
 use skim::{
     prelude::{SkimItemReceiver, SkimItemSender, SkimOptionsBuilder},
-    AnsiString, Skim, SkimItem,
+    AnsiString, DisplayContext, Skim, SkimItem,
 };
 
 /// Find and select a secret in the given store.
@@ -53,9 +53,8 @@ impl From<Secret> for SkimSecret {
 }
 
 impl SkimItem for SkimSecret {
-    fn display(&self) -> Cow<AnsiString> {
-        let s: AnsiString = self.0.name.clone().into();
-        Cow::Owned(s)
+    fn display(&self, _: DisplayContext) -> AnsiString {
+        self.0.name.clone().into()
     }
 
     fn text(&self) -> Cow<str> {
@@ -140,9 +139,8 @@ impl From<Key> for SkimKey {
 }
 
 impl SkimItem for SkimKey {
-    fn display(&self) -> Cow<AnsiString> {
-        let s: AnsiString = format!("{}", self.0).into();
-        Cow::Owned(s)
+    fn display(&self, _: DisplayContext) -> AnsiString {
+        format!("{}", self.0).into()
     }
 
     fn text(&self) -> Cow<str> {

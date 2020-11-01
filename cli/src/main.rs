@@ -121,19 +121,19 @@ pub fn print_main_info() -> ! {
     let has_sync = store.as_ref().map(|s| s.sync().is_init()).unwrap_or(false);
 
     // Print the main info
-    println!("{} {}", crate_name!(), crate_version!());
-    println!("Usage: {} [FLAGS] <SUBCOMMAND> ...", bin);
-    println!(crate_description!());
-    println!();
+    eprintln!("{} {}", crate_name!(), crate_version!());
+    eprintln!("Usage: {} [FLAGS] <SUBCOMMAND> ...", bin);
+    eprintln!(crate_description!());
+    eprintln!();
 
     if store.is_none() {
-        println!("Initialize a new password store or clone an existing one:");
-        println!("    {}", style::highlight(&format!("{} init", bin)));
-        println!(
+        eprintln!("Initialize a new password store or clone an existing one:");
+        eprintln!("    {}", style::highlight(&format!("{} init", bin)));
+        eprintln!(
             "    {}",
             style::highlight(&format!("{} clone <GIT_URL>", bin))
         );
-        println!();
+        eprintln!();
     } else {
         let store = store.unwrap();
 
@@ -145,62 +145,62 @@ pub fn print_main_info() -> ! {
         if !we_own_any_recipient {
             let system_has_secret = action::clone::has_secret_key_in_keychain().unwrap_or(true);
             if system_has_secret {
-                println!("Add your own key as recipient or generate a new one:");
+                eprintln!("Add your own key as recipient or generate a new one:");
             } else {
-                println!("Generate and add a new recipient key for yourself:");
+                eprintln!("Generate and add a new recipient key for yourself:");
             }
             if system_has_secret {
-                println!(
+                eprintln!(
                     "    {}",
                     style::highlight(&format!("{} recipients add --secret", bin))
                 );
             }
-            println!(
+            eprintln!(
                 "    {}",
                 style::highlight(&format!("{} recipients generate", bin))
             );
-            println!();
+            eprintln!();
         }
 
         // Hint show/copy commands if user has secret
         let has_secret = store.secret_iter().next().is_some();
         if has_secret {
-            println!("Show or copy a secret:");
-            println!("    {}", style::highlight(&format!("{} show [NAME]", bin)));
-            println!("    {}", style::highlight(&format!("{} copy [NAME]", bin)));
-            println!();
+            eprintln!("Show or copy a secret:");
+            eprintln!("    {}", style::highlight(&format!("{} show [NAME]", bin)));
+            eprintln!("    {}", style::highlight(&format!("{} copy [NAME]", bin)));
+            eprintln!();
         }
 
         // Hint add/edit/remove commands if store has recipient we own
         if we_own_any_recipient {
-            println!("Generate, add, edit or remove secrets:");
-            println!(
+            eprintln!("Generate, add, edit or remove secrets:");
+            eprintln!(
                 "    {}",
                 style::highlight(&format!("{} generate <NAME>", bin))
             );
-            println!("    {}", style::highlight(&format!("{} add <NAME>", bin)));
-            println!("    {}", style::highlight(&format!("{} edit [NAME]", bin)));
-            println!(
+            eprintln!("    {}", style::highlight(&format!("{} add <NAME>", bin)));
+            eprintln!("    {}", style::highlight(&format!("{} edit [NAME]", bin)));
+            eprintln!(
                 "    {}",
                 style::highlight(&format!("{} remove [NAME]", bin))
             );
-            println!();
+            eprintln!();
         }
 
         // Hint about sync
         if has_sync {
-            println!("Sync your password store:");
-            println!("    {}", style::highlight(&format!("{} sync", bin)));
-            println!();
+            eprintln!("Sync your password store:");
+            eprintln!("    {}", style::highlight(&format!("{} sync", bin)));
+            eprintln!();
         } else {
-            println!("Enable sync for your password store:");
-            println!("    {}", style::highlight(&format!("{} sync init", bin)));
-            println!();
+            eprintln!("Enable sync for your password store:");
+            eprintln!("    {}", style::highlight(&format!("{} sync init", bin)));
+            eprintln!();
         }
     }
 
-    println!("Show all subcommands, features and other help:");
-    println!(
+    eprintln!("Show all subcommands, features and other help:");
+    eprintln!(
         "    {}",
         style::highlight(&format!("{} help [SUBCOMMAND]", bin))
     );

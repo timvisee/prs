@@ -9,7 +9,11 @@ use crate::{
         sync::{remote::RemoteMatcher, SyncMatcher},
         MainMatcher, Matcher,
     },
-    util::error::{self, ErrorHintsBuilder},
+    util::{
+        self,
+        error::{self, ErrorHintsBuilder},
+        style,
+    },
 };
 
 /// A sync remote action.
@@ -54,6 +58,14 @@ impl<'a> Remote<'a> {
                         "multiple remotes configured, cannot set automatically",
                         ErrorHintsBuilder::default().git(true).build().unwrap(),
                     ),
+                }
+                if !matcher_main.quiet() {
+                    eprintln!("To sync with the remote now use:");
+                    eprintln!(
+                        "    {}",
+                        style::highlight(&format!("{} sync", util::bin_name()))
+                    );
+                    eprintln!();
                 }
                 if matcher_main.verbose() {
                     eprintln!("Sync remote set");

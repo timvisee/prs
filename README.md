@@ -314,7 +314,7 @@ SUBCOMMANDS:
 This project is released under the GNU GPL-3.0 license.
 Check out the [LICENSE](LICENSE) file for more information.
 
-The library portion of this project is licensed under the MIT license.
+The library portion of this project is licensed under the LGPL-3.0 license.
 Check out the [lib/LICENSE](lib/LICENSE) file for more information.
 
 [git]: https://git-scm.com/

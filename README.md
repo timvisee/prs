@@ -144,7 +144,10 @@ The protection against leaking secrets has its boundaries, notably:
 - `prs edit` stores secret in a secure temporary file on disk, opens it in your
   default editor, and removes it afterwards
 - `prs copy` copies secret data to your clipboard, and clears it after 20
-    seconds
+  seconds
+
+[![Security](./res/xkcd_538.png)][xkcd538]  
+_Reference: [XKCD 538][xkcd538]_
 
 Note: `prs` does not provide any warranty in any way, shape or form for damage
 due to leaked secrets or other issues.
@@ -314,10 +317,11 @@ Check out the [LICENSE](LICENSE) file for more information.
 The library portion of this project is licensed under the MIT license.
 Check out the [lib/LICENSE](lib/LICENSE) file for more information.
 
-[usage-demo-asciinema]: https://asciinema.org/a/368611
-[usage-demo-svg]: ./res/demo.svg
 [git]: https://git-scm.com/
 [gpg]: https://gnupg.org/
-[pass]: https://www.passwordstore.org/
 [pass-compatible-clients]: https://www.passwordstore.org#other
+[pass]: https://www.passwordstore.org/
 [skim]: https://github.com/lotabout/skim
+[usage-demo-asciinema]: https://asciinema.org/a/368611
+[usage-demo-svg]: ./res/demo.svg
+[xkcd538]: https://xkcd.com/538/

@@ -98,7 +98,7 @@ prs help
 ```
 
 ## Requirements
-- Linux, macOS, Windows, FreeBSD, Android (other BSDs might work)
+- Linux, macOS, FreeBSD, Android (other BSDs might work)
 - A terminal :sunglasses:
 - `gpg` and `git`
   - Ubuntu, Debian and derivatives: `apt install git gpg`

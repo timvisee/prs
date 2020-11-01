@@ -52,6 +52,9 @@ compatible clients, extensions and migration scripts.
 
 ## Usage
 ```bash
+# Show useful commands (based on current password store state)
+prs
+
 # Easily add, modify and remove secrets with your default editor:
 prs add site/gitlab.com
 prs edit site/gitlab.com
@@ -119,10 +122,10 @@ $ prs help
 
 prs-cli 0.1.0
 Tim Visee <3a4fb3964f@sinenomine.email>
-Secure, fast & convenient password manager with GPG & git
+Secure, fast & convenient password manager CLI with GPG & git sync
 
 USAGE:
-    prs [FLAGS] <SUBCOMMAND>
+    prs [FLAGS] [SUBCOMMAND]
 
 FLAGS:
     -f, --force          Force the action, ignore warnings
@@ -135,6 +138,7 @@ FLAGS:
 
 SUBCOMMANDS:
     add             Add a secret
+    clone           Clone existing password store
     copy            Copy secret to clipboard
     duplicate       Duplicate a secret
     edit            Edit a secret

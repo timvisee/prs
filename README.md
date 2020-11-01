@@ -138,6 +138,14 @@ Secrets are/use:
 [security-mlock]: https://man7.org/linux/man-pages/man2/mlock.2.html
 [security-madvice]: https://man7.org/linux/man-pages/man2/madvise.2.html
 
+The protection against leaking secrets has its boundaries, notably:
+
+- `prs show` prints secret data to stdout
+- `prs edit` stores secret in a secure temporary file on disk, opens it in your
+  default editor, and removes it afterwards
+- `prs copy` copies secret data to your clipboard, and clears it after 20
+    seconds
+
 Note: `prs` does not provide any warranty in any way, shape or form for damage
 due to leaked secrets or other issues.
 

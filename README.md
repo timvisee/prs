@@ -29,6 +29,7 @@ compatible clients, extensions and migration scripts.
 - [Usage](#usage)
 - [Requirements](#requirements)
 - [Security](#security)
+- [FAQ](#faq)
 - [Help](#help)
 - [License](#license)
 
@@ -116,6 +117,123 @@ has been battle-tested for more than 20 years.
 Note: `prs` does not provide any warranty in any way, shape or form for damage
 due to leaked secrets or other issues.
 
+## FAQ
+#### Is `prs` secure? How secure is `prs`?
+Please read the [Security](#security) section.
+
+#### How do I use sync with git?
+If you already have a remote password store repository that is compatible with `prs`,
+clone it using:
+
+```bash
+# Clone existing remote password store, automatically enables sync
+prs clone MY_GIT_URL
+
+# List secrets
+prs list
+```
+
+If you do not have a remote password store repository yet, create one (a private
+repository on GitHub or GitLab for example), and run the following:
+
+```bash
+# Initialize new password store (if you haven't done so yet)
+prs init
+
+# Initialize sync functionality (if you haven't done so yet)
+prs sync init
+
+# Set your remote repository URL and sync to push your password store
+prs sync remote MY_GIT_URL
+prs sync
+```
+
+When sync is enabled on your password store, all commands that modify your
+secrets will automatically keep your remote store in sync.
+
+To manually trigger a sync because you edited a secret on a different machine,
+run:
+
+```bash
+prs sync
+```
+
+#### How do I use `prs` on multiple machines and sync between them?
+_Note: adding and using your existing password store on a new/additional machine
+requires you to have access to a machine that already uses the store during setup._
+
+First, you must have a password store on one machine. Create one (with `prs init`)
+if you don't have any yet.
+You must set up sync with a remote git repository for this passwords store, see
+the [How do I use sync with git](#how-do-i-enable-sync-with-git) section.
+
+To use your existing password store on a new machine, install `prs` and clone
+your remote password store:
+
+```bash
+# On new machine: clone existing password store from git remote
+prs clone MY_GIT_URL
+```
+
+Then add a recipient to the password store for your new machine. I highly
+recommend to use a new recipient (GPG key pair) for each machine (so you won't
+have to share secret GPG keys). Add an existing secret GPG key as recipient, or
+generate a new GPG key pair, using:
+
+```bash
+# On new machine: add existing recipient or generate new one
+prs recipients add --secret
+# or
+prs recipients generate
+```
+
+Your new machine can't read any password store secrets yet, because they are not
+encrypted for its recipient yet. Go back to an existing machine you already use
+the store on, and re-encrypt all secrets to also encrypt them for the new
+recipient:
+
+```bash
+# On existing machine: re-encrypt all secrets
+prs housekeeping recrypt
+```
+
+This may take a while. Once done, sync on your new machine to pull in the
+updated secrets:
+
+```bash
+# On new machine: pull in all re-crypted secrets
+prs sync
+
+# You're done!
+prs list
+```
+
+#### How do I use `prs` on mobile?
+`prs` itself does not support mobile, but there are compatible clients you can
+use to use your password store on mobile.
+
+See [Compatible Clients][pass-compatible-clients] on `pass`s website.
+
+#### Can I recover my secrets if I lost my key?
+No, if you lose all keys, there is no way to recover your secrets.
+
+You might lose your key (recipient, GPG secret key) if your machine crashes or
+if you reinstall it's operating system.
+
+If you are using the same password store on multiple machines with git sync, you
+can still read the secrets on your other machines. To re-add the machine you
+lost your key on, remove the password store from it and see
+[this](#how-do-i-use-prs-on-multiple-machines-and-sync-between-them) section.
+
+#### Is `prs` compatible with `pass`?
+Yes.
+
+`prs` uses the same file structure as [`pass`][pass]. Other `pass` clients
+should be able to view and edit your secrets.
+
+`prs` does add additional files and settings, some `prs` features might not work
+with other `pass` clients.
+
 ## Help
 ```
 $ prs help
@@ -167,4 +285,5 @@ Check out the [lib/LICENSE](lib/LICENSE) file for more information.
 [git]: https://git-scm.com/
 [gpg]: https://gnupg.org/
 [pass]: https://www.passwordstore.org/
+[pass-compatible-clients]: https://www.passwordstore.org#other
 [skim]: https://github.com/lotabout/skim

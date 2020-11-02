@@ -24,7 +24,7 @@ cache:
 # Install compiler and OpenSSL dependencies
 before_script:
   - apt-get update
-  - apt-get install -y --no-install-recommends libgpgme-dev build-essential pkg-config xorg-dev python3 libx11-xcb-dev libgl1-mesa-dev libdbus-1-dev
+  - apt-get install -y --no-install-recommends libgpgme-dev build-essential pkg-config xorg-dev python3 libx11-xcb-dev libgl1-mesa-dev libdbus-1-dev $APT_PACKAGES
   - |
     rustup install $RUST_VERSION
     rustup default $RUST_VERSION
@@ -71,46 +71,20 @@ build-x86_64-linux-musl:
   stage: build
   needs: []
   variables:
+    TARGET: x86_64-unknown-linux-musl
     RUST_TARGET: x86_64-unknown-linux-musl
     PKG_CONFIG_ALLOW_CROSS: 1
+    LIBGPG_ERROR_INCLUDE: "$PREFIX/include"
+    LIBGPG_ERROR_LIB_DIR: "$PREFIX/lib"
+    LIBGPG_ERROR_LIBS: "gpg-error"
+    LIBGPG_ERROR_STATIC: 1
+    GPGME_INCLUDE: "$PREFIX/include"
+    GPGME_LIB_DIR: "$PREFIX/lib"
+    GPGME_LIBS: "gpgme:assuan"
+    GPGME_STATIC: 1
+    APT_PACKAGES: "bzip2 gnupg2 curl"
   script:
-    - apt-get install -y --no-install-recommends bzip2 gnupg2 curl
-
-    - export TARGET="x86_64-unknown-linux-musl"
-
-    - export LIBGPG_ERROR_VER=1.39
-    - cd /usr/src
-    - curl -sSL "https://www.gnupg.org/ftp/gcrypt/libgpg-error/libgpg-error-${LIBGPG_ERROR_VER}.tar.bz2" | tar -xj
-    - cd libgpg-error-$LIBGPG_ERROR_VER
-    - ./configure --host "$TARGET" --prefix="$PREFIX" --with-pic --enable-fast-install --disable-dependency-tracking --enable-static --disable-shared --disable-nls --disable-doc --disable-languages --disable-tests
-    - make -j$(nproc) install
-
-    - apt-get update && apt-get install -y --no-install-recommends gnupg2 && rm -rf /var/lib/apt/lists/*
-
-    - export LIBASSUAN_VER=2.5.3
-    - cd /usr/src
-    - curl -sSL "https://www.gnupg.org/ftp/gcrypt/libassuan/libassuan-${LIBASSUAN_VER}.tar.bz2" | tar -xj
-    - cd "libassuan-$LIBASSUAN_VER"
-    - ./configure --host "$TARGET" --prefix="$PREFIX" --with-pic --enable-fast-install --disable-dependency-tracking --enable-static --disable-shared --disable-doc --with-gpg-error-prefix="$PREFIX"
-    - make -j$(nproc) install
-
-    - export GPGME_VER=1.14.0
-    - cd /usr/src
-    - curl -sSL "https://www.gnupg.org/ftp/gcrypt/gpgme/gpgme-${GPGME_VER}.tar.bz2" | tar -xj
-    - cd "gpgme-$GPGME_VER"
-    - ./configure --host "$TARGET" --prefix="$PREFIX" --with-pic --enable-fast-install --disable-dependency-tracking --enable-static --disable-shared --disable-languages --disable-gpg-test --with-gpg-error-prefix="$PREFIX" --with-libassuan-prefix="$PREFIX"
-    - make -j$(nproc) install
-
-    - export LIBGPG_ERROR_INCLUDE="$PREFIX/include"
-    - export LIBGPG_ERROR_LIB_DIR="$PREFIX/lib"
-    - export LIBGPG_ERROR_LIBS="gpg-error"
-    - export LIBGPG_ERROR_STATIC=1
-    - export GPGME_INCLUDE="$PREFIX/include"
-    - export GPGME_LIB_DIR="$PREFIX/lib"
-    - export GPGME_LIBS="gpgme:assuan"
-    - export GPGME_STATIC=1
-
-    - cd /builds/timvisee/prs/
+    - ./ci/gpgme/build
 
     - rustup target add $RUST_TARGET
     - cargo build --target=$RUST_TARGET --release --verbose

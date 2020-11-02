@@ -3,7 +3,9 @@ use std::time::Duration;
 
 use anyhow::Result;
 use copypasta_ext::prelude::*;
-use notify_rust::{Hint, Notification};
+#[cfg(target_os = "linux")]
+use notify_rust::Hint;
+use notify_rust::Notification;
 use prs_lib::types::Plaintext;
 use thiserror::Error;
 
@@ -183,16 +185,19 @@ pub(crate) fn plaintext_copy(
 
 /// Show notification to user about cleared clipboard.
 fn notify_cleared() -> Result<()> {
-    Notification::new()
-        .appname(&crate::util::bin_name())
+    let mut n = Notification::new();
+    n.appname(&crate::util::bin_name())
         .summary(&format!("Clipboard cleared - {}", crate::util::bin_name()))
         .body("Secret cleared from clipboard")
         .auto_icon()
         .icon("lock")
-        .timeout(3000)
-        .urgency(notify_rust::Urgency::Low)
-        .hint(Hint::Category("presence.offline".into()))
-        .show()?;
+        .timeout(3000);
+
+    #[cfg(target_os = "linux")]
+    n.urgency(notify_rust::Urgency::Low)
+        .hint(Hint::Category("presence.offline".into()));
+
+    n.show()?;
     Ok(())
 }
 

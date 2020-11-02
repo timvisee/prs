@@ -4,7 +4,7 @@ use std::time::Duration;
 use anyhow::Result;
 
 use crate::{
-    git::{self, RepoState},
+    git::{self, RepositoryState},
     store::Store,
 };
 
@@ -46,8 +46,8 @@ impl<'a> Sync<'a> {
             return Ok(Readyness::NoSync);
         }
 
-        match git::git_state(path)? {
-            RepoState::Clean => {
+        match git::git_state(path).unwrap() {
+            RepositoryState::Clean => {
                 if is_dirty(path)? {
                     Ok(Readyness::Dirty)
                 } else {
@@ -244,7 +244,7 @@ pub enum Readyness {
     NoSync,
 
     /// Special repository state.
-    RepoState(git::RepoState),
+    RepoState(git::RepositoryState),
 
     /// Repository is dirty (has uncommitted changes).
     Dirty,

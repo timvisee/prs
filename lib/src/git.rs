@@ -7,6 +7,9 @@ use std::time::SystemTime;
 use anyhow::Result;
 use thiserror::Error;
 
+// Re-exports
+pub use git_state::{git_state, RepositoryState};
+
 /// The git FETCH_HEAD file.
 const GIT_FETCH_HEAD_FILE: &str = ".git/FETCH_HEAD";
 
@@ -206,67 +209,6 @@ pub fn git_last_pull_time(repo: &Path) -> Result<SystemTime> {
         .metadata()
         .and_then(|m| m.modified())
         .map_err(Err::Other)?)
-}
-
-/// Get git repository state.
-///
-/// See:
-/// - https://github.com/libgit2/libgit2/blob/52294c413100ed4930764addc69beadd82382a4c/src/repository.c#L2867-L2908
-/// - https://libgit2.org/libgit2/#HEAD/type/git_repository_state_t
-pub fn git_state(repo: &Path) -> Result<RepoState> {
-    let git_dir = repo.join(".git");
-    let git_dir = if git_dir.is_dir() { &git_dir } else { repo };
-
-    if git_dir.join("rebase-merge/interactive").is_file() {
-        Ok(RepoState::RebaseInteractive)
-    } else if git_dir.join("rebase-merge").is_dir() {
-        Ok(RepoState::RebaseMerge)
-    } else if git_dir.join("rebase-apply/rebasing").is_file() {
-        Ok(RepoState::Rebase)
-    } else if git_dir.join("rebase-apply/applying").is_file() {
-        Ok(RepoState::ApplyMailbox)
-    } else if git_dir.join("rebase-apply").is_dir() {
-        Ok(RepoState::ApplyMailboxOrRebase)
-    } else if git_dir.join("MERGE_HEAD").is_file() {
-        Ok(RepoState::Merge)
-    } else if git_dir.join("REVERT_HEAD").is_file() {
-        if git_dir.join("sequencer/todo").is_file() {
-            Ok(RepoState::RevertSequence)
-        } else {
-            Ok(RepoState::Revert)
-        }
-    } else if git_dir.join("CHERRY_PICK_HEAD").is_file() {
-        if git_dir.join("sequencer/todo").is_file() {
-            Ok(RepoState::CherryPickSequence)
-        } else {
-            Ok(RepoState::CherryPick)
-        }
-    } else if git_dir.join("BISECT_LOG").is_file() {
-        Ok(RepoState::Bisect)
-    } else {
-        Ok(RepoState::Clean)
-    }
-}
-
-/// Git repository state.
-///
-/// See:
-/// - https://libgit2.org/libgit2/#HEAD/type/git_repository_state_t
-/// - https://libgit2.org/libgit2/#HEAD/group/repository/git_repository_state
-#[derive(Debug, PartialEq, Eq, Copy, Clone)]
-pub enum RepoState {
-    Clean,
-    Merge,
-    Revert,
-    RevertSequence,
-    CherryPick,
-    CherryPickSequence,
-    Bisect,
-    Rebase,
-    RebaseInteractive,
-    RebaseMerge,
-    ApplyMailbox,
-    ApplyMailboxOrRebase,
 }
 
 /// Invoke a git command with the given arguments.

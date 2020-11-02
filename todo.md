@@ -1,5 +1,4 @@
 - find better way to see if we own key to decrypt secrets (can_decrypt) (https://stackoverflow.com/q/64633736/1000145)
-- update dependencies
 
 Next feature:
 - sync filesystem after clearing secret from disk

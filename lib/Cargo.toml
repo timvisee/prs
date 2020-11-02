@@ -20,6 +20,7 @@ gitlab = { repository = "timvisee/prs", branch = "master" }
 
 [dependencies]
 anyhow = "1.0"
+git-state = "0.1"
 gpgme = "0.9.2"
 secstr = "0.4"
 shellexpand = "2.0"

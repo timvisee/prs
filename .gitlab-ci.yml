@@ -73,7 +73,9 @@ build-x86_64-linux-musl:
   variables:
     TARGET: x86_64-unknown-linux-musl
     RUST_TARGET: x86_64-unknown-linux-musl
+    APT_PACKAGES: "bzip2 gnupg2 curl libsystemd-dev"
     PKG_CONFIG_ALLOW_CROSS: 1
+    PKG_CONFIG_ALL_STATIC: 1
     LIBGPG_ERROR_INCLUDE: "$PREFIX/include"
     LIBGPG_ERROR_LIB_DIR: "$PREFIX/lib"
     LIBGPG_ERROR_LIBS: "gpg-error"
@@ -82,7 +84,6 @@ build-x86_64-linux-musl:
     GPGME_LIB_DIR: "$PREFIX/lib"
     GPGME_LIBS: "gpgme:assuan"
     GPGME_STATIC: 1
-    APT_PACKAGES: "bzip2 gnupg2 curl"
   script:
     - ./ci/gpgme/build
 

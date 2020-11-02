@@ -51,8 +51,21 @@ check-old:
   <<: *check-base
   variables:
     RUST_VERSION: "1.45.0"
+check-macos-stable:
+  tags:
+    - macos
+  cache: {}
+  before_script:
+    - |
+      rustup install $RUST_VERSION
+      rustup default $RUST_VERSION
+    - |
+      rustc --version
+      cargo --version
+    - brew install gpg gpgme
+  <<: *check-base
 
-# Build using Rust stable
+# Build using Rust stable on Linux
 build-x86_64-linux-gnu:
   stage: build
   needs: []
@@ -64,6 +77,31 @@ build-x86_64-linux-gnu:
     name: prs-x86_64-linux-gnu
     paths:
       - prs-$RUST_TARGET
+    expire_in: 1 month
+
+# Build using Rust stable on macOS
+build-macos:
+  stage: build
+  tags:
+    - macos
+  cache: {}
+  needs: []
+  before_script:
+    - |
+      rustup install $RUST_VERSION
+      rustup default $RUST_VERSION
+    - |
+      rustc --version
+      cargo --version
+    - brew install gpg gpgme
+  script:
+    - cargo build --release --verbose
+    - mv target/release/prs ./prs
+    # - strip -g ./prs
+  artifacts:
+    name: prs-macos
+    paths:
+      - prs
     expire_in: 1 month
 
 # Run the unit tests through Cargo

@@ -25,8 +25,6 @@ cache:
 before_script:
   - apt-get update
   - apt-get install -y --no-install-recommends libgpgme-dev build-essential pkg-config xorg-dev python3 libx11-xcb-dev libgl1-mesa-dev libdbus-1-dev
-    # TODO: remove this installation when git2 dependency is removed
-  - apt-get install -y --no-install-recommends libssl-dev
   - |
     rustup install $RUST_VERSION
     rustup default $RUST_VERSION
@@ -68,26 +66,25 @@ build-x86_64-linux-gnu:
       - prs-$RUST_TARGET
     expire_in: 1 month
 
-# TODO: enable this again, specify how to statically compile OpenSSL, or remove git2 dependency
-# # Build a static version
-# build-x86_64-linux-musl:
-#   stage: build
-#   needs: []
-#   variables:
-#     RUST_TARGET: x86_64-unknown-linux-musl
-#   script:
-#     - rustup target add $RUST_TARGET
-#     - cargo build --target=$RUST_TARGET --release --verbose
+# Build a static version
+build-x86_64-linux-musl:
+  stage: build
+  needs: []
+  variables:
+    RUST_TARGET: x86_64-unknown-linux-musl
+  script:
+    - rustup target add $RUST_TARGET
+    - cargo build --target=$RUST_TARGET --release --verbose
 
-#     # Prepare the release artifact, strip it
-#     - find . -name prs -exec ls -lah {} \;
-#     - mv target/$RUST_TARGET/release/prs ./prs-$RUST_TARGET
-#     - strip -g ./prs-$RUST_TARGET
-#   artifacts:
-#     name: prs-x86_64-linux-musl
-#     paths:
-#       - prs-$RUST_TARGET
-#     expire_in: 1 month
+    # Prepare the release artifact, strip it
+    - find . -name prs -exec ls -lah {} \;
+    - mv target/$RUST_TARGET/release/prs ./prs-$RUST_TARGET
+    - strip -g ./prs-$RUST_TARGET
+  artifacts:
+    name: prs-x86_64-linux-musl
+    paths:
+      - prs-$RUST_TARGET
+    expire_in: 1 month
 
 # Run the unit tests through Cargo
 test-cargo:

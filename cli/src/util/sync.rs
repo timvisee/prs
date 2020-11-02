@@ -18,7 +18,7 @@ pub fn ensure_ready(sync: &Sync) {
         match readyness {
             Readyness::Ready | Readyness::NoSync => return,
             Readyness::Dirty => "store git repository has uncommitted changes".into(),
-            Readyness::GitState(state) => {
+            Readyness::RepoState(state) => {
                 format!("store git repository is in unfinished state: {:?}", state)
             }
         },

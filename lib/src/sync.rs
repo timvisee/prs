@@ -2,9 +2,11 @@ use std::path::Path;
 use std::time::Duration;
 
 use anyhow::Result;
-use thiserror::Error;
 
-use crate::store::Store;
+use crate::{
+    git::{self, RepoState},
+    store::Store,
+};
 
 /// Store git directory.
 pub const STORE_GIT_DIR: &str = ".git/";
@@ -44,15 +46,15 @@ impl<'a> Sync<'a> {
             return Ok(Readyness::NoSync);
         }
 
-        match git2::Repository::open(path).map_err(Err::Git2)?.state() {
-            git2::RepositoryState::Clean => {
+        match git::git_state(path)? {
+            RepoState::Clean => {
                 if is_dirty(path)? {
                     Ok(Readyness::Dirty)
                 } else {
                     Ok(Readyness::Ready)
                 }
             }
-            state => Ok(Readyness::GitState(state)),
+            state => Ok(Readyness::RepoState(state)),
         }
     }
 
@@ -75,32 +77,32 @@ impl<'a> Sync<'a> {
 
         // We must have upstream set, otherwise try to automatically set or don't pull
         let repo = self.path();
-        if crate::git::git_branch_upstream(repo, "HEAD")?.is_none() {
+        if git::git_branch_upstream(repo, "HEAD")?.is_none() {
             // Get remotes, we cannot decide upstream if we don't have exactly one
-            let remotes = crate::git::git_remote(repo)?;
+            let remotes = git::git_remote(repo)?;
             if remotes.len() != 1 {
                 return Ok(());
             }
 
             // Fetch remote branches
             let remote = &remotes[0];
-            crate::git::git_fetch(repo, Some(remote))?;
+            git::git_fetch(repo, Some(remote))?;
 
             // List remote branches, stop if there are none
-            let remote_branches = crate::git::git_branch_remote(repo)?;
+            let remote_branches = git::git_branch_remote(repo)?;
             if remote_branches.is_empty() {
                 return Ok(());
             }
 
             // Determine upstream reference
-            let branch = crate::git::git_current_branch(repo)?;
+            let branch = git::git_current_branch(repo)?;
             let upstream_ref = format!("{}/{}", remote, branch);
 
             // Set upstream reference if available on remote, otherwise stop
             if !remote_branches.contains(&upstream_ref) {
                 return Ok(());
             }
-            crate::git::git_branch_set_upstream(repo, None, &upstream_ref)?;
+            git::git_branch_set_upstream(repo, None, &upstream_ref)?;
         }
 
         self.pull()?;
@@ -133,17 +135,17 @@ impl<'a> Sync<'a> {
         let mut set_branch = None;
         let mut set_upstream = None;
         let repo = self.path();
-        if crate::git::git_branch_upstream(repo, "HEAD")?.is_none() {
+        if git::git_branch_upstream(repo, "HEAD")?.is_none() {
             // Get remotes, we cannot decide upstream if we don't have exactly one
-            let remotes = crate::git::git_remote(repo)?;
+            let remotes = git::git_remote(repo)?;
             if remotes.len() == 1 {
                 // Fetch and list remote branches
                 let remote = &remotes[0];
-                crate::git::git_fetch(repo, Some(remote))?;
-                let remote_branches = crate::git::git_branch_remote(repo)?;
+                git::git_fetch(repo, Some(remote))?;
+                let remote_branches = git::git_branch_remote(repo)?;
 
                 // Determine upstream reference
-                let branch = crate::git::git_current_branch(repo)?;
+                let branch = git::git_current_branch(repo)?;
                 let upstream_ref = format!("{}/{}", remote, branch);
 
                 // Set upstream reference if not yet used on remote
@@ -161,7 +163,7 @@ impl<'a> Sync<'a> {
 
     /// Initialize sync.
     pub fn init(&self) -> Result<()> {
-        crate::git::git_init(self.path())?;
+        git::git_init(self.path())?;
         self.commit_all("Initialize sync with git", true)?;
         Ok(())
     }
@@ -172,7 +174,7 @@ impl<'a> Sync<'a> {
             .path()
             .to_str()
             .expect("failed to determine clone path");
-        crate::git::git_clone(self.path(), url, path, quiet)?;
+        git::git_clone(self.path(), url, path, quiet)?;
         Ok(())
     }
 
@@ -184,23 +186,23 @@ impl<'a> Sync<'a> {
 
     /// Get a list of sync remotes.
     pub fn remotes(&self) -> Result<Vec<String>> {
-        crate::git::git_remote(self.path())
+        git::git_remote(self.path())
     }
 
     /// Get the URL of the given remote.
     pub fn remote_url(&self, remote: &str) -> Result<String> {
-        crate::git::git_remote_get_url(self.path(), remote)
+        git::git_remote_get_url(self.path(), remote)
     }
 
     /// Add the URL of the given remote.
     pub fn add_remote_url(&self, remote: &str, url: &str) -> Result<()> {
-        crate::git::git_remote_add(self.path(), remote, url)
+        git::git_remote_add(self.path(), remote, url)
     }
 
     /// Set the URL of the given remote.
     pub fn set_remote_url(&self, remote: &str, url: &str) -> Result<()> {
         // Do not set but remove and add to flush any fetched remote data
-        crate::git::git_remote_remove(self.path(), remote)?;
+        git::git_remote_remove(self.path(), remote)?;
         self.add_remote_url(remote, url)
     }
 
@@ -209,24 +211,24 @@ impl<'a> Sync<'a> {
         if !self.is_init() {
             return Ok(false);
         }
-        crate::git::git_has_remote(self.path())
+        git::git_has_remote(self.path())
     }
 
     /// Pull changes from remote.
     fn pull(&self) -> Result<()> {
-        crate::git::git_pull(self.path())
+        git::git_pull(self.path())
     }
 
     /// Push changes to remote.
     fn push(&self, set_branch: Option<&str>, set_upstream: Option<&str>) -> Result<()> {
-        crate::git::git_push(self.path(), set_branch, set_upstream)
+        git::git_push(self.path(), set_branch, set_upstream)
     }
 
     /// Add all changes and commit them.
     fn commit_all<M: AsRef<str>>(&self, msg: M, commit_empty: bool) -> Result<()> {
         let path = self.path();
-        crate::git::git_add_all(path)?;
-        crate::git::git_commit(path, msg.as_ref(), commit_empty)
+        git::git_add_all(path)?;
+        git::git_commit(path, msg.as_ref(), commit_empty)
     }
 }
 
@@ -242,7 +244,7 @@ pub enum Readyness {
     NoSync,
 
     /// Special repository state.
-    GitState(git2::RepositoryState),
+    RepoState(git::RepoState),
 
     /// Repository is dirty (has uncommitted changes).
     Dirty,
@@ -265,9 +267,7 @@ impl Readyness {
 ///
 /// Repository is dirty if it has any uncommitted changed.
 fn is_dirty(repo: &Path) -> Result<bool> {
-    let repo = git2::Repository::open(repo).map_err(Err::Git2)?;
-    let statuses = repo.statuses(None).map_err(Err::Git2)?;
-    Ok(!statuses.is_empty())
+    git::git_has_changes(repo)
 }
 
 /// Check whether we need to push to the remote.
@@ -291,25 +291,18 @@ fn safe_need_to_push(repo: &Path) -> bool {
 /// If the upstream branch is unknown, this always returns true.
 fn need_to_push(repo: &Path) -> Result<bool> {
     // If last pull is outdated, always push
-    let last_pulled = crate::git::git_last_pull_time(repo)?;
+    let last_pulled = git::git_last_pull_time(repo)?;
     if last_pulled.elapsed()? > GIT_PULL_OUTDATED {
         return Ok(true);
     }
 
     // Get branch and upstream branch name
-    let branch = crate::git::git_current_branch(repo)?;
-    let upstream = match crate::git::git_branch_upstream(repo, &branch)? {
+    let branch = git::git_current_branch(repo)?;
+    let upstream = match git::git_branch_upstream(repo, &branch)? {
         Some(upstream) => upstream,
         None => return Ok(true),
     };
 
     // Compare local and remote branch hashes
-    Ok(crate::git::git_ref_hash(repo, branch)? != crate::git::git_ref_hash(repo, upstream)?)
-}
-
-#[derive(Debug, Error)]
-pub enum Err {
-    // TODO: show prepare/finalize errors here?
-    #[error("failed to complete git operation")]
-    Git2(#[source] git2::Error),
+    Ok(git::git_ref_hash(repo, branch)? != git::git_ref_hash(repo, upstream)?)
 }

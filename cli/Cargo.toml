@@ -25,6 +25,7 @@ clap = "2.33"
 colored = "2.0"
 derive_builder = "0.9"
 edit = "0.1"
+libc = "0.2"
 notify-rust = "4.0"
 prs-lib = { path = "../lib" }
 shellexpand = "2.0"
@@ -38,13 +39,11 @@ copypasta-ext = { version = "0.3.2", default-features = false, features = [] }
 # Clipboard support for X11
 [target.'cfg(all(unix, not(any(target_os="macos", target_os="android", target_os="emscripten")), not(target_env = "musl")))'.dependencies]
 copypasta-ext = { version = "0.3.2", default-features = false, features = ["x11-fork"] }
-libc = "0.2"
 x11-clipboard = "0.5"
 
 # Clipboard support for X11 musl
 [target.'cfg(all(unix, not(any(target_os="macos", target_os="android", target_os="emscripten")), target_env = "musl"))'.dependencies]
 copypasta-ext = { version = "0.3.2", default-features = false, features = ["x11-bin"] }
-libc = "0.2"
 
 [[bin]]
 name = "prs"

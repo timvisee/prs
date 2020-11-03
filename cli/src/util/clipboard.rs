@@ -184,20 +184,29 @@ pub(crate) fn plaintext_copy(
 }
 
 /// Show notification to user about cleared clipboard.
+#[allow(unreachable_code)]
 fn notify_cleared() -> Result<()> {
-    let mut n = Notification::new();
-    n.appname(&crate::util::bin_name())
-        .summary(&format!("Clipboard cleared - {}", crate::util::bin_name()))
-        .body("Secret cleared from clipboard")
-        .auto_icon()
-        .icon("lock")
-        .timeout(3000);
+    // Do not show notification on musl due to segfault
+    #[cfg(not(target_env = "musl"))]
+    {
+        let mut n = Notification::new();
+        n.appname(&crate::util::bin_name())
+            .summary(&format!("Clipboard cleared - {}", crate::util::bin_name()))
+            .body("Secret cleared from clipboard")
+            .auto_icon()
+            .icon("lock")
+            .timeout(3000);
 
-    #[cfg(target_os = "linux")]
-    n.urgency(notify_rust::Urgency::Low)
-        .hint(Hint::Category("presence.offline".into()));
+        #[cfg(target_os = "linux")]
+        n.urgency(notify_rust::Urgency::Low)
+            .hint(Hint::Category("presence.offline".into()));
 
-    n.show()?;
+        n.show()?;
+        return Ok(());
+    }
+
+    // Fallback if we cannot notify
+    eprintln!("Secret cleared from clipboard");
     Ok(())
 }
 

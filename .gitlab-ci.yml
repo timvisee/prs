@@ -55,6 +55,9 @@ check-macos-stable:
   tags:
     - macos
   cache: {}
+  only:
+    - master
+    - /^v(\d+\.)*\d+$/
   before_script:
     - |
       rustup install $RUST_VERSION
@@ -119,6 +122,9 @@ build-macos:
   tags:
     - macos
   cache: {}
+  only:
+    - master
+    - /^v(\d+\.)*\d+$/
   needs: []
   before_script:
     - |

@@ -28,7 +28,7 @@ compatible clients, extensions and migration scripts.
 - [Features](#features)
 - [Usage](#usage)
 - [Requirements](#requirements)
-- [Installation](#installation)
+- [Install](#install)
 - [Security](#security)
 - [FAQ](#faq)
 - [Help](#help)
@@ -116,8 +116,8 @@ Make sure you meet and install the [requirements](#requirements).
 
 The latest binaries (zipped) from `master` can be found here:
 
-- [Linux x86_64 GNU](https://gitlab.com/timvisee/prs/-/jobs/artifacts/master/download?job=build-x86_64-linux-gnu)
-- [Linux x86_64 musl](https://gitlab.com/timvisee/prs/-/jobs/artifacts/master/download?job=build-x86_64-linux-musl)
+- [Linux x86_64 musl](https://gitlab.com/timvisee/prs/-/jobs/artifacts/master/download?job=build-x86_64-linux-musl) _(static)_
+- [Linux x86_64 GNU](https://gitlab.com/timvisee/prs/-/jobs/artifacts/master/download?job=build-x86_64-linux-gnu) _(dynamic)_
 - [macOS x86_64](https://gitlab.com/timvisee/prs/-/jobs/artifacts/master/download?job=build-macos)
 
 ## Security

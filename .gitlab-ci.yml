@@ -77,6 +77,27 @@ check-macos-stable:
     - brew upgrade
     - brew install $BREW_PACKAGES
   <<: *check-base
+check-windows:
+  stage: check
+  tags:
+    - windows
+  cache: {}
+  before_script:
+    # Install scoop
+    - Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
+
+    # Install Rust
+    - scoop install rustup
+    - rustup install $RUST_VERSION
+    - rustup default $RUST_VERSION
+    - rustc --version
+    - cargo --version
+
+    # Install GPGME
+    - scoop install gpg
+  script:
+    - cd lib; cargo check --no-default-features --features backend-gnupg-bin --verbose; cd ..
+    - cd cli; cargo check --no-default-features --features backend-gnupg-bin --verbose; cd ..
 
 # Build using Rust stable on Linux
 build-x86_64-linux-gnu:

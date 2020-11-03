@@ -250,6 +250,7 @@ checksum = "893dee0849968620a0f22e1da74cf5ec697a1c00a3f2a0bb10101140bebe3ca4"
 dependencies = [
  "copypasta",
  "libc",
+ "which 4.0.2",
  "x11-clipboard",
 ]
 
@@ -522,7 +523,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "323032447eba6f5aca88b46d6e7815151c16c53e4128569420c09d7840db3bfc"
 dependencies = [
  "tempfile",
- "which",
+ "which 3.1.1",
 ]
 
 [[package]]
@@ -1545,6 +1546,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d011071ae14a2f6671d0b74080ae0cd8ebf3a6f8c9589a2cd45f23126fe29724"
 dependencies = [
  "libc",
+]
+
+[[package]]
+name = "which"
+version = "4.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "87c14ef7e1b8b8ecfc75d5eca37949410046e66f15d185c01d70824f1f8111ef"
+dependencies = [
+ "libc",
+ "thiserror",
 ]
 
 [[package]]

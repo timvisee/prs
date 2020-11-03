@@ -28,6 +28,7 @@ compatible clients, extensions and migration scripts.
 - [Features](#features)
 - [Usage](#usage)
 - [Requirements](#requirements)
+- [Installation](#installation)
 - [Security](#security)
 - [FAQ](#faq)
 - [Help](#help)
@@ -100,10 +101,24 @@ prs help
 ## Requirements
 - Linux, macOS, FreeBSD, Android (other BSDs might work)
 - A terminal :sunglasses:
-- `gpg` and `git`
-  - Ubuntu, Debian and derivatives: `apt install git gpg`
-  - CentOS/Red Hat/openSUSE/Fedora: `apt install git gnupg`
-  - Arch: `pacman -S git gnupg`
+- `gpg`, `gpgme` and `git`
+  - Ubuntu, Debian and derivatives: `apt install git gpg libgpgme11`
+  - CentOS/Red Hat/openSUSE/Fedora: `yum install git gnupg gpgme`
+  - Arch: `pacman -S git gnupg gpgme`
+  - Alpine: `apk add git gnupg gpgme`
+  - macOS: `brew install gpg gpgme`
+
+## Install
+Because `prs` is still in early stages, only limited installation options are
+available right now. Feel free to contribute.
+
+Make sure you meet and install the [requirements](#requirements).
+
+The latest binaries (zipped) from `master` can be found here:
+
+- [Linux x86_64 GNU](https://gitlab.com/timvisee/prs/-/jobs/artifacts/master/download?job=build-x86_64-linux-gnu)
+- [Linux x86_64 musl](https://gitlab.com/timvisee/prs/-/jobs/artifacts/master/download?job=build-x86_64-linux-musl)
+- [macOS x86_64](https://gitlab.com/timvisee/prs/-/jobs/artifacts/master/download?job=build-macos)
 
 ## Security
 Security is backed by [`gpg`][gpg] which is used all over the world and

@@ -3,9 +3,9 @@ use std::time::Duration;
 
 use anyhow::Result;
 use copypasta_ext::prelude::*;
-#[cfg(all(target_os = "linux", not(target_env = "musl")))]
+#[cfg(all(feature = "notify", target_os = "linux", not(target_env = "musl")))]
 use notify_rust::Hint;
-#[cfg(not(target_env = "musl"))]
+#[cfg(all(feature = "notify", not(target_env = "musl")))]
 use notify_rust::Notification;
 use prs_lib::types::Plaintext;
 use thiserror::Error;
@@ -340,8 +340,8 @@ pub(crate) fn plaintext_copy(
 /// Show notification to user about cleared clipboard.
 #[allow(unreachable_code)]
 fn notify_cleared() -> Result<()> {
-    // Do not show notification on musl due to segfault
-    #[cfg(not(target_env = "musl"))]
+    // Do not show notification with not notify or on musl due to segfault
+    #[cfg(all(feature = "notify", not(target_env = "musl")))]
     {
         let mut n = Notification::new();
         n.appname(&crate::util::bin_name())

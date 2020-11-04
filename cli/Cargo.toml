@@ -19,10 +19,13 @@ edition = "2018"
 gitlab = { repository = "timvisee/prs", branch = "master" }
 
 [features]
-default = ["clipboard"]
+default = ["clipboard", "notify"]
 
 # Clipboard support
 clipboard = ["copypasta-ext", "x11-clipboard"]
+
+# Notification support (clipboard notifications)
+notify = ["notify-rust"]
 
 [dependencies]
 anyhow = "1.0"
@@ -32,11 +35,13 @@ colored = "2.0"
 derive_builder = "0.9"
 edit = "0.1"
 libc = "0.2"
-notify-rust = "4.0"
 prs-lib = { path = "../lib" }
 shellexpand = "2.0"
 skim = "0.9"
 thiserror = "1.0"
+
+# Notification support
+notify-rust = { version = "4.0", optional = true }
 
 # Clipboard support for non-X11
 [target.'cfg(not(all(unix, not(any(target_os="macos", target_os="android", target_os="emscripten")))))'.dependencies]

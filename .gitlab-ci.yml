@@ -181,7 +181,6 @@ package-docker:
 
     # Export image as artifact
     - docker image save -o ./prs-docker-$TARGET.tar timvisee/prs:latest
-    - ls -al
   artifacts:
     name: prs-docker-x86_64-linux-musl
     paths:

@@ -154,6 +154,30 @@ test-cargo:
   script:
     - cargo test --verbose
 
+# Run basic integration test with prs
+test-integration:
+  image: alpine
+  stage: test
+  needs:
+    - build-x86_64-linux-musl
+  dependencies:
+    - build-x86_64-linux-musl
+  variables:
+    TARGET: x86_64-unknown-linux-musl
+  before_script: []
+  script:
+    - apk add git gnupg gpgme
+    - mv ./prs-$TARGET ./prs
+
+    - git config --global user.email example@example.org
+    - git config --global user.name "Example User"
+
+    # TODO: add/edit/remove secrets
+    - ./prs init
+    - ./prs sync init
+    - ./prs list
+    - ./prs sync
+
 # Package a Docker image
 package-docker:
   image: docker:git

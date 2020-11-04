@@ -198,3 +198,34 @@ release-crate:
     - echo $CARGO_TOKEN | cargo login
     - echo "Publishing crate to crates.io..."
     - cargo publish --verbose --allow-dirty
+
+# Publish a Docker image
+release-docker:
+  image: docker:git
+  stage: release
+  only:
+    - /^v(\d+\.)*\d+$/
+  dependencies:
+    - package-docker
+  services:
+    - docker:dind
+  variables:
+    TARGET: x86_64-unknown-linux-musl
+    DOCKER_HOST: tcp://docker:2375
+    # DOCKER_DRIVER: overlay2
+  before_script: []
+  script:
+    # Import Docker image
+    - docker image load ./prs-docker-$TARGET.tar
+
+    # Retag version
+    - VERSION=$(echo $CI_COMMIT_REF_NAME | cut -c 2-)
+    - echo "Determined Docker image version number 'v$VERSION', retagging image..."
+    - docker tag timvisee/prs:latest timvisee/prs:$VERSION
+
+    # TODO: publish on GitLab registry as well
+
+    # Authenticate and push the Docker images
+    - echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+    - docker push timvisee/prs:$VERSION
+    - docker push timvisee/prs:latest

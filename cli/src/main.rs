@@ -50,6 +50,7 @@ fn invoke_action(handler: &Handler) -> Result<()> {
         return action::clone::Clone::new(handler.matches()).invoke();
     }
 
+    #[cfg(feature = "clipboard")]
     if handler.copy().is_some() {
         return action::copy::Copy::new(handler.matches()).invoke();
     }
@@ -165,8 +166,12 @@ pub fn print_main_info() -> ! {
         // Hint show/copy commands if user has secret
         let has_secret = store.secret_iter().next().is_some();
         if has_secret {
+            #[cfg(not(feature = "clipboard"))]
+            eprintln!("Show a secret:");
+            #[cfg(feature = "clipboard")]
             eprintln!("Show or copy a secret:");
             eprintln!("    {}", style::highlight(&format!("{} show [NAME]", bin)));
+            #[cfg(feature = "clipboard")]
             eprintln!("    {}", style::highlight(&format!("{} copy [NAME]", bin)));
             eprintln!();
         }

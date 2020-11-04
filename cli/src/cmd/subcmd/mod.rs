@@ -1,5 +1,6 @@
 pub mod add;
 pub mod clone;
+#[cfg(feature = "clipboard")]
 pub mod copy;
 pub mod duplicate;
 pub mod edit;
@@ -17,6 +18,7 @@ pub mod sync;
 // Re-export to cmd module
 pub use self::add::CmdAdd;
 pub use self::clone::CmdClone;
+#[cfg(feature = "clipboard")]
 pub use self::copy::CmdCopy;
 pub use self::duplicate::CmdDuplicate;
 pub use self::edit::CmdEdit;

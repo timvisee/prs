@@ -60,7 +60,6 @@ impl<'a: 'b, 'b> Handler<'a> {
             )
             .subcommand(subcmd::CmdAdd::build())
             .subcommand(subcmd::CmdClone::build())
-            .subcommand(subcmd::CmdCopy::build())
             .subcommand(subcmd::CmdDuplicate::build())
             .subcommand(subcmd::CmdEdit::build())
             .subcommand(subcmd::CmdGenerate::build())
@@ -73,6 +72,9 @@ impl<'a: 'b, 'b> Handler<'a> {
             .subcommand(subcmd::CmdRemove::build())
             .subcommand(subcmd::CmdShow::build())
             .subcommand(subcmd::CmdSync::build());
+
+        #[cfg(feature = "clipboard")]
+        let app = app.subcommand(subcmd::CmdCopy::build());
 
         // Disable color usage if compiled without color support
         // TODO: do not use feature, pull from env var instead
@@ -105,6 +107,7 @@ impl<'a: 'b, 'b> Handler<'a> {
     }
 
     /// Get the copy sub command, if matched.
+    #[cfg(feature = "clipboard")]
     pub fn copy(&'a self) -> Option<matcher::CopyMatcher> {
         matcher::CopyMatcher::with(&self.matches)
     }

@@ -1,5 +1,6 @@
 pub mod add;
 pub mod clone;
+#[cfg(feature = "clipboard")]
 pub mod copy;
 pub mod duplicate;
 pub mod edit;

@@ -14,6 +14,7 @@ impl<'a: 'b, 'b> ExportMatcher<'a> {
     }
 
     /// Check whether to copy the key.
+    #[cfg(feature = "clipboard")]
     pub fn copy(&self) -> bool {
         self.matches.is_present("copy")
     }

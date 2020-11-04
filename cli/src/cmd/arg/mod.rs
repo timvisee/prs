@@ -7,6 +7,7 @@ use clap::{Arg, ArgMatches};
 // Re-eexport to arg module
 pub use self::query::ArgQuery;
 pub use self::store::ArgStore;
+#[cfg(feature = "clipboard")]
 pub use self::timeout::ArgTimeout;
 
 /// A generic trait, for a reusable command argument struct.

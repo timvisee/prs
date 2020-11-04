@@ -1,5 +1,6 @@
 pub mod add;
 pub mod clone;
+#[cfg(feature = "clipboard")]
 pub mod copy;
 pub mod duplicate;
 pub mod edit;
@@ -18,6 +19,7 @@ pub mod sync;
 // Re-export to matcher module
 pub use self::add::AddMatcher;
 pub use self::clone::CloneMatcher;
+#[cfg(feature = "clipboard")]
 pub use self::copy::CopyMatcher;
 pub use self::duplicate::DuplicateMatcher;
 pub use self::edit::EditMatcher;

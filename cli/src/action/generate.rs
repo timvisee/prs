@@ -7,7 +7,9 @@ use prs_lib::{
 use thiserror::Error;
 
 use crate::cmd::matcher::{generate::GenerateMatcher, MainMatcher, Matcher};
-use crate::util::{cli, clipboard, error, stdin, sync};
+#[cfg(feature = "clipboard")]
+use crate::util::clipboard;
+use crate::util::{cli, error, stdin, sync};
 
 /// Generate secret action.
 pub struct Generate<'a> {
@@ -92,6 +94,7 @@ impl<'a> Generate<'a> {
         prs_lib::crypto::encrypt_file(&recipients, plaintext.clone(), &path).map_err(Err::Write)?;
 
         // Copy to clipboard
+        #[cfg(feature = "clipboard")]
         if matcher_generate.copy() {
             clipboard::plaintext_copy(
                 plaintext.clone(),
@@ -109,9 +112,15 @@ impl<'a> Generate<'a> {
 
         sync.finalize(format!("Generate secret to {}", secret.name))?;
 
-        if matcher_main.verbose()
-            || (!(matcher_generate.copy() || matcher_generate.show()) && !matcher_main.quiet())
+        // Determine whehter we outputted anything to stdout/stderr
+        #[allow(unused_mut)]
+        let mut output_any = matcher_generate.show();
+        #[cfg(feature = "clipboard")]
         {
+            output_any = output_any || matcher_generate.copy();
+        }
+
+        if matcher_main.verbose() || (!output_any && !matcher_main.quiet()) {
             eprintln!("Secret created");
         }
 

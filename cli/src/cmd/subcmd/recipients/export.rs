@@ -5,7 +5,7 @@ pub struct CmdExport;
 
 impl CmdExport {
     pub fn build<'a, 'b>() -> App<'a, 'b> {
-        SubCommand::with_name("export")
+        let cmd = SubCommand::with_name("export")
             .alias("exp")
             .alias("ex")
             .about("Export recipient key")
@@ -17,13 +17,17 @@ impl CmdExport {
                     .alias("file")
                     .value_name("PATH")
                     .help("Write recipient key to file instead of stdout"),
-            )
-            .arg(
-                Arg::with_name("copy")
-                    .long("copy")
-                    .short("c")
-                    .alias("yank")
-                    .help("Copy recipient key to clipboard instead of stdout"),
-            )
+            );
+
+        #[cfg(feature = "clipboard")]
+        let cmd = cmd.arg(
+            Arg::with_name("copy")
+                .long("copy")
+                .short("c")
+                .alias("yank")
+                .help("Copy recipient key to clipboard instead of stdout"),
+        );
+
+        cmd
     }
 }

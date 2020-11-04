@@ -11,7 +11,9 @@ use crate::cmd::matcher::{
     recipients::{export::ExportMatcher, RecipientsMatcher},
     MainMatcher, Matcher,
 };
-use crate::util::{clipboard, skim};
+#[cfg(feature = "clipboard")]
+use crate::util::clipboard;
+use crate::util::skim;
 
 /// A recipients export action.
 pub struct Export<'a> {
@@ -54,6 +56,7 @@ impl<'a> Export<'a> {
         }
 
         // Copy to clipboard
+        #[cfg(feature = "clipboard")]
         if matcher_export.copy() {
             stdout = false;
             clipboard::copy(&data).map_err(Err::Clipboard)?;
@@ -81,6 +84,7 @@ pub enum Err {
     #[error("failed to write key to file")]
     Output(#[source] std::io::Error),
 
+    #[cfg(feature = "clipboard")]
     #[error("failed to copy key to clipboard")]
     Clipboard(#[source] anyhow::Error),
 }

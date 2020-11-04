@@ -1,13 +1,15 @@
 use clap::{App, Arg, SubCommand};
 
-use crate::cmd::arg::{ArgStore, ArgTimeout, CmdArg};
+#[cfg(feature = "clipboard")]
+use crate::cmd::arg::ArgTimeout;
+use crate::cmd::arg::{ArgStore, CmdArg};
 
 /// The generate command definition.
 pub struct CmdGenerate;
 
 impl CmdGenerate {
     pub fn build<'a, 'b>() -> App<'a, 'b> {
-        SubCommand::with_name("generate")
+        let cmd = SubCommand::with_name("generate")
             .alias("gen")
             .alias("g")
             .alias("random")
@@ -32,20 +34,25 @@ impl CmdGenerate {
                     .conflicts_with("edit"),
             )
             .arg(
-                Arg::with_name("copy")
-                    .long("copy")
-                    .short("c")
-                    .alias("cp")
-                    .help("Copy secret to clipboard"),
-            )
-            .arg(
                 Arg::with_name("show")
                     .long("show")
                     .alias("cat")
                     .alias("display")
                     .help("Display secret after generation"),
             )
-            .arg(ArgTimeout::build())
-            .arg(ArgStore::build())
+            .arg(ArgStore::build());
+
+        #[cfg(feature = "clipboard")]
+        let cmd = cmd
+            .arg(
+                Arg::with_name("copy")
+                    .long("copy")
+                    .short("c")
+                    .alias("cp")
+                    .help("Copy secret to clipboard"),
+            )
+            .arg(ArgTimeout::build());
+
+        cmd
     }
 }

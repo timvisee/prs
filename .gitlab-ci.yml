@@ -10,7 +10,7 @@ stages:
 # Variable defaults
 variables:
   RUST_VERSION: stable
-  RUST_TARGET: x86_64-unknown-linux-gnu
+  TARGET: x86_64-unknown-linux-gnu
 
 # Cache rust/cargo/build artifacts
 cache:
@@ -73,13 +73,13 @@ build-x86_64-linux-gnu:
   stage: build
   needs: []
   script:
-    - cargo build --target=$RUST_TARGET --release --verbose
-    - mv target/$RUST_TARGET/release/prs ./prs-$RUST_TARGET
-    - strip -g ./prs-$RUST_TARGET
+    - cargo build --target=$TARGET --release --verbose
+    - mv target/$TARGET/release/prs ./prs-$TARGET
+    - strip -g ./prs-$TARGET
   artifacts:
     name: prs-x86_64-linux-gnu
     paths:
-      - prs-$RUST_TARGET
+      - prs-$TARGET
     expire_in: 1 month
 
 # Build a static version
@@ -88,7 +88,6 @@ build-x86_64-linux-musl:
   needs: []
   variables:
     TARGET: x86_64-unknown-linux-musl
-    RUST_TARGET: x86_64-unknown-linux-musl
     APT_PACKAGES: "bzip2 gnupg2 curl libsystemd-dev"
     PKG_CONFIG_ALLOW_CROSS: 1
     PKG_CONFIG_ALL_STATIC: 1
@@ -103,17 +102,17 @@ build-x86_64-linux-musl:
   script:
     - ./ci/gpgme/build
 
-    - rustup target add $RUST_TARGET
-    - cargo build --target=$RUST_TARGET --release --verbose
+    - rustup target add $TARGET
+    - cargo build --target=$TARGET --release --verbose
 
     # Prepare the release artifact, strip it
     - find . -name prs -exec ls -lah {} \;
-    - mv target/$RUST_TARGET/release/prs ./prs-$RUST_TARGET
-    - strip -g ./prs-$RUST_TARGET
+    - mv target/$TARGET/release/prs ./prs-$TARGET
+    - strip -g ./prs-$TARGET
   artifacts:
     name: prs-x86_64-linux-musl
     paths:
-      - prs-$RUST_TARGET
+      - prs-$TARGET
     expire_in: 1 month
 
 # Build using Rust stable on macOS
@@ -126,6 +125,8 @@ build-macos:
     - master
     - /^v(\d+\.)*\d+$/
   needs: []
+  variables:
+    TARGET: x86_64-apple-darwin
   before_script:
     - |
       rustup install $RUST_VERSION
@@ -135,13 +136,12 @@ build-macos:
       cargo --version
     - brew install gpg gpgme
   script:
-    - cargo build --release --verbose
-    - mv target/release/prs ./prs
-    # - strip -g ./prs
+    - cargo build --target=$TARGET --release --verbose
+    - mv target/$TARGET/release/prs ./prs-$TARGET
   artifacts:
-    name: prs-macos
+    name: prs-x86_64-macos
     paths:
-      - prs
+      - prs-$TARGET
     expire_in: 1 month
 
 # Run the unit tests through Cargo

@@ -38,6 +38,7 @@ before_script:
   stage: check
   script:
     - cargo check --verbose
+    - cargo check --no-default-features --verbose
 check-stable:
   <<: *check-base
 check-beta:

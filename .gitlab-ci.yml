@@ -4,8 +4,8 @@ stages:
   - check
   - build
   - test
-  - release
   - package
+  - release
 
 # Variable defaults
 variables:
@@ -153,6 +153,40 @@ test-cargo:
   dependencies: []
   script:
     - cargo test --verbose
+
+# Package a Docker image
+package-docker:
+  image: docker:git
+  stage: package
+  dependencies:
+    - build-x86_64-linux-musl
+  services:
+    - docker:dind
+  variables:
+    TARGET: x86_64-unknown-linux-musl
+    DOCKER_HOST: tcp://docker:2375
+    # DOCKER_DRIVER: overlay2
+  before_script: []
+  script:
+    - ls -al
+
+    # Place binary in Docker directory
+    - mv ./prs-$TARGET ./pkg/docker/prs
+
+    # Build the Docker image, run it once to test
+    - cd ./pkg/docker
+    - docker build -t timvisee/prs:latest ./
+    - docker run --rm timvisee/prs:latest -V
+    - cd ../..
+
+    # Export image as artifact
+    - docker image save -o ./prs-docker-$TARGET.tar timvisee/prs:latest
+    - ls -al
+  artifacts:
+    name: prs-docker-x86_64-linux-musl
+    paths:
+      - prs-docker-$TARGET.tar
+    expire_in: 1 month
 
 # Cargo crate release
 release-crate:

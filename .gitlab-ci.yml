@@ -38,7 +38,7 @@ before_script:
   stage: check
   script:
     - cargo check --verbose
-    - cargo check --no-default-features --verbose
+    - cd cli && cargo check --no-default-features --verbose && cd ..
 check-stable:
   <<: *check-base
 check-beta:

@@ -58,6 +58,22 @@ fn build_ui(application: &gtk::Application) {
     completion.set_text_column(0);
     completion.set_minimum_key_length(1);
     completion.set_popup_completion(true);
+    completion.set_inline_completion(true);
+    completion.set_inline_selection(true);
+    completion.set_match_func(|completion, query, iter| {
+        let model = completion.get_model().unwrap();
+        let item = model.get_value(iter, 0);
+
+        // Get item text
+        let text: Result<Option<String>, _> = item.get();
+        let text = match text {
+            Ok(Some(text)) => text,
+            _ => return false,
+        };
+
+        // Match item text to query
+        text.contains(query)
+    });
 
     // Create a ListStore of items
     // These will be the source for the autocompletion

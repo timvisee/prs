@@ -12,6 +12,7 @@ use crate::{sync::Sync, Recipients};
 pub const SECRET_SUFFIX: &str = ".gpg";
 
 /// Represents a password store.
+#[derive(Clone)]
 pub struct Store {
     /// Root directory of the password store.
     ///

@@ -11,6 +11,8 @@ stages:
 variables:
   RUST_VERSION: stable
   TARGET: x86_64-unknown-linux-gnu
+  APT_GTK_LIBS: libgtk-3-dev
+  BREW_PACKAGES: gpg gpgme gtk+3
 
 # Cache rust/cargo/build artifacts
 cache:
@@ -24,7 +26,7 @@ cache:
 # Install compiler and OpenSSL dependencies
 before_script:
   - apt-get update
-  - apt-get install -y --no-install-recommends libgpgme-dev build-essential pkg-config xorg-dev python3 libx11-xcb-dev libgl1-mesa-dev libdbus-1-dev $APT_PACKAGES
+  - apt-get install -y --no-install-recommends libgpgme-dev build-essential pkg-config xorg-dev python3 libx11-xcb-dev libgl1-mesa-dev libdbus-1-dev $APT_GTK_LIBS $APT_PACKAGES
   - apt-get install -y $APT_PACKAGES_RECOMMENDS
   - |
     rustup install $RUST_VERSION
@@ -67,7 +69,7 @@ check-macos-stable:
     - |
       rustc --version
       cargo --version
-    - brew install gpg gpgme
+    - brew install $BREW_PACKAGES
   <<: *check-base
 
 # Build using Rust stable on Linux
@@ -77,11 +79,14 @@ build-x86_64-linux-gnu:
   script:
     - cargo build --target=$TARGET --release --verbose
     - mv target/$TARGET/release/prs ./prs-$TARGET
+    - mv target/$TARGET/release/prs-gtk3-copy ./prs-gtk3-copy-$TARGET
     - strip -g ./prs-$TARGET
+    - strip -g ./prs-gtk3-copy-$TARGET
   artifacts:
     name: prs-x86_64-linux-gnu
     paths:
       - prs-$TARGET
+      - prs-gtk3-copy-$TARGET
     expire_in: 1 month
 
 # Build a static version
@@ -110,11 +115,14 @@ build-x86_64-linux-musl:
     # Prepare the release artifact, strip it
     - find . -name prs -exec ls -lah {} \;
     - mv target/$TARGET/release/prs ./prs-$TARGET
+    - mv target/$TARGET/release/prs-gtk3-copy ./prs-gtk3-copy-$TARGET
     - strip -g ./prs-$TARGET
+    - strip -g ./prs-gtk3-copy-$TARGET
   artifacts:
     name: prs-x86_64-linux-musl
     paths:
       - prs-$TARGET
+      - prs-gtk3-copy-$TARGET
     expire_in: 1 month
 
 # Build using Rust stable on macOS
@@ -136,14 +144,16 @@ build-macos:
     - |
       rustc --version
       cargo --version
-    - brew install gpg gpgme
+    - brew install $BREW_PACKAGES
   script:
     - cargo build --target=$TARGET --release --verbose
     - mv target/$TARGET/release/prs ./prs-$TARGET
+    - mv target/$TARGET/release/prs-gtk3-copy ./prs-gtk3-copy-$TARGET
   artifacts:
     name: prs-x86_64-macos
     paths:
       - prs-$TARGET
+      - prs-gtk3-copy-$TARGET
     expire_in: 1 month
 
 # Run the unit tests through Cargo

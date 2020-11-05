@@ -21,9 +21,6 @@ use crate::{
     },
 };
 
-/// Default password store directory.
-const STORE_DEFAULT_ROOT: &str = "~/.password-store";
-
 /// Clipboard timeout in seconds.
 const CLIPBOARD_TIMEOUT_STR: &str = "20";
 
@@ -118,7 +115,7 @@ pub fn print_main_info() -> ! {
     let bin = util::bin_name();
 
     // Attempt to load default store
-    let store = Store::open(crate::STORE_DEFAULT_ROOT).ok();
+    let store = Store::open(prs_lib::STORE_DEFAULT_ROOT).ok();
     let has_sync = store.as_ref().map(|s| s.sync().is_init()).unwrap_or(false);
 
     // Print the main info

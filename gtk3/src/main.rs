@@ -12,8 +12,33 @@ use notify_rust::Notification;
 
 use prs_lib::store::{FindSecret, Secret, Store};
 
+/// Application ID.
+const APP_ID: &str = "com.timvisee.prs.gtk3-copy";
+
+/// Application name.
+const APP_NAME: &str = "prs";
+
 /// Clipboard timeout in seconds.
-const TIMEOUT: u32 = 20;
+const CLIPBOARD_TIMEOUT: u32 = 20;
+
+fn main() {
+    let application =
+        gtk::Application::new(Some(APP_ID), Default::default()).expect("Initialization failed...");
+    application.connect_activate(|app| {
+        build_ui(app);
+    });
+
+    // When activated, shuts down the application
+    let quit = gio::SimpleAction::new("quit", None);
+    quit.connect_activate(clone!(@weak application => move |_action, _parameter| {
+        application.quit();
+    }));
+    application.set_accels_for_action("app.quit", &["Escape"]);
+    application.add_action(&quit);
+
+    // Run the application
+    application.run(&args().collect::<Vec<_>>());
+}
 
 /// Wraps a store secret.
 struct Data {
@@ -47,18 +72,28 @@ fn create_list_model(secrets: Vec<Secret>) -> gtk::ListStore {
 
 fn build_ui(application: &gtk::Application) {
     // Load secrets from store
-    // TODO: show error popup on load failure
-    let store = Store::open(prs_lib::STORE_DEFAULT_ROOT).unwrap();
+    let store = match Store::open(prs_lib::STORE_DEFAULT_ROOT) {
+        Ok(store) => store,
+        Err(err) => {
+            error_dialog(&format!("Failed to load password store.\n\nError: {}", err));
+            application.quit();
+            return;
+        }
+    };
     let secrets = store.secrets(None);
 
-    // TODO: show warning if user has no secrets
+    // Quit if user has no secrets
+    if secrets.is_empty() {
+        error_dialog("Your password store does not have any secrets.");
+        application.quit();
+        return;
+    }
 
     // create the main window
     let window = gtk::ApplicationWindow::new(application);
     window.set_title("prs quick copy");
     window.set_border_width(5);
     window.set_position(gtk::WindowPosition::Center);
-    // window.set_default_size(400, 150);
     window.set_keep_above(true);
     window.set_urgency_hint(true);
     window.stick();
@@ -142,18 +177,25 @@ fn selected_entry(
 ///
 /// Copies to clipboard with revert timeout.
 fn selected(secret: Secret, window: gtk::ApplicationWindow, input: gtk::SearchEntry) {
-    // TODO: do not unwrap
-    // let mut plaintext = prs_lib::crypto::decrypt_file(&secret.path).map_err(Err::Read)?;
-    let plaintext = prs_lib::crypto::decrypt_file(&secret.path)
-        .unwrap()
-        .first_line()
-        .unwrap();
+    // Decrypt first line of plaintext
+    let plaintext = match prs_lib::crypto::decrypt_file(&secret.path)
+        .and_then(|plaintext| plaintext.first_line())
+    {
+        Ok(plaintext) => plaintext,
+        Err(err) => {
+            error_dialog(&format!(
+                "Failed to decrypt first line of secret.\n\nError: {}",
+                err
+            ));
+            window.close();
+            return;
+        }
+    };
 
-    // TODO: do not unwrap
     let text = plaintext.unsecure_to_str().unwrap();
 
     // Copy with revert timeout
-    copy(text.to_string(), TIMEOUT);
+    copy(text.to_string(), CLIPBOARD_TIMEOUT);
 
     // Move to back, disable input
     window.set_keep_above(false);
@@ -161,7 +203,10 @@ fn selected(secret: Secret, window: gtk::ApplicationWindow, input: gtk::SearchEn
     window.set_deletable(false);
     window.unstick();
     input.set_text("");
-    input.set_placeholder_text(Some(&format!("Copied, clearing in {} seconds...", TIMEOUT)));
+    input.set_placeholder_text(Some(&format!(
+        "Copied, clearing in {} seconds...",
+        CLIPBOARD_TIMEOUT
+    )));
 
     // Hack to unfocus and move window to back
     window.set_accept_focus(false);
@@ -174,7 +219,7 @@ fn selected(secret: Secret, window: gtk::ApplicationWindow, input: gtk::SearchEn
 
     // Close window after clipboard revert
     // TODO: wait for clipboard revert instead, do not use own timeout
-    glib::timeout_add_seconds_local(TIMEOUT + 1, move || {
+    glib::timeout_add_seconds_local(CLIPBOARD_TIMEOUT + 1, move || {
         window.close();
         Continue(false)
     });
@@ -228,15 +273,12 @@ fn copy(text: String, timeout: u32) {
 /// Show notification to user about cleared clipboard.
 #[allow(unreachable_code)]
 fn notify_cleared() {
-    // TODO: dynamically get application name?
-    let bin_name = "prs";
-
     // Do not show notification with not notify or on musl due to segfault
     #[cfg(all(feature = "notify", not(target_env = "musl")))]
     {
         let mut n = Notification::new();
-        n.appname(bin_name)
-            .summary(&format!("Clipboard cleared - {}", bin_name))
+        n.appname(APP_NAME)
+            .summary(&format!("Clipboard cleared - {}", APP_NAME))
             .body("Secret cleared from clipboard")
             .auto_icon()
             .icon("lock")
@@ -265,7 +307,7 @@ fn error_dialog(msg: &str) {
         msg,
     );
     dialog.connect_response(|dialog, _response| dialog.close());
-    dialog.show_all();
+    dialog.run();
 }
 
 /// Get the text for a tree model item by iterator.
@@ -278,23 +320,4 @@ fn model_item_text(model: &gtk::TreeModel, iter: &gtk::TreeIter) -> Option<Strin
         Ok(Some(text)) => Some(text),
         _ => None,
     }
-}
-
-fn main() {
-    let application = gtk::Application::new(Some("com.timvisee.prs.gtk3-copy"), Default::default())
-        .expect("Initialization failed...");
-    application.connect_activate(|app| {
-        build_ui(app);
-    });
-
-    // When activated, shuts down the application
-    let quit = gio::SimpleAction::new("quit", None);
-    quit.connect_activate(clone!(@weak application => move |_action, _parameter| {
-        application.quit();
-    }));
-    application.set_accels_for_action("app.quit", &["Escape"]);
-    application.add_action(&quit);
-
-    // Run the application
-    application.run(&args().collect::<Vec<_>>());
 }

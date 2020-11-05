@@ -4,6 +4,10 @@ use std::sync::{Arc, Mutex};
 use gio::prelude::*;
 use glib::clone;
 use gtk::prelude::*;
+#[cfg(all(feature = "notify", target_os = "linux", not(target_env = "musl")))]
+use notify_rust::Hint;
+#[cfg(all(feature = "notify", not(target_env = "musl")))]
+use notify_rust::Notification;
 
 use prs_lib::store::{FindSecret, Secret, Store};
 
@@ -86,8 +90,16 @@ fn build_ui(application: &gtk::Application) {
         input_field_signal.emit_activate();
         Inhibit(false)
     });
+
+    let window_ref = window.clone();
+    let input_ref = input_field.clone();
     input_field.connect_activate(move |entry| {
-        selected_entry(store.clone(), entry.get_text().into());
+        selected_entry(
+            store.clone(),
+            entry.get_text().into(),
+            window_ref.clone(),
+            input_ref.clone(),
+        );
     });
 
     window.add(&input_field);
@@ -100,7 +112,12 @@ fn build_ui(application: &gtk::Application) {
 /// Called when we've selected a secret in the input field.
 ///
 /// Shows an error if it doesn't resolve to exactly one.
-fn selected_entry(store: Store, query: String) {
+fn selected_entry(
+    store: Store,
+    query: String,
+    window: gtk::ApplicationWindow,
+    input: gtk::SearchEntry,
+) {
     let secret = match store.find(Some(query)) {
         FindSecret::Exact(secret) => secret,
         FindSecret::Many(secrets) => {
@@ -120,13 +137,13 @@ fn selected_entry(store: Store, query: String) {
         }
     };
 
-    selected(secret);
+    selected(secret, window, input);
 }
 
 /// Called when we've selected a secret.
 ///
 /// Copies to clipboard with revert timeout.
-fn selected(secret: Secret) {
+fn selected(secret: Secret, window: gtk::ApplicationWindow, input: gtk::SearchEntry) {
     // TODO: do not unwrap
     // let mut plaintext = prs_lib::crypto::decrypt_file(&secret.path).map_err(Err::Read)?;
     let plaintext = prs_lib::crypto::decrypt_file(&secret.path)
@@ -139,6 +156,21 @@ fn selected(secret: Secret) {
 
     // Copy with revert timeout
     copy(text.to_string(), TIMEOUT);
+
+    // Move to back, disable input
+    window.set_focus(None::<&gtk::Widget>);
+    window.set_keep_above(false);
+    window.set_keep_below(true);
+    window.set_sensitive(false);
+    input.set_text("");
+    input.set_placeholder_text(Some(&format!("Copied, clearing in {} seconds...", TIMEOUT)));
+
+    // Close window after clipboard revert
+    // TODO: wait for clipboard revert instead, do not use own timeout
+    glib::timeout_add_seconds_local(TIMEOUT + 1, move || {
+        window.close();
+        Continue(false)
+    });
 }
 
 /// Copy given text to clipboard with revert timeout.
@@ -172,16 +204,47 @@ fn copy(text: String, timeout: u32) {
             if let Ok(previous) = previous.lock() {
                 if let Some(ref previous) = *previous {
                     clipboard.set_text(previous);
+                    notify_cleared();
                     return;
                 }
             }
 
             // Fallback
             clipboard.set_text("");
+            notify_cleared();
         });
 
         Continue(false)
     });
+}
+
+/// Show notification to user about cleared clipboard.
+#[allow(unreachable_code)]
+fn notify_cleared() {
+    // TODO: dynamically get application name?
+    let bin_name = "prs";
+
+    // Do not show notification with not notify or on musl due to segfault
+    #[cfg(all(feature = "notify", not(target_env = "musl")))]
+    {
+        let mut n = Notification::new();
+        n.appname(bin_name)
+            .summary(&format!("Clipboard cleared - {}", bin_name))
+            .body("Secret cleared from clipboard")
+            .auto_icon()
+            .icon("lock")
+            .timeout(3000);
+
+        #[cfg(target_os = "linux")]
+        n.urgency(notify_rust::Urgency::Low)
+            .hint(Hint::Category("presence.offline".into()));
+
+        let _ = n.show();
+        return;
+    }
+
+    // Fallback if we cannot notify
+    eprintln!("Secret cleared from clipboard");
 }
 
 /// Get the text for a tree model item by iterator.

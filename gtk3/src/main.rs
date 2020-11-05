@@ -53,11 +53,10 @@ fn build_ui(application: &gtk::Application) {
     window.set_title("prs copy");
     window.set_border_width(5);
     window.set_position(gtk::WindowPosition::Center);
-    window.set_default_size(400, 150);
-
-    // Create a title label
-    let win_title = gtk::Label::new(None);
-    win_title.set_markup("Start typing to select a secret:");
+    // window.set_default_size(400, 150);
+    window.set_keep_above(true);
+    window.set_urgency_hint(true);
+    window.stick();
 
     // Create an EntryCompletion widget
     let completion = gtk::EntryCompletion::new();
@@ -77,6 +76,9 @@ fn build_ui(application: &gtk::Application) {
 
     let input_field = gtk::SearchEntry::new();
     input_field.set_completion(Some(&completion));
+    input_field.set_width_chars(40);
+    input_field.set_placeholder_text(Some("Search for a secret..."));
+    input_field.set_input_hints(gtk::InputHints::NO_SPELLCHECK);
 
     // Action handlers to copy selected secret
     let input_field_signal = input_field.clone();
@@ -88,15 +90,11 @@ fn build_ui(application: &gtk::Application) {
         selected_entry(store.clone(), entry.get_text().into());
     });
 
-    let row = gtk::Box::new(gtk::Orientation::Vertical, 5);
-    row.add(&win_title);
-    row.pack_start(&input_field, false, false, 10);
-
-    // window.add(&win_title);
-    window.add(&row);
+    window.add(&input_field);
 
     // show everything
     window.show_all();
+    window.grab_focus();
 }
 
 /// Called when we've selected a secret in the input field.
@@ -105,14 +103,17 @@ fn build_ui(application: &gtk::Application) {
 fn selected_entry(store: Store, query: String) {
     let secret = match store.find(Some(query)) {
         FindSecret::Exact(secret) => secret,
-        FindSecret::Many(_) => {
+        FindSecret::Many(secrets) => {
             gtk::MessageDialog::new(
                 // TODO: set parent window
                 None::<&gtk::Window>,
                 gtk::DialogFlags::MODAL,
                 gtk::MessageType::Error,
                 gtk::ButtonsType::Close,
-                "Found multiple secrets for this query. Please refine your query.",
+                &format!(
+                    "Found {} secrets for this query. Please refine your query.",
+                    secrets.len()
+                ),
             )
             .show_all();
             return;

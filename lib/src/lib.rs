@@ -14,6 +14,9 @@ use thiserror::Error;
 
 use crate::store::Store;
 
+/// Default password store directory.
+pub const STORE_DEFAULT_ROOT: &str = "~/.password-store";
+
 /// Password store GPG IDs file.
 const STORE_GPG_IDS_FILE: &str = ".gpg-id";
 

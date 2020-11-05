@@ -17,7 +17,7 @@ impl CmdArg for ArgStore {
             .value_name("PATH")
             .global(true)
             .help("Password store to use")
-            .default_value(crate::STORE_DEFAULT_ROOT)
+            .default_value(prs_lib::STORE_DEFAULT_ROOT)
     }
 }
 

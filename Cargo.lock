@@ -1409,23 +1409,13 @@ name = "prs-gtk3"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "chbs",
- "clap",
- "colored",
- "copypasta-ext",
- "derive_builder",
- "edit",
  "gdk",
  "gio",
  "glib",
  "gtk",
- "libc",
  "notify-rust",
  "prs-lib",
- "shellexpand",
- "skim",
  "thiserror",
- "x11-clipboard",
 ]
 
 [[package]]

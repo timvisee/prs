@@ -19,54 +19,22 @@ edition = "2018"
 gitlab = { repository = "timvisee/prs", branch = "master" }
 
 [features]
-default = ["clipboard", "notify"]
-
-# TODO: does it make sense to put this behind a feature flag for GTK?
-# Clipboard support
-clipboard = ["copypasta-ext", "x11-clipboard"]
+default = ["notify"]
 
 # Notification support (clipboard notifications)
 notify = ["notify-rust"]
 
 [dependencies]
 anyhow = "1.0"
-chbs = "0.0.10"
-clap = "2.33"
-colored = "2.0"
-derive_builder = "0.9"
-edit = "0.1"
-libc = "0.2"
+gdk = "^0"
+gio = { version = "^0", features = ["v2_44"] }
+glib = "^0"
+gtk = { version = "0.9.0", features = ["v3_16"] }
 prs-lib = { path = "../lib" }
-shellexpand = "2.0"
-skim = "0.9"
 thiserror = "1.0"
 
 # Notification support
 notify-rust = { version = "4.0", optional = true }
-
-gdk = "^0"
-glib = "^0"
-
-[dependencies.gtk]
-version = "0.9.0"
-features = ["v3_16"]
-
-[dependencies.gio]
-version = ""
-features = ["v2_44"]
-
-# Clipboard support for non-X11
-[target.'cfg(not(all(unix, not(any(target_os="macos", target_os="android", target_os="emscripten")))))'.dependencies]
-copypasta-ext = { version = "0.3.2", optional = true, default-features = false, features = [] }
-
-# Clipboard support for X11
-[target.'cfg(all(unix, not(any(target_os="macos", target_os="android", target_os="emscripten")), not(target_env = "musl")))'.dependencies]
-copypasta-ext = { version = "0.3.2", optional = true, default-features = false, features = ["x11-fork"] }
-x11-clipboard = { version = "0.5", optional = true }
-
-# Clipboard support for X11 musl
-[target.'cfg(all(unix, not(any(target_os="macos", target_os="android", target_os="emscripten")), target_env = "musl"))'.dependencies]
-copypasta-ext = { version = "0.3.2", optional = true, default-features = false, features = ["x11-bin"] }
 
 [[bin]]
 name = "prs-gtk3-copy"

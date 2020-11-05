@@ -1,6 +1,7 @@
 use std::env::args;
 use std::sync::{Arc, Mutex};
 
+use gdk::prelude::*;
 use gio::prelude::*;
 use glib::clone;
 use gtk::prelude::*;
@@ -158,12 +159,21 @@ fn selected(secret: Secret, window: gtk::ApplicationWindow, input: gtk::SearchEn
     copy(text.to_string(), TIMEOUT);
 
     // Move to back, disable input
-    window.set_focus(None::<&gtk::Widget>);
     window.set_keep_above(false);
-    window.set_keep_below(true);
     window.set_sensitive(false);
+    window.set_deletable(false);
+    window.unstick();
     input.set_text("");
     input.set_placeholder_text(Some(&format!("Copied, clearing in {} seconds...", TIMEOUT)));
+
+    // Hack to unfocus and move window to back
+    window.set_accept_focus(false);
+    window.set_focus(None::<&gtk::Widget>);
+    if let Some(window) = window.get_window() {
+        window.hide();
+        window.show_unraised();
+        window.lower();
+    }
 
     // Close window after clipboard revert
     // TODO: wait for clipboard revert instead, do not use own timeout

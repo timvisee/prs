@@ -55,7 +55,7 @@ fn build_ui(application: &gtk::Application) {
 
     // create the main window
     let window = gtk::ApplicationWindow::new(application);
-    window.set_title("prs copy");
+    window.set_title("prs quick copy");
     window.set_border_width(5);
     window.set_position(gtk::WindowPosition::Center);
     // window.set_default_size(400, 150);
@@ -121,19 +121,16 @@ fn selected_entry(
 ) {
     let secret = match store.find(Some(query)) {
         FindSecret::Exact(secret) => secret,
+        FindSecret::Many(secrets) if secrets.len() == 1 => secrets[0].clone(),
+        FindSecret::Many(secrets) if secrets.is_empty() => {
+            error_dialog("Found no secrets for this query. Please redefine your query.");
+            return;
+        }
         FindSecret::Many(secrets) => {
-            gtk::MessageDialog::new(
-                // TODO: set parent window
-                None::<&gtk::Window>,
-                gtk::DialogFlags::MODAL,
-                gtk::MessageType::Error,
-                gtk::ButtonsType::Close,
-                &format!(
-                    "Found {} secrets for this query. Please refine your query.",
-                    secrets.len()
-                ),
-            )
-            .show_all();
+            error_dialog(&format!(
+                "Found {} secrets for this query. Please refine your query.",
+                secrets.len()
+            ));
             return;
         }
     };
@@ -257,6 +254,20 @@ fn notify_cleared() {
     eprintln!("Secret cleared from clipboard");
 }
 
+/// Show an error dialog.
+fn error_dialog(msg: &str) {
+    let dialog = gtk::MessageDialog::new(
+        // TODO: set parent window
+        None::<&gtk::Window>,
+        gtk::DialogFlags::MODAL,
+        gtk::MessageType::Error,
+        gtk::ButtonsType::Close,
+        msg,
+    );
+    dialog.connect_response(|dialog, _response| dialog.close());
+    dialog.show_all();
+}
+
 /// Get the text for a tree model item by iterator.
 fn model_item_text(model: &gtk::TreeModel, iter: &gtk::TreeIter) -> Option<String> {
     let item = model.get_value(iter, 0);
@@ -281,7 +292,7 @@ fn main() {
     quit.connect_activate(clone!(@weak application => move |_action, _parameter| {
         application.quit();
     }));
-    application.set_accels_for_action("app.quit", &["<Primary>Q"]);
+    application.set_accels_for_action("app.quit", &["Escape"]);
     application.add_action(&quit);
 
     // Run the application

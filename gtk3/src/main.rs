@@ -18,6 +18,9 @@ const APP_ID: &str = "com.timvisee.prs.gtk3-copy";
 /// Application name.
 const APP_NAME: &str = "prs";
 
+/// Application window title.
+const APP_TITLE: &str = "prs quick copy";
+
 /// Clipboard timeout in seconds.
 const CLIPBOARD_TIMEOUT: u32 = 20;
 
@@ -75,7 +78,10 @@ fn build_ui(application: &gtk::Application) {
     let store = match Store::open(prs_lib::STORE_DEFAULT_ROOT) {
         Ok(store) => store,
         Err(err) => {
-            error_dialog(&format!("Failed to load password store.\n\nError: {}", err));
+            error_dialog(
+                &format!("Failed to load password store.\n\nError: {}", err),
+                None,
+            );
             application.quit();
             return;
         }
@@ -84,18 +90,19 @@ fn build_ui(application: &gtk::Application) {
 
     // Quit if user has no secrets
     if secrets.is_empty() {
-        error_dialog("Your password store does not have any secrets.");
+        error_dialog("Your password store does not have any secrets.", None);
         application.quit();
         return;
     }
 
-    // create the main window
+    // Create the main window
     let window = gtk::ApplicationWindow::new(application);
-    window.set_title("prs quick copy");
+    window.set_title(APP_TITLE);
     window.set_border_width(5);
     window.set_position(gtk::WindowPosition::Center);
     window.set_keep_above(true);
     window.set_urgency_hint(true);
+    window.set_type_hint(gdk::WindowTypeHint::Dialog);
     window.stick();
 
     // Create an EntryCompletion widget
@@ -154,18 +161,30 @@ fn selected_entry(
     window: gtk::ApplicationWindow,
     input: gtk::SearchEntry,
 ) {
+    // Show error for empty query
+    if query.trim().is_empty() {
+        error_dialog("Please enter the name of a secret to copy.", Some(&window));
+        return;
+    }
+
     let secret = match store.find(Some(query)) {
         FindSecret::Exact(secret) => secret,
         FindSecret::Many(secrets) if secrets.len() == 1 => secrets[0].clone(),
         FindSecret::Many(secrets) if secrets.is_empty() => {
-            error_dialog("Found no secrets for this query. Please redefine your query.");
+            error_dialog(
+                "Found no secrets for this query. Please name a specific secret.",
+                Some(&window),
+            );
             return;
         }
         FindSecret::Many(secrets) => {
-            error_dialog(&format!(
-                "Found {} secrets for this query. Please refine your query.",
-                secrets.len()
-            ));
+            error_dialog(
+                &format!(
+                    "Found {} secrets for this query. Please refine your query.",
+                    secrets.len()
+                ),
+                Some(&window),
+            );
             return;
         }
     };
@@ -183,10 +202,10 @@ fn selected(secret: Secret, window: gtk::ApplicationWindow, input: gtk::SearchEn
     {
         Ok(plaintext) => plaintext,
         Err(err) => {
-            error_dialog(&format!(
-                "Failed to decrypt first line of secret.\n\nError: {}",
-                err
-            ));
+            error_dialog(
+                &format!("Failed to decrypt first line of secret.\n\nError: {}", err),
+                Some(&window),
+            );
             window.close();
             return;
         }
@@ -297,10 +316,9 @@ fn notify_cleared() {
 }
 
 /// Show an error dialog.
-fn error_dialog(msg: &str) {
+fn error_dialog(msg: &str, window: Option<&gtk::ApplicationWindow>) {
     let dialog = gtk::MessageDialog::new(
-        // TODO: set parent window
-        None::<&gtk::Window>,
+        window,
         gtk::DialogFlags::MODAL,
         gtk::MessageType::Error,
         gtk::ButtonsType::Close,

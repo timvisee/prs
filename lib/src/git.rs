@@ -14,7 +14,7 @@ pub use git_state::{git_state, RepositoryState};
 const GIT_FETCH_HEAD_FILE: &str = ".git/FETCH_HEAD";
 
 /// Environment variable git uses to modify the ssh command.
-#[cfg(not(windows))]
+#[cfg(unix)]
 const GIT_ENV_SSH: &str = "GIT_SSH_COMMAND";
 
 /// Custom ssh command for git.
@@ -22,7 +22,7 @@ const GIT_ENV_SSH: &str = "GIT_SSH_COMMAND";
 /// With this custom SSH command we enable SSH session reuse, to make remote git operations much
 /// quicker for repositories using an SSH URL. This greatly improves prs sync speeds.
 // TODO: make configurable, add current user ID to path
-#[cfg(not(windows))]
+#[cfg(unix)]
 const GIT_ENV_SSH_CMD: &str = "ssh -o 'ControlMaster auto' -o 'ControlPath /tmp/.prs-session--%r@%h:%p' -o 'ControlPersist 1h'";
 
 /// Invoke git init.
@@ -263,7 +263,7 @@ where
     }
 
     // Set custom git ssh command to speed up remote operations
-    #[cfg(not(windows))]
+    #[cfg(unix)]
     {
         if env::var_os(GIT_ENV_SSH).is_none() {
             cmd.env(GIT_ENV_SSH, GIT_ENV_SSH_CMD);

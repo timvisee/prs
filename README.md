@@ -106,7 +106,7 @@ prs help
   - CentOS/Red Hat/openSUSE/Fedora: `yum install git gnupg gpgme`
   - Arch: `pacman -S git gnupg gpgme`
   - Alpine: `apk add git gnupg gpgme`
-  - macOS: `brew install gpg gpgme`
+  - macOS: `brew install gpg gpgme` (+ `gtk+3`)
 
 ## Install
 Because `prs` is still in early stages, only limited installation options are
@@ -116,8 +116,8 @@ Make sure you meet and install the [requirements](#requirements).
 
 The latest binaries (zipped) from `master` can be found here:
 
-- [Linux x86_64 musl](https://gitlab.com/timvisee/prs/-/jobs/artifacts/master/download?job=build-x86_64-linux-musl) _(static)_
 - [Linux x86_64 GNU](https://gitlab.com/timvisee/prs/-/jobs/artifacts/master/download?job=build-x86_64-linux-gnu) _(dynamic)_
+- [Linux x86_64 musl](https://gitlab.com/timvisee/prs/-/jobs/artifacts/master/download?job=build-x86_64-linux-musl) _(static)_
 - [macOS x86_64](https://gitlab.com/timvisee/prs/-/jobs/artifacts/master/download?job=build-macos)
 
 ## Security

@@ -120,6 +120,9 @@ The latest binaries (zipped) from `master` can be found here:
 - [Linux x86_64 musl](https://gitlab.com/timvisee/prs/-/jobs/artifacts/master/download?job=build-x86_64-linux-musl) _(static)_
 - [macOS x86_64](https://gitlab.com/timvisee/prs/-/jobs/artifacts/master/download?job=build-macos)
 
+_Note: for Linux the GNU (versus musl) binary is recommended if it works, because it
+has better clipboard/notification support._
+
 ## Security
 Security is backed by [`gpg`][gpg] which is used all over the world and
 has been battle-tested for more than 20 years.

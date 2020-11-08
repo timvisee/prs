@@ -221,6 +221,36 @@ package-docker:
       - prs-docker-$TARGET.tar
     expire_in: 1 month
 
+# Release binaries on GitLab as generic package
+release-gitlab-generic-package:
+  image: curlimages/curl:latest
+  stage: release
+  dependencies:
+    - build-x86_64-linux-gnu
+    - build-x86_64-linux-musl
+    # TODO: add macOS binary
+  # TODO: only run for release tag
+  # only:
+  #   - /^v(\d+\.)*\d+$/
+  variables:
+    PACKAGE_VERSION: "0.0.1"
+    LINUX_GNU_BIN: "prs-x86_64-unknown-linux-gnu"
+    LINUX_GNU_BIN_GTK_COPY: "prs-gtk3-copy-x86_64-unknown-linux-gnu"
+    LINUX_MUSL_BIN: "prs-x86_64-unknown-linux-musl"
+    LINUX_MUSL_BIN_GTK_COPY: "prs-gtk3-copy-x86_64-unknown-linux-musl"
+    PACKAGE_REGISTRY_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/prs/${PACKAGE_VERSION}"
+  before_script: []
+  script:
+    - |
+      curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file ${LINUX_GNU_BIN} ${PACKAGE_REGISTRY_URL}/${LINUX_GNU_BIN}
+    - |
+      curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file ${LINUX_GNU_BIN_GTK_COPY} ${PACKAGE_REGISTRY_URL}/${LINUX_GNU_BIN_GTK_COPY}
+    - |
+      curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file ${LINUX_MUSL_BIN} ${PACKAGE_REGISTRY_URL}/${LINUX_MUSL_BIN}
+    - |
+      curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file ${LINUX_MUSL_BIN_GTK_COPY} ${PACKAGE_REGISTRY_URL}/${LINUX_MUSL_BIN_GTK_COPY}
+    # TODO: add macOS releases
+
 # Cargo crate release
 release-crate:
   stage: release

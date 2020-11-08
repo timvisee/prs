@@ -199,6 +199,7 @@ package-docker:
     - docker:dind
   variables:
     TARGET: x86_64-unknown-linux-musl
+    IMAGE_NAME: prs:$CI_COMMIT_SHA
     DOCKER_HOST: tcp://docker:2375
     # DOCKER_DRIVER: overlay2
   before_script: []
@@ -210,12 +211,12 @@ package-docker:
 
     # Build the Docker image, run it once to test
     - cd ./pkg/docker
-    - docker build -t timvisee/prs:latest ./
-    - docker run --rm timvisee/prs:latest -V
+    - docker build -t $IMAGE_NAME ./
+    - docker run --rm $IMAGE_NAME -V
     - cd ../..
 
     # Export image as artifact
-    - docker image save -o ./prs-docker-$TARGET.tar timvisee/prs:latest
+    - docker image save -o ./prs-docker-$TARGET.tar $IMAGE_NAME
   artifacts:
     name: prs-docker-x86_64-linux-musl
     paths:
@@ -329,9 +330,9 @@ release-crate:
     - echo "Publishing crate to crates.io..."
     - cargo publish --verbose --allow-dirty
 
-# Publish a Docker image
+# Publish Docker image on repository registry
 release-docker:
-  image: docker:git
+  image: docker:latest
   stage: release
   only:
     - /^v(\d+\.)*\d+$/
@@ -342,6 +343,7 @@ release-docker:
   variables:
     TARGET: x86_64-unknown-linux-musl
     DOCKER_HOST: tcp://docker:2375
+    IMAGE_NAME: prs:$CI_COMMIT_SHA
     # DOCKER_DRIVER: overlay2
   before_script: []
   script:
@@ -351,11 +353,41 @@ release-docker:
     # Retag version
     - VERSION=$(echo $CI_COMMIT_REF_NAME | cut -c 2-)
     - echo "Determined Docker image version number 'v$VERSION', retagging image..."
-    - docker tag timvisee/prs:latest timvisee/prs:$VERSION
-
-    # TODO: publish on GitLab registry as well
+    - docker tag $IMAGE_NAME registry.gitlab.com/timvisee/prs:$VERSION
+    - docker tag $IMAGE_NAME registry.gitlab.com/timvisee/prs:latest
 
     # Authenticate and push the Docker images
-    - echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+    - 'docker login registry.gitlab.com -u $DOCKER_USER -p $DOCKER_PASS'
+    - docker push registry.gitlab.com/timvisee/prs:$VERSION
+    - docker push registry.gitlab.com/timvisee/prs:latest
+
+# Publish Docker image on Docker hub
+release-docker-hub:
+  image: docker:latest
+  stage: release
+  only:
+    - /^v(\d+\.)*\d+$/
+  dependencies:
+    - package-docker
+  services:
+    - docker:dind
+  variables:
+    TARGET: x86_64-unknown-linux-musl
+    DOCKER_HOST: tcp://docker:2375
+    IMAGE_NAME: prs:$CI_COMMIT_SHA
+    # DOCKER_DRIVER: overlay2
+  before_script: []
+  script:
+    # Import Docker image
+    - docker image load ./prs-docker-$TARGET.tar
+
+    # Retag version
+    - VERSION=$(echo $CI_COMMIT_REF_NAME | cut -c 2-)
+    - echo "Determined Docker image version number 'v$VERSION', retagging image..."
+    - docker tag $IMAGE_NAME timvisee/prs:$VERSION
+    - docker tag $IMAGE_NAME timvisee/prs:latest
+
+    # Authenticate and push the Docker images
+    - echo "$DOCKER_HUB_PASS" | docker login -u "$DOCKER_HUB_USER" --password-stdin
     - docker push timvisee/prs:$VERSION
     - docker push timvisee/prs:latest

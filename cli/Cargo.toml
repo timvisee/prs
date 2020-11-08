@@ -35,7 +35,7 @@ colored = "2.0"
 derive_builder = "0.9"
 edit = "0.1"
 libc = "0.2"
-prs-lib = { path = "../lib" }
+prs-lib = { version = "0.1.0", path = "../lib" }
 shellexpand = "2.0"
 skim = "0.9"
 thiserror = "1.0"

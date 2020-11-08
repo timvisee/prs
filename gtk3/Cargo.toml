@@ -30,7 +30,7 @@ gdk = "^0"
 gio = { version = "^0", features = ["v2_44"] }
 glib = "^0"
 gtk = { version = "0.9.0", features = ["v3_16"] }
-prs-lib = { path = "../lib" }
+prs-lib = { version = "0.1.0", path = "../lib" }
 thiserror = "1.0"
 
 # Notification support

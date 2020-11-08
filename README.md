@@ -114,22 +114,10 @@ available right now. Feel free to contribute.
 
 Make sure you meet and install the [requirements](#requirements).
 
-Here are the latest release binaries:
-
-- Linux amd64:
-  [prs](https://github.com/timvisee/prs/releases/latest/download/prs-v0.1.0-linux-x64)
-  [prs-gtk3-copy](https://github.com/timvisee/prs/releases/latest/download/prs-gtk3-copy-v0.1.0-linux-x64)
-  _(dynamic)_
-- Linux amd64 musl:
-  [prs](https://github.com/timvisee/prs/releases/latest/download/prs-v0.1.0-linux-x64-static)
-  [prs-gtk3-copy](https://github.com/timvisee/prs/releases/latest/download/prs-gtk3-copy-v0.1.0-linux-x64-static)
-  _(static)_
-- macOS amd64:
-  [prs](https://github.com/timvisee/prs/releases/latest/download/prs-v0.1.0-macos)
-  [prs-gtk3-copy](https://github.com/timvisee/prs/releases/latest/download/prs-gtk3-copy-v0.1.0-macos)
-
-Or see the latest release files on [GitHub][github-release-latest],
-[GitLab][gitlab-releases] or [GitLab prs package registry][gitlab-packages].
+Find the latest binaries on the latest release page:
+- [GitHub][github-release-latest]
+- [GitLab][gitlab-releases]
+- [GitLab package registry][gitlab-packages] for `prs`
 
 _Note: for Linux the GNU (not musl) binary is recommended if it works, because it
 has better clipboard/notification support._

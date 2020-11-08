@@ -2,9 +2,9 @@
 [![Newest release on crates.io][crate-version-badge]][crate-link]
 [![Project license][crate-license-badge]](LICENSE)
 
-[crate-license-badge]: https://img.shields.io/crates/l/prs.svg
-[crate-link]: https://crates.io/crates/prs
-[crate-version-badge]: https://img.shields.io/crates/v/prs.svg
+[crate-license-badge]: https://img.shields.io/crates/l/prs-lib.svg
+[crate-link]: https://crates.io/crates/prs-cli
+[crate-version-badge]: https://img.shields.io/crates/v/prs-lib.svg
 [gitlab-ci-link]: https://gitlab.com/timvisee/prs/pipelines
 [gitlab-ci-master-badge]: https://gitlab.com/timvisee/prs/badges/master/pipeline.svg
 
@@ -114,13 +114,24 @@ available right now. Feel free to contribute.
 
 Make sure you meet and install the [requirements](#requirements).
 
-The latest binaries (zipped) from `master` can be found here:
+Here are the latest release binaries:
 
-- [Linux x86_64 GNU](https://gitlab.com/timvisee/prs/-/jobs/artifacts/master/download?job=build-x86_64-linux-gnu) _(dynamic)_
-- [Linux x86_64 musl](https://gitlab.com/timvisee/prs/-/jobs/artifacts/master/download?job=build-x86_64-linux-musl) _(static)_
-- [macOS x86_64](https://gitlab.com/timvisee/prs/-/jobs/artifacts/master/download?job=build-macos)
+- Linux amd64:
+  [prs](https://github.com/timvisee/prs/releases/latest/download/prs-v0.1.0-linux-x64)
+  [prs-gtk3-copy](https://github.com/timvisee/prs/releases/latest/download/prs-gtk3-copy-v0.1.0-linux-x64)
+  _(dynamic)_
+- Linux amd64 musl:
+  [prs](https://github.com/timvisee/prs/releases/latest/download/prs-v0.1.0-linux-x64-static)
+  [prs-gtk3-copy](https://github.com/timvisee/prs/releases/latest/download/prs-gtk3-copy-v0.1.0-linux-x64-static)
+  _(static)_
+- macOS amd64:
+  [prs](https://github.com/timvisee/prs/releases/latest/download/prs-v0.1.0-macos)
+  [prs-gtk3-copy](https://github.com/timvisee/prs/releases/latest/download/prs-gtk3-copy-v0.1.0-macos)
 
-_Note: for Linux the GNU (versus musl) binary is recommended if it works, because it
+Or see the latest release files on [GitHub][github-release-latest],
+[GitLab][gitlab-releases] or [GitLab prs package registry][gitlab-packages].
+
+_Note: for Linux the GNU (not musl) binary is recommended if it works, because it
 has better clipboard/notification support._
 
 ## Security
@@ -336,6 +347,9 @@ The library portion of this project is licensed under the GNU LGPL-3.0 license.
 Check out the [lib/LICENSE](lib/LICENSE) file for more information.
 
 [git]: https://git-scm.com/
+[github-release-latest]: https://github.com/timvisee/prs/releases/latest
+[gitlab-packages]: https://gitlab.com/timvisee/prs/-/packages
+[gitlab-releases]: https://gitlab.com/timvisee/prs/-/releases
 [gpg]: https://gnupg.org/
 [pass-compatible-clients]: https://www.passwordstore.org#other
 [pass]: https://www.passwordstore.org/

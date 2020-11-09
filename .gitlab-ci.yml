@@ -58,8 +58,6 @@ check-old:
 check-macos-stable:
   tags:
     - macos
-  cache:
-    <<: *rust-build-cache
   only:
     - master
     - /^v(\d+\.)*\d+$/
@@ -141,8 +139,6 @@ build-macos:
   needs: []
   variables:
     TARGET: x86_64-apple-darwin
-  cache:
-    <<: *rust-build-cache
   before_script:
     - |
       rustup install $RUST_VERSION

@@ -1,4 +1,4 @@
-use clap::{App, Arg, SubCommand};
+use clap::{App, AppSettings, Arg, SubCommand};
 
 use crate::cmd::arg::{ArgStore, CmdArg};
 
@@ -15,5 +15,6 @@ impl CmdGit {
                     .multiple(true),
             )
             .arg(ArgStore::build())
+            .setting(AppSettings::TrailingVarArg)
     }
 }

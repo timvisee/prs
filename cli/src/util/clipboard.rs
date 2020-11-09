@@ -79,7 +79,7 @@ fn copy_timeout_x11(data: &[u8], timeout: u64, report: bool) -> Result<()> {
 
     // Remember previous clipboard contents
     let mut ctx = ClipboardContext::new().map_err(Err::Clipboard)?;
-    let previous = ctx.get_contents().map_err(Err::Clipboard)?;
+    let previous = ctx.get_contents().unwrap_or_else(|_| String::new());
 
     let bin = crate::util::bin_name();
 
@@ -179,7 +179,7 @@ fn copy_timeout_x11_bin(data: &[u8], timeout: u64, report: bool) -> Result<()> {
 
     // Remember previous clipboard contents
     let mut ctx = ClipboardContext::new().map_err(Err::Clipboard)?;
-    let previous = ctx.get_contents().map_err(Err::Clipboard)?;
+    let previous = ctx.get_contents().unwrap_or_else(|_| String::new());
 
     // Set clipboard
     ctx.set_contents(data.to_string()).map_err(Err::Clipboard)?;
@@ -241,7 +241,7 @@ fn copy_timeout_macos(data: &[u8], timeout: u64, report: bool) -> Result<()> {
 
     // Remember previous clipboard contents
     let mut ctx = ClipboardContext::new().map_err(Err::Clipboard)?;
-    let previous = ctx.get_contents().map_err(Err::Clipboard)?;
+    let previous = ctx.get_contents().unwrap_or_else(|_| String::new());
 
     // Set clipboard
     ctx.set_contents(data.to_string()).map_err(Err::Clipboard)?;

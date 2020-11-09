@@ -15,15 +15,6 @@ variables:
   APT_GTK_LIBS: libgtk-3-dev
   BREW_PACKAGES: gpg gpgme gtk+3
 
-# Cache rust/cargo/build artifacts
-cache:
-  key: "$CI_PIPELINE_ID-$RUST_VERSION"
-  paths:
-    - /usr/local/cargo/registry/
-    - /usr/local/rustup/toolchains/
-    - /usr/local/rustup/update-hashes/
-    - target/
-
 # Install compiler and OpenSSL dependencies
 before_script:
   - apt-get update
@@ -36,9 +27,17 @@ before_script:
     rustc --version
     cargo --version
 
+# Rust build cache configuration
+.rust-build-cache: &rust-build-cache
+  key: "$CI_PIPELINE_ID-$RUST_VERSION"
+  paths:
+    - target/
+
 # Check on stable, beta and nightly 
 .check-base: &check-base
   stage: check
+  cache:
+    <<: *rust-build-cache
   script:
     - cargo check --verbose
     - cd cli && cargo check --no-default-features --verbose && cd ..
@@ -59,7 +58,8 @@ check-old:
 check-macos-stable:
   tags:
     - macos
-  cache: {}
+  cache:
+    <<: *rust-build-cache
   only:
     - master
     - /^v(\d+\.)*\d+$/
@@ -77,6 +77,8 @@ check-macos-stable:
 build-x86_64-linux-gnu:
   stage: build
   needs: []
+  cache:
+    <<: *rust-build-cache
   script:
     - cargo build --target=$TARGET --release --verbose
     - mv target/$TARGET/release/prs ./prs-$TARGET
@@ -107,6 +109,8 @@ build-x86_64-linux-musl:
     GPGME_LIB_DIR: "$PREFIX/lib"
     GPGME_LIBS: "gpgme:assuan"
     GPGME_STATIC: 1
+  cache:
+    <<: *rust-build-cache
   script:
     - ./ci/gpgme/build
 
@@ -131,13 +135,14 @@ build-macos:
   stage: build
   tags:
     - macos
-  cache: {}
   only:
     - master
     - /^v(\d+\.)*\d+$/
   needs: []
   variables:
     TARGET: x86_64-apple-darwin
+  cache:
+    <<: *rust-build-cache
   before_script:
     - |
       rustup install $RUST_VERSION
@@ -162,6 +167,8 @@ test-cargo:
   stage: test
   needs: []
   dependencies: []
+  cache:
+    <<: *rust-build-cache
   script:
     - cargo test --verbose
 

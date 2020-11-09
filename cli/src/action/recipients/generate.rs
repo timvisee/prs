@@ -9,7 +9,7 @@ use crate::cmd::matcher::{
     MainMatcher, Matcher,
 };
 use crate::util::{
-    self,
+    self, cli,
     error::{self, ErrorHintsBuilder},
     style, sync,
 };
@@ -38,8 +38,19 @@ impl<'a> Generate<'a> {
         sync::ensure_ready(&sync);
         sync.prepare()?;
 
+        // Show warning to user
+        if !matcher_main.force() {
+            eprintln!("This will start a key pair generation wizard through 'gpg'");
+            if !cli::prompt_yes("Continue?", Some(true), &matcher_main) {
+                if matcher_main.verbose() {
+                    eprintln!("Generation cancelled");
+                }
+                error::quit();
+            }
+        }
+
         // Generate new key through GPG
-        let new = gpg_generate(matcher_main.verbose())?;
+        let new = gpg_generate(matcher_main.quiet(), matcher_main.verbose())?;
         let new_keys = new.keys();
 
         if !matcher_generate.no_add() {
@@ -103,12 +114,18 @@ impl<'a> Generate<'a> {
 /// Invoke GPG generate command.
 ///
 /// Return new keys as recipients.
-pub fn gpg_generate(verbose: bool) -> Result<Recipients> {
+pub fn gpg_generate(quiet: bool, verbose: bool) -> Result<Recipients> {
     // List recipients before
     let before = prs_lib::all(true)?;
 
     // Generate key through GPG
+    if !quiet {
+        eprintln!("===== GPG START =====");
+    }
     util::invoke_cmd("gpg --full-generate-key".into(), None, verbose).map_err(Err::Invoke)?;
+    if !quiet {
+        eprintln!("===== GPG END =====");
+    }
 
     // List recipients after, keep new keys
     let mut diff = prs_lib::all(true)?;

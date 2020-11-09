@@ -148,10 +148,10 @@ Secrets are/use:
 - Zeroed on drop
 - Locked to physical memory, cannot leak to swap/disk ([`mlock`][security-mlock])
 - Locked into memory, cannot be dumped/not included in core ([`madvice`][security-mlock])
+- Not written to disk to edit (if possible)
 - String formatting is blocked
 - Constant time comparison to prevent time based attacks
 - Minimally cloned
-- Not written to disk to editing (when possible)
 
 [security-mlock]: https://man7.org/linux/man-pages/man2/mlock.2.html
 [security-madvice]: https://man7.org/linux/man-pages/man2/madvise.2.html

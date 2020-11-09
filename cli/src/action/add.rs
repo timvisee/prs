@@ -7,7 +7,7 @@ use prs_lib::{
 use thiserror::Error;
 
 use crate::cmd::matcher::{add::AddMatcher, MainMatcher, Matcher};
-use crate::util::{cli, error, stdin, sync};
+use crate::util::{cli, edit, error, stdin, sync};
 
 /// Add secret action.
 pub struct Add<'a> {
@@ -44,7 +44,7 @@ impl<'a> Add<'a> {
         if matcher_add.stdin() {
             plaintext = stdin::read_plaintext(!matcher_main.quiet())?;
         } else if !matcher_add.empty() {
-            if let Some(changed) = cli::edit(&plaintext).map_err(Err::Edit)? {
+            if let Some(changed) = edit::edit(&plaintext).map_err(Err::Edit)? {
                 plaintext = changed;
             }
         }
@@ -92,7 +92,7 @@ pub enum Err {
     NormalizePath(#[source] anyhow::Error),
 
     #[error("failed to edit secret in editor")]
-    Edit(#[source] std::io::Error),
+    Edit(#[source] anyhow::Error),
 
     #[error("failed to write changed secret")]
     Write(#[source] anyhow::Error),

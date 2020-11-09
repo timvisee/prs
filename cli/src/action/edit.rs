@@ -4,7 +4,7 @@ use prs_lib::store::Store;
 use thiserror::Error;
 
 use crate::cmd::matcher::{edit::EditMatcher, MainMatcher, Matcher};
-use crate::util::{cli, error, skim, stdin, sync};
+use crate::util::{cli, edit, error, skim, stdin, sync};
 
 /// Edit secret plaintext action.
 pub struct Edit<'a> {
@@ -36,7 +36,7 @@ impl<'a> Edit<'a> {
         if matcher_edit.stdin() {
             plaintext = stdin::read_plaintext(!matcher_main.quiet())?;
         } else {
-            plaintext = match cli::edit(&plaintext).map_err(Err::Edit)? {
+            plaintext = match edit::edit(&plaintext).map_err(Err::Edit)? {
                 Some(changed) => changed,
                 None => {
                     if !matcher_main.quiet() {
@@ -85,7 +85,7 @@ pub enum Err {
     Read(#[source] anyhow::Error),
 
     #[error("failed to edit secret in editor")]
-    Edit(#[source] std::io::Error),
+    Edit(#[source] anyhow::Error),
 
     #[error("failed to write changed secret")]
     Write(#[source] anyhow::Error),

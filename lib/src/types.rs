@@ -45,7 +45,7 @@ impl From<Vec<u8>> for Ciphertext {
 ///
 /// Wraps plaintext bytes. This type is limited on purpose, to prevent accidentally leaking the
 /// plaintext. Security properties are enforced by `secstr::SecVec`.
-#[derive(Clone)]
+#[derive(Clone, Eq, PartialEq)]
 pub struct Plaintext(SecVec<u8>);
 
 impl Plaintext {

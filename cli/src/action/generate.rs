@@ -9,7 +9,7 @@ use thiserror::Error;
 use crate::cmd::matcher::{generate::GenerateMatcher, MainMatcher, Matcher};
 #[cfg(feature = "clipboard")]
 use crate::util::clipboard;
-use crate::util::{cli, error, stdin, sync};
+use crate::util::{cli, edit, error, stdin, sync};
 
 /// Generate secret action.
 pub struct Generate<'a> {
@@ -71,7 +71,7 @@ impl<'a> Generate<'a> {
 
         // Edit in editor
         if matcher_generate.edit() {
-            if let Some(changed) = cli::edit(&plaintext).map_err(Err::Edit)? {
+            if let Some(changed) = edit::edit(&plaintext).map_err(Err::Edit)? {
                 plaintext = changed;
             }
         }
@@ -137,7 +137,7 @@ pub enum Err {
     NormalizePath(#[source] anyhow::Error),
 
     #[error("failed to edit secret in editor")]
-    Edit(#[source] std::io::Error),
+    Edit(#[source] anyhow::Error),
 
     #[error("failed to read existing secret")]
     Read(#[source] anyhow::Error),

@@ -1,7 +1,5 @@
 use std::io::{stderr, stdin, Write};
 
-use prs_lib::types::Plaintext;
-
 use crate::cmd::matcher::MainMatcher;
 
 use crate::util::error::{quit_error, quit_error_msg, ErrorHints};
@@ -120,15 +118,4 @@ fn derive_bool(input: &str) -> Option<bool> {
 
     // The answer could not be determined, return none
     None
-}
-
-/// Edit given plaintext in default editor.
-///
-/// Only returns `Plaintext` if changed.
-pub fn edit(plaintext: &Plaintext) -> Result<Option<Plaintext>, std::io::Error> {
-    edit::edit_bytes(plaintext.unsecure_ref()).map(|data| {
-        Some(data)
-            .filter(|data| &plaintext.unsecure_ref() != &data.as_slice())
-            .map(|data| data.into())
-    })
 }

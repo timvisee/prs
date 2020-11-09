@@ -40,7 +40,7 @@ before_script:
     <<: *rust-build-cache
   script:
     - cargo check --verbose
-    - pushd cli; cargo check --no-default-features --verbose; popd
+    - cd cli; cargo check --no-default-features --verbose; cd ..
 check-stable:
   <<: *check-base
 check-beta:
@@ -194,7 +194,7 @@ test-integration:
 
 # Package a Docker image
 package-docker:
-  image: docker:git
+  image: docker:latest
   stage: package
   dependencies:
     - build-x86_64-linux-musl
@@ -213,10 +213,10 @@ package-docker:
     - mv ./prs-$TARGET ./pkg/docker/prs
 
     # Build the Docker image, run it once to test
-    - pushd ./pkg/docker
+    - cd ./pkg/docker
     - docker build -t $IMAGE_NAME ./
     - docker run --rm $IMAGE_NAME -V
-    - popd
+    - cd ../..
 
     # Export image as artifact
     - docker image save -o ./prs-docker-$TARGET.tar $IMAGE_NAME
@@ -332,13 +332,13 @@ release-crate:
     - echo "Creating release crate to publish on crates.io..."
     - echo $CARGO_TOKEN | cargo login
     - echo "Publishing crates to crates.io..."
-    - pushd lib; cargo publish --verbose --allow-dirty --no-verify; popd
+    - cd lib; cargo publish --verbose --allow-dirty --no-verify; cd ..
 
     # Give package index some time to sync
     - sleep 60
 
-    - pushd cli && cargo publish --verbose --allow-dirty --no-verify; popd
-    - pushd gtk3 && cargo publish --verbose --allow-dirty --no-verify; popd
+    - cd cli && cargo publish --verbose --allow-dirty --no-verify; cd ..
+    - cd gtk3 && cargo publish --verbose --allow-dirty --no-verify; cd ..
 
 # Publish Docker image on repository registry
 release-docker:

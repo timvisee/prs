@@ -331,11 +331,16 @@ release-crate:
   dependencies: []
   only:
     - /^v(\d+\.)*\d+$/
+  before_script: []
   script:
     - echo "Creating release crate to publish on crates.io..."
     - echo $CARGO_TOKEN | cargo login
     - echo "Publishing crates to crates.io..."
     - cd lib && cargo publish --verbose --allow-dirty --no-verify && cd ..
+
+    # Give package index some time to sync
+    - sleep 60
+
     - cd cli && cargo publish --verbose --allow-dirty --no-verify && cd ..
     - cd gtk3 && cargo publish --verbose --allow-dirty --no-verify && cd ..
 

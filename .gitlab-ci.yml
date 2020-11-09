@@ -367,13 +367,13 @@ release-docker:
     # Retag version
     - VERSION=$(echo $CI_COMMIT_REF_NAME | cut -c 2-)
     - echo "Determined Docker image version number 'v$VERSION', retagging image..."
-    - docker tag $IMAGE_NAME registry.gitlab.com/timvisee/prs:$VERSION
-    - docker tag $IMAGE_NAME registry.gitlab.com/timvisee/prs:latest
+    - docker tag $IMAGE_NAME registry.gitlab.com/timvisee/prs/docker/prs:$VERSION
+    - docker tag $IMAGE_NAME registry.gitlab.com/timvisee/prs/docker/prs:latest
 
     # Authenticate and push the Docker images
     - 'docker login registry.gitlab.com -u $DOCKER_USER -p $DOCKER_PASS'
-    - docker push registry.gitlab.com/timvisee/prs:$VERSION
-    - docker push registry.gitlab.com/timvisee/prs:latest
+    - docker push registry.gitlab.com/timvisee/prs/docker/prs:$VERSION
+    - docker push registry.gitlab.com/timvisee/prs/docker/prs:latest
 
 # Publish Docker image on Docker hub
 release-docker-hub:

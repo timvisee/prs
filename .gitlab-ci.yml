@@ -68,6 +68,8 @@ check-macos-stable:
     - |
       rustc --version
       cargo --version
+    - brew update
+    - brew upgrade
     - brew install $BREW_PACKAGES
   <<: *check-base
 
@@ -146,6 +148,8 @@ build-macos:
     - |
       rustc --version
       cargo --version
+    - brew update
+    - brew upgrade
     - brew install $BREW_PACKAGES
   script:
     - cargo build --target=$TARGET --release --verbose

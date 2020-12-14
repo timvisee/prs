@@ -8,6 +8,7 @@ pub mod generate;
 pub mod git;
 pub mod housekeeping;
 pub mod init;
+pub mod internal;
 pub mod list;
 pub mod r#move;
 pub mod recipients;

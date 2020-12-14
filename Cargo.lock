@@ -1396,6 +1396,7 @@ name = "prs-cli"
 version = "0.1.2"
 dependencies = [
  "anyhow",
+ "base64",
  "chbs",
  "clap",
  "colored",

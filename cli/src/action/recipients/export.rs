@@ -59,7 +59,7 @@ impl<'a> Export<'a> {
         #[cfg(feature = "clipboard")]
         if matcher_export.copy() {
             stdout = false;
-            clipboard::copy(&data).map_err(Err::Clipboard)?;
+            clipboard::set(&data).map_err(Err::Clipboard)?;
         }
 
         if stdout {

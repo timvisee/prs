@@ -1,3 +1,5 @@
+use std::io::Write;
+use std::process::{Command, Stdio};
 use std::thread;
 use std::time::Duration;
 
@@ -12,8 +14,16 @@ use thiserror::Error;
 
 use crate::util::error::{self, ErrorHintsBuilder};
 
-/// Copy the given plain text to the user clipboard.
-pub fn copy(data: &[u8]) -> Result<()> {
+/// Get clipboard contents.
+///
+/// If clipboard is unset, an emtpy string is returned.
+pub fn get() -> Result<String> {
+    let mut ctx = copypasta_ext::x11_fork::ClipboardContext::new().map_err(Err::Clipboard)?;
+    Ok(ctx.get_contents().unwrap_or_else(|_| String::new()))
+}
+
+/// Set clipboard contents.
+pub fn set(data: &[u8]) -> Result<()> {
     let mut ctx = copypasta_ext::x11_fork::ClipboardContext::new().map_err(Err::Clipboard)?;
     ctx.set_contents(std::str::from_utf8(data).unwrap().into())
         .map_err(|err| Err::Clipboard(err).into())
@@ -23,13 +33,19 @@ pub fn copy(data: &[u8]) -> Result<()> {
 #[allow(unreachable_code)]
 pub fn copy_timeout(data: &[u8], timeout: u64, report: bool) -> Result<()> {
     if timeout == 0 {
-        return copy(data);
+        return set(data);
     }
 
     // macOS
     #[cfg(target_os = "macos")]
     {
         return copy_timeout_macos(data, timeout, report);
+    }
+
+    // Windows
+    #[cfg(target_os = "windows")]
+    {
+        return copy_timeout_windows(data, timeout, report);
     }
 
     // X11 with musl
@@ -53,7 +69,7 @@ pub fn copy_timeout(data: &[u8], timeout: u64, report: bool) -> Result<()> {
     }
 
     // Other clipboard contexts
-    copy_timeout_fallback(data, timeout, report)
+    copy_timeout_blocking(data, timeout, report)
 }
 
 /// Copy with timeout on X11.
@@ -229,52 +245,54 @@ fn copy_timeout_x11_bin(data: &[u8], timeout: u64, report: bool) -> Result<()> {
 /// Keeps clipboard contents in clipboard even if application quits. Doesn't fuck with other
 /// clipboard contents and reverts back to previous contents once a timeout is reached.
 ///
-/// Forks & detaches two processes to set/keep clipboard contents and to drive the timeout.
-///
-/// Based on: https://docs.rs/copypasta-ext/0.3.2/copypasta_ext/x11_fork/index.html
+/// Spawns and disowns a process to manage reverting the clipboard after timeout.
 #[cfg(target_os = "macos")]
 fn copy_timeout_macos(data: &[u8], timeout: u64, report: bool) -> Result<()> {
-    use copypasta_ext::copypasta::ClipboardContext;
+    copy_timeout_process(data, timeout, report)
+}
 
-    let data = std::str::from_utf8(data).map_err(Err::Utf8)?;
-    let bin = crate::util::bin_name();
+/// Copy with timeout on Windows.
+///
+/// Keeps clipboard contents in clipboard even if application quits. Doesn't fuck with other
+/// clipboard contents and reverts back to previous contents once a timeout is reached.
+///
+/// Spawns and disowns a process to manage reverting the clipboard after timeout.
+#[cfg(target_os = "windows")]
+fn copy_timeout_windows(data: &[u8], timeout: u64, report: bool) -> Result<()> {
+    copy_timeout_process(data, timeout, report)
+}
 
-    // Remember previous clipboard contents
-    let mut ctx = ClipboardContext::new().map_err(Err::Clipboard)?;
-    let previous = ctx.get_contents().unwrap_or_else(|_| String::new());
+/// Copy with timeout using subprocess.
+///
+/// Copy with timeout. Spawn and disown a process to manage reverting the clipboard contents.
+///
+/// Falls back to blocking method if it fails to determine the current executable path.
+#[allow(unused)]
+fn copy_timeout_process(data: &[u8], timeout: u64, report: bool) -> Result<()> {
+    // Find current exe path, or fall back to basic timeout copy
+    let current_exe = match std::env::current_exe() {
+        Ok(exe) => exe,
+        Err(_) => match std::env::args().next() {
+            Some(bin) => bin.into(),
+            None => return copy_timeout_blocking(data, timeout, report),
+        },
+    };
 
-    // Set clipboard
-    ctx.set_contents(data.to_string()).map_err(Err::Clipboard)?;
+    // Set clipboard, remember previous contents
+    let previous = get()?;
+    set(&data)?;
 
-    // Detach fork to revert clipboard after timeout unless changed
-    match unsafe { libc::fork() } {
-        -1 => panic!("failed to fork"),
-        0 => {
-            thread::sleep(Duration::from_secs(timeout));
-
-            // Obtain new clipboard context, get current contents
-            let mut ctx = ClipboardContext::new()
-                .expect(&format!("{}: failed to obtain X11 clipboard context", bin,));
-            let now = ctx.get_contents().expect(&format!(
-                "{}: failed to get clipboard contents through forked process",
-                bin,
-            ));
-
-            // If clipboard contents didn't change, revert back to previous
-            if data == now {
-                ctx.set_contents(previous).expect(&format!(
-                    "{}: failed to revert clipboard contents through forked process",
-                    bin,
-                ));
-
-                // Update cleared state, show notification
-                let _ = notify_cleared();
-            }
-
-            error::quit();
-        }
-        _pid => {}
-    }
+    // Spawn & disown background process to revert clipboard, send previous contents to it
+    let process = Command::new(current_exe)
+        .arg("_internal")
+        .arg("clip-revert")
+        .arg("--previous-base64-stdin")
+        .arg("--timeout")
+        .arg(&format!("{}", timeout))
+        .stdin(Stdio::piped())
+        .spawn()
+        .map_err(Err::Timeout)?;
+    writeln!(process.stdin.unwrap(), "{}", base64::encode(previous)).map_err(Err::Timeout)?;
 
     if report {
         eprintln!(
@@ -286,12 +304,11 @@ fn copy_timeout_macos(data: &[u8], timeout: u64, report: bool) -> Result<()> {
     Ok(())
 }
 
-/// Copy with timeout.
+/// Copy with timeout, blocking.
 ///
-/// Simple fallback method using delay in console.
-fn copy_timeout_fallback(data: &[u8], timeout: u64, report: bool) -> Result<()> {
-    // TODO: do not use x11 context here!
-    use copypasta_ext::x11_fork::ClipboardContext;
+/// Simple fallback method blocking for timeout until cleared.
+fn copy_timeout_blocking(data: &[u8], timeout: u64, report: bool) -> Result<()> {
+    use copypasta_ext::copypasta::ClipboardContext;
 
     let mut ctx = ClipboardContext::new().map_err(Err::Clipboard)?;
     ctx.set_contents(std::str::from_utf8(data).unwrap().into())
@@ -339,7 +356,7 @@ pub(crate) fn plaintext_copy(
 
 /// Show notification to user about cleared clipboard.
 #[allow(unreachable_code)]
-fn notify_cleared() -> Result<()> {
+pub(crate) fn notify_cleared() -> Result<()> {
     // Do not show notification with not notify or on musl due to segfault
     #[cfg(all(feature = "notify", not(target_env = "musl")))]
     {
@@ -375,4 +392,7 @@ pub enum Err {
 
     #[error("failed to copy secret to clipboard")]
     CopySecret(#[source] anyhow::Error),
+
+    #[error("failed to set-up clipboard clearing timeout")]
+    Timeout(#[source] std::io::Error),
 }

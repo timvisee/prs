@@ -7,6 +7,7 @@ use super::Matcher;
 
 /// The internal matcher.
 pub struct InternalMatcher<'a> {
+    #[allow(unused)]
     root: &'a ArgMatches<'a>,
     _matches: &'a ArgMatches<'a>,
 }

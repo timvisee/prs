@@ -22,7 +22,7 @@ gitlab = { repository = "timvisee/prs", branch = "master" }
 default = ["clipboard", "notify"]
 
 # Clipboard support
-clipboard = ["copypasta-ext", "x11-clipboard"]
+clipboard = ["copypasta-ext", "x11-clipboard", "base64"]
 
 # Notification support (clipboard notifications)
 notify = ["notify-rust"]
@@ -42,6 +42,9 @@ thiserror = "1.0"
 
 # Notification support
 notify-rust = { version = "4.0", optional = true }
+
+# Clipboard support
+base64 = { version = "0.13", optional = true }
 
 # Clipboard support for non-X11
 [target.'cfg(not(all(unix, not(any(target_os="macos", target_os="android", target_os="emscripten")))))'.dependencies]

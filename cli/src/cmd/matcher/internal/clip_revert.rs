@@ -10,6 +10,11 @@ pub struct ClipRevertMatcher<'a> {
 }
 
 impl<'a: 'b, 'b> ClipRevertMatcher<'a> {
+    /// Check whether to read previous clipboard contents from stdin as base64 line.
+    pub fn previous_base64_stdin(&self) -> bool {
+        self.matches.is_present("previous-base64-stdin")
+    }
+
     /// Clipboard timeout in seconds.
     pub fn timeout(&self) -> Result<u64> {
         ArgTimeout::value(self.matches)

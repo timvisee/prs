@@ -1,3 +1,4 @@
+use std::io;
 use std::thread;
 use std::time::Duration;
 
@@ -25,14 +26,25 @@ impl<'a> ClipRevert<'a> {
         let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
         let matcher_clip_revert = ClipRevertMatcher::with(self.cmd_matches).unwrap();
 
+        // Remember current clipboard contents, fetch previous contents
+        let current = clipboard::get().map_err(Err::Current)?;
+        let mut previous = None;
+        if matcher_clip_revert.previous_base64_stdin() {
+            let mut buffer = String::new();
+            io::stdin().read_line(&mut buffer)?;
+            previous = base64::decode(buffer.trim()).ok();
+        }
+
         // Wait for timeout
         let timeout = matcher_clip_revert.timeout().unwrap();
         if timeout > 0 {
             thread::sleep(Duration::from_secs(timeout));
         }
 
-        // TODO: actually revert clipboard (if unchanged), instead of clearing
-        clipboard::copy(&[]).map_err(Err::Revert)?;
+        // Revert clipboard to previous if contents didn't change
+        if current == clipboard::get().map_err(Err::Current)? {
+            clipboard::set(previous.as_deref().unwrap_or(&[])).map_err(Err::Revert)?;
+        }
 
         if matcher_main.verbose() {
             eprintln!("Clipboard cleared");
@@ -47,6 +59,9 @@ impl<'a> ClipRevert<'a> {
 
 #[derive(Debug, Error)]
 pub enum Err {
+    #[error("failed to get current clipboard contents")]
+    Current(#[source] anyhow::Error),
+
     #[error("failed to revert clipboard")]
     Revert(#[source] anyhow::Error),
 

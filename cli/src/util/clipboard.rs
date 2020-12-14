@@ -166,7 +166,7 @@ fn copy_timeout_x11(data: &[u8], timeout: u64, report: bool) -> Result<()> {
 
     if report {
         eprintln!(
-            "Secret copied to clipboard. Waiting {} seconds to clear...",
+            "Secret copied to clipboard. Clearing after {} seconds...",
             timeout
         );
     }
@@ -232,7 +232,7 @@ fn copy_timeout_x11_bin(data: &[u8], timeout: u64, report: bool) -> Result<()> {
 
     if report {
         eprintln!(
-            "Secret copied to clipboard. Waiting {} seconds to clear...",
+            "Secret copied to clipboard. Clearing after {} seconds...",
             timeout
         );
     }
@@ -296,7 +296,7 @@ fn copy_timeout_process(data: &[u8], timeout: u64, report: bool) -> Result<()> {
 
     if report {
         eprintln!(
-            "Secret copied to clipboard. Waiting {} seconds to clear...",
+            "Secret copied to clipboard. Clearing after {} seconds...",
             timeout
         );
     }

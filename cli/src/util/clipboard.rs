@@ -235,46 +235,34 @@ fn copy_timeout_x11_bin(data: &[u8], timeout: u64, report: bool) -> Result<()> {
 #[cfg(target_os = "macos")]
 fn copy_timeout_macos(data: &[u8], timeout: u64, report: bool) -> Result<()> {
     use copypasta_ext::copypasta::ClipboardContext;
+    use std::process::Command;
 
-    let data = std::str::from_utf8(data).map_err(Err::Utf8)?;
-    let bin = crate::util::bin_name();
+    // Find current exe path, or fall back to basic timeout copy
+    let current_exe = match std::env::current_exe() {
+        Ok(exe) => exe,
+        Err(_) => match std::env::args().next() {
+            Some(bin) => bin.into(),
+            None => return copy_timeout_fallback(data, timeout, report),
+        },
+    };
+    let data = std::str::from_utf8(data).map_err(Err::Utf8)?.to_string();
 
     // Remember previous clipboard contents
     let mut ctx = ClipboardContext::new().map_err(Err::Clipboard)?;
     let previous = ctx.get_contents().unwrap_or_else(|_| String::new());
 
     // Set clipboard
-    ctx.set_contents(data.to_string()).map_err(Err::Clipboard)?;
+    ctx.set_contents(data).map_err(Err::Clipboard)?;
 
-    // Detach fork to revert clipboard after timeout unless changed
-    match unsafe { libc::fork() } {
-        -1 => panic!("failed to fork"),
-        0 => {
-            thread::sleep(Duration::from_secs(timeout));
-
-            // Obtain new clipboard context, get current contents
-            let mut ctx = ClipboardContext::new()
-                .expect(&format!("{}: failed to obtain X11 clipboard context", bin,));
-            let now = ctx.get_contents().expect(&format!(
-                "{}: failed to get clipboard contents through forked process",
-                bin,
-            ));
-
-            // If clipboard contents didn't change, revert back to previous
-            if data == now {
-                ctx.set_contents(previous).expect(&format!(
-                    "{}: failed to revert clipboard contents through forked process",
-                    bin,
-                ));
-
-                // Update cleared state, show notification
-                let _ = notify_cleared();
-            }
-
-            error::quit();
-        }
-        _pid => {}
-    }
+    // Spawn and disown background process to revert clipboard after timeout
+    // TODO: provide previous & current
+    Command::new(current_exe)
+        .arg("_internal")
+        .arg("clip-revert")
+        .arg("--timeout")
+        .arg(&format!("{}", timeout))
+        .spawn()
+        .map_err(Err::Timeout)?;
 
     if report {
         eprintln!(
@@ -375,4 +363,7 @@ pub enum Err {
 
     #[error("failed to copy secret to clipboard")]
     CopySecret(#[source] anyhow::Error),
+
+    #[error("failed to set-up clipboard clearing timeout")]
+    Timeout(#[source] std::io::Error),
 }

@@ -339,7 +339,7 @@ pub(crate) fn plaintext_copy(
 
 /// Show notification to user about cleared clipboard.
 #[allow(unreachable_code)]
-fn notify_cleared() -> Result<()> {
+pub(crate) fn notify_cleared() -> Result<()> {
     // Do not show notification with not notify or on musl due to segfault
     #[cfg(all(feature = "notify", not(target_env = "musl")))]
     {

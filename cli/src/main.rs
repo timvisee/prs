@@ -80,6 +80,10 @@ fn invoke_action(handler: &Handler) -> Result<()> {
         return action::init::Init::new(handler.matches()).invoke();
     }
 
+    if handler.internal().is_some() {
+        return action::internal::Internal::new(handler.matches()).invoke();
+    }
+
     if handler.list().is_some() {
         return action::list::List::new(handler.matches()).invoke();
     }

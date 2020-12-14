@@ -66,6 +66,7 @@ impl<'a: 'b, 'b> Handler<'a> {
             .subcommand(subcmd::CmdGit::build())
             .subcommand(subcmd::CmdHousekeeping::build())
             .subcommand(subcmd::CmdInit::build())
+            .subcommand(subcmd::CmdInternal::build())
             .subcommand(subcmd::CmdList::build())
             .subcommand(subcmd::CmdMove::build())
             .subcommand(subcmd::CmdRecipients::build())
@@ -140,6 +141,11 @@ impl<'a: 'b, 'b> Handler<'a> {
     /// Get the init sub command, if matched.
     pub fn init(&'a self) -> Option<matcher::InitMatcher> {
         matcher::InitMatcher::with(&self.matches)
+    }
+
+    /// Get the internal sub command, if matched.
+    pub fn internal(&'a self) -> Option<matcher::InternalMatcher> {
+        matcher::InternalMatcher::with(&self.matches)
     }
 
     /// Get the list sub command, if matched.

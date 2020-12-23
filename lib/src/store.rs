@@ -233,6 +233,7 @@ impl SecretIter {
     /// Create new store secret iterator at given store root.
     pub fn new(root: PathBuf) -> Self {
         let walker = WalkDir::new(&root)
+            .follow_links(true)
             .into_iter()
             .filter_entry(|e| !is_hidden_subdir(e))
             .filter_map(|e| e.ok())

@@ -57,9 +57,7 @@ impl<'a> Duplicate<'a> {
         }
 
         // Copy secret
-        fs::copy(&secret.path, path)
-            .map(|_| ())
-            .map_err(|err| Err::Copy(err))?;
+        fs::copy(&secret.path, path).map_err(Err::Copy)?;
 
         sync.finalize(format!("Copy from {} to {}", secret.name, new_secret.name))?;
 

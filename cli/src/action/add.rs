@@ -16,7 +16,7 @@ pub struct Add<'a> {
 
 impl<'a> Add<'a> {
     /// Construct a new add action.
-    pub fn add(cmd_matches: &'a ArgMatches<'a>) -> Self {
+    pub fn new(cmd_matches: &'a ArgMatches<'a>) -> Self {
         Self { cmd_matches }
     }
 

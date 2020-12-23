@@ -1,4 +1,6 @@
 pub mod add;
+#[cfg(any(unix, windows))]
+pub mod alias;
 pub mod clone;
 #[cfg(feature = "clipboard")]
 pub mod copy;
@@ -19,6 +21,8 @@ pub mod sync;
 
 // Re-export to matcher module
 pub use self::add::AddMatcher;
+#[cfg(any(unix, windows))]
+pub use self::alias::AliasMatcher;
 pub use self::clone::CloneMatcher;
 #[cfg(feature = "clipboard")]
 pub use self::copy::CopyMatcher;

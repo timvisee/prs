@@ -191,8 +191,7 @@ impl Secret {
     /// Construct secret at given path in the given password store root.
     pub fn in_root(root: &Path, path: PathBuf) -> Self {
         // TODO: use path.display() as fallback
-        let name: String = path
-            .strip_prefix(&root)
+        let name: String = relative_path(root, &path)
             .ok()
             .and_then(|f| f.to_str())
             .map(|f| f.trim_end_matches(SECRET_SUFFIX))
@@ -200,6 +199,22 @@ impl Secret {
             .to_string();
         Self { name, path }
     }
+
+    /// Get relative path to this secret, root must be given.
+    pub fn relative_path<'a>(
+        &'a self,
+        root: &'a Path,
+    ) -> Result<&'a Path, std::path::StripPrefixError> {
+        relative_path(root, &self.path)
+    }
+}
+
+/// Get relative path in given root.
+pub fn relative_path<'a>(
+    root: &'a Path,
+    path: &'a PathBuf,
+) -> Result<&'a Path, std::path::StripPrefixError> {
+    path.strip_prefix(&root)
 }
 
 /// Iterator that walks through password store secrets.
@@ -218,6 +233,7 @@ impl SecretIter {
     /// Create new store secret iterator at given store root.
     pub fn new(root: PathBuf) -> Self {
         let walker = WalkDir::new(&root)
+            .follow_links(true)
             .into_iter()
             .filter_entry(|e| !is_hidden_subdir(e))
             .filter_map(|e| e.ok())

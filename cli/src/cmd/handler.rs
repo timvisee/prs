@@ -74,6 +74,9 @@ impl<'a: 'b, 'b> Handler<'a> {
             .subcommand(subcmd::CmdShow::build())
             .subcommand(subcmd::CmdSync::build());
 
+        #[cfg(any(unix, windows))]
+        let app = app.subcommand(subcmd::CmdAlias::build());
+
         #[cfg(feature = "clipboard")]
         let app = app.subcommand(subcmd::CmdCopy::build());
 
@@ -100,6 +103,12 @@ impl<'a: 'b, 'b> Handler<'a> {
     /// Get the add sub command, if matched.
     pub fn add(&'a self) -> Option<matcher::AddMatcher> {
         matcher::AddMatcher::with(&self.matches)
+    }
+
+    /// Get the alias sub command, if matched.
+    #[cfg(any(unix, windows))]
+    pub fn alias(&'a self) -> Option<matcher::AliasMatcher> {
+        matcher::AliasMatcher::with(&self.matches)
     }
 
     /// Get the clone sub command, if matched.

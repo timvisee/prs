@@ -40,7 +40,12 @@ fn main() {
 /// message.
 fn invoke_action(handler: &Handler) -> Result<()> {
     if handler.add().is_some() {
-        return action::add::Add::add(handler.matches()).invoke();
+        return action::add::Add::new(handler.matches()).invoke();
+    }
+
+    #[cfg(any(unix, windows))]
+    if handler.alias().is_some() {
+        return action::alias::Alias::new(handler.matches()).invoke();
     }
 
     if handler.clone().is_some() {

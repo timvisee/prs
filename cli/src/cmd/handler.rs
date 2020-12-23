@@ -59,7 +59,6 @@ impl<'a: 'b, 'b> Handler<'a> {
                     .help("Enable verbose information and logging"),
             )
             .subcommand(subcmd::CmdAdd::build())
-            .subcommand(subcmd::CmdAlias::build())
             .subcommand(subcmd::CmdClone::build())
             .subcommand(subcmd::CmdDuplicate::build())
             .subcommand(subcmd::CmdEdit::build())
@@ -74,6 +73,9 @@ impl<'a: 'b, 'b> Handler<'a> {
             .subcommand(subcmd::CmdRemove::build())
             .subcommand(subcmd::CmdShow::build())
             .subcommand(subcmd::CmdSync::build());
+
+        #[cfg(any(unix, windows))]
+        let app = app.subcommand(subcmd::CmdAlias::build());
 
         #[cfg(feature = "clipboard")]
         let app = app.subcommand(subcmd::CmdCopy::build());
@@ -104,6 +106,7 @@ impl<'a: 'b, 'b> Handler<'a> {
     }
 
     /// Get the alias sub command, if matched.
+    #[cfg(any(unix, windows))]
     pub fn alias(&'a self) -> Option<matcher::AliasMatcher> {
         matcher::AliasMatcher::with(&self.matches)
     }

@@ -63,8 +63,10 @@ impl<'a> Alias<'a> {
         let symlink_link = secret_link_path(&store, &secret, &path)?;
 
         // Create symlink
-        // TODO: only compatible with unix, also support windows
+        #[cfg(unix)]
         std::os::unix::fs::symlink(symlink_link, path).map_err(Err::Symlink)?;
+        #[cfg(windows)]
+        std::os::windows::fs::symlink_file(symlink_link, path).map_err(Err::Symlink)?;
 
         sync.finalize(format!(
             "Alias from {} to {}",

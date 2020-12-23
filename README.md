@@ -62,6 +62,7 @@ prs
 prs add site/gitlab.com
 prs edit site/gitlab.com
 prs duplicate my/secret extra/secret
+prs alias my/secret extra/alias
 prs move my/secret extra/secret
 prs remove site/gitlab.com
 
@@ -312,6 +313,7 @@ FLAGS:
 
 SUBCOMMANDS:
     add             Add a secret
+    alias           Alias/symlink a secret
     clone           Clone existing password store
     copy            Copy secret to clipboard
     duplicate       Duplicate a secret

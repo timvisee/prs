@@ -1,4 +1,5 @@
 pub mod add;
+pub mod alias;
 pub mod clone;
 #[cfg(feature = "clipboard")]
 pub mod copy;
@@ -19,6 +20,7 @@ pub mod sync;
 
 // Re-export to matcher module
 pub use self::add::AddMatcher;
+pub use self::alias::AliasMatcher;
 pub use self::clone::CloneMatcher;
 #[cfg(feature = "clipboard")]
 pub use self::copy::CopyMatcher;

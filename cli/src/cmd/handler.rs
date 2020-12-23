@@ -59,6 +59,7 @@ impl<'a: 'b, 'b> Handler<'a> {
                     .help("Enable verbose information and logging"),
             )
             .subcommand(subcmd::CmdAdd::build())
+            .subcommand(subcmd::CmdAlias::build())
             .subcommand(subcmd::CmdClone::build())
             .subcommand(subcmd::CmdDuplicate::build())
             .subcommand(subcmd::CmdEdit::build())
@@ -100,6 +101,11 @@ impl<'a: 'b, 'b> Handler<'a> {
     /// Get the add sub command, if matched.
     pub fn add(&'a self) -> Option<matcher::AddMatcher> {
         matcher::AddMatcher::with(&self.matches)
+    }
+
+    /// Get the alias sub command, if matched.
+    pub fn alias(&'a self) -> Option<matcher::AliasMatcher> {
+        matcher::AliasMatcher::with(&self.matches)
     }
 
     /// Get the clone sub command, if matched.

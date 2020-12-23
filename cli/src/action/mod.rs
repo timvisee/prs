@@ -1,4 +1,5 @@
 pub mod add;
+pub mod alias;
 pub mod clone;
 #[cfg(feature = "clipboard")]
 pub mod copy;

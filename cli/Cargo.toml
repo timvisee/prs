@@ -29,7 +29,7 @@ notify = ["notify-rust"]
 
 [dependencies]
 anyhow = "1.0"
-chbs = "0.0.10"
+chbs = "0.1.0"
 clap = "2.33"
 colored = "2.0"
 derive_builder = "0.9"

@@ -15,6 +15,8 @@ impl CmdShow {
             .arg(
                 Arg::with_name("first")
                     .long("first")
+                    .alias("password")
+                    .alias("pass")
                     .help("Show only the first line of the secret"),
             )
             .arg(ArgQuery::build())

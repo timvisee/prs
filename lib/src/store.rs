@@ -225,6 +225,7 @@ pub fn relative_path<'a>(
 /// Secret iterator configuration.
 ///
 /// Used to configure what files are found by the secret iterator.
+#[derive(Clone, Debug)]
 pub struct SecretIterConfig {
     /// Find pure files.
     pub find_files: bool,

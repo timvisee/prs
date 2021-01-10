@@ -2,7 +2,7 @@ use anyhow::Result;
 use clap::ArgMatches;
 use thiserror::Error;
 
-use prs_lib::store::Store;
+use prs_lib::store::{Secret, SecretIterConfig, Store};
 
 use crate::cmd::matcher::{list::ListMatcher, Matcher};
 
@@ -24,7 +24,15 @@ impl<'a> List<'a> {
 
         let store = Store::open(matcher_list.store()).map_err(Err::Store)?;
 
-        let mut secrets = store.secrets(matcher_list.query());
+        // List aliases based on filters, sort the list
+        let config = SecretIterConfig {
+            find_files: !matcher_list.only_aliases(),
+            find_symlink_files: !matcher_list.only_non_aliases(),
+        };
+        let mut secrets: Vec<Secret> = store
+            .secret_iter_config(config)
+            .filter_name(matcher_list.query())
+            .collect();
         secrets.sort_unstable_by(|a, b| a.name.cmp(&b.name));
 
         secrets.iter().for_each(|s| println!("{}", s.name));

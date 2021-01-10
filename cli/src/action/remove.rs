@@ -94,7 +94,7 @@ fn remove_confirm(
 /// Find symlink secrets to given secret.
 ///
 /// Collect all secrets that are a symlink which target the given `secret`.
-fn find_symlinks_to(store: &Store, secret: &Secret) -> Vec<Secret> {
+pub fn find_symlinks_to(store: &Store, secret: &Secret) -> Vec<Secret> {
     // Configure secret iterator to only find symlinks
     let mut config = SecretIterConfig::default();
     config.find_files = false;

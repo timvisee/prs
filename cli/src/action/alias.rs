@@ -59,14 +59,8 @@ impl<'a> Alias<'a> {
             fs::remove_file(&path).map_err(Err::RemoveExisting)?;
         }
 
-        // Get symlink path
-        let symlink_link = secret_link_path(&store, &secret, &path)?;
-
-        // Create symlink
-        #[cfg(unix)]
-        std::os::unix::fs::symlink(symlink_link, path).map_err(Err::Symlink)?;
-        #[cfg(windows)]
-        std::os::windows::fs::symlink_file(symlink_link, path).map_err(Err::Symlink)?;
+        // Create alias
+        create_alias(&store, &secret, &path)?;
 
         sync.finalize(format!(
             "Alias from {} to {}",
@@ -81,15 +75,40 @@ impl<'a> Alias<'a> {
     }
 }
 
+/// Create an alias.
+///
+/// Create an alias (symlink) file at `dst` which points to `src`.
+pub fn create_alias(store: &Store, src: &Secret, dst: &Path) -> Result<(), Err> {
+    create_symlink(secret_link_path(&store, &src, &dst)?, dst)
+}
+
+/// Create a symlink.
+///
+/// Create an symlink file at `dst` which points to `src`.
+fn create_symlink<P, Q>(src: P, dst: Q) -> Result<(), Err>
+where
+    P: AsRef<Path>,
+    Q: AsRef<Path>,
+{
+    #[cfg(unix)]
+    {
+        std::os::unix::fs::symlink(src, dst).map_err(Err::Symlink)
+    }
+    #[cfg(windows)]
+    {
+        std::os::windows::fs::symlink_file(src, dst).map_err(Err::Symlink)
+    }
+}
+
 /// Determine symlink path to use.
 ///
-/// This function determines what path to provide when creating a symlink at `dest`, which links to
+/// This function determines what path to provide when creating a symlink at `dst`, which links to
 /// `src`.
-fn secret_link_path(store: &Store, src: &Secret, dest: &Path) -> Result<PathBuf, Err> {
+fn secret_link_path(store: &Store, src: &Secret, dst: &Path) -> Result<PathBuf, Err> {
     let target = src
         .relative_path(&store.root)
         .map_err(|_| Err::UnknownRoot)?;
-    let depth = path_depth(store, dest)?;
+    let depth = path_depth(store, dst)?;
 
     // Build and return path
     let mut path = PathBuf::from(".");

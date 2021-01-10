@@ -1,4 +1,5 @@
 use std::fs;
+use std::path::Path;
 
 use anyhow::Result;
 use clap::ArgMatches;
@@ -56,10 +57,21 @@ impl<'a> Move<'a> {
             }
         }
 
+        // Update paths of symlink that point to moved secret
+        for secret in super::remove::find_symlinks_to(&store, &secret) {
+            if let Err(err) = update_alias(&store, &new_secret, &secret.path) {
+                error::print_error(err.context(
+                    "failed to update path of alias that points to moved secret, ignoring...",
+                ));
+            }
+        }
+
+        // TODO: if moved secret is symlink, update path
+
         // Move secret
         fs::rename(&secret.path, path)
             .map(|_| ())
-            .map_err(|err| Err::Move(err))?;
+            .map_err(Err::Move)?;
 
         sync.finalize(format!("Move from {} to {}", secret.name, new_secret.name))?;
 
@@ -69,6 +81,30 @@ impl<'a> Move<'a> {
 
         Ok(())
     }
+}
+
+/// Update the path of an alias.
+///
+/// Updates the symlink file at `symlink` to point to the new target `src`.
+///
+/// # Errors
+///
+/// Panics if the given `symlink` path is not an existing symlink.
+fn update_alias(store: &Store, src: &Secret, symlink: &Path) -> Result<()> {
+    assert!(
+        symlink.symlink_metadata()?.file_type().is_symlink(),
+        "failed to update symlink, not a symlink"
+    );
+
+    // Remove existing file
+    fs::remove_file(symlink)
+        .map(|_| ())
+        .map_err(Err::UpdateAlias)?;
+
+    // Create new symlink
+    super::alias::create_alias(store, src, symlink)?;
+
+    Ok(())
 }
 
 #[derive(Debug, Error)]
@@ -84,4 +120,7 @@ pub enum Err {
 
     #[error("failed to move secret file")]
     Move(#[source] std::io::Error),
+
+    #[error("failed to update alias")]
+    UpdateAlias(#[source] std::io::Error),
 }

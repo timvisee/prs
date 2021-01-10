@@ -60,7 +60,7 @@ impl<'a> Alias<'a> {
         }
 
         // Create alias
-        create_alias(&store, &secret, &path)?;
+        create_alias(&store, &secret, &path, &path)?;
 
         sync.finalize(format!(
             "Alias from {} to {}",
@@ -77,9 +77,13 @@ impl<'a> Alias<'a> {
 
 /// Create an alias.
 ///
-/// Create an alias (symlink) file at `dst` which points to `src`.
-pub fn create_alias(store: &Store, src: &Secret, dst: &Path) -> Result<(), Err> {
-    create_symlink(secret_link_path(&store, &src, &dst)?, dst)
+/// Create an alias (symlink) file at `place_at` for a symlink at `dst` which points to `src`.
+///
+/// `dst` and `place_at` are usually the same.
+/// This may be different to use the correct relative symlink path for a secret at `place_at` that
+/// will be moved to `dst` in the future.
+pub fn create_alias(store: &Store, src: &Secret, dst: &Path, place_at: &Path) -> Result<(), Err> {
+    create_symlink(secret_link_path(&store, &src, &dst)?, place_at)
 }
 
 /// Create a symlink.

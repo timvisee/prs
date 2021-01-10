@@ -48,12 +48,17 @@ impl Store {
 
     /// Create secret iterator for this store.
     pub fn secret_iter(&self) -> SecretIter {
-        SecretIter::new(self.root.clone())
+        self.secret_iter_config(SecretIterConfig::default())
+    }
+
+    /// Create secret iterator for this store with custom configuration.
+    pub fn secret_iter_config(&self, config: SecretIterConfig) -> SecretIter {
+        SecretIter::new(self.root.clone(), config)
     }
 
     /// List store password secrets.
     pub fn secrets(&self, filter: Option<String>) -> Vec<Secret> {
-        self.secret_iter().filter(filter).collect()
+        self.secret_iter().filter_name(filter).collect()
     }
 
     /// Try to find matching secret at path.
@@ -217,6 +222,28 @@ pub fn relative_path<'a>(
     path.strip_prefix(&root)
 }
 
+/// Secret iterator configuration.
+///
+/// Used to configure what files are found by the secret iterator.
+pub struct SecretIterConfig {
+    /// Find pure files.
+    pub find_files: bool,
+
+    /// Find files that are symlinks.
+    ///
+    /// Will still find files if they're symlinked to while `find_files` is `false`.
+    pub find_symlink_files: bool,
+}
+
+impl Default for SecretIterConfig {
+    fn default() -> Self {
+        Self {
+            find_files: true,
+            find_symlink_files: true,
+        }
+    }
+}
+
 /// Iterator that walks through password store secrets.
 ///
 /// This walks all password store directories, and yields password secrets.
@@ -231,13 +258,14 @@ pub struct SecretIter {
 
 impl SecretIter {
     /// Create new store secret iterator at given store root.
-    pub fn new(root: PathBuf) -> Self {
+    pub fn new(root: PathBuf, config: SecretIterConfig) -> Self {
         let walker = WalkDir::new(&root)
             .follow_links(true)
             .into_iter()
             .filter_entry(|e| !is_hidden_subdir(e))
             .filter_map(|e| e.ok())
-            .filter(is_secret_file);
+            .filter(is_secret_file)
+            .filter(move |entry| filter_by_config(entry, &config));
         Self {
             root,
             walker: Box::new(walker),
@@ -245,7 +273,7 @@ impl SecretIter {
     }
 
     /// Transform into a filtered secret iterator.
-    pub fn filter(self, filter: Option<String>) -> FilterSecretIter<Self> {
+    pub fn filter_name(self, filter: Option<String>) -> FilterSecretIter<Self> {
         FilterSecretIter::new(self, filter)
     }
 }
@@ -278,6 +306,26 @@ fn is_secret_file(entry: &DirEntry) -> bool {
             .to_str()
             .map(|s| s.ends_with(SECRET_SUFFIX))
             .unwrap_or(false)
+}
+
+/// Check if given WalkDir DirEntry passes the configuration.
+fn filter_by_config(entry: &DirEntry, config: &SecretIterConfig) -> bool {
+    // Find symlinks
+    if config.find_symlink_files && entry.path_is_symlink() {
+        return true;
+    }
+
+    // Do not find symlinks
+    if !config.find_symlink_files && entry.path_is_symlink() {
+        return false;
+    }
+
+    // Find files
+    if !config.find_files && !entry.path_is_symlink() {
+        return false;
+    }
+
+    true
 }
 
 /// Check whether we can decrypt the first secret in the store.

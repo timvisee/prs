@@ -59,7 +59,10 @@ impl<'a> Duplicate<'a> {
         // Copy secret
         fs::copy(&secret.path, path).map_err(Err::Copy)?;
 
-        sync.finalize(format!("Copy from {} to {}", secret.name, new_secret.name))?;
+        sync.finalize(format!(
+            "Duplicate from {} to {}",
+            secret.name, new_secret.name
+        ))?;
 
         if !matcher_main.quiet() {
             eprintln!("Secret duplicated");

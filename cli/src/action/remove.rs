@@ -4,7 +4,7 @@ use anyhow::Result;
 use clap::ArgMatches;
 use thiserror::Error;
 
-use prs_lib::store::Store;
+use prs_lib::store::{Secret, SecretIterConfig, Store};
 
 use crate::cmd::matcher::{remove::RemoveMatcher, MainMatcher, Matcher};
 use crate::util::{cli, error, skim, sync};
@@ -35,24 +35,19 @@ impl<'a> Remove<'a> {
         let secret =
             skim::select_secret(&store, matcher_remove.query()).ok_or(Err::NoneSelected)?;
 
-        // Confirm removal
-        if !matcher_main.force() {
-            if !cli::prompt_yes(
-                &format!("Remove '{}'?", secret.path.display()),
-                Some(true),
-                &matcher_main,
-            ) {
-                if matcher_main.verbose() {
-                    eprintln!("Removal cancelled");
-                }
-                error::quit();
-            }
-        }
+        // TODO: if this secret is a symlink, ask whether to remove target file as well?
 
-        // Remove secret
-        fs::remove_file(&secret.path)
-            .map(|_| ())
-            .map_err(|err| Err::Remove(err))?;
+        if !remove_confirm(
+            &store,
+            &secret,
+            &matcher_main,
+            &format!("Remove '{}'?", secret.path.display()),
+        )? {
+            if matcher_main.verbose() {
+                eprintln!("Removal cancelled");
+            }
+            error::quit();
+        };
 
         sync.finalize(format!("Remove secret {}", secret.name))?;
 
@@ -62,6 +57,69 @@ impl<'a> Remove<'a> {
 
         Ok(())
     }
+}
+
+/// Confirm to remove the given secret, then remove.
+fn remove_confirm(
+    store: &Store,
+    secret: &Secret,
+    matcher_main: &MainMatcher,
+    prompt: &str,
+) -> Result<bool> {
+    // Confirm removal
+    if !matcher_main.force() && !cli::prompt_yes(&prompt, Some(true), &matcher_main) {
+        return Ok(false);
+    }
+
+    // Remove symlinks that target this secret
+    for secret in find_symlinks_to(&store, &secret) {
+        if let Err(err) = remove_confirm(
+            store,
+            &secret,
+            matcher_main,
+            &format!("Remove alias '{}'?", secret.path.display()),
+        ) {
+            error::print_error(err.context("failed to remove alias, ignoring"));
+        }
+    }
+
+    // Remove secret
+    fs::remove_file(&secret.path)
+        .map(|_| ())
+        .map_err(|err| Err::Remove(err))?;
+
+    Ok(true)
+}
+
+/// Find symlink secrets to given secret.
+///
+/// Collect all secrets that are a symlink which target the given `secret`.
+pub fn find_symlinks_to(store: &Store, secret: &Secret) -> Vec<Secret> {
+    // Configure secret iterator to only find symlinks
+    let mut config = SecretIterConfig::default();
+    config.find_files = false;
+    config.find_symlink_files = true;
+
+    // Collect secrets that symlink to given secret
+    store
+        .secret_iter_config(config)
+        .filter(|sym| {
+            // Find symlink target path
+            let sym_path = match std::fs::read_link(&sym.path) {
+                Ok(path) => path,
+                Err(_) => return false,
+            };
+
+            // Ignore secret if absolute symlink target doesn't match secret
+            sym.path
+                .parent()
+                .unwrap()
+                .join(&sym_path)
+                .canonicalize()
+                .map(|full_path| secret.path == full_path)
+                .unwrap_or(false)
+        })
+        .collect()
 }
 
 #[derive(Debug, Error)]

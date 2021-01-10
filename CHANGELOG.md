@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.1.4 (2021-01-10)
+- Add alias support
+  (https://gitlab.com/timvisee/prs/-/issues/9)  
+  _You can now easily create aliases for secrets. Aliases are symlinks under the
+  hood, compatible with most other `pass` clients. Aliases are automatically
+  updated when moving/removing their pointed to secret._
+- Add `alias` command to create new aliases
+- Add `--aliases` and `--no-aliases` flags to `list` command
+- Add `--password` alias for `--first` in `show` command
+- Update dependencies
+
 ## 0.1.3 (2020-12-14)
 - Add dmenu and rofi quick copy scripts
 - Use secure directory to edit secret if possible (such as `/dev/shm`)

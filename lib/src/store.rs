@@ -311,6 +311,11 @@ fn is_secret_file(entry: &DirEntry) -> bool {
 
 /// Check if given WalkDir DirEntry passes the configuration.
 fn filter_by_config(entry: &DirEntry, config: &SecretIterConfig) -> bool {
+    // Optimization, config permutation which includes all files
+    if config.find_files && config.find_symlink_files {
+        return true;
+    }
+
     // Find symlinks
     if config.find_symlink_files && entry.path_is_symlink() {
         return true;

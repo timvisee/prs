@@ -18,6 +18,16 @@ impl<'a: 'b, 'b> ListMatcher<'a> {
     pub fn store(&self) -> String {
         ArgStore::value(self.matches)
     }
+
+    /// Whether to only show aliases.
+    pub fn only_aliases(&self) -> bool {
+        self.matches.is_present("aliases")
+    }
+
+    /// Whether to only show aliases.
+    pub fn only_non_aliases(&self) -> bool {
+        self.matches.is_present("non-aliases")
+    }
 }
 
 impl<'a> Matcher<'a> for ListMatcher<'a> {

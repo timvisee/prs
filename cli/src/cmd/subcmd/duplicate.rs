@@ -10,6 +10,7 @@ impl CmdDuplicate {
         SubCommand::with_name("duplicate")
             .alias("dup")
             .about("Duplicate a secret")
+            .long_about("Duplicate the contents of a secret to a new file")
             .arg(ArgQuery::build().required(true))
             .arg(
                 Arg::with_name("DEST")

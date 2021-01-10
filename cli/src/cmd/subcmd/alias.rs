@@ -12,6 +12,7 @@ impl CmdAlias {
             .alias("link")
             .alias("symlink")
             .about("Alias/symlink a secret")
+            .long_about("Alias/symlink a secret without duplicating its content")
             .arg(ArgQuery::build().required(true))
             .arg(
                 Arg::with_name("DEST")

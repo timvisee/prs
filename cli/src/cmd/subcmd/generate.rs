@@ -68,7 +68,7 @@ impl CmdGenerate {
                     .alias("cp")
                     .help("Copy secret to clipboard"),
             )
-            .arg(ArgTimeout::build());
+            .arg(ArgTimeout::build().requires("copy"));
 
         cmd
     }

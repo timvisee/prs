@@ -20,6 +20,23 @@ impl CmdGenerate {
                     .required(true),
             )
             .arg(
+                Arg::with_name("passphrase")
+                    .long("passphrase")
+                    .short("P")
+                    .help("Generate passhprase instead of random string"),
+            )
+            .arg(
+                Arg::with_name("length")
+                    .value_name("NUM")
+                    .long("length")
+                    .short("l")
+                    .alias("len")
+                    .help("Generated password length in characters")
+                    .long_help(
+                        "Generated password length in characters. Passphrase length in words.",
+                    ),
+            )
+            .arg(
                 Arg::with_name("edit")
                     .long("edit")
                     .short("e")

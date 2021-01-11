@@ -1,4 +1,5 @@
 use anyhow::Result;
+use chbs::{config::BasicConfig, prelude::*};
 use clap::ArgMatches;
 use prs_lib::{
     store::{Secret, Store},
@@ -9,7 +10,7 @@ use thiserror::Error;
 use crate::cmd::matcher::{generate::GenerateMatcher, MainMatcher, Matcher};
 #[cfg(feature = "clipboard")]
 use crate::util::clipboard;
-use crate::util::{cli, edit, error, stdin, sync};
+use crate::util::{cli, edit, error, pass, stdin, sync};
 
 /// Generate secret action.
 pub struct Generate<'a> {
@@ -41,8 +42,8 @@ impl<'a> Generate<'a> {
             .map_err(Err::NormalizePath)?;
         let secret = Secret::from(&store, path.to_path_buf());
 
-        // Generate secure passphrase plaintext
-        let mut plaintext: Plaintext = chbs::passphrase().into();
+        // Generate secure password/passphrase plaintext
+        let mut plaintext = generate_password(&matcher_generate);
 
         // Check if destination already exists, ask to merge if so
         if !matcher_main.force() && path.is_file() {
@@ -125,6 +126,19 @@ impl<'a> Generate<'a> {
         }
 
         Ok(())
+    }
+}
+
+/// Generate a random password.
+///
+/// This generates a secure random password/passphrase based on user configuration.
+fn generate_password(matcher_generate: &GenerateMatcher) -> Plaintext {
+    if matcher_generate.passphrase() {
+        let mut config = BasicConfig::default();
+        config.words = matcher_generate.length() as usize;
+        config.to_scheme().generate().into()
+    } else {
+        pass::generate_password(matcher_generate.length())
     }
 }
 

@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.5 (2021-01-11)
+- Generate password instead of passphrase by default with `generate` command
+- Add `--length` option to `generate` command
+- Do not require to store generated password to secret with `generate` when `--show` or `--copy` is provided
+- Generate passphrase with `generate --passphrase`
+- Improve secret listing performance
+- Update dependencies
+
 ## 0.1.4 (2021-01-10)
 - Add alias support
   (https://gitlab.com/timvisee/prs/-/issues/9)  

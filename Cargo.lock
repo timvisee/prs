@@ -1422,6 +1422,7 @@ dependencies = [
  "shellexpand",
  "skim",
  "thiserror",
+ "walkdir",
  "x11-clipboard",
 ]
 

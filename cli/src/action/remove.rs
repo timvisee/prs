@@ -1,8 +1,11 @@
 use std::fs;
+use std::io;
+use std::path::Path;
 
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use clap::ArgMatches;
 use thiserror::Error;
+use walkdir::WalkDir;
 
 use prs_lib::store::{Secret, SecretIterConfig, Store};
 
@@ -48,6 +51,8 @@ impl<'a> Remove<'a> {
             }
             error::quit();
         };
+
+        remove_empty_secret_dir(&secret);
 
         sync.finalize(format!("Remove secret {}", secret.name))?;
 
@@ -120,6 +125,62 @@ pub fn find_symlinks_to(store: &Store, secret: &Secret) -> Vec<Secret> {
                 .unwrap_or(false)
         })
         .collect()
+}
+
+/// Remove secret directory if empty.
+///
+/// This removes the directory the given `secret` was in if the directory is empty.
+/// Parent directories will be removed if they're empty as well.
+///
+/// If the given `secret` still exists, the directory is never removed because it is not empty.
+///
+/// This never errors, but reports an error to the user when it does.
+pub fn remove_empty_secret_dir(secret: &Secret) {
+    // Remove secret directory if empty
+    if let Err(err) = remove_empty_dir(secret.path.parent().unwrap(), true) {
+        error::print_error(
+            anyhow!(err).context("failed to remove now empty secret directory, ignoring"),
+        );
+    }
+}
+
+/// Remove directory if it's empty.
+///
+/// Remove the directory `path` if it's empty.
+/// If the directory contains other empty directories, it's still considered empty.
+///
+/// If `remove_empty_parents` is true, the parents that are empty will be removed too.
+fn remove_empty_dir(path: &Path, remove_empty_parents: bool) -> Result<(), io::Error> {
+    // Stop if path is not an existing directory
+    if !path.is_dir() {
+        return Ok(());
+    }
+
+    // Make sure directory is empty, assume no on error, stop if not empty
+    let is_empty = WalkDir::new(&path)
+        .follow_links(true)
+        .into_iter()
+        .filter(|entry| match entry {
+            Ok(entry) => entry.file_type().is_file(),
+            Err(_) => true,
+        })
+        .next()
+        .is_some();
+    if is_empty {
+        return Ok(());
+    }
+
+    // Remove the directory
+    fs::remove_dir_all(path)?;
+
+    // Remove empty parents
+    if remove_empty_parents {
+        if let Some(parent) = path.parent() {
+            return remove_empty_dir(parent, true);
+        }
+    }
+
+    Ok(())
 }
 
 #[derive(Debug, Error)]

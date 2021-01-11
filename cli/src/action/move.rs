@@ -68,6 +68,8 @@ impl<'a> Move<'a> {
             .map(|_| ())
             .map_err(Err::Move)?;
 
+        super::remove::remove_empty_secret_dir(&secret);
+
         sync.finalize(format!("Move from {} to {}", secret.name, new_secret.name))?;
 
         if !matcher_main.quiet() {

@@ -1,4 +1,7 @@
+use std::path::PathBuf;
+
 use anyhow::Result;
+use chbs::{config::BasicConfig, prelude::*};
 use clap::ArgMatches;
 use prs_lib::{
     store::{Secret, Store},
@@ -9,7 +12,7 @@ use thiserror::Error;
 use crate::cmd::matcher::{generate::GenerateMatcher, MainMatcher, Matcher};
 #[cfg(feature = "clipboard")]
 use crate::util::clipboard;
-use crate::util::{cli, edit, error, stdin, sync};
+use crate::util::{cli, edit, error, pass, stdin, sync};
 
 /// Generate secret action.
 pub struct Generate<'a> {
@@ -30,36 +33,47 @@ impl<'a> Generate<'a> {
 
         let store = Store::open(matcher_generate.store()).map_err(Err::Store)?;
         let sync = store.sync();
-        let dest = matcher_generate.destination();
 
-        sync::ensure_ready(&sync);
-        sync.prepare()?;
+        // Normalize destination path if we will store the secret
+        let dest: Option<(PathBuf, Secret)> = match matcher_generate.destination() {
+            Some(dest) => {
+                let path = store
+                    .normalize_secret_path(dest, None, true)
+                    .map_err(Err::NormalizePath)?;
+                let secret = Secret::from(&store, path.to_path_buf());
 
-        // Normalize destination path
-        let path = store
-            .normalize_secret_path(dest, None, true)
-            .map_err(Err::NormalizePath)?;
-        let secret = Secret::from(&store, path.to_path_buf());
-
-        // Generate secure passphrase plaintext
-        let mut plaintext: Plaintext = chbs::passphrase().into();
-
-        // Check if destination already exists, ask to merge if so
-        if !matcher_main.force() && path.is_file() {
-            eprintln!("A secret at '{}' already exists", path.display(),);
-            if !cli::prompt_yes("Merge?", Some(true), &matcher_main) {
-                if !matcher_main.quiet() {
-                    eprintln!("No secret generated");
-                }
-                error::quit();
+                Some((path, secret))
             }
+            None => None,
+        };
 
-            // Append existing secret exept first line to new secret
-            let existing = prs_lib::crypto::decrypt_file(&path)
-                .and_then(|p| p.except_first_line())
-                .map_err(Err::Read)?;
-            if !existing.is_empty() {
-                plaintext.append(existing, true);
+        // Prepare store sync if we will store the secret
+        if dest.is_some() {
+            sync::ensure_ready(&sync);
+            sync.prepare()?;
+        }
+
+        // Generate secure password/passphrase plaintext
+        let mut plaintext = generate_password(&matcher_generate);
+
+        // Check if destination already exists, if we will stor ethe secret, ask to merge if so
+        if let Some(dest) = &dest {
+            if !matcher_main.force() && dest.0.is_file() {
+                eprintln!("A secret at '{}' already exists", dest.0.display(),);
+                if !cli::prompt_yes("Merge?", Some(true), &matcher_main) {
+                    if !matcher_main.quiet() {
+                        eprintln!("No secret generated");
+                    }
+                    error::quit();
+                }
+
+                // Append existing secret exept first line to new secret
+                let existing = prs_lib::crypto::decrypt_file(&dest.0)
+                    .and_then(|p| p.except_first_line())
+                    .map_err(Err::Read)?;
+                if !existing.is_empty() {
+                    plaintext.append(existing, true);
+                }
             }
         }
 
@@ -87,11 +101,14 @@ impl<'a> Generate<'a> {
             }
         }
 
-        // Encrypt and write changed plaintext
-        // TODO: select proper recipients (use from current file?)
-        // TODO: log recipients to encrypt for
-        let recipients = store.recipients()?;
-        prs_lib::crypto::encrypt_file(&recipients, plaintext.clone(), &path).map_err(Err::Write)?;
+        // Encrypt and write changed plaintext if we need to store
+        if let Some(dest) = &dest {
+            // TODO: select proper recipients (use from current file?)
+            // TODO: log recipients to encrypt for
+            let recipients = store.recipients()?;
+            prs_lib::crypto::encrypt_file(&recipients, plaintext.clone(), &dest.0)
+                .map_err(Err::Write)?;
+        }
 
         // Copy to clipboard
         #[cfg(feature = "clipboard")]
@@ -110,7 +127,10 @@ impl<'a> Generate<'a> {
             super::show::print(plaintext)?;
         }
 
-        sync.finalize(format!("Generate secret to {}", secret.name))?;
+        // Finalize store sync if we saved the secret
+        if let Some(dest) = &dest {
+            sync.finalize(format!("Generate secret to {}", dest.1.name))?;
+        }
 
         // Determine whehter we outputted anything to stdout/stderr
         #[allow(unused_mut)]
@@ -125,6 +145,19 @@ impl<'a> Generate<'a> {
         }
 
         Ok(())
+    }
+}
+
+/// Generate a random password.
+///
+/// This generates a secure random password/passphrase based on user configuration.
+fn generate_password(matcher_generate: &GenerateMatcher) -> Plaintext {
+    if matcher_generate.passphrase() {
+        let mut config = BasicConfig::default();
+        config.words = matcher_generate.length() as usize;
+        config.to_scheme().generate().into()
+    } else {
+        pass::generate_password(matcher_generate.length())
     }
 }
 

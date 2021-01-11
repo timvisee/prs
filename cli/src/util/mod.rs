@@ -3,6 +3,7 @@ pub mod cli;
 pub mod clipboard;
 pub mod edit;
 pub mod error;
+pub mod pass;
 pub mod skim;
 pub mod stdin;
 pub mod style;

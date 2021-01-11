@@ -22,7 +22,6 @@ impl CmdArg for ArgTimeout {
             .value_name("SECONDS")
             .global(true)
             .help("Timeout after which to clear clipboard")
-            .default_value(crate::CLIPBOARD_TIMEOUT_STR)
     }
 }
 
@@ -31,7 +30,7 @@ impl<'a> CmdArgOption<'a> for ArgTimeout {
 
     fn value<'b: 'a>(matches: &'a ArgMatches<'b>) -> Self::Value {
         Self::value_raw(matches)
-            .unwrap()
+            .unwrap_or(crate::CLIPBOARD_TIMEOUT_STR)
             .parse()
             .map_err(|err| Err::Parse(err).into())
     }

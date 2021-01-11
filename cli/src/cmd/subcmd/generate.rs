@@ -17,7 +17,7 @@ impl CmdGenerate {
             .arg(
                 Arg::with_name("DEST")
                     .help("Secret destination path")
-                    .required(true),
+                    .required_unless_one(&["show", "copy"]),
             )
             .arg(
                 Arg::with_name("passphrase")

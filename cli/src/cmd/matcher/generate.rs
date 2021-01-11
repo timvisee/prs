@@ -20,8 +20,8 @@ pub struct GenerateMatcher<'a> {
 
 impl<'a: 'b, 'b> GenerateMatcher<'a> {
     /// Secret destination.
-    pub fn destination(&self) -> &str {
-        self.matches.value_of("DEST").unwrap()
+    pub fn destination(&self) -> Option<&str> {
+        self.matches.value_of("DEST")
     }
 
     /// Check whether to generate a passphrase.

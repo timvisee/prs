@@ -12,7 +12,7 @@ use crate::{
         housekeeping::{recrypt::RecryptMatcher, HousekeepingMatcher},
         MainMatcher, Matcher,
     },
-    util::sync,
+    util::{self, error, style, sync},
 };
 
 /// A housekeeping recrypt action.
@@ -67,19 +67,67 @@ pub fn recrypt(store: &Store, secrets: &[Secret], quiet: bool, verbose: bool) ->
     let recipients = store.recipients().map_err(Err::Store)?;
     let len = secrets.len();
 
+    let mut failed = Vec::new();
+
     for (i, secret) in secrets.into_iter().enumerate() {
         if verbose {
             eprintln!("[{}/{}] Re-encrypting: {}", i + 1, len, secret.name);
         }
 
-        let path = &secret.path;
-        let plaintext = prs_lib::crypto::decrypt_file(path).map_err(Err::Read)?;
-        prs_lib::crypto::encrypt_file(&recipients, plaintext, path).map_err(Err::Write)?;
-
-        if !quiet {
-            eprintln!("[{}/{}] Re-encrypted: {}", i + 1, len, secret.name);
+        // Recrypt secret, show status, remember errors
+        match recrypt_single(secret, &recipients) {
+            Ok(_) => {
+                if !quiet {
+                    eprintln!("[{}/{}] Re-encrypted: {}", i + 1, len, secret.name);
+                }
+            }
+            Err(err) => {
+                eprintln!("[{}/{}] Re-encrypting failed: {}", i + 1, len, secret.name);
+                error::print_error(err.context("recrypting failed"));
+                failed.push(secret);
+            }
         }
     }
+
+    // Show recrypt failures
+    if !failed.is_empty() {
+        let all = failed.len() >= secrets.len();
+
+        eprintln!();
+        error::print_error_msg(format!(
+            "Failed to re-encrypt {} of {} secrets",
+            failed.len(),
+            secrets.len()
+        ));
+
+        if !quiet {
+            eprintln!(
+                "Use '{}' to try again",
+                style::highlight(&format!(
+                    "{} housekeeping recrypt{}",
+                    util::bin_name(),
+                    &if all {
+                        " --all".into()
+                    } else if failed.len() == 1 {
+                        format!(" {}", &failed[0].name)
+                    } else {
+                        "".into()
+                    }
+                ))
+            );
+        }
+
+        error::exit(1);
+    }
+
+    Ok(())
+}
+
+/// Recrypt a single secret.
+fn recrypt_single(secret: &Secret, recipients: &Recipients) -> Result<()> {
+    let path = &secret.path;
+    let plaintext = prs_lib::crypto::decrypt_file(path).map_err(Err::Read)?;
+    prs_lib::crypto::encrypt_file(recipients, plaintext, path).map_err(Err::Write)?;
 
     Ok(())
 }

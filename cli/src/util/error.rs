@@ -4,7 +4,7 @@
 use std::borrow::Borrow;
 use std::fmt::{Debug, Display};
 use std::io::{self, Write};
-use std::process::exit;
+pub use std::process::exit;
 
 use anyhow::anyhow;
 

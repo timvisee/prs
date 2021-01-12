@@ -1,6 +1,6 @@
 use std::fs;
 use std::io;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use anyhow::{anyhow, Result};
 use clap::ArgMatches;
@@ -40,19 +40,12 @@ impl<'a> Remove<'a> {
 
         // TODO: if this secret is a symlink, ask whether to remove target file as well?
 
-        if !remove_confirm(
-            &store,
-            &secret,
-            &matcher_main,
-            &format!("Remove '{}'?", secret.path.display()),
-        )? {
+        if !remove_confirm(&store, &secret, &matcher_main, &mut Vec::new())? {
             if matcher_main.verbose() {
                 eprintln!("Removal cancelled");
             }
             error::quit();
         };
-
-        remove_empty_secret_dir(&secret);
 
         sync.finalize(format!("Remove secret {}", secret.name))?;
 
@@ -65,33 +58,59 @@ impl<'a> Remove<'a> {
 }
 
 /// Confirm to remove the given secret, then remove.
+///
+/// This also asks to remove an alias target, and aliases targeting this secret, effectively asking
+/// to remove all linked aliases.
 fn remove_confirm(
     store: &Store,
     secret: &Secret,
     matcher_main: &MainMatcher,
-    prompt: &str,
+    ignore: &mut Vec<PathBuf>,
 ) -> Result<bool> {
+    // Prevent infinite loops, skip removal if already on ignore list
+    if ignore.contains(&secret.path) {
+        return Ok(false);
+    }
+
+    // Check wheher secret is an alias, build prompt
+    let is_alias = fs::symlink_metadata(&secret.path)?.file_type().is_symlink();
+    let prompt = &format!(
+        "Remove {}'{}'?",
+        if is_alias { "alias " } else { "" },
+        secret.path.display(),
+    );
+
     // Confirm removal
+    ignore.push(secret.path.clone());
     if !matcher_main.force() && !cli::prompt_yes(&prompt, Some(true), &matcher_main) {
         return Ok(false);
     }
 
-    // Remove symlinks that target this secret
+    // Ask to remove alias target
+    if is_alias {
+        match secret.alias_target(&store) {
+            Ok(secret) => {
+                // TODO: is this error okay?
+                if let Err(err) = remove_confirm(&store, &secret, &matcher_main, ignore_paths) {
+                    error::print_error(err.context("failed to remove alias target, ignoring"));
+                }
+            }
+            Err(err) => error::print_error(err.context("failed to query alias target, ignoring")),
+        }
+    }
+
+    // Ask to remove aliases targeting this secret
     for secret in find_symlinks_to(&store, &secret) {
-        if let Err(err) = remove_confirm(
-            store,
-            &secret,
-            matcher_main,
-            &format!("Remove alias '{}'?", secret.path.display()),
-        ) {
+        if let Err(err) = remove_confirm(store, &secret, matcher_main, ignore_paths) {
             error::print_error(err.context("failed to remove alias, ignoring"));
         }
     }
 
-    // Remove secret
+    // Remove secret, remove directories that become empty
     fs::remove_file(&secret.path)
         .map(|_| ())
         .map_err(|err| Err::Remove(err))?;
+    remove_empty_secret_dir(&secret);
 
     Ok(true)
 }

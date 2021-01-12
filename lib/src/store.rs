@@ -212,6 +212,22 @@ impl Secret {
     ) -> Result<&'a Path, std::path::StripPrefixError> {
         relative_path(root, &self.path)
     }
+
+    /// Returns pointed to secret.
+    ///
+    /// If this secret is an alias, this will return the pointed to secret.
+    /// If this secret is not an alias, an error will be returned.
+    ///
+    /// The pointed to secret may be an alias as well.
+    pub fn alias_target(&self, store: &Store) -> Result<Secret> {
+        // Read alias target path, make absolute, attempt to canonicalize
+        let mut path = self.path.parent().unwrap().join(fs::read_link(&self.path)?);
+        if let Ok(canonical_path) = path.canonicalize() {
+            path = canonical_path;
+        }
+
+        Ok(Secret::from(store, path))
+    }
 }
 
 /// Get relative path in given root.

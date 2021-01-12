@@ -3,6 +3,9 @@ use secstr::SecVec;
 use thiserror::Error;
 use zeroize::Zeroize;
 
+/// Delimiter for properties.
+const PROPERTY_DELIMITER: char = ':';
+
 /// Newline character(s) on this platform.
 #[cfg(not(windows))]
 pub const NEWLINE: &str = "\n";
@@ -80,7 +83,7 @@ impl Plaintext {
     pub fn first_line(self) -> Result<Plaintext> {
         Ok(self
             .unsecure_to_str()
-            .map_err(Err::FirstLine)?
+            .map_err(Err::Utf8)?
             .lines()
             .next()
             .map(|l| l.as_bytes().into())
@@ -94,13 +97,43 @@ impl Plaintext {
     pub fn except_first_line(self) -> Result<Plaintext> {
         Ok(self
             .unsecure_to_str()
-            .map_err(Err::FirstLine)?
+            .map_err(Err::Utf8)?
             .lines()
             .skip(1)
             .collect::<Vec<&str>>()
             .join(NEWLINE)
             .into_bytes()
             .into())
+    }
+
+    /// Get line with the given property.
+    ///
+    /// Returns line with the given property. The property prefix is removed, and only the value is
+    /// returned. Returns an error if the property does not exist.
+    ///
+    /// This will never return the first line being the password.
+    pub fn property(self, property: &str) -> Result<Plaintext> {
+        let property = property.trim().to_uppercase();
+        self.unsecure_to_str()
+            .map_err(Err::Utf8)?
+            .lines()
+            .skip(1)
+            .filter_map(|line| {
+                let mut parts = line.splitn(2, PROPERTY_DELIMITER);
+                if parts.next().unwrap().trim().to_uppercase() == property {
+                    Some(
+                        parts
+                            .next()
+                            .map(|value| value.trim_start())
+                            .unwrap_or("")
+                            .into(),
+                    )
+                } else {
+                    None
+                }
+            })
+            .next()
+            .ok_or_else(|| Err::Property(property.to_lowercase()).into())
     }
 
     /// Append other plaintext.
@@ -154,6 +187,9 @@ impl From<&str> for Plaintext {
 
 #[derive(Debug, Error)]
 pub enum Err {
-    #[error("failed to select first line of plaintext")]
-    FirstLine(#[source] std::str::Utf8Error),
+    #[error("failed parse plaintext as UTF-8")]
+    Utf8(#[source] std::str::Utf8Error),
+
+    #[error("property '{}' does not exist in plaintext", _0)]
+    Property(String),
 }

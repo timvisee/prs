@@ -1,3 +1,4 @@
+pub mod property;
 pub mod query;
 pub mod store;
 pub mod timeout;
@@ -5,6 +6,7 @@ pub mod timeout;
 use clap::{Arg, ArgMatches};
 
 // Re-eexport to arg module
+pub use self::property::ArgProperty;
 pub use self::query::ArgQuery;
 pub use self::store::ArgStore;
 #[cfg(feature = "clipboard")]

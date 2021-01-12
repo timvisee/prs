@@ -29,9 +29,11 @@ impl<'a> Show<'a> {
 
         let mut plaintext = prs_lib::crypto::decrypt_file(&secret.path).map_err(Err::Read)?;
 
-        // Trim plaintext to first line
+        // Trim plaintext to first line or property
         if matcher_show.first_line() {
             plaintext = plaintext.first_line()?;
+        } else if let Some(property) = matcher_show.property() {
+            plaintext = plaintext.property(property).map_err(Err::Property)?;
         }
 
         print(plaintext)
@@ -61,4 +63,7 @@ pub enum Err {
 
     #[error("failed to print secret to stdout")]
     Print(#[source] std::io::Error),
+
+    #[error("failed to select property from secret")]
+    Property(#[source] anyhow::Error),
 }

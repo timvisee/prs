@@ -2,7 +2,7 @@ use anyhow::Result;
 use clap::ArgMatches;
 
 use super::Matcher;
-use crate::cmd::arg::{ArgQuery, ArgStore, ArgTimeout, CmdArgOption};
+use crate::cmd::arg::{ArgProperty, ArgQuery, ArgStore, ArgTimeout, CmdArgOption};
 
 /// The copy command matcher.
 pub struct CopyMatcher<'a> {
@@ -28,6 +28,11 @@ impl<'a: 'b, 'b> CopyMatcher<'a> {
     /// The store.
     pub fn store(&self) -> String {
         ArgStore::value(self.matches)
+    }
+
+    /// The selected property.
+    pub fn property(&self) -> Option<&str> {
+        ArgProperty::value(self.matches)
     }
 }
 

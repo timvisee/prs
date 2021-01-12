@@ -26,11 +26,18 @@ impl<'a> Copy<'a> {
         let store = Store::open(matcher_copy.store()).map_err(Err::Store)?;
         let secret = skim::select_secret(&store, matcher_copy.query()).ok_or(Err::NoneSelected)?;
 
-        let plaintext = prs_lib::crypto::decrypt_file(&secret.path).map_err(Err::Read)?;
+        let mut plaintext = prs_lib::crypto::decrypt_file(&secret.path).map_err(Err::Read)?;
+
+        // Trim plaintext to property or first line
+        if let Some(property) = matcher_copy.property() {
+            plaintext = plaintext.property(property).map_err(Err::Property)?;
+        } else if !matcher_copy.all() {
+            plaintext = plaintext.first_line()?;
+        }
 
         clipboard::plaintext_copy(
             plaintext,
-            !matcher_copy.all(),
+            false,
             !matcher_main.force(),
             !matcher_main.quiet(),
             matcher_copy.timeout()?,
@@ -48,4 +55,7 @@ pub enum Err {
 
     #[error("failed to read secret")]
     Read(#[source] anyhow::Error),
+
+    #[error("failed to select property from secret")]
+    Property(#[source] anyhow::Error),
 }

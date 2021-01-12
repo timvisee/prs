@@ -1,7 +1,7 @@
 use clap::ArgMatches;
 
 use super::Matcher;
-use crate::cmd::arg::{ArgQuery, ArgStore, CmdArgOption};
+use crate::cmd::arg::{ArgProperty, ArgQuery, ArgStore, CmdArgOption};
 
 /// The show command matcher.
 pub struct ShowMatcher<'a> {
@@ -22,6 +22,11 @@ impl<'a: 'b, 'b> ShowMatcher<'a> {
     /// The store.
     pub fn store(&self) -> String {
         ArgStore::value(self.matches)
+    }
+
+    /// The selected property.
+    pub fn property(&self) -> Option<&str> {
+        ArgProperty::value(self.matches)
     }
 }
 

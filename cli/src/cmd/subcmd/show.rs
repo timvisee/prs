@@ -1,6 +1,6 @@
 use clap::{App, Arg, SubCommand};
 
-use crate::cmd::arg::{ArgQuery, ArgStore, CmdArg};
+use crate::cmd::arg::{ArgProperty, ArgQuery, ArgStore, CmdArg};
 
 /// The show command definition.
 pub struct CmdShow;
@@ -21,5 +21,6 @@ impl CmdShow {
             )
             .arg(ArgQuery::build())
             .arg(ArgStore::build())
+            .arg(ArgProperty::build().conflicts_with("first"))
     }
 }

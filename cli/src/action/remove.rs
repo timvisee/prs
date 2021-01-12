@@ -91,7 +91,7 @@ fn remove_confirm(
         match secret.alias_target(&store) {
             Ok(secret) => {
                 // TODO: is this error okay?
-                if let Err(err) = remove_confirm(&store, &secret, &matcher_main, ignore_paths) {
+                if let Err(err) = remove_confirm(&store, &secret, &matcher_main, ignore) {
                     error::print_error(err.context("failed to remove alias target, ignoring"));
                 }
             }
@@ -101,7 +101,7 @@ fn remove_confirm(
 
     // Ask to remove aliases targeting this secret
     for secret in find_symlinks_to(&store, &secret) {
-        if let Err(err) = remove_confirm(store, &secret, matcher_main, ignore_paths) {
+        if let Err(err) = remove_confirm(store, &secret, matcher_main, ignore) {
             error::print_error(err.context("failed to remove alias, ignoring"));
         }
     }

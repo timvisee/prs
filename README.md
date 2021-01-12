@@ -41,7 +41,7 @@ compatible clients, extensions and migration scripts.
 - Automatic synchronization with [`git`][git] including history tracking
 - Supports multiple machines with easy recipient management
 - Easily edit secrets using your default editor
-- Supports smart secret aliases
+- Supports smart aliases, property selection
 - Compatible with [`pass`][pass]
 - Scriptable with `-y`, `-f`, `-I` flags
 - Accurate & useful error reporting

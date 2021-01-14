@@ -24,10 +24,8 @@ impl<'a> Internal<'a> {
         let matcher_internal = InternalMatcher::with(self.cmd_matches).unwrap();
 
         #[cfg(feature = "clipboard")]
-        {
-            if matcher_internal.clip_revert().is_some() {
-                return clip_revert::ClipRevert::new(self.cmd_matches).invoke();
-            }
+        if matcher_internal.clip_revert().is_some() {
+            return clip_revert::ClipRevert::new(self.cmd_matches).invoke();
         }
 
         // Unreachable, clap will print help for missing sub command instead

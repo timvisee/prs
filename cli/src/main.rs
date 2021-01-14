@@ -43,7 +43,7 @@ fn invoke_action(handler: &Handler) -> Result<()> {
         return action::add::Add::new(handler.matches()).invoke();
     }
 
-    #[cfg(any(unix, windows))]
+    #[cfg(feature = "alias")]
     if handler.alias().is_some() {
         return action::alias::Alias::new(handler.matches()).invoke();
     }

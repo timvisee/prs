@@ -264,10 +264,8 @@ where
 
     // Set custom git ssh command to speed up remote operations
     #[cfg(unix)]
-    {
-        if env::var_os(GIT_ENV_SSH).is_none() {
-            cmd.env(GIT_ENV_SSH, GIT_ENV_SSH_CMD);
-        }
+    if env::var_os(GIT_ENV_SSH).is_none() {
+        cmd.env(GIT_ENV_SSH, GIT_ENV_SSH_CMD);
     }
 
     cmd.args(args);

@@ -38,15 +38,11 @@ pub fn copy_timeout(data: &[u8], timeout: u64, report: bool) -> Result<()> {
 
     // macOS
     #[cfg(target_os = "macos")]
-    {
-        return copy_timeout_macos(data, timeout, report);
-    }
+    return copy_timeout_macos(data, timeout, report);
 
     // Windows
     #[cfg(target_os = "windows")]
-    {
-        return copy_timeout_windows(data, timeout, report);
-    }
+    return copy_timeout_windows(data, timeout, report);
 
     // X11 with musl
     #[cfg(all(
@@ -54,9 +50,7 @@ pub fn copy_timeout(data: &[u8], timeout: u64, report: bool) -> Result<()> {
         not(any(target_os = "macos", target_os = "android", target_os = "emscripten")),
         target_env = "musl",
     ))]
-    {
-        return copy_timeout_x11_bin(data, timeout, report);
-    }
+    return copy_timeout_x11_bin(data, timeout, report);
 
     // X11
     #[cfg(all(
@@ -64,9 +58,7 @@ pub fn copy_timeout(data: &[u8], timeout: u64, report: bool) -> Result<()> {
         not(any(target_os = "macos", target_os = "android", target_os = "emscripten")),
         not(target_env = "musl"),
     ))]
-    {
-        return copy_timeout_x11(data, timeout, report);
-    }
+    return copy_timeout_x11(data, timeout, report);
 
     // Other clipboard contexts
     copy_timeout_blocking(data, timeout, report)

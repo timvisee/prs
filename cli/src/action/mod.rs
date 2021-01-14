@@ -1,5 +1,5 @@
 pub mod add;
-#[cfg(any(unix, windows))]
+#[cfg(feature = "alias")]
 pub mod alias;
 pub mod clone;
 #[cfg(feature = "clipboard")]

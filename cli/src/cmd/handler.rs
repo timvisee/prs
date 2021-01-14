@@ -74,7 +74,7 @@ impl<'a: 'b, 'b> Handler<'a> {
             .subcommand(subcmd::CmdShow::build())
             .subcommand(subcmd::CmdSync::build());
 
-        #[cfg(any(unix, windows))]
+        #[cfg(feature = "alias")]
         let app = app.subcommand(subcmd::CmdAlias::build());
 
         #[cfg(feature = "clipboard")]
@@ -106,7 +106,7 @@ impl<'a: 'b, 'b> Handler<'a> {
     }
 
     /// Get the alias sub command, if matched.
-    #[cfg(any(unix, windows))]
+    #[cfg(feature = "alias")]
     pub fn alias(&'a self) -> Option<matcher::AliasMatcher> {
         matcher::AliasMatcher::with(&self.matches)
     }

@@ -7,7 +7,9 @@ use clap::ArgMatches;
 use thiserror::Error;
 use walkdir::WalkDir;
 
-use prs_lib::store::{Secret, SecretIterConfig, Store};
+#[cfg(feature = "alias")]
+use prs_lib::store::SecretIterConfig;
+use prs_lib::store::{Secret, Store};
 
 use crate::cmd::matcher::{remove::RemoveMatcher, MainMatcher, Matcher};
 use crate::util::{cli, error, skim, sync};
@@ -73,9 +75,9 @@ fn remove_confirm(
     }
 
     // Check wheher secret is an alias, build prompt
-    #[cfg(any(unix, windows))]
+    #[cfg(feature = "alias")]
     let is_alias = fs::symlink_metadata(&secret.path)?.file_type().is_symlink();
-    #[cfg(not(any(windows, unix)))]
+    #[cfg(not(feature = "alias"))]
     let is_alias = false;
     let prompt = &format!(
         "Remove {}'{}'?",
@@ -103,12 +105,10 @@ fn remove_confirm(
     }
 
     // Ask to remove aliases targeting this secret
-    #[cfg(any(unix, windows))]
-    {
-        for secret in find_symlinks_to(&store, &secret) {
-            if let Err(err) = remove_confirm(store, &secret, matcher_main, ignore) {
-                error::print_error(err.context("failed to remove alias, ignoring"));
-            }
+    #[cfg(feature = "alias")]
+    for secret in find_symlinks_to(&store, &secret) {
+        if let Err(err) = remove_confirm(store, &secret, matcher_main, ignore) {
+            error::print_error(err.context("failed to remove alias, ignoring"));
         }
     }
 
@@ -124,7 +124,7 @@ fn remove_confirm(
 /// Find symlink secrets to given secret.
 ///
 /// Collect all secrets that are a symlink which target the given `secret`.
-#[cfg(any(unix, windows))]
+#[cfg(feature = "alias")]
 pub fn find_symlinks_to(store: &Store, secret: &Secret) -> Vec<Secret> {
     // Configure secret iterator to only find symlinks
     let mut config = SecretIterConfig::default();

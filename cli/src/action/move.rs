@@ -1,4 +1,5 @@
 use std::fs;
+#[cfg(feature = "alias")]
 use std::path::Path;
 
 use anyhow::Result;
@@ -57,7 +58,7 @@ impl<'a> Move<'a> {
             }
         }
 
-        #[cfg(any(unix, windows))]
+        #[cfg(feature = "alias")]
         {
             // Update this (relative) alias to point to the same target after moving
             update_secret_alias_target(&store, &secret, &new_secret)?;
@@ -95,7 +96,7 @@ impl<'a> Move<'a> {
 /// If `secret` is not an alias, nothing happens.
 ///
 /// Returns `true` if a symlink has been updated.
-#[cfg(any(unix, windows))]
+#[cfg(feature = "alias")]
 fn update_secret_alias_target(
     store: &Store,
     secret: &Secret,
@@ -129,7 +130,7 @@ fn update_secret_alias_target(
 ///
 /// The `secret` is the old secret location, the `new_secret` is the location it is moved to.
 /// Aliases targetting `secret` will be updated to point to `new_secret`.
-#[cfg(any(unix, windows))]
+#[cfg(feature = "alias")]
 fn update_alias_for_secret_to(store: &Store, secret: &Secret, new_secret: &Secret) {
     for secret in super::remove::find_symlinks_to(&store, &secret) {
         if let Err(err) = update_alias(&store, &new_secret, &secret.path, &secret.path) {
@@ -147,7 +148,7 @@ fn update_alias_for_secret_to(store: &Store, secret: &Secret, new_secret: &Secre
 /// # Errors
 ///
 /// Panics if the given `symlink` path is not an existing symlink.
-#[cfg(any(unix, windows))]
+#[cfg(feature = "alias")]
 fn update_alias(store: &Store, src: &Secret, symlink: &Path, future_symlink: &Path) -> Result<()> {
     assert!(
         symlink.symlink_metadata()?.file_type().is_symlink(),
@@ -179,6 +180,7 @@ pub enum Err {
     #[error("failed to move secret file")]
     Move(#[source] std::io::Error),
 
+    #[cfg(feature = "alias")]
     #[error("failed to update alias")]
     UpdateAlias(#[source] std::io::Error),
 }

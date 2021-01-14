@@ -1,5 +1,5 @@
 pub mod add;
-#[cfg(any(unix, windows))]
+#[cfg(feature = "alias")]
 pub mod alias;
 pub mod clone;
 #[cfg(feature = "clipboard")]
@@ -20,7 +20,7 @@ pub mod sync;
 
 // Re-export to cmd module
 pub use self::add::CmdAdd;
-#[cfg(any(unix, windows))]
+#[cfg(feature = "alias")]
 pub use self::alias::CmdAlias;
 pub use self::clone::CmdClone;
 #[cfg(feature = "clipboard")]

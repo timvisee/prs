@@ -2,7 +2,7 @@ use anyhow::Result;
 use clap::ArgMatches;
 
 use super::Matcher;
-use crate::cmd::arg::{ArgTimeout, CmdArgOption};
+use crate::cmd::arg::ArgTimeout;
 
 /// The internal clipboard revert command matcher.
 pub struct ClipRevertMatcher<'a> {
@@ -17,7 +17,7 @@ impl<'a: 'b, 'b> ClipRevertMatcher<'a> {
 
     /// Clipboard timeout in seconds.
     pub fn timeout(&self) -> Result<u64> {
-        ArgTimeout::value(self.matches)
+        ArgTimeout::value_or_default(self.matches)
     }
 }
 

@@ -1,11 +1,13 @@
 use std::io::Write;
+use std::thread;
+use std::time::Duration;
 
 use anyhow::Result;
 use clap::ArgMatches;
 use prs_lib::{store::Store, types::Plaintext};
 use thiserror::Error;
 
-use crate::cmd::matcher::{show::ShowMatcher, Matcher};
+use crate::cmd::matcher::{show::ShowMatcher, MainMatcher, Matcher};
 use crate::util::skim;
 
 /// Show secret action.
@@ -22,6 +24,7 @@ impl<'a> Show<'a> {
     /// Invoke the show action.
     pub fn invoke(&self) -> Result<()> {
         // Create the command matchers
+        let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
         let matcher_show = ShowMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(matcher_show.store()).map_err(Err::Store)?;
@@ -36,7 +39,26 @@ impl<'a> Show<'a> {
             plaintext = plaintext.property(property).map_err(Err::Property)?;
         }
 
-        print(plaintext)
+        let lines = plaintext.unsecure_to_str().unwrap().lines().count();
+
+        print(plaintext)?;
+
+        // Clear after timeout
+        if let Some(timeout) = matcher_show.timeout() {
+            let timeout = timeout?;
+            let mut lines = lines as u16 + 1;
+
+            if matcher_main.verbose() {
+                lines += 2;
+                eprintln!();
+                eprint!("Clearing output in {} seconds...", timeout);
+            }
+
+            thread::sleep(Duration::from_secs(timeout));
+            eprint!("{}", ansi_escapes::EraseLines(lines));
+        }
+
+        Ok(())
     }
 }
 

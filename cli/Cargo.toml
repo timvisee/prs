@@ -32,6 +32,7 @@ clipboard = ["copypasta-ext", "x11-clipboard", "base64"]
 notify = ["notify-rust"]
 
 [dependencies]
+ansi-escapes = "0.1"
 anyhow = "1.0"
 chbs = "0.1.0"
 clap = "2.33"

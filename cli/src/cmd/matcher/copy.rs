@@ -22,7 +22,7 @@ impl<'a: 'b, 'b> CopyMatcher<'a> {
 
     /// Clipboard timeout in seconds.
     pub fn timeout(&self) -> Result<u64> {
-        ArgTimeout::value(self.matches)
+        ArgTimeout::value_or_default(self.matches)
     }
 
     /// The store.

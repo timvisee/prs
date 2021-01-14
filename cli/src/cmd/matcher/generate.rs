@@ -62,7 +62,7 @@ impl<'a: 'b, 'b> GenerateMatcher<'a> {
     /// Clipboard timeout in seconds.
     #[cfg(feature = "clipboard")]
     pub fn timeout(&self) -> Result<u64> {
-        ArgTimeout::value(self.matches)
+        ArgTimeout::value_or_default(self.matches)
     }
 
     /// Check whether to read from show.

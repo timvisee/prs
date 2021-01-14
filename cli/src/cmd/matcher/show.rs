@@ -1,7 +1,8 @@
+use anyhow::Result;
 use clap::ArgMatches;
 
 use super::Matcher;
-use crate::cmd::arg::{ArgProperty, ArgQuery, ArgStore, CmdArgOption};
+use crate::cmd::arg::{ArgProperty, ArgQuery, ArgStore, ArgTimeout, CmdArgOption};
 
 /// The show command matcher.
 pub struct ShowMatcher<'a> {
@@ -22,6 +23,11 @@ impl<'a: 'b, 'b> ShowMatcher<'a> {
     /// The store.
     pub fn store(&self) -> String {
         ArgStore::value(self.matches)
+    }
+
+    /// Show timeout in seconds.
+    pub fn timeout(&self) -> Option<Result<u64>> {
+        ArgTimeout::value(self.matches)
     }
 
     /// The selected property.

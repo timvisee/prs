@@ -1,6 +1,6 @@
 use clap::{App, Arg, SubCommand};
 
-use crate::cmd::arg::{ArgProperty, ArgQuery, ArgStore, CmdArg};
+use crate::cmd::arg::{ArgProperty, ArgQuery, ArgStore, ArgTimeout, CmdArg};
 
 /// The show command definition.
 pub struct CmdShow;
@@ -21,6 +21,7 @@ impl CmdShow {
             )
             .arg(ArgQuery::build())
             .arg(ArgStore::build())
+            .arg(ArgTimeout::build().help("Timeout after which to clear output"))
             .arg(ArgProperty::build().conflicts_with("first"))
     }
 }

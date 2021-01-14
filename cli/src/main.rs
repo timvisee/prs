@@ -22,7 +22,7 @@ use crate::{
 };
 
 /// Clipboard timeout in seconds.
-const CLIPBOARD_TIMEOUT_STR: &str = "20";
+const CLIPBOARD_TIMEOUT: u64 = 20;
 
 fn main() {
     // Parse CLI arguments

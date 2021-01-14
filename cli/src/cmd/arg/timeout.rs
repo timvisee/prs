@@ -7,6 +7,12 @@ use super::{CmdArg, CmdArgOption};
 /// The timeout argument.
 pub struct ArgTimeout {}
 
+impl ArgTimeout {
+    pub fn value_or_default<'a, 'b: 'a>(matches: &'a ArgMatches<'b>) -> Result<u64> {
+        Self::value(matches).unwrap_or(Ok(crate::CLIPBOARD_TIMEOUT))
+    }
+}
+
 impl CmdArg for ArgTimeout {
     fn name() -> &'static str {
         "timeout"
@@ -26,13 +32,10 @@ impl CmdArg for ArgTimeout {
 }
 
 impl<'a> CmdArgOption<'a> for ArgTimeout {
-    type Value = Result<u64>;
+    type Value = Option<Result<u64>>;
 
     fn value<'b: 'a>(matches: &'a ArgMatches<'b>) -> Self::Value {
-        Self::value_raw(matches)
-            .unwrap_or(crate::CLIPBOARD_TIMEOUT_STR)
-            .parse()
-            .map_err(|err| Err::Parse(err).into())
+        Self::value_raw(matches).map(|t| t.parse().map_err(|err| Err::Parse(err).into()))
     }
 }
 

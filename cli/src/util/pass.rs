@@ -8,7 +8,7 @@ const PASSWORD_CHAR_SETS: [&str; 4] = [
     "abcdefghijklmnopqrstuvwxyz",
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
     "0123456789",
-    "!@#$%&*+-=/",
+    "!@#$%&*+-=/[]<>(),.;|",
 ];
 
 /// Generate secure random password.

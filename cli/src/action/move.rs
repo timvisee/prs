@@ -57,11 +57,14 @@ impl<'a> Move<'a> {
             }
         }
 
-        // Update this (relative) alias to point to the same target after moving
-        update_secret_alias_target(&store, &secret, &new_secret)?;
+        #[cfg(any(unix, windows))]
+        {
+            // Update this (relative) alias to point to the same target after moving
+            update_secret_alias_target(&store, &secret, &new_secret)?;
 
-        // Update other aliases pointing to this, to point to new location
-        update_alias_for_secret_to(&store, &secret, &new_secret);
+            // Update other aliases pointing to this, to point to new location
+            update_alias_for_secret_to(&store, &secret, &new_secret);
+        }
 
         // Move secret
         fs::rename(&secret.path, path)
@@ -92,6 +95,7 @@ impl<'a> Move<'a> {
 /// If `secret` is not an alias, nothing happens.
 ///
 /// Returns `true` if a symlink has been updated.
+#[cfg(any(unix, windows))]
 fn update_secret_alias_target(
     store: &Store,
     secret: &Secret,
@@ -125,6 +129,7 @@ fn update_secret_alias_target(
 ///
 /// The `secret` is the old secret location, the `new_secret` is the location it is moved to.
 /// Aliases targetting `secret` will be updated to point to `new_secret`.
+#[cfg(any(unix, windows))]
 fn update_alias_for_secret_to(store: &Store, secret: &Secret, new_secret: &Secret) {
     for secret in super::remove::find_symlinks_to(&store, &secret) {
         if let Err(err) = update_alias(&store, &new_secret, &secret.path, &secret.path) {
@@ -142,6 +147,7 @@ fn update_alias_for_secret_to(store: &Store, secret: &Secret, new_secret: &Secre
 /// # Errors
 ///
 /// Panics if the given `symlink` path is not an existing symlink.
+#[cfg(any(unix, windows))]
 fn update_alias(store: &Store, src: &Secret, symlink: &Path, future_symlink: &Path) -> Result<()> {
     assert!(
         symlink.symlink_metadata()?.file_type().is_symlink(),

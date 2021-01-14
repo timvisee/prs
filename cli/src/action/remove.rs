@@ -73,7 +73,10 @@ fn remove_confirm(
     }
 
     // Check wheher secret is an alias, build prompt
+    #[cfg(any(unix, windows))]
     let is_alias = fs::symlink_metadata(&secret.path)?.file_type().is_symlink();
+    #[cfg(not(any(windows, unix)))]
+    let is_alias = false;
     let prompt = &format!(
         "Remove {}'{}'?",
         if is_alias { "alias " } else { "" },
@@ -100,9 +103,12 @@ fn remove_confirm(
     }
 
     // Ask to remove aliases targeting this secret
-    for secret in find_symlinks_to(&store, &secret) {
-        if let Err(err) = remove_confirm(store, &secret, matcher_main, ignore) {
-            error::print_error(err.context("failed to remove alias, ignoring"));
+    #[cfg(any(unix, windows))]
+    {
+        for secret in find_symlinks_to(&store, &secret) {
+            if let Err(err) = remove_confirm(store, &secret, matcher_main, ignore) {
+                error::print_error(err.context("failed to remove alias, ignoring"));
+            }
         }
     }
 
@@ -118,6 +124,7 @@ fn remove_confirm(
 /// Find symlink secrets to given secret.
 ///
 /// Collect all secrets that are a symlink which target the given `secret`.
+#[cfg(any(unix, windows))]
 pub fn find_symlinks_to(store: &Store, secret: &Secret) -> Vec<Secret> {
     // Configure secret iterator to only find symlinks
     let mut config = SecretIterConfig::default();

@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.1.6 (2021-01-18)
+- Show or copy a specific secret property with `--property`
+- Add optional `--timeout` flag to `show` command, output is cleared afterwards
+- Ask to remove pointed to secrets when removing alias secret
+- Don't crash on re-encrypt failure, continue and show error summary instead
+- Extend list of password generator characters with `[]<>(),.;|`
+- Require `--copy` with `--timeout` with `generate` command
+- Only run alias management tasks on platforms that support it
+- Add `dmenu` and `rofi` scripts to type selected password
+- Update dependencies
+
 ## 0.1.5 (2021-01-11)
 - Generate password instead of passphrase by default with `generate` command
 - Add `--length` option to `generate` command

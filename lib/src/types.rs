@@ -28,8 +28,11 @@ impl Ciphertext {
     ///
     /// # Warning
     ///
-    /// Considered unsecure because we cannot guarantee that the referenced data isn't cloned. Use
-    /// with care!
+    /// Unsecure because we cannot guarantee that the referenced data isn't cloned. Use with care!
+    ///
+    /// The reference itself is safe to use and share. Data may be cloned from this reference
+    /// though, when that happens we lose track of it and are unable to securely handle it in
+    /// memory. You should clone `Ciphertext` instead.
     pub(crate) fn unsecure_ref(&self) -> &[u8] {
         self.0.unsecure()
     }
@@ -61,8 +64,11 @@ impl Plaintext {
     ///
     /// # Warning
     ///
-    /// Considered unsecure because we cannot guarantee that the referenced data isn't cloned. Use
-    /// with care!
+    /// Unsecure because we cannot guarantee that the referenced data isn't cloned. Use with care!
+    ///
+    /// The reference itself is safe to use and share. Data may be cloned from this reference
+    /// though, when that happens we lose track of it and are unable to securely handle it in
+    /// memory. You should clone `Plaintext` instead.
     pub fn unsecure_ref(&self) -> &[u8] {
         self.0.unsecure()
     }
@@ -71,8 +77,11 @@ impl Plaintext {
     ///
     /// # Warning
     ///
-    /// Considered unsecure because we cannot guarantee that the referenced data isn't messed with
-    /// or isn't cloned.
+    /// Unsecure because we cannot guarantee that the referenced data isn't cloned. Use with care!
+    ///
+    /// The reference itself is safe to use and share. Data may be cloned from this reference
+    /// though, when that happens we lose track of it and are unable to securely handle it in
+    /// memory. You should clone `Plaintext` instead.
     pub fn unsecure_to_str(&self) -> Result<&str, std::str::Utf8Error> {
         std::str::from_utf8(self.unsecure_ref())
     }

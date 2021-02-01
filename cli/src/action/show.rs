@@ -65,10 +65,20 @@ impl<'a> Show<'a> {
 /// Print the given plaintext to stdout.
 // TODO: move to shared module
 pub(crate) fn print(plaintext: Plaintext) -> Result<()> {
-    std::io::stdout()
+    let mut stdout = std::io::stdout();
+
+    stdout
         .write_all(plaintext.unsecure_ref())
         .map_err(Err::Print)?;
-    let _ = std::io::stdout().flush();
+
+    // Always finish with newline
+    if let Some(&last) = plaintext.unsecure_ref().last() {
+        if last != b'\n' {
+            stdout.write_all(&[b'\n']).map_err(Err::Print)?;
+        }
+    }
+
+    let _ = stdout.flush();
     Ok(())
 }
 

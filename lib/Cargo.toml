@@ -18,12 +18,20 @@ edition = "2018"
 [badges]
 gitlab = { repository = "timvisee/prs", branch = "master" }
 
+[features]
+default = ["crypto-gpgme"]
+
+# Crypto backend: GPGME
+crypto-gpgme = ["gpgme"]
+
 [dependencies]
 anyhow = "1.0"
 git-state = "0.1"
-gpgme = "0.9.2"
 secstr = "0.4"
 shellexpand = "2.0"
 thiserror = "1.0"
 walkdir = "2.0"
-zeroize = { version = "1.1" }
+zeroize = "1.1"
+
+# Crypto backend: GPGME
+gpgme = { version = "0.9.2", optional = true }

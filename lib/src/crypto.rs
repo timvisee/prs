@@ -2,6 +2,7 @@ use std::fs;
 use std::path::Path;
 
 use anyhow::Result;
+#[cfg(feature = "crypto-gpgme")]
 use gpgme::{Context, EncryptFlags, Protocol};
 use thiserror::Error;
 use zeroize::Zeroize;

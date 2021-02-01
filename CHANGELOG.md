@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.7 (2021-02-01)
+- Always end secret output to stdout with newline
+- Update dependencies
+
 ## 0.1.6 (2021-01-18)
 - Show or copy a specific secret property with `--property`
 - Add optional `--timeout` flag to `show` command, output is cleared afterwards

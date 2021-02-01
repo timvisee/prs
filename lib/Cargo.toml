@@ -19,10 +19,13 @@ edition = "2018"
 gitlab = { repository = "timvisee/prs", branch = "master" }
 
 [features]
-default = ["crypto-gpgme"]
+default = ["crypto-gpgme", "crypto-gnupg-bin"]
 
 # Crypto backend: GPGME
 crypto-gpgme = ["gpgme"]
+
+# Crypto backend: gnupg binary
+crypto-gnupg-bin = ["which", "version-compare"]
 
 [dependencies]
 anyhow = "1.0"
@@ -35,3 +38,7 @@ zeroize = "1.1"
 
 # Crypto backend: GPGME
 gpgme = { version = "0.9.2", optional = true }
+
+# Crypto backend: gnupg binary
+which = { version = "4.0", optional = true }
+version-compare = { version = "0.0.11", optional = true }

@@ -1,3 +1,4 @@
+pub mod crypt;
 pub mod crypto;
 pub(crate) mod git;
 pub mod store;
@@ -9,6 +10,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 use anyhow::Result;
+#[cfg(feature = "crypto-gpgme")]
 use gpgme::Context;
 use thiserror::Error;
 

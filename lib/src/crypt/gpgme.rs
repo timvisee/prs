@@ -1,8 +1,11 @@
+use std::fmt;
+
 use anyhow::Result;
 use gpgme::{Context as GpgmeContext, EncryptFlags, Protocol};
 use thiserror::Error;
 use zeroize::Zeroize;
 
+use super::prelude::*;
 use crate::types::{Ciphertext, Plaintext};
 use crate::Recipients;
 
@@ -29,13 +32,21 @@ impl Context {
     pub fn from(context: GpgmeContext) -> Self {
         Self { context }
     }
+
+    pub fn inner_mut(&mut self) -> &mut GpgmeContext {
+        &mut self.context
+    }
 }
 
-impl super::ContextAdapter for Context {}
+impl ContextAdapter for Context {}
 
-impl super::Crypto for Context {}
+impl Crypto for Context {
+    fn keychain<'a>(&'a mut self) -> Box<dyn IsKeychain + 'a> {
+        Box::new(Keychain::from(self))
+    }
+}
 
-impl super::Encrypt for Context {
+impl Encrypt for Context {
     fn encrypt(&mut self, recipients: &Recipients, plaintext: Plaintext) -> Result<Ciphertext> {
         // TODO: do not use temporary (unsecure) buffer here
         let mut ciphertext = vec![];
@@ -57,7 +68,7 @@ impl super::Encrypt for Context {
     }
 }
 
-impl super::Decrypt for Context {
+impl Decrypt for Context {
     fn decrypt(&mut self, ciphertext: Ciphertext) -> Result<Plaintext> {
         // TODO: do not use temporary (unsecure) buffer here
         let mut plaintext = vec![];
@@ -89,6 +100,99 @@ impl super::Decrypt for Context {
             // TODO: should this be false for other errors?
             Err(_) => Ok(true),
         }
+    }
+}
+
+/// GPGME key, a recipient.
+#[derive(Clone)]
+pub struct Key(gpgme::Key);
+
+impl IsKey for Key {
+    /// Get fingerprint.
+    fn fingerprint(&self, short: bool) -> String {
+        let fp = self.0.fingerprint().expect("key does not have fingerprint");
+        super::format_fingerprint(if short { &fp[fp.len() - 16..] } else { fp })
+    }
+
+    /// Format user data to displayable string.
+    fn user_display(&self) -> String {
+        self.0
+            .user_ids()
+            .map(|user| {
+                let mut parts = vec![];
+                if let Ok(name) = user.name() {
+                    if !name.trim().is_empty() {
+                        parts.push(name.into());
+                    }
+                }
+                if let Ok(comment) = user.comment() {
+                    if !comment.trim().is_empty() {
+                        parts.push(format!("({})", comment));
+                    }
+                }
+                if let Ok(email) = user.email() {
+                    if !email.trim().is_empty() {
+                        parts.push(format!("<{}>", email));
+                    }
+                }
+                parts.join(" ")
+            })
+            .collect::<Vec<_>>()
+            .join("; ")
+    }
+}
+
+impl PartialEq for Key {
+    fn eq(&self, other: &Self) -> bool {
+        self.0.id_raw() == other.0.id_raw() && self.0.fingerprint_raw() == other.0.fingerprint_raw()
+    }
+}
+
+impl fmt::Display for Key {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "[GPG] {} - {}",
+            self.fingerprint(true),
+            self.user_display()
+        )
+    }
+}
+
+/// Provides access to GPGME keys.
+pub struct Keychain<'a> {
+    context: &'a mut GpgmeContext,
+}
+
+impl<'a> Keychain<'a> {
+    fn from(context: &'a mut Context) -> Self {
+        Self {
+            context: context.inner_mut(),
+        }
+    }
+}
+
+impl<'a> IsKeychain for Keychain<'a> {
+    fn keys_public(&mut self) -> Result<Vec<Box<dyn IsKey>>> {
+        Ok(self
+            .context
+            .keys()?
+            .into_iter()
+            .filter_map(|k| k.ok())
+            .filter(|k| k.can_encrypt())
+            .map(|k| Box::new(Key(k)) as Box<dyn IsKey>)
+            .collect())
+    }
+
+    fn keys_private(&mut self) -> Result<Vec<Box<dyn IsKey>>> {
+        Ok(self
+            .context
+            .secret_keys()?
+            .into_iter()
+            .filter_map(|k| k.ok())
+            .filter(|k| k.can_encrypt())
+            .map(|k| Box::new(Key(k)) as Box<dyn IsKey>)
+            .collect())
     }
 }
 

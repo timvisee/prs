@@ -64,7 +64,11 @@ impl Context {
     }
 }
 
-impl Crypto for Context {}
+impl Crypto for Context {
+    fn keychain<'a>(&'a mut self) -> Box<dyn IsKeychain + 'a> {
+        self.inner.keychain()
+    }
+}
 
 impl Encrypt for Context {
     fn encrypt(&mut self, recipients: &Recipients, plaintext: Plaintext) -> Result<Ciphertext> {
@@ -87,7 +91,10 @@ impl Decrypt for Context {
 /// Definese that a type is a crypto context adapter.
 pub trait ContextAdapter: Crypto {}
 
-pub trait Crypto: Encrypt + Decrypt {}
+pub trait Crypto: Encrypt + Decrypt {
+    /// Get keychain for this crypto backend.
+    fn keychain<'a>(&'a mut self) -> Box<dyn IsKeychain + 'a>;
+}
 
 pub trait Encrypt {
     /// Encrypt the given plaintext.
@@ -125,6 +132,63 @@ pub trait Decrypt {
     }
 }
 
+/// Provides access to crypto backend keys.
+pub struct Keychain<'a> {
+    inner: &'a mut Box<dyn IsKeychain>,
+}
+
+impl<'a> Keychain<'a> {
+    fn from(inner: &'a mut Box<dyn IsKeychain>) -> Self {
+        Self { inner }
+    }
+}
+
+impl<'a> IsKeychain for Keychain<'a> {
+    fn keys_public(&mut self) -> Result<Vec<Box<dyn IsKey>>> {
+        self.inner.keys_public()
+    }
+
+    fn keys_private(&mut self) -> Result<Vec<Box<dyn IsKey>>> {
+        self.inner.keys_private()
+    }
+}
+
+pub trait IsKeychain {
+    /// Get all public keys.
+    fn keys_public(&mut self) -> Result<Vec<Box<dyn IsKey>>>;
+
+    /// Get all private keys.
+    fn keys_private(&mut self) -> Result<Vec<Box<dyn IsKey>>>;
+}
+
+pub struct Key {
+    key: Box<dyn IsKey>,
+}
+
+impl IsKey for Key {
+    fn fingerprint(&self, short: bool) -> String {
+        self.key.fingerprint(short)
+    }
+
+    /// Format user data to displayable string.
+    fn user_display(&self) -> String {
+        self.key.user_display()
+    }
+}
+
+pub trait IsKey {
+    /// Get fingerprint.
+    fn fingerprint(&self, short: bool) -> String;
+
+    /// Format user data to displayable string.
+    fn user_display(&self) -> String;
+}
+
+/// Reformat the given fingerprint.
+fn format_fingerprint<S: AsRef<str>>(fingerprint: S) -> String {
+    fingerprint.as_ref().trim().to_uppercase()
+}
+
 #[derive(Debug, Error)]
 pub enum ContextErr {
     #[error(
@@ -160,5 +224,5 @@ pub enum DecryptErr {
 
 /// Prelude traits.
 pub mod prelude {
-    pub use super::{ContextAdapter, Crypto, Decrypt, Encrypt};
+    pub use super::{ContextAdapter, Crypto, Decrypt, Encrypt, IsKey, IsKeychain};
 }

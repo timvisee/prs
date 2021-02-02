@@ -1,12 +1,16 @@
+use std::collections::VecDeque;
 use std::ffi::OsStr;
+use std::fmt;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::process::{Command, ExitStatus, Output, Stdio};
 
 use anyhow::Result;
+use regex::Regex;
 use thiserror::Error;
 use version_compare::Version;
 
+use super::prelude::*;
 use crate::types::{Ciphertext, Plaintext};
 use crate::Recipients;
 
@@ -75,11 +79,15 @@ impl Context {
     }
 }
 
-impl super::ContextAdapter for Context {}
+impl ContextAdapter for Context {}
 
-impl super::Crypto for Context {}
+impl Crypto for Context {
+    fn keychain<'a>(&'a mut self) -> Box<dyn IsKeychain + 'a> {
+        Box::new(Keychain::from(self))
+    }
+}
 
-impl super::Encrypt for Context {
+impl Encrypt for Context {
     fn encrypt(&mut self, recipients: &Recipients, plaintext: Plaintext) -> Result<Ciphertext> {
         // TODO: list of recipients must not be empty
 
@@ -103,7 +111,7 @@ impl super::Encrypt for Context {
     }
 }
 
-impl super::Decrypt for Context {
+impl Decrypt for Context {
     fn decrypt(&mut self, ciphertext: Ciphertext) -> Result<Plaintext> {
         // TODO: ensure ciphertext ends with PGP footer
         Ok(Plaintext::from(
@@ -169,6 +177,15 @@ pub enum Err {
 
     #[error("system command exited with non-zero status code: {0}")]
     Status(std::process::ExitStatus),
+}
+
+#[derive(Debug, Error)]
+pub enum KeychainErr {
+    #[error("failed to communicate with GnuPG gpg binary, got unexpected output")]
+    UnexpectedOutput,
+
+    #[error("failed to list keys")]
+    Keys(#[source] anyhow::Error),
 }
 
 /// Invoke a gpg command with the given arguments.
@@ -264,4 +281,152 @@ fn cmd_assert_status(status: ExitStatus) -> Result<()> {
         return Err(Err::Status(status).into());
     }
     Ok(())
+}
+
+/// Provides access to GPGME keys.
+pub struct Keychain<'a> {
+    context: &'a Context,
+}
+
+impl<'a> Keychain<'a> {
+    fn from(context: &'a Context) -> Self {
+        Self { context }
+    }
+}
+
+impl<'a> IsKeychain for Keychain<'a> {
+    fn keys_public(&mut self) -> Result<Vec<Box<dyn IsKey>>> {
+        let list = gpg_stdout_ok(
+            &self.context.bin,
+            &["--list-keys", "--keyid-format", "LONG"],
+        )
+        .map_err(KeychainErr::Keys)?;
+        Ok(parse_key_list(list)
+            .ok_or(Err::UnexpectedOutput)?
+            .into_iter()
+            .map(|key| Box::new(key) as Box<dyn IsKey>)
+            .collect())
+    }
+
+    fn keys_private(&mut self) -> Result<Vec<Box<dyn IsKey>>> {
+        let list = gpg_stdout_ok(
+            &self.context.bin,
+            &["--list-secret-keys", "--keyid-format", "LONG"],
+        )
+        .map_err(KeychainErr::Keys)?;
+        Ok(parse_key_list(list)
+            .ok_or(Err::UnexpectedOutput)?
+            .into_iter()
+            .map(|key| Box::new(key) as Box<dyn IsKey>)
+            .collect())
+    }
+}
+
+/// Parse key list output from gnupg.
+// TODO: throw proper errors on parse failure
+fn parse_key_list(list: String) -> Option<Vec<Key>> {
+    let mut lines: VecDeque<_> = list.lines().collect();
+
+    // Second line must be a line
+    lines.pop_front()?;
+    if lines
+        .pop_front()?
+        .bytes()
+        .filter(|&b| b != b'-')
+        .take(1)
+        .count()
+        > 0
+    {
+        return None;
+    }
+
+    let re_fingerprint = Regex::new(r"^[0-9A-F]{16,}$").unwrap();
+    let re_user_id = Regex::new(r"^uid\s*\[[a-z ]+\]\s*(.*)$").unwrap();
+
+    // Walk through the list, collect list of keys
+    let mut keys = Vec::new();
+    while !lines.is_empty() {
+        match lines.pop_front()? {
+            // Start reading a new key
+            l if l.starts_with("pub ") || l.starts_with("sec ") => {
+                // Get the fingerprint
+                let fingerprint = super::format_fingerprint(lines.pop_front()?.trim());
+                if !re_fingerprint.is_match(&fingerprint) {
+                    return None;
+                }
+
+                // Find and parse user IDs
+                let mut user_ids = Vec::new();
+                while !lines.is_empty() {
+                    match lines.pop_front()? {
+                        // Read user ID
+                        l if l.starts_with("uid ") => {
+                            let captures = re_user_id.captures(l)?;
+                            user_ids.push(captures[1].to_string());
+                        }
+
+                        // Finalize on empty line
+                        l if l.trim().is_empty() => break,
+
+                        _ => {}
+                    }
+                }
+
+                // Add read key to list
+                keys.push(Key {
+                    fingerprint,
+                    user_ids,
+                });
+            }
+
+            // Ignore empty lines
+            l if l.trim().is_empty() => {}
+
+            // Got something unexpected
+            _ => return None,
+        }
+    }
+
+    Some(keys)
+}
+
+/// GnuPG binary key, a recipient.
+#[derive(Clone)]
+pub struct Key {
+    fingerprint: String,
+    user_ids: Vec<String>,
+}
+
+impl IsKey for Key {
+    /// Get fingerprint.
+    fn fingerprint(&self, short: bool) -> String {
+        super::format_fingerprint(if short {
+            self.fingerprint[self.fingerprint.len() - 16..].to_string()
+        } else {
+            self.fingerprint.clone()
+        })
+    }
+
+    /// Format user data to displayable string.
+    fn user_display(&self) -> String {
+        // TODO: this should never be empty!
+        self.user_ids.join("; ")
+    }
+}
+
+impl PartialEq for Key {
+    fn eq(&self, other: &Self) -> bool {
+        self.fingerprint == other.fingerprint
+    }
+}
+
+impl fmt::Display for Key {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "[GPG] {} - {}",
+            self.fingerprint(true),
+            self.user_display()
+        )
+    }
 }

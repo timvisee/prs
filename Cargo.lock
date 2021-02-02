@@ -1454,6 +1454,7 @@ dependencies = [
  "anyhow",
  "git-state",
  "gpgme",
+ "regex",
  "secstr",
  "shellexpand",
  "thiserror",

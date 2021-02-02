@@ -200,7 +200,6 @@ where
     S: AsRef<OsStr>,
 {
     let mut cmd = cmd_gpg(bin, args);
-    cmd.stdin(Stdio::piped());
 
     // Pass stdin to child process
     let mut child = cmd.spawn().unwrap();
@@ -246,7 +245,10 @@ where
     S: AsRef<OsStr>,
 {
     let mut cmd = Command::new(bin);
-    cmd.args(args);
+    cmd.stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .args(args);
 
     // Debug invoked gpg commands
     // eprintln!("Invoked: {:?}", &cmd);

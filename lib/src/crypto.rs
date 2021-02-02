@@ -61,16 +61,4 @@ pub fn can_decrypt_file(path: &Path) -> Result<bool> {
 pub enum Err {
     #[error("failed to obtain GPGME cryptography context")]
     Context(#[source] gpgme::Error),
-
-    #[error("failed to encrypt plaintext")]
-    Encrypt(#[source] gpgme::Error),
-
-    #[error("failed to decrypt ciphertext")]
-    Decrypt(#[source] gpgme::Error),
-
-    #[error("failed to write ciphertext to file")]
-    WriteFile(#[source] std::io::Error),
-
-    #[error("failed to read ciphertext from file")]
-    ReadFile(#[source] std::io::Error),
 }

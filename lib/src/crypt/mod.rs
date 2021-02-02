@@ -18,7 +18,7 @@ use crate::Recipients;
 #[non_exhaustive]
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum CryptoType {
-    // TODO: rename to GNUPG_OpenPgp because we're using `~/.gnupg`?
+    // TODO: rename to GnuPg_OpenPgp because we're using `~/.gnupg`?
     /// OpenPGP crypto.
     OpenPgp,
 }
@@ -34,6 +34,7 @@ pub enum CryptoType {
 pub fn context(crypto: CryptoType) -> Result<Context, ContextErr> {
     // Select proper crypto backend
     match crypto {
+        #[allow(unreachable_code)]
         CryptoType::OpenPgp => {
             #[cfg(feature = "crypto-gpgme")]
             return Ok(Context::from(Box::new(
@@ -58,9 +59,26 @@ pub struct Context {
 
 impl Context {
     /// Construct new context from given context.
-    // TODO:
     fn from(context: Box<dyn ContextAdapter>) -> Self {
         Self { inner: context }
+    }
+}
+
+impl Crypto for Context {}
+
+impl Encrypt for Context {
+    fn encrypt(&mut self, recipients: &Recipients, plaintext: Plaintext) -> Result<Ciphertext> {
+        self.inner.encrypt(recipients, plaintext)
+    }
+}
+
+impl Decrypt for Context {
+    fn decrypt(&mut self, ciphertext: Ciphertext) -> Result<Plaintext> {
+        self.inner.decrypt(ciphertext)
+    }
+
+    fn can_decrypt(&mut self, ciphertext: Ciphertext) -> Result<bool> {
+        self.inner.can_decrypt(ciphertext)
     }
 }
 

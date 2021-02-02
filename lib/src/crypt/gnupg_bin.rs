@@ -1,5 +1,7 @@
+use std::ffi::OsStr;
+use std::io::Write;
 use std::path::{Path, PathBuf};
-use std::process::Command;
+use std::process::{Command, ExitStatus, Output, Stdio};
 
 use anyhow::Result;
 use thiserror::Error;
@@ -14,14 +16,8 @@ const BIN_NAME: &str = "gpg";
 /// Minimum required version.
 const VERSION_MIN: &str = "2.0.0";
 
-// /// Protocol to use.
-// const PROTO: Protocol = Protocol::OpenPgp;
-
-// /// GPGME encryption flags.
-// const ENCRYPT_FLAGS: EncryptFlags = EncryptFlags::ALWAYS_TRUST;
-
-// TODO: also search this default path
-// const DEFAULT_PATH: &str = "/usr/bin/gpg";
+/// Partial output from gpg if the user does not own the secret key.
+const GPG_OUTPUT_ERR_NO_SECKEY: &str = "decryption failed: No secret key";
 
 /// Create GnuPG binary context.
 pub fn context() -> Result<Context, Err> {
@@ -30,6 +26,7 @@ pub fn context() -> Result<Context, Err> {
 
 /// Find the gpg binary.
 fn find_gpg_bin() -> Result<PathBuf, Err> {
+    // TODO: if not found, try default path
     let path = which::which(BIN_NAME).map_err(Err::Unavailable)?;
     test_gpg_compat(&path)?;
     Ok(path)
@@ -42,8 +39,8 @@ fn test_gpg_compat(path: &Path) -> Result<(), Err> {
         .output()
         .map_err(|err| Err::Binary(err))?;
 
-    // Exit code must be successful, stderr must be empty
-    if !cmd_output.status.success() || !cmd_output.stderr.is_empty() {
+    // Exit code must be successful
+    if !cmd_output.status.success() {
         return Err(Err::UnexpectedOutput);
     }
 
@@ -83,20 +80,57 @@ impl super::ContextAdapter for Context {}
 impl super::Crypto for Context {}
 
 impl super::Encrypt for Context {
-    /// Encrypt the given plaintext.
     fn encrypt(&mut self, recipients: &Recipients, plaintext: Plaintext) -> Result<Ciphertext> {
-        unimplemented!()
+        // TODO: list of recipients must not be empty
+
+        // Build argument list
+        let mut args = vec![
+            "--quiet".into(),
+            "--openpgp".into(),
+            "--trust-model".into(),
+            "always".into(),
+        ];
+        for recip in recipients.keys() {
+            args.push("--recipient".into());
+            args.push(recip.fingerprint(false));
+        }
+        args.push("--encrypt".into());
+
+        Ok(Ciphertext::from(
+            gpg_stdin_stdout_ok_bin(&self.bin, args.as_slice(), plaintext.unsecure_ref())
+                .map_err(|err| Err::Decrypt(err))?,
+        ))
     }
 }
 
 impl super::Decrypt for Context {
-    /// Decrypt the given ciphertext.
     fn decrypt(&mut self, ciphertext: Ciphertext) -> Result<Plaintext> {
-        unimplemented!()
+        // TODO: ensure ciphertext ends with PGP footer
+        Ok(Plaintext::from(
+            gpg_stdin_stdout_ok_bin(
+                &self.bin,
+                &["--quiet", "--decrypt"],
+                ciphertext.unsecure_ref(),
+            )
+            .map_err(|err| Err::Decrypt(err))?,
+        ))
     }
 
     fn can_decrypt(&mut self, ciphertext: Ciphertext) -> Result<bool> {
-        unimplemented!()
+        // TODO: ensure ciphertext ends with PGP footer
+
+        let output = gpg_stdin_output(
+            &self.bin,
+            &["--quiet", "--decrypt"],
+            ciphertext.unsecure_ref(),
+        )
+        .map_err(|err| Err::Decrypt(err))?;
+
+        match output.status.code() {
+            Some(0) | None => Ok(true),
+            Some(2) => Ok(!std::str::from_utf8(&output.stdout)?.contains(GPG_OUTPUT_ERR_NO_SECKEY)),
+            Some(_) => Ok(true),
+        }
     }
 }
 
@@ -117,10 +151,115 @@ pub enum Err {
     // TODO: is this used?
     #[error("failed to obtain GPGME cryptography context")]
     Context(#[source] gpgme::Error),
-    //
-    // #[error("failed to encrypt plaintext")]
-    // Encrypt(#[source] gpgme::Error),
 
-    // #[error("failed to decrypt ciphertext")]
-    // Decrypt(#[source] gpgme::Error),
+    #[error("failed to encrypt plaintext")]
+    Encrypt(#[source] anyhow::Error),
+
+    #[error("failed to decrypt ciphertext")]
+    Decrypt(#[source] anyhow::Error),
+
+    #[error("failed to complete gpg operation")]
+    Other(#[source] std::io::Error),
+
+    #[error("failed to complete gpg operation")]
+    GpgCli(#[source] anyhow::Error),
+
+    #[error("failed to invoke system command")]
+    System(#[source] std::io::Error),
+
+    #[error("system command exited with non-zero status code: {0}")]
+    Status(std::process::ExitStatus),
+}
+
+/// Invoke a gpg command with the given arguments.
+///
+/// The command will take over the user console for in/output.
+fn gpg<I, S>(bin: &Path, args: I) -> Result<()>
+where
+    I: IntoIterator<Item = S>,
+    S: AsRef<OsStr>,
+{
+    cmd_assert_status(cmd_gpg(bin, args).status().map_err(Err::System)?)
+}
+
+/// Invoke a gpg command, returns output.
+fn gpg_output<I, S>(bin: &Path, args: I) -> Result<Output>
+where
+    I: IntoIterator<Item = S>,
+    S: AsRef<OsStr>,
+{
+    cmd_gpg(bin, args)
+        .output()
+        .map_err(|err| Err::System(err).into())
+}
+
+/// Invoke a gpg command, returns output.
+fn gpg_stdin_output<I, S>(bin: &Path, args: I, stdin: &[u8]) -> Result<Output>
+where
+    I: IntoIterator<Item = S>,
+    S: AsRef<OsStr>,
+{
+    let mut cmd = cmd_gpg(bin, args);
+    cmd.stdin(Stdio::piped());
+
+    // Pass stdin to child process
+    let mut child = cmd.spawn().unwrap();
+    if let Err(err) = child.stdin.as_mut().unwrap().write_all(&stdin) {
+        return Err(Err::System(err).into());
+    }
+
+    child
+        .wait_with_output()
+        .map_err(|err| Err::System(err).into())
+}
+
+/// Invoke a gpg command with the given arguments, return stdout on success.
+fn gpg_stdout_ok<I, S>(bin: &Path, args: I) -> Result<String>
+where
+    I: IntoIterator<Item = S>,
+    S: AsRef<OsStr>,
+{
+    let output = gpg_output(bin, args)?;
+    cmd_assert_status(output.status)?;
+
+    Ok(std::str::from_utf8(&output.stdout)
+        .map_err(|err| Err::GpgCli(err.into()))?
+        .trim()
+        .into())
+}
+
+/// Invoke a gpg command with the given arguments, return stdout on success.
+fn gpg_stdin_stdout_ok_bin<I, S>(bin: &Path, args: I, stdin: &[u8]) -> Result<Vec<u8>>
+where
+    I: IntoIterator<Item = S>,
+    S: AsRef<OsStr>,
+{
+    let output = gpg_stdin_output(bin, args, stdin)?;
+    cmd_assert_status(output.status)?;
+    Ok(output.stdout)
+}
+
+/// Build a gpg command to run.
+fn cmd_gpg<I, S>(bin: &Path, args: I) -> Command
+where
+    I: IntoIterator<Item = S>,
+    S: AsRef<OsStr>,
+{
+    let mut cmd = Command::new(bin);
+    cmd.args(args);
+
+    // Debug invoked gpg commands
+    // eprintln!("Invoked: {:?}", &cmd);
+
+    cmd
+}
+
+/// Assert the exit status of a command.
+///
+/// Returns error is status is not succesful.
+fn cmd_assert_status(status: ExitStatus) -> Result<()> {
+    if !status.success() {
+        return Err(Err::Status(status).into());
+    }
+    Ok(())
 }

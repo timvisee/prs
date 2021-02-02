@@ -86,7 +86,8 @@ impl super::Decrypt for Context {
         match result {
             Ok(_) => Ok(true),
             Err(err) if gpgme::error::Error::NO_SECKEY.code() == err.code() => Ok(false),
-            _ => Ok(true),
+            // TODO: should this be false for other errors?
+            Err(_) => Ok(true),
         }
     }
 }

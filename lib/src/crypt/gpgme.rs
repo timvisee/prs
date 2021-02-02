@@ -104,8 +104,9 @@ impl Decrypt for Context {
 }
 
 /// GPGME key, a recipient.
+// TODO: make field private
 #[derive(Clone)]
-pub struct Key(gpgme::Key);
+pub struct Key(pub(crate) gpgme::Key);
 
 impl IsKey for Key {
     /// Get fingerprint.
@@ -194,6 +195,56 @@ impl<'a> IsKeychain for Keychain<'a> {
             .map(|k| Box::new(Key(k)) as Box<dyn IsKey>)
             .collect())
     }
+
+    /// Import the given key from bytes.
+    fn import_key(&mut self, key: &[u8]) -> Result<()> {
+        // Assert we're importing a public key
+        let key_str = std::str::from_utf8(&key).expect("exported key is invalid UTF-8");
+        assert!(
+            !key_str.contains("PRIVATE KEY"),
+            "imported key contains PRIVATE KEY, blocked to prevent accidentally leaked secret key"
+        );
+        assert!(
+            key_str.contains("PUBLIC KEY"),
+            "imported key must contain PUBLIC KEY, blocked to prevent accidentally leaked secret key"
+        );
+
+        // Import the key
+        self.context
+            .import(key)
+            .map(|_| ())
+            .map_err(|err| KeychainErr::Import(err.into()).into())
+    }
+
+    /// Export the given key as bytes.
+    // TODO: do not box, just provide key?
+    fn export_key(&mut self, key: &Box<dyn IsKey>) -> Result<Vec<u8>> {
+        // Find the GPGME key to export
+        let key = self
+            .context
+            .get_key(key.fingerprint(false))
+            .map_err(|err| KeychainErr::Export(KeychainErr::UnknownKey(err).into()))?;
+
+        // Export key to memoy with armor enabled
+        let mut data: Vec<u8> = vec![];
+        let armor = self.context.armor();
+        self.context.set_armor(true);
+        self.context
+            .export_keys(&[key], gpgme::ExportMode::empty(), &mut data)?;
+        self.context.set_armor(armor);
+
+        // Assert we're exporting a public key
+        let data_str = std::str::from_utf8(&data).expect("exported key is invalid UTF-8");
+        assert!(
+            !data_str.contains("PRIVATE KEY"),
+            "exported key contains PRIVATE KEY, blocked to prevent accidentally leaking secret key"
+        );
+        assert!(
+            data_str.contains("PUBLIC KEY"),
+            "exported key must contain PUBLIC KEY, blocked to prevent accidentally leaking secret key"
+        );
+        Ok(data)
+    }
 }
 
 #[derive(Debug, Error)]
@@ -206,4 +257,16 @@ pub enum Err {
 
     #[error("failed to decrypt ciphertext")]
     Decrypt(#[source] gpgme::Error),
+}
+
+#[derive(Debug, Error)]
+pub enum KeychainErr {
+    #[error("failed to import key")]
+    Import(#[source] anyhow::Error),
+
+    #[error("failed to export key")]
+    Export(#[source] anyhow::Error),
+
+    #[error("key does not exist in keychain")]
+    UnknownKey(#[source] gpgme::Error),
 }

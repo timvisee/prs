@@ -186,6 +186,12 @@ pub enum KeychainErr {
 
     #[error("failed to list keys")]
     Keys(#[source] anyhow::Error),
+
+    #[error("failed to import key")]
+    Import(#[source] anyhow::Error),
+
+    #[error("failed to export key")]
+    Export(#[source] anyhow::Error),
 }
 
 /// Invoke a gpg command with the given arguments.
@@ -230,15 +236,23 @@ where
 }
 
 /// Invoke a gpg command with the given arguments, return stdout on success.
-fn gpg_stdout_ok<I, S>(bin: &Path, args: I) -> Result<String>
+fn gpg_stdout_ok_bin<I, S>(bin: &Path, args: I) -> Result<Vec<u8>>
 where
     I: IntoIterator<Item = S>,
     S: AsRef<OsStr>,
 {
     let output = gpg_output(bin, args)?;
     cmd_assert_status(output.status)?;
+    Ok(output.stdout)
+}
 
-    Ok(std::str::from_utf8(&output.stdout)
+/// Invoke a gpg command with the given arguments, return stdout on success.
+fn gpg_stdout_ok<I, S>(bin: &Path, args: I) -> Result<String>
+where
+    I: IntoIterator<Item = S>,
+    S: AsRef<OsStr>,
+{
+    Ok(std::str::from_utf8(&gpg_stdout_ok_bin(bin, args)?)
         .map_err(|err| Err::GpgCli(err.into()))?
         .trim()
         .into())
@@ -319,6 +333,49 @@ impl<'a> IsKeychain for Keychain<'a> {
             .into_iter()
             .map(|key| Box::new(key) as Box<dyn IsKey>)
             .collect())
+    }
+
+    /// Import the given key from bytes.
+    fn import_key(&mut self, key: &[u8]) -> Result<()> {
+        // Assert we're importing a public key
+        let key_str = std::str::from_utf8(&key).expect("exported key is invalid UTF-8");
+        assert!(
+            !key_str.contains("PRIVATE KEY"),
+            "imported key contains PRIVATE KEY, blocked to prevent accidentally leaked secret key"
+        );
+        assert!(
+            key_str.contains("PUBLIC KEY"),
+            "imported key must contain PUBLIC KEY, blocked to prevent accidentally leaked secret key"
+        );
+
+        // Import key with gpg command
+        gpg_stdin_stdout_ok_bin(&self.context.bin, &["--quiet", "--import"], key)
+            .map(|_| ())
+            .map_err(|err| KeychainErr::Import(err).into())
+    }
+
+    /// Export the given key as bytes.
+    // TODO: do not box, just give key
+    fn export_key(&mut self, key: &Box<dyn IsKey>) -> Result<Vec<u8>> {
+        // Export key with gpg command
+        let data = gpg_stdout_ok_bin(
+            &self.context.bin,
+            &["--quiet", "--armor", "--export", &key.fingerprint(false)],
+        )
+        .map_err(|err| KeychainErr::Export(err))?;
+
+        // Assert we're exporting a public key
+        let data_str = std::str::from_utf8(&data).expect("exported key is invalid UTF-8");
+        assert!(
+            !data_str.contains("PRIVATE KEY"),
+            "exported key contains PRIVATE KEY, blocked to prevent accidentally leaking secret key"
+        );
+        assert!(
+            data_str.contains("PUBLIC KEY"),
+            "exported key must contain PUBLIC KEY, blocked to prevent accidentally leaking secret key"
+        );
+
+        Ok(data)
     }
 }
 

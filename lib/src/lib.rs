@@ -10,6 +10,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 use anyhow::Result;
+// TODO: remove this, replace with our crypto system
 #[cfg(feature = "crypto-gpgme")]
 use gpgme::Context;
 use thiserror::Error;
@@ -262,59 +263,45 @@ pub fn store_public_keys_dir(store: &Store) -> PathBuf {
 }
 
 /// Import the given key from bytes.
-pub fn import_key(context: &mut Context, key: &[u8]) -> Result<(), gpgme::Error> {
-    // Assert we're importing a public key
-    let key_str = std::str::from_utf8(&key).expect("exported key is invalid UTF-8");
-    assert!(
-        !key_str.contains("PRIVATE KEY"),
-        "imported key contains PRIVATE KEY, blocked to prevent accidentally leaked secret key"
-    );
-    assert!(
-        key_str.contains("PUBLIC KEY"),
-        "imported key must contain PUBLIC KEY, blocked to prevent accidentally leaked secret key"
-    );
-
-    // Import the key
-    context.import(key).map(|_| ())
+// TODO: remove this, replace with crypto system
+pub fn import_key(_context: &mut Context, key: &[u8]) -> Result<()> {
+    use crate::crypt::prelude::*;
+    crate::crypt::context(crate::crypt::CryptoType::OpenPgp)?
+        .keychain()
+        .import_key(key)
 }
 
 /// Import the given key from a file.
-pub fn import_key_file(context: &mut Context, path: &Path) -> Result<()> {
-    import_key(context, &fs::read(path).map_err(Err::ReadKey)?)
-        .map_err(|err| Err::Import(err).into())
+// TODO: remove this, replace with crypto system
+pub fn import_key_file(_context: &mut Context, path: &Path) -> Result<()> {
+    use crate::crypt::prelude::*;
+    crate::crypt::context(crate::crypt::CryptoType::OpenPgp)?
+        .keychain()
+        .import_key_file(path)
 }
 
 /// Export the given key as bytes.
-pub fn export_key(context: &mut Context, key: &Key) -> Result<Vec<u8>, gpgme::Error> {
-    // Export public key
-    let mut data: Vec<u8> = vec![];
-
-    // Export key to memory with armor enabled
-    let armor = context.armor();
-    context.set_armor(true);
-    context.export_keys(&[key.0.clone()], gpgme::ExportMode::empty(), &mut data)?;
-    context.set_armor(armor);
-
-    // Assert we're exporting a public key
-    let data_str = std::str::from_utf8(&data).expect("exported key is invalid UTF-8");
-    assert!(
-        !data_str.contains("PRIVATE KEY"),
-        "exported key contains PRIVATE KEY, blocked to prevent accidentally leaking secret key"
-    );
-    assert!(
-        data_str.contains("PUBLIC KEY"),
-        "exported key must contain PUBLIC KEY, blocked to prevent accidentally leaking secret key"
-    );
-    Ok(data)
+// TODO: remove this, replace with crypto system
+pub fn export_key(_context: &mut Context, key: &Key) -> Result<Vec<u8>> {
+    use crate::crypt::prelude::*;
+    let key: Box<dyn IsKey> = Box::new(crate::crypt::gpgme::Key(key.clone().0));
+    crate::crypt::context(crate::crypt::CryptoType::OpenPgp)?
+        .keychain()
+        .export_key(&key)
 }
 
 /// Export the given key to a file.
-pub fn export_key_file(context: &mut Context, key: &Key, path: &Path) -> Result<()> {
-    fs::write(path, export_key(context, key).map_err(Err::Export)?)
-        .map_err(|err| Err::WriteKey(err).into())
+// TODO: remove this, replace with crypto system
+pub fn export_key_file(_context: &mut Context, key: &Key, path: &Path) -> Result<()> {
+    use crate::crypt::prelude::*;
+    let key: Box<dyn IsKey> = Box::new(crate::crypt::gpgme::Key(key.clone().0));
+    crate::crypt::context(crate::crypt::CryptoType::OpenPgp)?
+        .keychain()
+        .export_key_file(&key, path)
 }
 
 /// Recipient key.
+// TODO: remove this, replace with crypto system
 #[derive(Clone)]
 pub struct Key(pub gpgme::Key);
 
@@ -380,8 +367,18 @@ impl From<gpgme::Key> for Key {
 }
 
 /// Select all public or private keys from keychain usable as recipient.
-// TODO: remove this, add better method for obtaining all keyring keys
+// TODO: remove this, replace with crypto system
 pub fn all(secret: bool) -> Result<Recipients> {
+    // use crate::crypt::prelude::*;
+    // let mut context = crate::crypt::gnupg_bin::context()?;
+    // let mut keychain = context.keychain();
+
+    // let keys = if !secret {
+    //     keychain.keys_public()?
+    // } else {
+    //     keychain.keys_private()?
+    // };
+
     let mut context = crypto::context()?;
     let keys = if !secret {
         context.keys()?

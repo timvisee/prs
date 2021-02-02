@@ -151,6 +151,16 @@ impl<'a> IsKeychain for Keychain<'a> {
     fn keys_private(&mut self) -> Result<Vec<Box<dyn IsKey>>> {
         self.inner.keys_private()
     }
+
+    /// Import the given key from bytes.
+    fn import_key(&mut self, key: &[u8]) -> Result<()> {
+        self.inner.import_key(key)
+    }
+
+    /// Export the given key as bytes.
+    fn export_key(&mut self, key: &Box<dyn IsKey>) -> Result<Vec<u8>> {
+        self.inner.export_key(key)
+    }
 }
 
 pub trait IsKeychain {
@@ -159,6 +169,24 @@ pub trait IsKeychain {
 
     /// Get all private keys.
     fn keys_private(&mut self) -> Result<Vec<Box<dyn IsKey>>>;
+
+    /// Import the given key from bytes.
+    fn import_key(&mut self, key: &[u8]) -> Result<()>;
+
+    /// Import the given key from a file.
+    fn import_key_file(&mut self, path: &Path) -> Result<()> {
+        self.import_key(&fs::read(path).map_err(KeychainErr::ReadKey)?)
+            .map_err(|err| KeychainErr::Import(err).into())
+    }
+
+    /// Export the given key as bytes.
+    fn export_key(&mut self, key: &Box<dyn IsKey>) -> Result<Vec<u8>>;
+
+    /// Export the given key to a file.
+    fn export_key_file(&mut self, key: &Box<dyn IsKey>, path: &Path) -> Result<()> {
+        fs::write(path, self.export_key(key).map_err(KeychainErr::Export)?)
+            .map_err(|err| KeychainErr::WriteKey(err).into())
+    }
 }
 
 pub struct Key {
@@ -220,6 +248,21 @@ pub enum DecryptErr {
 
     #[error("failed to read ciphertext from file")]
     ReadFile(#[source] std::io::Error),
+}
+
+#[derive(Debug, Error)]
+pub enum KeychainErr {
+    #[error("failed to read public key")]
+    ReadKey(#[source] std::io::Error),
+
+    #[error("failed to write public key")]
+    WriteKey(#[source] std::io::Error),
+
+    #[error("failed to import key")]
+    Import(#[source] anyhow::Error),
+
+    #[error("failed to export key")]
+    Export(#[source] anyhow::Error),
 }
 
 /// Prelude traits.

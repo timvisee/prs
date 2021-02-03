@@ -26,8 +26,8 @@ impl Key {
     }
 
     /// Transform into generic key.
-    pub fn into_key(self) -> crate::crypt::extra::Key {
-        crate::crypt::extra::Key::Gpg(self)
+    pub fn into_key(self) -> crate::crypto::Key {
+        crate::crypto::Key::Gpg(self)
     }
 }
 

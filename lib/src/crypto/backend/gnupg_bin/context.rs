@@ -6,7 +6,7 @@ use version_compare::Version;
 
 use super::raw;
 use super::raw_cmd::gpg_stdout_ok;
-use crate::crypt::extra::{proto, IsContext, Key};
+use crate::crypto::{proto, IsContext, Key};
 use crate::types::{Ciphertext, Plaintext};
 use crate::Recipients;
 

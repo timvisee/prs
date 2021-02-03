@@ -3,7 +3,7 @@ use gpgme::{Context as GpgmeContext, Protocol};
 use thiserror::Error;
 
 use super::raw;
-use crate::crypt::extra::{proto, IsContext, Key};
+use crate::crypto::{proto, IsContext, Key};
 use crate::types::{Ciphertext, Plaintext};
 use crate::Recipients;
 

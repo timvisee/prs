@@ -357,7 +357,7 @@ fn filter_by_config(entry: &DirEntry, config: &SecretIterConfig) -> bool {
 /// Returns true if there is no secret.
 pub fn can_decrypt(store: &Store) -> bool {
     if let Some(secret) = store.secret_iter().next() {
-        crate::crypto::can_decrypt_file(&secret.path).unwrap_or(true)
+        crate::crypto_old::can_decrypt_file(&secret.path).unwrap_or(true)
     } else {
         true
     }

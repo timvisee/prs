@@ -1,5 +1,5 @@
-pub mod crypt;
 pub mod crypto;
+pub mod crypto_old;
 pub(crate) mod git;
 pub mod store;
 pub mod sync;
@@ -42,7 +42,7 @@ impl Recipients {
         let keys = if fingerprints.is_empty() {
             vec![]
         } else {
-            crypto::context()?
+            crypto_old::context()?
                 .find_keys(fingerprints)?
                 .filter_map(|x| x.ok())
                 .filter(|k| k.can_encrypt())
@@ -147,7 +147,7 @@ impl Recipients {
         }
 
         // Import keys
-        let mut context = crypto::context()?;
+        let mut context = crypto_old::context()?;
         for (path, _) in missing {
             import_key_file(&mut context, &path)?;
         }
@@ -194,7 +194,7 @@ impl Recipients {
         {
             // Lazy load context
             if context.is_none() {
-                context = Some(crypto::context()?);
+                context = Some(crypto_old::context()?);
             }
 
             // Export public key to disk
@@ -245,7 +245,7 @@ pub fn read_fingerprints_file<P: AsRef<Path>>(path: P) -> Result<Vec<String>> {
 ///
 /// Keep list of unimported fingerprints.
 pub fn filter_imported_fingerprints(fingerprints: Vec<String>) -> Result<Vec<String>> {
-    let mut context = crypto::context()?;
+    let mut context = crypto_old::context()?;
     Ok(fingerprints
         .into_iter()
         .filter(|fp| context.get_key(fp).is_err())
@@ -265,39 +265,39 @@ pub fn store_public_keys_dir(store: &Store) -> PathBuf {
 /// Import the given key from bytes.
 // TODO: remove this, replace with crypto system
 pub fn import_key(_context: &mut Context, key: &[u8]) -> Result<()> {
-    use crate::crypt::extra::prelude::*;
-    crate::crypt::extra::context(crate::crypt::extra::Proto::Gpg)?.import_key(key)
+    use crate::crypto::prelude::*;
+    crate::crypto::context(crate::crypto::Proto::Gpg)?.import_key(key)
 }
 
 /// Import the given key from a file.
 // TODO: remove this, replace with crypto system
 pub fn import_key_file(_context: &mut Context, path: &Path) -> Result<()> {
-    use crate::crypt::extra::prelude::*;
-    crate::crypt::extra::context(crate::crypt::extra::Proto::Gpg)?.import_key_file(path)
+    use crate::crypto::prelude::*;
+    crate::crypto::context(crate::crypto::Proto::Gpg)?.import_key_file(path)
 }
 
 /// Export the given key as bytes.
 // TODO: remove this, replace with crypto system
 pub fn export_key(_context: &mut Context, key: &Key) -> Result<Vec<u8>> {
-    use crate::crypt::extra::prelude::*;
-    let key = crate::crypt::extra::proto::gpg::Key {
+    use crate::crypto::prelude::*;
+    let key = crate::crypto::proto::gpg::Key {
         fingerprint: key.fingerprint(false),
         user_ids: vec![],
     }
     .into_key();
-    crate::crypt::extra::context(crate::crypt::extra::Proto::Gpg)?.export_key(key)
+    crate::crypto::context(crate::crypto::Proto::Gpg)?.export_key(key)
 }
 
 /// Export the given key to a file.
 // TODO: remove this, replace with crypto system
 pub fn export_key_file(_context: &mut Context, key: &Key, path: &Path) -> Result<()> {
-    use crate::crypt::extra::prelude::*;
-    let key = crate::crypt::extra::proto::gpg::Key {
+    use crate::crypto::prelude::*;
+    let key = crate::crypto::proto::gpg::Key {
         fingerprint: key.fingerprint(false),
         user_ids: vec![],
     }
     .into_key();
-    crate::crypt::extra::context(crate::crypt::extra::Proto::Gpg)?.export_key_file(key, path)
+    crate::crypto::context(crate::crypto::Proto::Gpg)?.export_key_file(key, path)
 }
 
 /// Recipient key.
@@ -379,7 +379,7 @@ pub fn all(secret: bool) -> Result<Recipients> {
     //     keychain.keys_private()?
     // };
 
-    let mut context = crypto::context()?;
+    let mut context = crypto_old::context()?;
     let keys = if !secret {
         context.keys()?
     } else {

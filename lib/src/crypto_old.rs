@@ -6,8 +6,7 @@ use gpgme::{Context, Protocol};
 use thiserror::Error;
 
 use crate::{
-    crypt,
-    crypt::extra::{prelude::*, Proto},
+    crypto::{self, prelude::*, Proto},
     types::{Ciphertext, Plaintext},
     Recipients,
 };
@@ -25,22 +24,22 @@ pub fn context() -> Result<Context> {
 
 /// Encrypt given data, write to given file.
 pub fn encrypt(recipients: &Recipients, plaintext: Plaintext) -> Result<Ciphertext> {
-    crypt::extra::context(PROTO)?.encrypt(recipients, plaintext)
+    crypto::context(PROTO)?.encrypt(recipients, plaintext)
 }
 
 /// Encrypt the plaintext and write it to the file.
 pub fn encrypt_file(recipients: &Recipients, plaintext: Plaintext, path: &Path) -> Result<()> {
-    crypt::extra::context(PROTO)?.encrypt_file(recipients, plaintext, path)
+    crypto::context(PROTO)?.encrypt_file(recipients, plaintext, path)
 }
 
 /// Decrypt the given ciphertext.
 pub fn decrypt(ciphertext: Ciphertext) -> Result<Plaintext> {
-    crypt::extra::context(PROTO)?.decrypt(ciphertext)
+    crypto::context(PROTO)?.decrypt(ciphertext)
 }
 
 /// Decrypt the file at the given path.
 pub fn decrypt_file(path: &Path) -> Result<Plaintext> {
-    crypt::extra::context(PROTO)?.decrypt_file(path)
+    crypto::context(PROTO)?.decrypt_file(path)
 }
 
 /// Check whether we can decrypt a file.
@@ -50,12 +49,12 @@ pub fn decrypt_file(path: &Path) -> Result<Plaintext> {
 /// To check this, actual decryption is attempted, see this if this can be improved:
 /// https://stackoverflow.com/q/64633736/1000145
 pub fn can_decrypt(ciphertext: Ciphertext) -> Result<bool> {
-    crypt::extra::context(PROTO)?.can_decrypt(ciphertext)
+    crypto::context(PROTO)?.can_decrypt(ciphertext)
 }
 
 /// Check whether we can decrypt a file at the given path.
 pub fn can_decrypt_file(path: &Path) -> Result<bool> {
-    crypt::extra::context(PROTO)?.can_decrypt_file(path)
+    crypto::context(PROTO)?.can_decrypt_file(path)
 }
 
 #[derive(Debug, Error)]

@@ -1,8 +1,9 @@
 // TODO: rename this module to crypto, remove crypto.rs
 
-#[cfg(feature = "crypto-gnupg-bin")]
+pub mod extra;
+#[cfg(feature = "backend-gnupg-bin")]
 pub mod gnupg_bin;
-#[cfg(feature = "crypto-gpgme")]
+#[cfg(feature = "backend-gpgme")]
 pub mod gpgme;
 
 use std::fs;
@@ -36,11 +37,11 @@ pub fn context(crypto: CryptoType) -> Result<Context, ContextErr> {
     match crypto {
         #[allow(unreachable_code)]
         CryptoType::OpenPgp => {
-            #[cfg(feature = "crypto-gpgme")]
+            #[cfg(feature = "backend-gpgme")]
             return Ok(Context::from(Box::new(
                 gpgme::context().map_err(|err| ContextErr::Create(err.into()))?,
             )));
-            #[cfg(feature = "crypto-gnupg-bin")]
+            #[cfg(feature = "backend-gnupg-bin")]
             return Ok(Context::from(Box::new(
                 gnupg_bin::context().map_err(|err| ContextErr::Create(err.into()))?,
             )));

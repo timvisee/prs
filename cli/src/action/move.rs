@@ -145,7 +145,7 @@ fn update_alias_for_secret_to(store: &Store, secret: &Secret, new_secret: &Secre
 ///
 /// Updates the symlink file at `symlink` to point to the new target `src`.
 ///
-/// # Errors
+/// # Panics
 ///
 /// Panics if the given `symlink` path is not an existing symlink.
 #[cfg(feature = "alias")]

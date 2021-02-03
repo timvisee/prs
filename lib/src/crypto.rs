@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use anyhow::Result;
-#[cfg(feature = "crypto-gpgme")]
+#[cfg(feature = "backend-gpgme")]
 use gpgme::{Context, Protocol};
 use thiserror::Error;
 

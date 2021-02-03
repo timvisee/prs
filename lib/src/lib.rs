@@ -11,7 +11,7 @@ use std::path::{Path, PathBuf};
 
 use anyhow::Result;
 // TODO: remove this, replace with our crypto system
-#[cfg(feature = "crypto-gpgme")]
+#[cfg(feature = "backend-gpgme")]
 use gpgme::Context;
 use thiserror::Error;
 

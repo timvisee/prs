@@ -24,7 +24,7 @@ pub fn context() -> Result<Context, Err> {
 
 /// GPGME crypto context.
 pub struct Context {
-    /// GPGME crytp context.
+    /// Crytpo context.
     context: GpgmeContext,
 }
 

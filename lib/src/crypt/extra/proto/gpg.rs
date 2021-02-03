@@ -2,10 +2,10 @@
 #[derive(Clone)]
 pub struct Key {
     /// Full fingerprint.
-    fingerprint: String,
+    pub fingerprint: String,
 
     /// Displayable user ID strings.
-    user_ids: Vec<String>,
+    pub user_ids: Vec<String>,
 }
 
 impl Key {
@@ -23,6 +23,11 @@ impl Key {
     /// Key displayable user data.
     pub fn display_user(&self) -> String {
         self.user_ids.join("; ")
+    }
+
+    /// Transform into generic key.
+    pub fn into_key(self) -> crate::crypt::extra::Key {
+        crate::crypt::extra::Key::Gpg(self)
     }
 }
 

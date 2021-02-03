@@ -6,40 +6,41 @@ use gpgme::{Context, Protocol};
 use thiserror::Error;
 
 use crate::{
-    crypt::{self, prelude::*, CryptoType},
+    crypt,
+    crypt::extra::{prelude::*, Proto},
     types::{Ciphertext, Plaintext},
     Recipients,
 };
 
 /// Crypto type.
-const CRYPTO_TYPE: CryptoType = CryptoType::OpenPgp;
+const PROTO: Proto = Proto::Gpg;
 
 /// Protocol to use.
-const PROTO: Protocol = Protocol::OpenPgp;
+const GPGME_PROTO: Protocol = Protocol::OpenPgp;
 
 /// Create GNUME context.
 pub fn context() -> Result<Context> {
-    Context::from_protocol(PROTO).map_err(|err| Err::Context(err).into())
+    Context::from_protocol(GPGME_PROTO).map_err(|err| Err::Context(err).into())
 }
 
 /// Encrypt given data, write to given file.
 pub fn encrypt(recipients: &Recipients, plaintext: Plaintext) -> Result<Ciphertext> {
-    crypt::context(CRYPTO_TYPE)?.encrypt(recipients, plaintext)
+    crypt::extra::context(PROTO)?.encrypt(recipients, plaintext)
 }
 
 /// Encrypt the plaintext and write it to the file.
 pub fn encrypt_file(recipients: &Recipients, plaintext: Plaintext, path: &Path) -> Result<()> {
-    crypt::context(CRYPTO_TYPE)?.encrypt_file(recipients, plaintext, path)
+    crypt::extra::context(PROTO)?.encrypt_file(recipients, plaintext, path)
 }
 
 /// Decrypt the given ciphertext.
 pub fn decrypt(ciphertext: Ciphertext) -> Result<Plaintext> {
-    crypt::context(CRYPTO_TYPE)?.decrypt(ciphertext)
+    crypt::extra::context(PROTO)?.decrypt(ciphertext)
 }
 
 /// Decrypt the file at the given path.
 pub fn decrypt_file(path: &Path) -> Result<Plaintext> {
-    crypt::context(CRYPTO_TYPE)?.decrypt_file(path)
+    crypt::extra::context(PROTO)?.decrypt_file(path)
 }
 
 /// Check whether we can decrypt a file.
@@ -49,12 +50,12 @@ pub fn decrypt_file(path: &Path) -> Result<Plaintext> {
 /// To check this, actual decryption is attempted, see this if this can be improved:
 /// https://stackoverflow.com/q/64633736/1000145
 pub fn can_decrypt(ciphertext: Ciphertext) -> Result<bool> {
-    crypt::context(CRYPTO_TYPE)?.can_decrypt(ciphertext)
+    crypt::extra::context(PROTO)?.can_decrypt(ciphertext)
 }
 
 /// Check whether we can decrypt a file at the given path.
 pub fn can_decrypt_file(path: &Path) -> Result<bool> {
-    crypt::context(CRYPTO_TYPE)?.can_decrypt_file(path)
+    crypt::extra::context(PROTO)?.can_decrypt_file(path)
 }
 
 #[derive(Debug, Error)]

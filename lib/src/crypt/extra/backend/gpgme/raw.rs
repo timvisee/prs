@@ -63,6 +63,8 @@ pub fn decrypt(context: &mut Context, ciphertext: Ciphertext) -> Result<Plaintex
 ///
 /// - `context`: GPGME context
 /// - `ciphertext`: ciphertext to check
+// To check this, actual decryption is attempted, see this if this can be improved:
+// https://stackoverflow.com/q/64633736/1000145
 pub fn can_decrypt(context: &mut Context, ciphertext: Ciphertext) -> Result<bool> {
     // Try to decrypt, explicit zeroing of unsecure buffer required
     let mut plaintext = vec![];

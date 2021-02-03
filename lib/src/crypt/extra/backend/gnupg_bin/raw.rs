@@ -62,6 +62,8 @@ pub fn decrypt(bin: &Path, ciphertext: Ciphertext) -> Result<Plaintext> {
 ///
 /// - `bin`: path to `gpg` binary
 /// - `ciphertext`: ciphertext to check
+// To check this, actual decryption is attempted, see this if this can be improved:
+// https://stackoverflow.com/q/64633736/1000145
 pub fn can_decrypt(bin: &Path, ciphertext: Ciphertext) -> Result<bool> {
     // TODO: ensure ciphertext ends with PGP footer
 

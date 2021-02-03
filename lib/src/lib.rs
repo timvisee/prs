@@ -265,39 +265,39 @@ pub fn store_public_keys_dir(store: &Store) -> PathBuf {
 /// Import the given key from bytes.
 // TODO: remove this, replace with crypto system
 pub fn import_key(_context: &mut Context, key: &[u8]) -> Result<()> {
-    use crate::crypt::prelude::*;
-    crate::crypt::context(crate::crypt::CryptoType::OpenPgp)?
-        .keychain()
-        .import_key(key)
+    use crate::crypt::extra::prelude::*;
+    crate::crypt::extra::context(crate::crypt::extra::Proto::Gpg)?.import_key(key)
 }
 
 /// Import the given key from a file.
 // TODO: remove this, replace with crypto system
 pub fn import_key_file(_context: &mut Context, path: &Path) -> Result<()> {
-    use crate::crypt::prelude::*;
-    crate::crypt::context(crate::crypt::CryptoType::OpenPgp)?
-        .keychain()
-        .import_key_file(path)
+    use crate::crypt::extra::prelude::*;
+    crate::crypt::extra::context(crate::crypt::extra::Proto::Gpg)?.import_key_file(path)
 }
 
 /// Export the given key as bytes.
 // TODO: remove this, replace with crypto system
 pub fn export_key(_context: &mut Context, key: &Key) -> Result<Vec<u8>> {
-    use crate::crypt::prelude::*;
-    let key: Box<dyn IsKey> = Box::new(crate::crypt::gpgme::Key(key.clone().0));
-    crate::crypt::context(crate::crypt::CryptoType::OpenPgp)?
-        .keychain()
-        .export_key(&key)
+    use crate::crypt::extra::prelude::*;
+    let key = crate::crypt::extra::proto::gpg::Key {
+        fingerprint: key.fingerprint(false),
+        user_ids: vec![],
+    }
+    .into_key();
+    crate::crypt::extra::context(crate::crypt::extra::Proto::Gpg)?.export_key(key)
 }
 
 /// Export the given key to a file.
 // TODO: remove this, replace with crypto system
 pub fn export_key_file(_context: &mut Context, key: &Key, path: &Path) -> Result<()> {
-    use crate::crypt::prelude::*;
-    let key: Box<dyn IsKey> = Box::new(crate::crypt::gpgme::Key(key.clone().0));
-    crate::crypt::context(crate::crypt::CryptoType::OpenPgp)?
-        .keychain()
-        .export_key_file(&key, path)
+    use crate::crypt::extra::prelude::*;
+    let key = crate::crypt::extra::proto::gpg::Key {
+        fingerprint: key.fingerprint(false),
+        user_ids: vec![],
+    }
+    .into_key();
+    crate::crypt::extra::context(crate::crypt::extra::Proto::Gpg)?.export_key_file(key, path)
 }
 
 /// Recipient key.

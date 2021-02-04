@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 
@@ -6,7 +5,7 @@ use crate::store::Store;
 use anyhow::Result;
 use thiserror::Error;
 
-use super::{prelude::*, recipients::Recipients, util, Key, Proto};
+use super::{prelude::*, recipients::Recipients, util, ContextPool, Key, Proto};
 
 /// Password store GPG IDs file.
 const STORE_GPG_IDS_FILE: &str = ".gpg-id";
@@ -159,7 +158,7 @@ pub fn store_sync_public_key_files(store: &Store, keys: &[Key]) -> Result<()> {
     }
 
     // Add missing keys
-    let mut contexts = HashMap::new();
+    let mut contexts = ContextPool::empty();
     for (key, fp) in keys
         .into_iter()
         .map(|k| (k, k.fingerprint(false)))
@@ -167,7 +166,7 @@ pub fn store_sync_public_key_files(store: &Store, keys: &[Key]) -> Result<()> {
     {
         // Lazy load compatible context
         let proto = key.proto();
-        let context = contexts.entry(proto).or_insert(super::context(proto)?);
+        let context = contexts.get_mut(proto)?;
 
         // Export public key to disk
         let path = dir.join(&fp);
@@ -188,15 +187,13 @@ pub fn import_missing_keys_from_store(store: &Store) -> Result<Vec<ImportResult>
     }
 
     // Cache protocol contexts
-    let mut contexts = HashMap::new();
+    let mut contexts = ContextPool::empty();
     let mut results = Vec::new();
 
     // Check for missing GPG keys based on fingerprint, import them
     let gpg_fingerprints = store_read_gpg_fingerprints(store)?;
     for fingerprint in gpg_fingerprints {
-        let context = contexts
-            .entry(Proto::Gpg)
-            .or_insert(super::context(Proto::Gpg)?);
+        let context = contexts.get_mut(Proto::Gpg)?;
         if let Err(_) = context.get_public_key(&fingerprint) {
             let path = &store_public_keys_dir(store).join(&fingerprint);
             if path.is_file() {

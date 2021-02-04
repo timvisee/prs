@@ -4,6 +4,7 @@ pub mod recipients;
 pub mod store;
 pub mod util;
 
+use std::collections::HashMap;
 use std::fmt;
 use std::fs;
 use std::path::Path;
@@ -238,6 +239,31 @@ pub trait IsContext {
 
     /// Check whether this context supports the given protocol.
     fn supports_proto(&self, proto: Proto) -> bool;
+}
+
+/// A pool of proto contexts.
+///
+/// Makes using multiple contexts easy.
+pub struct ContextPool {
+    /// All loaded contexts.
+    contexts: HashMap<Proto, Context>,
+}
+
+impl ContextPool {
+    /// Create new empty pool.
+    pub fn empty() -> Self {
+        Self {
+            contexts: HashMap::new(),
+        }
+    }
+
+    /// Get mutable context for given proto.
+    ///
+    /// This will initialize the context if no context is loaded for the given proto yet. This
+    /// may error..
+    fn get_mut<'a>(&'a mut self, proto: Proto) -> Result<&'a mut Context> {
+        Ok(self.contexts.entry(proto).or_insert(context(proto)?))
+    }
 }
 
 #[derive(Debug, Error)]

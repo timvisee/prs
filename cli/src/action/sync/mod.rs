@@ -6,9 +6,9 @@ use clap::ArgMatches;
 use thiserror::Error;
 
 use prs_lib::{
+    crypto,
     store::Store,
     sync::{Readyness, Sync as StoreSync},
-    Recipients,
 };
 
 use crate::{
@@ -88,7 +88,7 @@ impl<'a> Sync<'a> {
         }
 
         // Import new keys
-        Recipients::import_missing_keys_from_store(&store).map_err(Err::ImportRecipients)?;
+        crypto::store::import_missing_keys_from_store(&store).map_err(Err::ImportRecipients)?;
 
         // TODO: assert not-dirty state?
 

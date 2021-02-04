@@ -5,7 +5,10 @@ use anyhow::Result;
 use clap::ArgMatches;
 use thiserror::Error;
 
-use prs_lib::store::Store;
+use prs_lib::{
+    crypto::{self, prelude::*},
+    store::Store,
+};
 
 use crate::cmd::matcher::{
     recipients::{export::ExportMatcher, RecipientsMatcher},
@@ -41,8 +44,7 @@ impl<'a> Export<'a> {
             .clone();
 
         // Export public key
-        let mut context = prs_lib::crypto::context()?;
-        let data = prs_lib::export_key(&mut context, &key)?;
+        let data = crypto::context(crypto::PROTO)?.export_key(key)?;
 
         let mut stdout = true;
 

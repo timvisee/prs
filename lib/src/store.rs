@@ -6,7 +6,11 @@ use anyhow::{ensure, Result};
 use thiserror::Error;
 use walkdir::{DirEntry, WalkDir};
 
-use crate::{sync::Sync, Recipients};
+use crate::{
+    crypto::{self, prelude::*},
+    sync::Sync,
+    Recipients,
+};
 
 /// Password store secret file suffix.
 pub const SECRET_SUFFIX: &str = ".gpg";
@@ -356,11 +360,16 @@ fn filter_by_config(entry: &DirEntry, config: &SecretIterConfig) -> bool {
 ///
 /// Returns true if there is no secret.
 pub fn can_decrypt(store: &Store) -> bool {
-    if let Some(secret) = store.secret_iter().next() {
-        crate::crypto::can_decrypt_file(&secret.path).unwrap_or(true)
-    } else {
-        true
-    }
+    // Try all proto's here once we support more
+    store
+        .secret_iter()
+        .next()
+        .map(|secret| {
+            crypto::context(crypto::PROTO)
+                .map(|mut context| context.can_decrypt_file(&secret.path).unwrap_or(true))
+                .unwrap_or(false)
+        })
+        .unwrap_or(true)
 }
 
 /// Iterator that wraps a `SecretIter` with a filter.

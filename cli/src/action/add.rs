@@ -1,6 +1,7 @@
 use anyhow::Result;
 use clap::ArgMatches;
 use prs_lib::{
+    crypto::{self, prelude::*},
     store::{Secret, Store},
     types::Plaintext,
 };
@@ -71,7 +72,9 @@ impl<'a> Add<'a> {
         // TODO: select proper recipients (use from current file?)
         // TODO: log recipients to encrypt for
         let recipients = store.recipients()?;
-        prs_lib::crypto::encrypt_file(&recipients, plaintext, &path).map_err(Err::Write)?;
+        crypto::context(crypto::PROTO)?
+            .encrypt_file(&recipients, plaintext, &path)
+            .map_err(Err::Write)?;
 
         sync.finalize(format!("Add secret to {}", secret.name))?;
 

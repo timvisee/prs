@@ -18,7 +18,7 @@ variables:
 # Install compiler and OpenSSL dependencies
 before_script:
   - apt-get update
-  - apt-get install -y --no-install-recommends libgpgme-dev build-essential pkg-config xorg-dev python3 libx11-xcb-dev libgl1-mesa-dev libdbus-1-dev $APT_GTK_LIBS $APT_PACKAGES
+  - apt-get install -y --no-install-recommends libgpgme-dev build-essential pkg-config xorg-dev python3 libx11-xcb-dev libdbus-1-dev libgl1-mesa-dev $APT_GTK_LIBS $APT_PACKAGES
   - apt-get install -y $APT_PACKAGES_RECOMMENDS
   - |
     rustup install $RUST_VERSION
@@ -40,7 +40,12 @@ before_script:
     <<: *rust-build-cache
   script:
     - cargo check --verbose
-    - cd cli; cargo check --no-default-features --verbose; cd ..
+    - cd lib; cargo check --no-default-features --features backend-gpgme --verbose; cd ..
+    - cd lib; cargo check --no-default-features --features backend-gnupg-bin --verbose; cd ..
+    - cd cli; cargo check --no-default-features --features backend-gpgme --verbose; cd ..
+    - cd cli; cargo check --no-default-features --features backend-gnupg-bin --verbose; cd ..
+    - cd gtk3; cargo check --no-default-features --features backend-gpgme --verbose; cd ..
+    - cd gtk3; cargo check --no-default-features --features backend-gnupg-bin --verbose; cd ..
 check-stable:
   <<: *check-base
 check-beta:

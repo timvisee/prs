@@ -1,6 +1,9 @@
 use anyhow::Result;
 use clap::ArgMatches;
-use prs_lib::store::Store;
+use prs_lib::{
+    crypto::{self, prelude::*},
+    store::Store,
+};
 use thiserror::Error;
 
 use crate::cmd::matcher::{edit::EditMatcher, MainMatcher, Matcher};
@@ -31,7 +34,8 @@ impl<'a> Edit<'a> {
 
         let secret = skim::select_secret(&store, matcher_edit.query()).ok_or(Err::NoneSelected)?;
 
-        let mut plaintext = prs_lib::crypto::decrypt_file(&secret.path).map_err(Err::Read)?;
+        let mut context = crypto::context(crypto::PROTO)?;
+        let mut plaintext = context.decrypt_file(&secret.path).map_err(Err::Read)?;
 
         if matcher_edit.stdin() {
             plaintext = stdin::read_plaintext(!matcher_main.quiet())?;
@@ -61,7 +65,9 @@ impl<'a> Edit<'a> {
         // TODO: select proper recipients (use from current file?)
         // TODO: log recipients to encrypt for
         let recipients = store.recipients()?;
-        prs_lib::crypto::encrypt_file(&recipients, plaintext, &secret.path).map_err(Err::Write)?;
+        context
+            .encrypt_file(&recipients, plaintext, &secret.path)
+            .map_err(Err::Write)?;
 
         sync.finalize(format!("Edit secret {}", secret.name))?;
 

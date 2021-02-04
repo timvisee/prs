@@ -4,6 +4,7 @@ use anyhow::Result;
 use chbs::{config::BasicConfig, prelude::*};
 use clap::ArgMatches;
 use prs_lib::{
+    crypto::{self, prelude::*},
     store::{Secret, Store},
     types::Plaintext,
 };
@@ -54,6 +55,7 @@ impl<'a> Generate<'a> {
         }
 
         // Generate secure password/passphrase plaintext
+        let mut context = crypto::context(crypto::PROTO)?;
         let mut plaintext = generate_password(&matcher_generate);
 
         // Check if destination already exists, if we will stor ethe secret, ask to merge if so
@@ -68,7 +70,8 @@ impl<'a> Generate<'a> {
                 }
 
                 // Append existing secret exept first line to new secret
-                let existing = prs_lib::crypto::decrypt_file(&dest.0)
+                let existing = context
+                    .decrypt_file(&dest.0)
                     .and_then(|p| p.except_first_line())
                     .map_err(Err::Read)?;
                 if !existing.is_empty() {
@@ -106,7 +109,8 @@ impl<'a> Generate<'a> {
             // TODO: select proper recipients (use from current file?)
             // TODO: log recipients to encrypt for
             let recipients = store.recipients()?;
-            prs_lib::crypto::encrypt_file(&recipients, plaintext.clone(), &dest.0)
+            context
+                .encrypt_file(&recipients, plaintext.clone(), &dest.0)
                 .map_err(Err::Write)?;
         }
 

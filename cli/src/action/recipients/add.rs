@@ -2,7 +2,11 @@ use anyhow::Result;
 use clap::ArgMatches;
 use thiserror::Error;
 
-use prs_lib::store::Store;
+use prs_lib::{
+    crypto::{self, prelude::*},
+    store::Store,
+    Recipients,
+};
 
 use crate::cmd::matcher::{
     recipients::{add::AddMatcher, RecipientsMatcher},
@@ -34,15 +38,24 @@ impl<'a> Add<'a> {
         sync::ensure_ready(&sync);
         sync.prepare()?;
 
+        let mut context = crypto::context(crypto::PROTO)?;
         let mut recipients = store.recipients().map_err(Err::Load)?;
 
         // Find unused keys, select one and add to recipients
-        let mut tmp = prs_lib::all(matcher_add.secret()).map_err(Err::Load)?;
-        tmp.remove_many(recipients.keys());
+        let mut tmp = Recipients::from(
+            if !matcher_add.secret() {
+                context.keys_public()
+            } else {
+                context.keys_private()
+            }
+            .map_err(Err::Load)?,
+        );
+        tmp.remove_all(recipients.keys());
         let key = skim::skim_select_key(tmp.keys()).ok_or(Err::NoneSelected)?;
         recipients.add(key.clone());
 
-        recipients.save(&store)?;
+        // TODO: implement save on recipients through trait
+        crypto::store::store_save_recipients(&store, &recipients)?;
 
         if prs_lib::store::can_decrypt(&store) {
             // Recrypt secrets

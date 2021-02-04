@@ -22,9 +22,9 @@ const PASSWORD_CHAR_SETS: [&str; 4] = [
 ///
 /// The returned password is embedded in `Plaintext` for security reasons.
 ///
-/// # Errors
+/// # Panics
 ///
-/// Errors if `len` is shorter than the number of sets in `PASSWORD_CHAR_SETS`.
+/// Panics if `len` is shorter than the number of sets in `PASSWORD_CHAR_SETS`.
 pub fn generate_password(len: u16) -> Plaintext {
     assert!(
         len as usize >= PASSWORD_CHAR_SETS.len(),

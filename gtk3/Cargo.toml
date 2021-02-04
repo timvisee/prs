@@ -19,7 +19,13 @@ edition = "2018"
 gitlab = { repository = "timvisee/prs", branch = "master" }
 
 [features]
-default = ["notify"]
+default = ["backend-gpgme", "notify"]
+
+# Backend using GPGME for GnuPG crypto
+backend-gpgme = ["prs-lib/backend-gpgme"]
+
+# Backend using GnuPG binary for GnuPG crypto
+backend-gnupg-bin = ["prs-lib/backend-gnupg-bin"]
 
 # Notification support (clipboard notifications)
 notify = ["notify-rust"]
@@ -30,7 +36,7 @@ gdk = "^0"
 gio = { version = "^0", features = ["v2_44"] }
 glib = "^0"
 gtk = { version = "0.9.0", features = ["v3_16"] }
-prs-lib = { version = "0.1.3", path = "../lib" }
+prs-lib = { version = "0.1.7", path = "../lib" }
 thiserror = "1.0"
 
 # Notification support

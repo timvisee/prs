@@ -3,7 +3,7 @@ use std::path::Path;
 
 use anyhow::Result;
 use clap::ArgMatches;
-use prs_lib::store::Store;
+use prs_lib::{crypto, store::Store};
 use thiserror::Error;
 
 use crate::cmd::matcher::{init::InitMatcher, MainMatcher, Matcher};
@@ -50,7 +50,7 @@ impl<'a> Init<'a> {
         // Hint user to add our recipient key
         if !matcher_main.quiet() {
             let bin = util::bin_name();
-            let system_has_secret = has_secret_key_in_keychain().unwrap_or(true);
+            let system_has_secret = crypto::util::has_private_key(crypto::PROTO).unwrap_or(true);
 
             if system_has_secret {
                 eprintln!("Now add your own key as recipient or generate a new one:");
@@ -72,12 +72,6 @@ impl<'a> Init<'a> {
 
         Ok(())
     }
-}
-
-/// Check whether the user has any secret key in his keychain.
-// TODO: duplicate, also use in clone
-fn has_secret_key_in_keychain() -> Result<bool> {
-    Ok(!prs_lib::all(true)?.keys().is_empty())
 }
 
 /// Ensure the given path is a free directory.

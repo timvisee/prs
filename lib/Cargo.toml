@@ -46,3 +46,7 @@ gpgme = { version = "0.9.2", optional = true }
 which = { version = "4.0", optional = true }
 version-compare = { version = "0.0.11", optional = true }
 regex = { version = "1.4", optional = true }
+
+[package.metadata.docs.rs]
+all-features = true
+targets = ["x86_64-unknown-linux-gnu"]

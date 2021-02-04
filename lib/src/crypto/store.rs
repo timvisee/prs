@@ -7,7 +7,7 @@ use anyhow::Result;
 use thiserror::Error;
 
 use super::{prelude::*, recipients::Recipients, util, ContextPool, Key, Proto};
-use crate::store::Store;
+use crate::Store;
 
 /// Password store GPG IDs file.
 const STORE_GPG_IDS_FILE: &str = ".gpg-id";
@@ -227,7 +227,7 @@ pub trait StoreRecipients {
     fn load(store: &Store) -> Result<Recipients>;
 
     /// Save recipients to given store.
-    fn save(store: &Store, recipients: &Recipients) -> Result<()>;
+    fn save(&self, store: &Store) -> Result<()>;
 }
 
 impl StoreRecipients for Recipients {
@@ -237,8 +237,8 @@ impl StoreRecipients for Recipients {
     }
 
     /// Save recipients to given store.
-    fn save(store: &Store, recipients: &Recipients) -> Result<()> {
-        store_save_recipients(store, recipients)
+    fn save(&self, store: &Store) -> Result<()> {
+        store_save_recipients(store, self)
     }
 }
 

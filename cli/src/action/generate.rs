@@ -5,8 +5,7 @@ use chbs::{config::BasicConfig, prelude::*};
 use clap::ArgMatches;
 use prs_lib::{
     crypto::{self, prelude::*},
-    store::{Secret, Store},
-    types::Plaintext,
+    Plaintext, Secret, Store,
 };
 use thiserror::Error;
 

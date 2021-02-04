@@ -10,7 +10,7 @@ mod util;
 use std::process;
 
 use anyhow::Result;
-use prs_lib::{crypto, store::Store};
+use prs_lib::{crypto, Store};
 
 use crate::{
     cmd::matcher::{MainMatcher, Matcher},

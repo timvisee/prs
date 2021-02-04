@@ -1,6 +1,6 @@
 use anyhow::Result;
 use clap::ArgMatches;
-use prs_lib::store::Store;
+use prs_lib::Store;
 use thiserror::Error;
 
 use crate::cmd::matcher::{git::GitMatcher, MainMatcher, Matcher};

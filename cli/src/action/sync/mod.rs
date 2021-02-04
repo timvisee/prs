@@ -7,8 +7,8 @@ use thiserror::Error;
 
 use prs_lib::{
     crypto,
-    store::Store,
     sync::{Readyness, Sync as StoreSync},
+    Store,
 };
 
 use crate::{

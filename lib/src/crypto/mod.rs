@@ -19,8 +19,7 @@ use std::path::Path;
 use anyhow::Result;
 use thiserror::Error;
 
-use crate::types::{Ciphertext, Plaintext};
-use crate::Recipients;
+use crate::{Ciphertext, Plaintext, Recipients};
 
 /// Default proto.
 ///
@@ -48,6 +47,8 @@ impl Proto {
 }
 
 /// Represents a key.
+///
+/// The key type may be any of the supported crypto proto types.
 #[derive(Clone, PartialEq)]
 #[non_exhaustive]
 pub enum Key {

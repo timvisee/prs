@@ -9,7 +9,7 @@ use walkdir::WalkDir;
 
 #[cfg(feature = "alias")]
 use prs_lib::store::SecretIterConfig;
-use prs_lib::store::{Secret, Store};
+use prs_lib::{Secret, Store};
 
 use crate::cmd::matcher::{remove::RemoveMatcher, MainMatcher, Matcher};
 use crate::util::{cli, error, skim, sync};

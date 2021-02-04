@@ -1,4 +1,4 @@
-use prs_lib::types::Plaintext;
+use prs_lib::Plaintext;
 
 /// Character sets to use for password generation.
 ///

@@ -9,7 +9,7 @@ use copypasta_ext::prelude::*;
 use notify_rust::Hint;
 #[cfg(all(feature = "notify", not(target_env = "musl")))]
 use notify_rust::Notification;
-use prs_lib::types::Plaintext;
+use prs_lib::Plaintext;
 use thiserror::Error;
 
 use crate::util::error::{self, ErrorHintsBuilder};

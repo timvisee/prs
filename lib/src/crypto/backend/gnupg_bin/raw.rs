@@ -11,7 +11,7 @@ use thiserror::Error;
 
 use super::raw_cmd::{gpg_stdin_output, gpg_stdin_stdout_ok_bin, gpg_stdout_ok, gpg_stdout_ok_bin};
 use crate::crypto::util;
-use crate::types::{Ciphertext, Plaintext};
+use crate::{Ciphertext, Plaintext};
 
 /// Partial output from gpg if the user does not own the secret key.
 const GPG_OUTPUT_ERR_NO_SECKEY: &str = "decryption failed: No secret key";

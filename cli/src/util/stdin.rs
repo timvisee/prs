@@ -1,7 +1,7 @@
 use std::io::{self, Read};
 
 use anyhow::Result;
-use prs_lib::types::Plaintext;
+use prs_lib::Plaintext;
 use thiserror::Error;
 
 /// Read file from stdin.

@@ -4,7 +4,7 @@ use anyhow::Result;
 use clap::ArgMatches;
 use thiserror::Error;
 
-use prs_lib::store::{Secret, Store};
+use prs_lib::{Secret, Store};
 
 use crate::cmd::matcher::{duplicate::DuplicateMatcher, MainMatcher, Matcher};
 use crate::util::{cli, error, skim, sync};

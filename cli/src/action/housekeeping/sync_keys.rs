@@ -4,7 +4,7 @@ use thiserror::Error;
 
 use prs_lib::{
     crypto::{self, store::ImportResult},
-    store::Store,
+    Store,
 };
 
 use crate::{

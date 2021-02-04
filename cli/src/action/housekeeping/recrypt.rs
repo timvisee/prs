@@ -4,8 +4,7 @@ use thiserror::Error;
 
 use prs_lib::{
     crypto::{self, prelude::*, Context},
-    store::{Secret, Store},
-    Recipients,
+    Recipients, Secret, Store,
 };
 
 use crate::{

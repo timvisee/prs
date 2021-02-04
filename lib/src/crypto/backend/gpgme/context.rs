@@ -6,8 +6,7 @@ use thiserror::Error;
 
 use super::raw;
 use crate::crypto::{proto, IsContext, Key, Proto};
-use crate::types::{Ciphertext, Plaintext};
-use crate::Recipients;
+use crate::{Ciphertext, Plaintext, Recipients};
 
 /// Protocol to use.
 const PROTO: Protocol = Protocol::OpenPgp;

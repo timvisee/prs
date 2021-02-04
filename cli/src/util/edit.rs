@@ -5,7 +5,7 @@ use std::path::{Path, PathBuf};
 use anyhow::Result;
 use thiserror::Error;
 
-use prs_lib::types::Plaintext;
+use prs_lib::Plaintext;
 
 /// Shared memory tmpfs mount path on Unix (Linux?) systems.
 #[cfg(unix)]

@@ -2,7 +2,7 @@ use anyhow::Result;
 use clap::ArgMatches;
 use thiserror::Error;
 
-use prs_lib::store::Store;
+use prs_lib::Store;
 
 use crate::{
     cmd::matcher::{sync::SyncMatcher, MainMatcher, Matcher},

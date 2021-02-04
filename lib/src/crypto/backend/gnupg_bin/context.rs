@@ -9,8 +9,7 @@ use version_compare::Version;
 use super::raw;
 use super::raw_cmd::gpg_stdout_ok;
 use crate::crypto::{proto, IsContext, Key, Proto};
-use crate::types::{Ciphertext, Plaintext};
-use crate::Recipients;
+use crate::{Ciphertext, Plaintext, Recipients};
 
 /// Binary name.
 const BIN_NAME: &str = "gpg";

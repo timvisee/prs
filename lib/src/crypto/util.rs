@@ -27,24 +27,3 @@ pub fn keys_contain_fingerprint<S: AsRef<str>>(keys: &[Key], fingerprint: S) -> 
 pub fn has_private_key(proto: Proto) -> Result<bool> {
     Ok(!super::context(proto)?.keys_private()?.is_empty())
 }
-
-///// Check whether the given recipients contain any key that we have a secret key in our keychain
-///// for.
-//pub fn contains_own_secret_key(recipients: &Recipients) -> Result<bool> {
-//    let secrets = all(true)?;
-//    Ok(recipients
-//        .keys()
-//        .iter()
-//        .any(|k| secrets.has_fingerprint(&k.fingerprint(false))))
-//}
-
-///// Filter list of fingerprints.
-/////
-///// Keep list of unimported fingerprints.
-//pub fn filter_imported_fingerprints(fingerprints: Vec<String>) -> Result<Vec<String>> {
-//    let mut context = crypto_old::context()?;
-//    Ok(fingerprints
-//        .into_iter()
-//        .filter(|fp| context.get_key(fp).is_err())
-//        .collect())
-//}

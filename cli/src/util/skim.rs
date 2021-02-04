@@ -2,10 +2,7 @@ use std::borrow::Cow;
 use std::path::PathBuf;
 use std::sync::Arc;
 
-use prs_lib::{
-    store::{FindSecret, Secret, Store},
-    Key,
-};
+use prs_lib::{store::FindSecret, Key, Secret, Store};
 use skim::{
     prelude::{SkimItemReceiver, SkimItemSender, SkimOptionsBuilder},
     AnsiString, DisplayContext, Skim, SkimItem,

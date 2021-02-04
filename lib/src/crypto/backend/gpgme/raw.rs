@@ -7,7 +7,7 @@ use gpgme::{Context, EncryptFlags, Key};
 use thiserror::Error;
 use zeroize::Zeroize;
 
-use crate::types::{Ciphertext, Plaintext};
+use crate::{Ciphertext, Plaintext};
 
 /// GPGME encryption flags.
 const ENCRYPT_FLAGS: EncryptFlags = EncryptFlags::ALWAYS_TRUST;

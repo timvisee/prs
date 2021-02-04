@@ -6,8 +6,7 @@ use anyhow::Result;
 use clap::ArgMatches;
 use prs_lib::{
     crypto::{self, prelude::*},
-    store::Store,
-    types::Plaintext,
+    Plaintext, Store,
 };
 use thiserror::Error;
 

@@ -7,7 +7,7 @@ use anyhow::Result;
 
 use crate::{
     git::{self, RepositoryState},
-    store::Store,
+    Store,
 };
 
 /// Store git directory.

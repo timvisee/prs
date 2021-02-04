@@ -7,7 +7,7 @@ use thiserror::Error;
 
 use prs_lib::{
     crypto::{self, prelude::*},
-    store::Store,
+    Store,
 };
 
 use crate::cmd::matcher::{

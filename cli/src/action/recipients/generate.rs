@@ -4,8 +4,7 @@ use thiserror::Error;
 
 use prs_lib::{
     crypto::{self, prelude::*},
-    store::Store,
-    Recipients,
+    Recipients, Store,
 };
 
 use crate::cmd::matcher::{
@@ -77,7 +76,7 @@ impl<'a> Generate<'a> {
                 recipients.add(key.clone());
             }
             // TODO: implement save on recipients through trait
-            crypto::store::store_save_recipients(&store, &recipients)?;
+            recipients.save(&store)?;
 
             if prs_lib::store::can_decrypt(&store) {
                 // Recrypt secrets

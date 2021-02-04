@@ -19,8 +19,7 @@ edition = "2018"
 gitlab = { repository = "timvisee/prs", branch = "master" }
 
 [features]
-# TODO: select proper default features
-default = ["backend-gpgme", "backend-gnupg-bin"]
+default = ["backend-gpgme"]
 
 # Backend using GPGME for GnuPG crypto
 backend-gpgme = ["gpgme"]

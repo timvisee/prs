@@ -10,7 +10,10 @@ use notify_rust::Hint;
 #[cfg(all(feature = "notify", not(target_env = "musl")))]
 use notify_rust::Notification;
 
-use prs_lib::store::{FindSecret, Secret, Store};
+use prs_lib::{
+    crypto::{self, prelude::*},
+    store::{FindSecret, Secret, Store},
+};
 
 /// Application ID.
 const APP_ID: &str = "com.timvisee.prs.gtk3-copy";
@@ -197,7 +200,9 @@ fn selected_entry(
 /// Copies to clipboard with revert timeout.
 fn selected(secret: Secret, window: gtk::ApplicationWindow, input: gtk::SearchEntry) {
     // Decrypt first line of plaintext
-    let plaintext = match prs_lib::crypto::decrypt_file(&secret.path)
+    let plaintext = match crypto::context(crypto::PROTO)
+        .map_err(|err| err.into())
+        .and_then(|mut context| context.decrypt_file(&secret.path))
         .and_then(|plaintext| plaintext.first_line())
     {
         Ok(plaintext) => plaintext,

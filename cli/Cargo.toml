@@ -19,7 +19,13 @@ edition = "2018"
 gitlab = { repository = "timvisee/prs", branch = "master" }
 
 [features]
-default = ["clipboard", "notify"]
+default = ["backend-gpgme", "clipboard", "notify"]
+
+# Backend using GPGME for GnuPG crypto
+backend-gpgme = ["prs-lib/backend-gpgme"]
+
+# Backend using GnuPG binary for GnuPG crypto
+backend-gnupg-bin = ["prs-lib/backend-gnupg-bin"]
 
 # Alias management (symlink) support, still follows symlinks if disables
 # Automatically enabled for Unix and Windows targets

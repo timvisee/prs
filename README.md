@@ -29,6 +29,7 @@ compatible clients, extensions and migration scripts.
 - [Usage](#usage)
 - [Requirements](#requirements)
 - [Install](#install)
+- [Build](#build)
 - [Security](#security)
 - [FAQ](#faq)
 - [Help](#help)
@@ -43,6 +44,8 @@ compatible clients, extensions and migration scripts.
 - Easily edit secrets using your default editor
 - Supports smart aliases, property selection
 - Compatible with [`pass`][pass]
+- Supports Linux, macOS, Windows, FreeBSD and others
+- Supports multiple cryptography backends (more backends & crypto in the future)
 - Scriptable with `-y`, `-f`, `-I` flags
 - Accurate & useful error reporting
 
@@ -50,7 +53,7 @@ compatible clients, extensions and migration scripts.
 
 - Greatly improved synchronisation speed through `git` with connection reuse
 - Super fast interactive secret/recipient selection through [`skim`][skim]
-- Prevents messing with your clipboard with unexpected overwrites
+- Prevents messing with your clipboard, no unexpected overwrites or clipboard loss
 - Commands have short and conventional aliases for faster and more convenient usage
 - Uses security best practices (secrets: zeroed, `mlock`, `madvice`, no format, [etc](#security))
 
@@ -101,28 +104,252 @@ prs help
 ```
 
 ## Requirements
-- Linux, macOS, FreeBSD, Android (other BSDs might work)
+- Linux, macOS, FreeBSD, Windows (other BSDs might work)
 - A terminal :sunglasses:
-- `gpg`, `gpgme` and `git`
+
+#### Recommended
+- Run: _`git`, `gnupg`, `gpgme`_
   - Ubuntu, Debian and derivatives: `apt install git gpg libgpgme11`
   - CentOS/Red Hat/openSUSE/Fedora: `yum install git gnupg gpgme`
   - Arch: `pacman -S git gnupg gpgme`
   - Alpine: `apk add git gnupg gpgme`
-  - macOS: `brew install gpg gpgme` (+ `gtk+3`)
+  - macOS: `brew install gnupg gpgme`
+  - Windows: `scoop install git gpg`
+- Build: _`git`, `gnupg`, `gpgme` dev packages and dev utilities_
+  - Ubuntu, Debian and derivatives: `apt install git gpg build-essential pkg-config python3 xorg-dev libx11-xcb-dev libdbus-1-dev libgpgme-dev`
+  - CentOS/Red Hat/openSUSE/Fedora: `yum install git gnupg gpgme-devel pkgconfig python3 xorg-x11-devel libxcb-devel`
+  - Arch: `pacman -S git gnupg gpgme pkgconf python3 xorg-server libxcb`
+  - Alpine: `apk add git gnupg gpgme-dev pkgconfig`
+  - macOS: `brew install gnupg gpgme`
+  - Windows: `scoop install git gpg`
+
+#### Specific
+Specific features or crates require specific dependencies as shown below.
+
+The listed dependencies might be incorrect or incomplete. If you believe there
+to be an error, please feel free to contribute.
+
+<details>
+  <summary>[Required] Minimal requirements</summary>
+
+  - Run & build: _`gpg` and `git`_
+    - Ubuntu, Debian and derivatives: `apt install git gpg`
+    - CentOS/Red Hat/openSUSE/Fedora: `yum install git gnupg`
+    - Arch: `pacman -S git gnupg`
+    - Alpine: `apk add git gnupg`
+    - macOS: `brew install gpg`
+    - Windows: `scoop install git gpg`
+</details>
+
+<details>
+  <summary>[Recommended] Feature: GPGME backend</summary>
+
+  _`--feature=backend-gpgme`_
+
+  - Run: _`gpgme` & build tools_
+    - Ubuntu, Debian and derivatives: `apt install libgpgme11`
+    - CentOS/Red Hat/openSUSE/Fedora: `yum install gpgme`
+    - Arch: `pacman -S gpgme`
+    - Alpine: `apk add gpgme`
+    - macOS: `brew install gpgme`
+    - Windows: _not supported_
+  - Build: _`gpgme` dev package
+    - Ubuntu, Debian and derivatives: `apt install build-essential pkg-config libgpgme-dev`
+    - CentOS/Red Hat/openSUSE/Fedora: `yum install pkgconfig gpgme-devel`
+    - Arch: `pacman -S pkgconf gpgme`
+    - Alpine: `apk add pkgconfig gpgme-dev`
+    - macOS: `brew install gpgme`
+    - Windows: _not supported_
+</details>
+
+<details>
+  <summary>[Recommended] Feature: Clipboard</summary>
+
+  _`--feature=clipboard`_
+
+  - Run:
+    - Ubuntu, Debian and derivatives: `apt install xorg libx11-xcb-dev`
+    - CentOS/Red Hat/openSUSE/Fedora: `yum install pkgconfig xorg libxcb`
+    - Arch: `pacman -S pkgconf xorg-server python3 libxcb`
+    - Alpine: _?_
+    - macOS: _none_
+    - Windows: _none_
+  - Build:
+    - Ubuntu, Debian and derivatives: `apt install build-essential pkg-config python3 xorg-dev libx11-xcb-dev`
+    - CentOS/Red Hat/openSUSE/Fedora: `yum install pkgconfig python3 xorg-x11-devel libxcb-devel`
+    - Arch: `pacman -S pkgconf xorg-server python3 libxcb`
+    - Alpine: _?_
+    - macOS: _none_
+    - Windows: _none_
+</details>
+
+<details>
+  <summary>[Recommended] Feature: Notifications</summary>
+
+  _`--feature=notify`_
+
+  - Run:
+    - Ubuntu, Debian and derivatives: _[something][linux-notifications] supporting notifications with libnotify_
+    - CentOS/Red Hat/openSUSE/Fedora: _[something][linux-notifications] supporting notifications with libnotify_
+    - Arch: _[something][linux-notifications] supporting notifications with libnotify_
+    - Alpine: _[something][linux-notifications] supporting notifications with libnotify_
+    - macOS: _none_
+    - Windows: _none_
+  - Build: _`gpgme` dev package_
+    - Ubuntu, Debian and derivatives: `apt install libdbus-1-dev`
+    - CentOS/Red Hat/openSUSE/Fedora: `yum install dbus-libs`
+    - Arch: `pacman -S dbus`
+    - Alpine: `apk add dbus`
+    - macOS: _none_
+    - Windows: _none_
+</details>
+
+<details>
+  <summary>Client: GTK3 client</summary>
+
+  _crate: `prs-gtk3` @ [`./gtk3`](./gtk3)_
+
+  - Run: _`gtk3`_
+    - Ubuntu, Debian and derivatives: `apt install libgtk-3-0 libgl1-mesa0`
+    - CentOS/Red Hat/openSUSE/Fedora: `yum install gtk3`
+    - Arch: `pacman -S gtk3`
+    - Alpine: `apk add gtk+3.0 --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main`
+    - macOS: `brew install gtk+3`
+    - Windows: _not supported_
+  - Build: _`gtk3` dev packages_
+    - Ubuntu, Debian and derivatives: `apt install libgtk-3-dev libgl1-mesa-dev`
+    - CentOS/Red Hat/openSUSE/Fedora: `yum install gtk3-devel`
+    - Arch: `pacman -S gtk3`
+    - Alpine: `apk add gtk+3.0-dev --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main`
+    - macOS: `brew install gtk+3`
+    - Windows: _not supported_
+</details>
 
 ## Install
 Because `prs` is still in early stages, only limited installation options are
 available right now. Feel free to contribute.
 
-Make sure you meet and install the [requirements](#requirements).
+Make sure you meet and install the 'Run' [requirements](#requirements).
+
+See the operating system/distribution specific instructions below:
+- [Linux: Arch](#linux-arch-aur-packages)
+- [Other](#other) _(other Linux's, macOS)_
+
+#### Linux: Arch AUR packages
+
+[» `prs`](https://aur.archlinux.org/packages/prs/) (compiles from source, latest release)  
+[» `prs-git`](https://aur.archlinux.org/packages/prs-git/) (compiles from source, latest `master` commit)
+
+```bash
+yay -S prs
+# or
+aurto add prs
+sudo pacman -S prs
+# or using any other AUR helper
+
+prs --help
+```
+
+#### Other
 
 Find the latest binaries on the latest release page:
+
 - [GitHub][github-release-latest]
 - [GitLab][gitlab-releases]
 - [GitLab package registry][gitlab-packages] for `prs`
 
 _Note: for Linux the GNU (not musl) binary is recommended if it works, because it
 has better clipboard/notification support._
+
+```bash
+# download binary from any source above
+
+# make executable
+chmod a+x ./prs
+
+# optional: make globally executable
+mv ./prs /usr/local/bin/prs
+
+./prs --help
+```
+
+## Build
+To build and install `prs` yourself, make sure you meet the 'Build' [requirements](#requirements).
+
+To build on Windows you must change the default feature set. By default `prs`
+build with the GPGME cryptography backend which is not supported on Windows, the
+alternative GnuPG binary backend (`backend-gnupg-bin`) backend is supported. See
+[compiler features](#compile-features-use-flags).
+
+### Compile and install
+To compile and install `prs` with the default features follow these steps:
+
+- Compile and install it directly from cargo:
+
+  ```bash
+  # Compile and install from cargo
+  cargo install prs-cli -f
+
+  # Start using prs
+  prs --help
+  ```
+
+- Or clone the repository and install it with `cargo`:
+
+  ```bash
+  # Clone the project
+  git clone https://github.com/timvisee/prs.git
+  cd prs
+
+  # Compile and install
+  cargo install --path prs-cli -f
+
+  # Start using ffsend
+  prs --help
+
+  # or run it directly from cargo
+  cargo run --release --package prs-cli -- --help
+
+  # or invoke release binary directly
+  ./target/release/prs --help
+  ```
+
+### Compile features / use flags
+
+Different use flags are available for `prs` to toggle whether to include various
+features and cryptography backends. The following features are available, some
+of which are enabled by default:
+
+| Feature             | In                    | Enabled | Description                                                |
+| :-----------------: | :-------------------: | :-----: | :--------------------------------------------------------- |
+| `backend-gpgme`     | _all_                 | Default | GPG crypto backend using GPGME (not supported on Windows)  |
+| `backend-gnupg-bin` | _all_                 |         | GPG crypto backend using GnuPG binary                      |
+| `alias`             | `prc-cli`             | Default | Support for secret aliases                                 |
+| `clipboard`         | `prs-cli`             | Default | Clipboard support: copy secret to clipboard                |
+| `notify`            | `prs-cli`, `prs-gtk3` | Default | Notification support: notify on clipboard clear            |
+
+To enable features during building or installation, specify them with
+`--features <features...>` when using `cargo`.
+You may want to disable default features first using
+`--no-default-features`.
+Here are some examples:
+
+```bash
+# Default set of features with backend-gnupg-bin, install or build, one of
+cargo install --features backend-gnupg-bin
+cargo build --release --features backend-gnupg-bin
+
+# No default features, except required, one of
+cargo install --no-default-features --features backend-gpgme
+cargo install --no-default-features --features backend-gnupg-bin
+
+# With alias, clipboard and notification support, one of
+cargo install --no-default-features --features backend-gpgme,alias,clipboard,notify
+cargo install --no-default-features --features backend-gnupg-bin,alias,clipboard,notify
+
+# Minimum configuration for Windowds
+cargo install --no-default-features --features backend-gnupg-bin
+```
 
 ## Security
 Security is backed by [`gpg`][gpg] which is used all over the world and
@@ -344,6 +571,7 @@ Check out the [lib/LICENSE](lib/LICENSE) file for more information.
 [gitlab-packages]: https://gitlab.com/timvisee/prs/-/packages
 [gitlab-releases]: https://gitlab.com/timvisee/prs/-/releases
 [gpg]: https://gnupg.org/
+[linux-notifications]: https://wiki.archlinux.org/index.php/Desktop_notifications
 [pass-compatible-clients]: https://www.passwordstore.org#other
 [pass]: https://www.passwordstore.org/
 [skim]: https://github.com/lotabout/skim

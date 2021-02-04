@@ -1,3 +1,5 @@
+//! Provides interface for crypto recipients.
+
 use anyhow::Result;
 
 use super::Key;

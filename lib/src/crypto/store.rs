@@ -1,3 +1,5 @@
+//! Helpers to use recipients with password store.
+
 use std::fs;
 use std::path::{Path, PathBuf};
 

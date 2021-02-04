@@ -1,3 +1,5 @@
+//! Common crypto utilities.
+
 use anyhow::Result;
 
 use super::{prelude::*, Key, Proto};

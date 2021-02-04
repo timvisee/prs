@@ -1,3 +1,5 @@
+//! Interface to a password store and its secrets.
+
 use std::ffi::OsString;
 use std::fs;
 use std::path::{self, Path, PathBuf};
@@ -413,6 +415,7 @@ where
     }
 }
 
+/// Password store error.
 #[derive(Debug, Error)]
 pub enum Err {
     #[error("failed to expand store root path")]

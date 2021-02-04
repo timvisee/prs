@@ -213,7 +213,7 @@ fn fingerprints_to_keys(context: &mut Context, fingerprints: &[&str]) -> Result<
     Ok(keys)
 }
 
-// TODO: update descriptions here
+/// GnuPG binary error.
 #[derive(Debug, Error)]
 pub enum Err {
     #[error("failed to obtain GPGME cryptography context")]

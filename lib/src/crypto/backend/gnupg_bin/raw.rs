@@ -214,6 +214,7 @@ fn parse_key_list(list: String) -> Option<Vec<KeyId>> {
     Some(keys)
 }
 
+/// GnuPG binary error.
 #[derive(Debug, Error)]
 pub enum Err {
     #[error("failed to communicate with gpg binary, got unexpected output")]

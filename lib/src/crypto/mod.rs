@@ -1,3 +1,10 @@
+//! Crypto interface.
+//!
+//! This module provides an interface to all cryptography features that are used in prs.
+//!
+//! It supports multiple cryptography protocols (e.g. GPG) and multiple backends (e.g. GPGME,
+//! GnuPG). The list of supported protocols and backends may be extended in the future.
+
 pub mod backend;
 pub mod proto;
 pub mod recipients;
@@ -160,6 +167,10 @@ impl IsContext for Context {
     }
 }
 
+/// Defines generic crypto context.
+///
+/// Implemented on backend specific cryptography contexcts, makes using it possible through a
+/// single simple interface.
 pub trait IsContext {
     /// Encrypt plaintext for recipients.
     fn encrypt(&mut self, recipients: &Recipients, plaintext: Plaintext) -> Result<Ciphertext>;
@@ -261,11 +272,12 @@ impl ContextPool {
     ///
     /// This will initialize the context if no context is loaded for the given proto yet. This
     /// may error..
-    fn get_mut<'a>(&'a mut self, proto: Proto) -> Result<&'a mut Context> {
+    pub fn get_mut<'a>(&'a mut self, proto: Proto) -> Result<&'a mut Context> {
         Ok(self.contexts.entry(proto).or_insert(context(proto)?))
     }
 }
 
+/// Crypto error.
 #[derive(Debug, Error)]
 pub enum Err {
     #[error("failed to obtain GPGME cryptography context")]
@@ -284,6 +296,7 @@ pub enum Err {
     UnknownFingerprint,
 }
 
+/// Prelude for common crypto traits.
 pub mod prelude {
     pub use super::{store::StoreRecipients, IsContext};
 }

@@ -1,3 +1,5 @@
+//! Password store synchronization functionality.
+
 use std::path::Path;
 use std::time::Duration;
 

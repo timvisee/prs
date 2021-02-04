@@ -1,3 +1,5 @@
+//! Secret plaintext and ciphertext types.
+
 use anyhow::Result;
 use secstr::SecVec;
 use thiserror::Error;
@@ -194,6 +196,7 @@ impl From<&str> for Plaintext {
     }
 }
 
+/// A plaintext or ciphertext handling error.
 #[derive(Debug, Error)]
 pub enum Err {
     #[error("failed parse plaintext as UTF-8")]

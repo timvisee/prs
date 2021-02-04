@@ -1,4 +1,6 @@
-/// Represents an GPG key.
+//! Crypto GPG protocol.
+
+/// Represents a GPG key.
 #[derive(Clone)]
 pub struct Key {
     /// Full fingerprint.

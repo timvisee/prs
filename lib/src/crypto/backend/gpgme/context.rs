@@ -1,3 +1,5 @@
+//! Provides GPGME binary context adapter.
+
 use anyhow::Result;
 use gpgme::{Context as GpgmeContext, Protocol};
 use thiserror::Error;
@@ -88,6 +90,7 @@ impl IsContext for Context {
     }
 }
 
+/// GPGME context error.
 #[derive(Debug, Error)]
 pub enum Err {
     #[error("failed to obtain GPGME cryptography context")]

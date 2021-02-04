@@ -1,3 +1,5 @@
+//! Provides GnuPG binary context adapter.
+
 use std::path::{Path, PathBuf};
 
 use anyhow::Result;
@@ -123,6 +125,7 @@ fn test_gpg_compat(path: &Path) -> Result<()> {
     Ok(())
 }
 
+/// GnuPG binary context error.
 #[derive(Debug, Error)]
 pub enum Err {
     #[error("failed to obtain GPGME cryptography context")]

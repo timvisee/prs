@@ -285,5 +285,5 @@ pub enum Err {
 }
 
 pub mod prelude {
-    pub use super::IsContext;
+    pub use super::{store::StoreRecipients, IsContext};
 }

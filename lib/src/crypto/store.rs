@@ -1,11 +1,11 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use crate::store::Store;
 use anyhow::Result;
 use thiserror::Error;
 
 use super::{prelude::*, recipients::Recipients, util, ContextPool, Key, Proto};
+use crate::store::Store;
 
 /// Password store GPG IDs file.
 const STORE_GPG_IDS_FILE: &str = ".gpg-id";
@@ -89,7 +89,7 @@ pub fn store_load_keys(store: &Store) -> Result<Vec<Key>> {
 ///
 /// This will try to load the recipient keys for all configured protocols, and errors if it fails.
 pub fn store_load_recipients(store: &Store) -> Result<Recipients> {
-    Ok(Recipients::from(store_load_keys(store)?))
+    Recipients::load(store)
 }
 
 /// Save the keys for the given store.
@@ -217,6 +217,27 @@ pub enum ImportResult {
 
     /// Key with given fingerprint was not found and was not imported in keychain.
     Unavailable(String),
+}
+
+/// Recipients extension for store functionality.
+pub trait StoreRecipients {
+    /// Load recipients from given store.
+    fn load(store: &Store) -> Result<Recipients>;
+
+    /// Save recipients to given store.
+    fn save(store: &Store, recipients: &Recipients) -> Result<()>;
+}
+
+impl StoreRecipients for Recipients {
+    /// Load recipients from given store.
+    fn load(store: &Store) -> Result<Recipients> {
+        store_load_recipients(store)
+    }
+
+    /// Save recipients to given store.
+    fn save(store: &Store, recipients: &Recipients) -> Result<()> {
+        store_save_recipients(store, recipients)
+    }
 }
 
 #[derive(Debug, Error)]

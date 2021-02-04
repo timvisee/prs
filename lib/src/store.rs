@@ -42,7 +42,7 @@ impl Store {
 
     /// Get the recipient keys for this store.
     pub fn recipients(&self) -> Result<Recipients> {
-        crypto::store::store_load_recipients(&self)
+        Recipients::load(&self)
     }
 
     /// Get a sync helper for this store.

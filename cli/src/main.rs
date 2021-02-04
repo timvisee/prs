@@ -25,6 +25,9 @@ use crate::{
 const CLIPBOARD_TIMEOUT: u64 = 20;
 
 fn main() {
+    // Do not use colored output on Windows
+    colored::control::set_override(false);
+
     // Parse CLI arguments
     let cmd_handler = Handler::parse();
 

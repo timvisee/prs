@@ -76,6 +76,7 @@ pub fn store_load_keys(store: &Store) -> Result<Vec<Key>> {
     // TODO: do not crash here if GPG ids file is not found!
     // Load GPG keys
     let fingerprints = store_read_gpg_fingerprints(store)?;
+
     if !fingerprints.is_empty() {
         let mut context = super::context(Proto::Gpg)?;
         let fingerprints: Vec<_> = fingerprints.iter().map(|fp| fp.as_str()).collect();
@@ -91,7 +92,7 @@ pub fn store_load_keys(store: &Store) -> Result<Vec<Key>> {
 ///
 /// This will try to load the recipient keys for all configured protocols, and errors if it fails.
 pub fn store_load_recipients(store: &Store) -> Result<Recipients> {
-    Recipients::load(store)
+    Ok(Recipients::from(store_load_keys(store)?))
 }
 
 /// Save the keys for the given store.

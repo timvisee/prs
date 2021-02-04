@@ -3,7 +3,7 @@ use gpgme::{Context as GpgmeContext, Protocol};
 use thiserror::Error;
 
 use super::raw;
-use crate::crypto::{proto, IsContext, Key};
+use crate::crypto::{proto, IsContext, Key, Proto};
 use crate::types::{Ciphertext, Plaintext};
 use crate::Recipients;
 
@@ -72,12 +72,19 @@ impl IsContext for Context {
             .collect())
     }
 
+    // TODO: implement: get_public_key
+    // TODO: implement: find_public_keys
+
     fn import_key(&mut self, key: &[u8]) -> Result<()> {
         raw::import_key(&mut self.context, key)
     }
 
     fn export_key(&mut self, key: Key) -> Result<Vec<u8>> {
         raw::export_key(&mut self.context, &key.fingerprint(false))
+    }
+
+    fn supports_proto(&self, proto: Proto) -> bool {
+        proto == Proto::Gpg
     }
 }
 

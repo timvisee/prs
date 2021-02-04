@@ -1,6 +1,5 @@
-use std::collections::HashSet;
-
 use super::Key;
+use crate::crypto::util;
 
 /// A list of recipients.
 ///
@@ -55,9 +54,10 @@ impl Recipients {
     }
 
     /// Check whether this recipient list has the given fingerprint.
-    fn has_fingerprint(&self, fingerprint: &str) -> bool {
-        let fp = fingerprint.trim().to_uppercase();
-        self.keys.iter().any(|k| k.fingerprint(false) == fp)
+    pub fn has_fingerprint(&self, fingerprint: &str) -> bool {
+        self.keys
+            .iter()
+            .any(|k| util::fingerprints_equal(k.fingerprint(false), fingerprint))
     }
 }
 
@@ -65,5 +65,5 @@ impl Recipients {
 ///
 /// Succeeds if no key is given.
 fn keys_same_proto(keys: &[Key]) -> bool {
-    keys.iter().map(|k| k.proto()).collect::<HashSet<_>>().len() <= 1
+    keys.len() < 2 || keys[1..].iter().all(|k| k == &keys[0])
 }

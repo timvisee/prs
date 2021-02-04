@@ -6,7 +6,7 @@ use version_compare::Version;
 
 use super::raw;
 use super::raw_cmd::gpg_stdout_ok;
-use crate::crypto::{proto, IsContext, Key};
+use crate::crypto::{proto, IsContext, Key, Proto};
 use crate::types::{Ciphertext, Plaintext};
 use crate::Recipients;
 
@@ -77,12 +77,19 @@ impl IsContext for Context {
             .collect())
     }
 
+    // TODO: implement: get_public_key
+    // TODO: implement: find_public_keys
+
     fn import_key(&mut self, key: &[u8]) -> Result<()> {
         raw::import_key(&self.bin, key)
     }
 
     fn export_key(&mut self, key: Key) -> Result<Vec<u8>> {
         raw::export_key(&self.bin, &key.fingerprint(false))
+    }
+
+    fn supports_proto(&self, proto: Proto) -> bool {
+        proto == Proto::Gpg
     }
 }
 

@@ -1,6 +1,8 @@
 pub mod backend;
 pub mod proto;
 pub mod recipients;
+pub mod store;
+pub mod util;
 
 use std::fs;
 use std::path::Path;
@@ -12,11 +14,13 @@ use crate::types::{Ciphertext, Plaintext};
 use crate::Recipients;
 
 /// Crypto protocol.
+///
+/// This list contains all protocols supported by the prs project. This does not mean that all
+/// protocols are supported at runtime in a given build.
 #[non_exhaustive]
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
 pub enum Proto {
     /// GPG crypto.
-    #[cfg(feature = "_crypto-gpg")]
     Gpg,
 }
 
@@ -67,7 +71,6 @@ pub fn context(proto: Proto) -> Result<Context, Err> {
     // Select proper crypto backend
     match proto {
         #[allow(unreachable_code)]
-        #[cfg(feature = "_crypto-gpg")]
         Proto::Gpg => {
             #[cfg(feature = "backend-gpgme")]
             return Ok(Context::from(Box::new(
@@ -123,6 +126,10 @@ impl IsContext for Context {
     fn export_key(&mut self, key: Key) -> Result<Vec<u8>> {
         self.context.export_key(key)
     }
+
+    fn supports_proto(&self, proto: Proto) -> bool {
+        self.context.supports_proto(proto)
+    }
 }
 
 pub trait IsContext {
@@ -162,6 +169,30 @@ pub trait IsContext {
     /// Obtain all public keys from keychain.
     fn keys_private(&mut self) -> Result<Vec<Key>>;
 
+    /// Obtain a public key from keychain for fingerprint.
+    fn get_public_key(&mut self, fingerprint: &str) -> Result<Key> {
+        self.keys_public()?
+            .into_iter()
+            .find(|key| util::fingerprints_equal(key.fingerprint(false), fingerprint))
+            .ok_or_else(|| Err::UnknownFingerprint.into())
+    }
+
+    /// Find public keys from keychain for fingerprints.
+    ///
+    /// Skips fingerprints no key is found for.
+    // TODO: throw errors on other error than not-found
+    fn find_public_keys(&mut self, fingerprints: &[&str]) -> Result<Vec<Key>> {
+        let keys = self.keys_public()?;
+        Ok(fingerprints
+            .into_iter()
+            .filter_map(|fingerprint| {
+                keys.iter()
+                    .find(|key| util::fingerprints_equal(key.fingerprint(false), fingerprint))
+                    .cloned()
+            })
+            .collect())
+    }
+
     /// Import the given key from bytes into keychain.
     fn import_key(&mut self, key: &[u8]) -> Result<()>;
 
@@ -177,6 +208,9 @@ pub trait IsContext {
     fn export_key_file(&mut self, key: Key, path: &Path) -> Result<()> {
         fs::write(path, self.export_key(key)?).map_err(|err| Err::WriteFile(err).into())
     }
+
+    /// Check whether this context supports the given protocol.
+    fn supports_proto(&self, proto: Proto) -> bool;
 }
 
 #[derive(Debug, Error)]
@@ -192,6 +226,9 @@ pub enum Err {
 
     #[error("failed to read from file")]
     ReadFile(#[source] std::io::Error),
+
+    #[error("fingerprint does not match public key in keychain")]
+    UnknownFingerprint,
 }
 
 pub mod prelude {

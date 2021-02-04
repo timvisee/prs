@@ -10,6 +10,7 @@ use regex::Regex;
 use thiserror::Error;
 
 use super::raw_cmd::{gpg_stdin_output, gpg_stdin_stdout_ok_bin, gpg_stdout_ok, gpg_stdout_ok_bin};
+use crate::crypto::util;
 use crate::types::{Ciphertext, Plaintext};
 
 /// Partial output from gpg if the user does not own the secret key.
@@ -176,7 +177,7 @@ fn parse_key_list(list: String) -> Option<Vec<KeyId>> {
             // Start reading a new key
             l if l.starts_with("pub ") || l.starts_with("sec ") => {
                 // Get the fingerprint
-                let fingerprint = format_fingerprint(lines.pop_front()?.trim());
+                let fingerprint = util::format_fingerprint(lines.pop_front()?.trim());
                 if !re_fingerprint.is_match(&fingerprint) {
                     return None;
                 }
@@ -211,13 +212,6 @@ fn parse_key_list(list: String) -> Option<Vec<KeyId>> {
     }
 
     Some(keys)
-}
-
-/// Format fingerprint in consistent format.
-///
-/// Trims and uppercases.
-fn format_fingerprint<S: AsRef<str>>(fingerprint: S) -> String {
-    fingerprint.as_ref().trim().to_uppercase()
 }
 
 #[derive(Debug, Error)]

@@ -130,7 +130,7 @@ pub fn store_save_recipients(store: &Store, recipients: &Recipients) -> Result<(
 /// This syncs public key files for all protocols. This is because the public key files themselves
 /// don't specify what protocol they use. All public key files and keys must therefore be taken
 /// into consideration all at once.
-fn store_sync_public_key_files(store: &Store, keys: &[Key]) -> Result<()> {
+pub fn store_sync_public_key_files(store: &Store, keys: &[Key]) -> Result<()> {
     // Get public keys directory, ensure it exists
     let dir = store_public_keys_dir(store);
     fs::create_dir_all(&dir).map_err(Err::SyncKeyFiles)?;
@@ -180,15 +180,16 @@ fn store_sync_public_key_files(store: &Store, keys: &[Key]) -> Result<()> {
 }
 
 /// Import keys from store that are missing in the keychain.
-pub fn import_missing_keys_from_store(store: &Store) -> Result<()> {
+pub fn import_missing_keys_from_store(store: &Store) -> Result<Vec<ImportResult>> {
     // Get public keys directory, ensure it exists
     let dir = store_public_keys_dir(store);
     if !dir.is_dir() {
-        return Ok(());
+        return Ok(vec![]);
     }
 
     // Cache protocol contexts
     let mut contexts = HashMap::new();
+    let mut results = Vec::new();
 
     // Check for missing GPG keys based on fingerprint, import them
     let gpg_fingerprints = store_read_gpg_fingerprints(store)?;
@@ -197,13 +198,28 @@ pub fn import_missing_keys_from_store(store: &Store) -> Result<()> {
             .entry(Proto::Gpg)
             .or_insert(super::context(Proto::Gpg)?);
         if let Err(_) = context.get_public_key(&fingerprint) {
-            context.import_key_file(&store_public_keys_dir(store).join(fingerprint))?;
+            let path = &store_public_keys_dir(store).join(&fingerprint);
+            if path.is_file() {
+                context.import_key_file(path)?;
+                results.push(ImportResult::Imported(fingerprint));
+            } else {
+                results.push(ImportResult::Unavailable(fingerprint));
+            }
         }
     }
 
     // NEWPROTO: if a new proto is added, import missing keys here
 
-    Ok(())
+    Ok(results)
+}
+
+/// Missing key import results.
+pub enum ImportResult {
+    /// Key with given fingerprint was imported into keychain.
+    Imported(String),
+
+    /// Key with given fingerprint was not found and was not imported in keychain.
+    Unavailable(String),
 }
 
 #[derive(Debug, Error)]

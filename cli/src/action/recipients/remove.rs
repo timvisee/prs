@@ -2,7 +2,7 @@ use anyhow::Result;
 use clap::ArgMatches;
 use thiserror::Error;
 
-use prs_lib::store::Store;
+use prs_lib::{crypto, store::Store};
 
 use crate::cmd::matcher::{
     recipients::{remove::RemoveMatcher, RecipientsMatcher},
@@ -57,7 +57,8 @@ impl<'a> Remove<'a> {
         }
 
         recipients.remove(&key);
-        recipients.save(&store)?;
+        // TODO: implement save on recipients through trait
+        crypto::store::store_save_recipients(&store, &recipients)?;
 
         // Recrypt secrets
         if matcher_remove.recrypt() {

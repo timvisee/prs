@@ -2,7 +2,11 @@ use anyhow::Result;
 use clap::ArgMatches;
 use thiserror::Error;
 
-use prs_lib::{store::Store, Recipients};
+use prs_lib::{
+    crypto::{self, prelude::*},
+    store::Store,
+    Recipients,
+};
 
 use crate::cmd::matcher::{
     recipients::{generate::GenerateMatcher, RecipientsMatcher},
@@ -72,7 +76,8 @@ impl<'a> Generate<'a> {
             for key in new_keys {
                 recipients.add(key.clone());
             }
-            recipients.save(&store)?;
+            // TODO: implement save on recipients through trait
+            crypto::store::store_save_recipients(&store, &recipients)?;
 
             if prs_lib::store::can_decrypt(&store) {
                 // Recrypt secrets
@@ -116,7 +121,8 @@ impl<'a> Generate<'a> {
 /// Return new keys as recipients.
 pub fn gpg_generate(quiet: bool, verbose: bool) -> Result<Recipients> {
     // List recipients before
-    let before = prs_lib::all(true)?;
+    let mut context = crypto::context(crypto::PROTO)?;
+    let before = Recipients::from(context.keys_private()?);
 
     // Generate key through GPG
     if !quiet {
@@ -128,8 +134,8 @@ pub fn gpg_generate(quiet: bool, verbose: bool) -> Result<Recipients> {
     }
 
     // List recipients after, keep new keys
-    let mut diff = prs_lib::all(true)?;
-    diff.remove_many(before.keys());
+    let mut diff = Recipients::from(context.keys_private()?);
+    diff.remove_all(before.keys());
     Ok(diff)
 }
 

@@ -1,10 +1,11 @@
-use std::fs;
-
 use anyhow::Result;
 use clap::ArgMatches;
 use thiserror::Error;
 
-use prs_lib::store::Store;
+use prs_lib::{
+    crypto::{self, store::ImportResult},
+    store::Store,
+};
 
 use crate::{
     cmd::matcher::{
@@ -44,12 +45,13 @@ impl<'a> SyncKeys<'a> {
 
         // Import missing keys into keychain
         if !matcher_sync_keys.no_import() {
-            import_missing_keys(&store, matcher_main.quiet(), matcher_main.verbose())?;
+            import_missing_keys(&store, matcher_main.quiet(), matcher_main.verbose())
+                .map_err(Err::ImportKeys)?;
         }
 
         // Sync public key files in store
         let recipients = store.recipients().map_err(Err::Load)?;
-        recipients.sync_public_key_files(&store)?;
+        crypto::store::store_sync_public_key_files(&store, recipients.keys())?;
 
         sync.finalize("Sync keys")?;
 
@@ -67,31 +69,18 @@ fn import_missing_keys(store: &Store, quiet: bool, verbose: bool) -> Result<()> 
         eprintln!("Importing missing public keys from recipients...");
     }
 
-    let mut context = prs_lib::crypto::context()?;
-
-    // Find fingerprints of unimported keys
-    let missing = prs_lib::filter_imported_fingerprints(prs_lib::read_fingerprints_file(
-        prs_lib::store_gpg_ids_file(&store),
-    )?)?;
-
-    for fingerprint in missing {
-        let path = prs_lib::store_public_keys_dir(&store).join(&fingerprint);
-
-        if !path.is_file() {
-            eprintln!(
+    // Import keys, report results
+    for result in crypto::store::import_missing_keys_from_store(&store)? {
+        match result {
+            ImportResult::Imported(fingerprint) => {
+                if !quiet {
+                    eprintln!("Imported key to keychain: {}", fingerprint);
+                }
+            }
+            ImportResult::Unavailable(fingerprint) => eprintln!(
                 "Cannot import missing public key, not available in store: {}",
                 fingerprint
-            );
-            continue;
-        }
-
-        let data = fs::read(path).map_err(|err| Err::ImportKey(err.into()))?;
-        context
-            .import(data)
-            .map_err(|err| Err::ImportKey(err.into()))?;
-
-        if !quiet {
-            eprintln!("Imported key to keychain: {}", fingerprint);
+            ),
         }
     }
 
@@ -106,6 +95,6 @@ pub enum Err {
     #[error("failed to load store recipients")]
     Load(#[source] anyhow::Error),
 
-    #[error("failed to import public key to keychain")]
-    ImportKey(#[source] anyhow::Error),
+    #[error("failed to import public keys to keychain")]
+    ImportKeys(#[source] anyhow::Error),
 }

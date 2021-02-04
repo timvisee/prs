@@ -4,7 +4,11 @@ use std::time::Duration;
 
 use anyhow::Result;
 use clap::ArgMatches;
-use prs_lib::{store::Store, types::Plaintext};
+use prs_lib::{
+    crypto::{self, prelude::*},
+    store::Store,
+    types::Plaintext,
+};
 use thiserror::Error;
 
 use crate::cmd::matcher::{show::ShowMatcher, MainMatcher, Matcher};
@@ -30,7 +34,9 @@ impl<'a> Show<'a> {
         let store = Store::open(matcher_show.store()).map_err(Err::Store)?;
         let secret = skim::select_secret(&store, matcher_show.query()).ok_or(Err::NoneSelected)?;
 
-        let mut plaintext = prs_lib::crypto::decrypt_file(&secret.path).map_err(Err::Read)?;
+        let mut plaintext = crypto::context(crypto::PROTO)?
+            .decrypt_file(&secret.path)
+            .map_err(Err::Read)?;
 
         // Trim plaintext to first line or property
         if matcher_show.first_line() {

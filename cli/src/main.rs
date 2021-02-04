@@ -10,7 +10,7 @@ mod util;
 use std::process;
 
 use anyhow::Result;
-use prs_lib::store::Store;
+use prs_lib::{crypto, store::Store};
 
 use crate::{
     cmd::matcher::{MainMatcher, Matcher},
@@ -147,10 +147,10 @@ pub fn print_main_info() -> ! {
         // Hint user to add ourselves as recipient if it doesn't have recipient we own
         let we_own_any_recipient = store
             .recipients()
-            .and_then(|recip| prs_lib::contains_own_secret_key(&recip))
+            .and_then(|recip| crypto::recipients::contains_own_secret_key(&recip))
             .unwrap_or(false);
         if !we_own_any_recipient {
-            let system_has_secret = action::clone::has_secret_key_in_keychain().unwrap_or(true);
+            let system_has_secret = crypto::util::has_private_key(crypto::PROTO).unwrap_or(true);
             if system_has_secret {
                 eprintln!("Add your own key as recipient or generate a new one:");
             } else {

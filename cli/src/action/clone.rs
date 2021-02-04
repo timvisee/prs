@@ -3,7 +3,7 @@ use std::path::Path;
 
 use anyhow::Result;
 use clap::ArgMatches;
-use prs_lib::{store::Store, Recipients};
+use prs_lib::{crypto, store::Store};
 use thiserror::Error;
 
 use crate::cmd::matcher::{clone::CloneMatcher, MainMatcher, Matcher};
@@ -43,7 +43,7 @@ impl<'a> Clone<'a> {
             .map_err(Err::Clone)?;
 
         // Import repo recipients missing in keychain
-        Recipients::import_missing_keys_from_store(&store).map_err(Err::ImportRecipients)?;
+        crypto::store::import_missing_keys_from_store(&store).map_err(Err::ImportRecipients)?;
 
         // Run housekeeping
         crate::action::housekeeping::run::housekeeping(&store).map_err(Err::Housekeeping)?;
@@ -51,14 +51,15 @@ impl<'a> Clone<'a> {
         // Check whether the store has any key we own the secret for, default to false
         let store_has_our_secret = store
             .recipients()
-            .and_then(|recipients| prs_lib::contains_own_secret_key(&recipients))
+            .and_then(|recipients| crypto::recipients::contains_own_secret_key(&recipients))
             .unwrap_or(false);
 
         // Hint user to add our recipient key
         if !matcher_main.quiet() {
             if !store_has_our_secret {
                 let bin = util::bin_name();
-                let system_has_secret = has_secret_key_in_keychain().unwrap_or(true);
+                let system_has_secret =
+                    crypto::util::has_private_key(crypto::PROTO).unwrap_or(true);
 
                 if system_has_secret {
                     println!("Now add your own key as recipient or generate a new one:");
@@ -83,12 +84,6 @@ impl<'a> Clone<'a> {
 
         Ok(())
     }
-}
-
-/// Check whether the user has any secret key in his keychain.
-// TODO: duplicate, also use in init
-pub(crate) fn has_secret_key_in_keychain() -> Result<bool> {
-    Ok(!prs_lib::all(true)?.keys().is_empty())
 }
 
 /// Ensure the given path is a free directory.

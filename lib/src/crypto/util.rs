@@ -1,4 +1,6 @@
-use super::Key;
+use anyhow::Result;
+
+use super::{prelude::*, Key, Proto};
 
 /// Format fingerprint in consistent format.
 ///
@@ -17,6 +19,11 @@ pub fn fingerprints_equal<S: AsRef<str>, T: AsRef<str>>(a: S, b: T) -> bool {
 pub fn keys_contain_fingerprint<S: AsRef<str>>(keys: &[Key], fingerprint: S) -> bool {
     keys.iter()
         .any(|key| fingerprints_equal(key.fingerprint(false), fingerprint.as_ref()))
+}
+
+/// Check whether the user has any private/secret key in their keychain.
+pub fn has_private_key(proto: Proto) -> Result<bool> {
+    Ok(!super::context(proto)?.keys_private()?.is_empty())
 }
 
 ///// Check whether the given recipients contain any key that we have a secret key in our keychain

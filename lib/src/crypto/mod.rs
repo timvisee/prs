@@ -4,6 +4,7 @@ pub mod recipients;
 pub mod store;
 pub mod util;
 
+use std::fmt;
 use std::fs;
 use std::path::Path;
 
@@ -12,6 +13,11 @@ use thiserror::Error;
 
 use crate::types::{Ciphertext, Plaintext};
 use crate::Recipients;
+
+/// Default proto.
+///
+/// May be removed later when multiple protocols are supported.
+pub const PROTO: Proto = Proto::Gpg;
 
 /// Crypto protocol.
 ///
@@ -22,6 +28,15 @@ use crate::Recipients;
 pub enum Proto {
     /// GPG crypto.
     Gpg,
+}
+
+impl Proto {
+    /// Get the protocol display name.
+    pub fn name(&self) -> &str {
+        match self {
+            Self::Gpg => "GPG",
+        }
+    }
 }
 
 /// Represents a key.
@@ -50,12 +65,24 @@ impl Key {
         }
     }
 
-    /// Key displayable user data.
-    pub fn display_user(&self) -> String {
+    /// Display string for user.
+    pub fn display(&self) -> String {
         match self {
             #[cfg(feature = "_crypto-gpg")]
             Key::Gpg(key) => key.display_user(),
         }
+    }
+}
+
+impl fmt::Display for Key {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "[{}] {} - {}",
+            self.proto().name(),
+            self.fingerprint(true),
+            self.display(),
+        )
     }
 }
 
@@ -67,10 +94,10 @@ impl Key {
 ///
 /// Errors if no compatible crypto context is available because no backend is providing it. Also
 /// errors if creating the context fails.
+#[allow(unreachable_code)]
 pub fn context(proto: Proto) -> Result<Context, Err> {
     // Select proper crypto backend
     match proto {
-        #[allow(unreachable_code)]
         Proto::Gpg => {
             #[cfg(feature = "backend-gpgme")]
             return Ok(Context::from(Box::new(

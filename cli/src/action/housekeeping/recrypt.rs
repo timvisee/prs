@@ -3,6 +3,7 @@ use clap::ArgMatches;
 use thiserror::Error;
 
 use prs_lib::{
+    crypto::{self, prelude::*, Context},
     store::{Secret, Store},
     Recipients,
 };
@@ -40,7 +41,7 @@ impl<'a> Recrypt<'a> {
         sync.prepare()?;
 
         // Import new keys
-        Recipients::import_missing_keys_from_store(&store).map_err(Err::ImportRecipients)?;
+        crypto::store::import_missing_keys_from_store(&store).map_err(Err::ImportRecipients)?;
 
         let secrets = store.secrets(matcher_recrypt.query());
 
@@ -64,6 +65,7 @@ pub fn recrypt_all(store: &Store, quiet: bool, verbose: bool) -> Result<()> {
 
 /// Re-encrypt all given secrets.
 pub fn recrypt(store: &Store, secrets: &[Secret], quiet: bool, verbose: bool) -> Result<()> {
+    let mut context = crypto::context(crypto::PROTO)?;
     let recipients = store.recipients().map_err(Err::Store)?;
     let len = secrets.len();
 
@@ -75,7 +77,7 @@ pub fn recrypt(store: &Store, secrets: &[Secret], quiet: bool, verbose: bool) ->
         }
 
         // Recrypt secret, show status, remember errors
-        match recrypt_single(secret, &recipients) {
+        match recrypt_single(&mut context, secret, &recipients) {
             Ok(_) => {
                 if !quiet {
                     eprintln!("[{}/{}] Re-encrypted: {}", i + 1, len, secret.name);
@@ -124,10 +126,12 @@ pub fn recrypt(store: &Store, secrets: &[Secret], quiet: bool, verbose: bool) ->
 }
 
 /// Recrypt a single secret.
-fn recrypt_single(secret: &Secret, recipients: &Recipients) -> Result<()> {
+fn recrypt_single(context: &mut Context, secret: &Secret, recipients: &Recipients) -> Result<()> {
     let path = &secret.path;
-    let plaintext = prs_lib::crypto::decrypt_file(path).map_err(Err::Read)?;
-    prs_lib::crypto::encrypt_file(recipients, plaintext, path).map_err(Err::Write)?;
+    let plaintext = context.decrypt_file(path).map_err(Err::Read)?;
+    context
+        .encrypt_file(recipients, plaintext, path)
+        .map_err(Err::Write)?;
 
     Ok(())
 }

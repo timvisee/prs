@@ -1,6 +1,9 @@
 use anyhow::Result;
 use clap::ArgMatches;
-use prs_lib::store::Store;
+use prs_lib::{
+    crypto::{self, prelude::*},
+    store::Store,
+};
 use thiserror::Error;
 
 use crate::cmd::matcher::{copy::CopyMatcher, MainMatcher, Matcher};
@@ -26,7 +29,9 @@ impl<'a> Copy<'a> {
         let store = Store::open(matcher_copy.store()).map_err(Err::Store)?;
         let secret = skim::select_secret(&store, matcher_copy.query()).ok_or(Err::NoneSelected)?;
 
-        let mut plaintext = prs_lib::crypto::decrypt_file(&secret.path).map_err(Err::Read)?;
+        let mut plaintext = crypto::context(crypto::PROTO)?
+            .decrypt_file(&secret.path)
+            .map_err(Err::Read)?;
 
         // Trim plaintext to property or first line
         if let Some(property) = matcher_copy.property() {

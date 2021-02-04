@@ -12,7 +12,7 @@ use prs_lib::store::SecretIterConfig;
 use prs_lib::{Secret, Store};
 
 use crate::cmd::matcher::{remove::RemoveMatcher, MainMatcher, Matcher};
-use crate::util::{cli, error, skim, sync};
+use crate::util::{cli, error, select, sync};
 
 /// Remove secret action.
 pub struct Remove<'a> {
@@ -38,7 +38,7 @@ impl<'a> Remove<'a> {
         sync.prepare()?;
 
         let secret =
-            skim::select_secret(&store, matcher_remove.query()).ok_or(Err::NoneSelected)?;
+            select::store_select_secret(&store, matcher_remove.query()).ok_or(Err::NoneSelected)?;
 
         // TODO: if this secret is a symlink, ask whether to remove target file as well?
 

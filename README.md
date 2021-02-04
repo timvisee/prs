@@ -114,14 +114,14 @@ prs help
   - Arch: `pacman -S git gnupg gpgme`
   - Alpine: `apk add git gnupg gpgme`
   - macOS: `brew install gnupg gpgme`
-  - Windows: `scoop install git gpg`
+  - Windows: `scoop install git gpg fzf`
 - Build: _`git`, `gnupg`, `gpgme` dev packages and dev utilities_
   - Ubuntu, Debian and derivatives: `apt install git gpg build-essential pkg-config python3 xorg-dev libx11-xcb-dev libdbus-1-dev libgpgme-dev`
   - CentOS/Red Hat/openSUSE/Fedora: `yum install git gnupg gpgme-devel pkgconfig python3 xorg-x11-devel libxcb-devel`
   - Arch: `pacman -S git gnupg gpgme pkgconf python3 xorg-server libxcb`
   - Alpine: `apk add git gnupg gpgme-dev pkgconfig`
   - macOS: `brew install gnupg gpgme`
-  - Windows: `scoop install git gpg`
+  - Windows: `scoop install git gpg fzf`
 
 #### Specific
 Specific features or crates require specific dependencies as shown below.

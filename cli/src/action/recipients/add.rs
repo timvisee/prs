@@ -11,7 +11,7 @@ use crate::cmd::matcher::{
     recipients::{add::AddMatcher, RecipientsMatcher},
     MainMatcher, Matcher,
 };
-use crate::util::{self, error, skim, style, sync};
+use crate::util::{self, error, select, style, sync};
 
 /// A recipients add action.
 pub struct Add<'a> {
@@ -50,7 +50,7 @@ impl<'a> Add<'a> {
             .map_err(Err::Load)?,
         );
         tmp.remove_all(recipients.keys());
-        let key = skim::skim_select_key(tmp.keys()).ok_or(Err::NoneSelected)?;
+        let key = select::select_key(tmp.keys()).ok_or(Err::NoneSelected)?;
         recipients.add(key.clone());
 
         // TODO: implement save on recipients through trait

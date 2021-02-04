@@ -7,7 +7,7 @@ use thiserror::Error;
 use prs_lib::{Secret, Store};
 
 use crate::cmd::matcher::{duplicate::DuplicateMatcher, MainMatcher, Matcher};
-use crate::util::{cli, error, skim, sync};
+use crate::util::{cli, error, select, sync};
 
 /// Duplicate secret action.
 pub struct Duplicate<'a> {
@@ -33,8 +33,8 @@ impl<'a> Duplicate<'a> {
         sync::ensure_ready(&sync);
         sync.prepare()?;
 
-        let secret =
-            skim::select_secret(&store, matcher_duplicate.query()).ok_or(Err::NoneSelected)?;
+        let secret = select::store_select_secret(&store, matcher_duplicate.query())
+            .ok_or(Err::NoneSelected)?;
         let dest = matcher_duplicate.destination();
 
         // TODO: show secret name if not equal to query, unless quiet?

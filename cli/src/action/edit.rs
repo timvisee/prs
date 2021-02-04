@@ -7,7 +7,7 @@ use prs_lib::{
 use thiserror::Error;
 
 use crate::cmd::matcher::{edit::EditMatcher, MainMatcher, Matcher};
-use crate::util::{cli, edit, error, skim, stdin, sync};
+use crate::util::{cli, edit, error, select, stdin, sync};
 
 /// Edit secret plaintext action.
 pub struct Edit<'a> {
@@ -32,7 +32,8 @@ impl<'a> Edit<'a> {
         sync::ensure_ready(&sync);
         sync.prepare()?;
 
-        let secret = skim::select_secret(&store, matcher_edit.query()).ok_or(Err::NoneSelected)?;
+        let secret =
+            select::store_select_secret(&store, matcher_edit.query()).ok_or(Err::NoneSelected)?;
 
         let mut context = crypto::context(crypto::PROTO)?;
         let mut plaintext = context.decrypt_file(&secret.path).map_err(Err::Read)?;

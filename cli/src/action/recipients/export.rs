@@ -16,7 +16,7 @@ use crate::cmd::matcher::{
 };
 #[cfg(feature = "clipboard")]
 use crate::util::clipboard;
-use crate::util::skim;
+use crate::util::select;
 
 /// A recipients export action.
 pub struct Export<'a> {
@@ -39,7 +39,7 @@ impl<'a> Export<'a> {
         let store = Store::open(matcher_recipients.store()).map_err(Err::Store)?;
         let recipients = store.recipients().map_err(Err::Load)?;
 
-        let key = skim::skim_select_key(recipients.keys())
+        let key = select::select_key(recipients.keys())
             .ok_or(Err::NoneSelected)?
             .clone();
 

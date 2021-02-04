@@ -4,7 +4,11 @@ pub mod clipboard;
 pub mod edit;
 pub mod error;
 pub mod pass;
-pub mod skim;
+pub mod select;
+#[cfg(not(unix))]
+pub mod select_fzf;
+#[cfg(unix)]
+pub mod select_skim;
 pub mod stdin;
 pub mod style;
 pub mod sync;

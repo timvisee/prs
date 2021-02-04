@@ -8,7 +8,7 @@ use thiserror::Error;
 use prs_lib::{Secret, Store};
 
 use crate::cmd::matcher::{alias::AliasMatcher, MainMatcher, Matcher};
-use crate::util::{cli, error, skim, sync};
+use crate::util::{cli, error, select, sync};
 
 /// Alias secret action.
 pub struct Alias<'a> {
@@ -34,7 +34,8 @@ impl<'a> Alias<'a> {
         sync::ensure_ready(&sync);
         sync.prepare()?;
 
-        let secret = skim::select_secret(&store, matcher_alias.query()).ok_or(Err::NoneSelected)?;
+        let secret =
+            select::store_select_secret(&store, matcher_alias.query()).ok_or(Err::NoneSelected)?;
         let dest = matcher_alias.destination();
 
         // TODO: show secret name if not equal to query, unless quiet?

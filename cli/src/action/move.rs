@@ -9,7 +9,7 @@ use thiserror::Error;
 use prs_lib::{Secret, Store};
 
 use crate::cmd::matcher::{r#move::MoveMatcher, MainMatcher, Matcher};
-use crate::util::{cli, error, skim, sync};
+use crate::util::{cli, error, select, sync};
 
 /// Move secret action.
 pub struct Move<'a> {
@@ -35,7 +35,8 @@ impl<'a> Move<'a> {
         sync::ensure_ready(&sync);
         sync.prepare()?;
 
-        let secret = skim::select_secret(&store, matcher_move.query()).ok_or(Err::NoneSelected)?;
+        let secret =
+            select::store_select_secret(&store, matcher_move.query()).ok_or(Err::NoneSelected)?;
 
         // TODO: show secret name if not equal to query, unless quiet?
 

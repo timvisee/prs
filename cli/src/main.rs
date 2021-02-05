@@ -24,6 +24,7 @@ const CLIPBOARD_TIMEOUT: u64 = 20;
 
 fn main() {
     // Do not use colored output on Windows
+    #[cfg(windows)]
     colored::control::set_override(false);
 
     // Parse CLI arguments

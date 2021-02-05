@@ -106,6 +106,7 @@ prs help
 ## Requirements
 - Linux, macOS, FreeBSD, Windows (other BSDs might work)
 - A terminal :sunglasses:
+- _And:_
 
 #### Recommended
 - Run: _`git`, `gnupg`, `gpgme`_
@@ -324,7 +325,7 @@ of which are enabled by default:
 | :-----------------: | :-------------------: | :-----: | :--------------------------------------------------------- |
 | `backend-gpgme`     | _all_                 | Default | GPG crypto backend using GPGME (not supported on Windows)  |
 | `backend-gnupg-bin` | _all_                 |         | GPG crypto backend using GnuPG binary                      |
-| `alias`             | `prc-cli`             | Default | Support for secret aliases                                 |
+| `alias`             | `prc-cli`             | Default | Support for secret aliases (partially supported on Windows)|
 | `clipboard`         | `prs-cli`             | Default | Clipboard support: copy secret to clipboard                |
 | `notify`            | `prs-cli`, `prs-gtk3` | Default | Notification support: notify on clipboard clear            |
 
@@ -336,19 +337,19 @@ Here are some examples:
 
 ```bash
 # Default set of features with backend-gnupg-bin, install or build, one of
-cargo install --features backend-gnupg-bin
-cargo build --release --features backend-gnupg-bin
+cargo install --path cli --features backend-gnupg-bin
+cargo build --path cli --release --features backend-gnupg-bin
 
 # No default features, except required, one of
-cargo install --no-default-features --features backend-gpgme
-cargo install --no-default-features --features backend-gnupg-bin
+cargo install --path cli --no-default-features --features backend-gpgme
+cargo install --path cli --no-default-features --features backend-gnupg-bin
 
 # With alias, clipboard and notification support, one of
-cargo install --no-default-features --features backend-gpgme,alias,clipboard,notify
-cargo install --no-default-features --features backend-gnupg-bin,alias,clipboard,notify
+cargo install --path cli --no-default-features --features backend-gpgme,alias,clipboard,notify
+cargo install --path cli --no-default-features --features backend-gnupg-bin,alias,clipboard,notify
 
 # Minimum configuration for Windowds
-cargo install --no-default-features --features backend-gnupg-bin
+cargo install --path cli --no-default-features --features backend-gnupg-bin
 ```
 
 ## Security

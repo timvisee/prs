@@ -19,7 +19,7 @@ edition = "2018"
 gitlab = { repository = "timvisee/prs", branch = "master" }
 
 [features]
-default = ["backend-gpgme", "clipboard", "notify"]
+default = ["backend-gpgme", "alias", "clipboard", "notify"]
 
 # Backend using GPGME for GnuPG crypto
 backend-gpgme = ["prs-lib/backend-gpgme"]

@@ -271,7 +271,7 @@ fn copy_timeout_process(data: &[u8], timeout: u64, report: bool) -> Result<()> {
     };
 
     // Set clipboard, remember previous contents
-    let previous = get()?;
+    let previous = get().unwrap_or_else(|_| "".into());
     set(&data)?;
 
     // Spawn & disown background process to revert clipboard, send previous contents to it

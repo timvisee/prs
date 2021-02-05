@@ -33,6 +33,22 @@ before_script:
   paths:
     - target/
 
+# Rust build cache configuration
+.before_script-windows: &before_script-windows
+  before_script:
+    # Install scoop
+    - Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
+
+    # Install Rust
+    - scoop install rustup
+    - rustup install $RUST_VERSION
+    - rustup default $RUST_VERSION
+    - rustc --version
+    - cargo --version
+
+    # Install GPGME
+    - scoop install gpg
+
 # Check on stable, beta and nightly 
 .check-base: &check-base
   stage: check
@@ -77,6 +93,15 @@ check-macos-stable:
     - brew upgrade
     - brew install $BREW_PACKAGES
   <<: *check-base
+check-windows:
+  stage: check
+  tags:
+    - windows
+  cache: {}
+  <<: *before_script-windows
+  script:
+    - cd lib; cargo check --no-default-features --features backend-gnupg-bin --verbose; cd ..
+    - cd cli; cargo check --no-default-features --features backend-gnupg-bin --verbose; cd ..
 
 # Build using Rust stable on Linux
 build-x86_64-linux-gnu:
@@ -167,6 +192,24 @@ build-macos:
       - prs-gtk3-copy-$TARGET
     expire_in: 1 month
 
+# Build using Rust stable on Windows
+build-x86_64-windows:
+  stage: build
+  tags:
+    - windows
+  needs: []
+  variables:
+    TARGET: x86_64-pc-windows-msvc
+  <<: *before_script-windows
+  script:
+    - cd cli; cargo build --target=$TARGET --release --no-default-features --features backend-gnupg-bin,clipboard,notify --verbose; cd ..
+    - mv target\$env:TARGET\release\prs.exe .\prs-$env:TARGET.exe
+  artifacts:
+    name: prs-x86_64-windows
+    paths:
+      - prs-$TARGET.exe
+    expire_in: 1 month
+
 # Run the unit tests through Cargo
 test-cargo:
   stage: test
@@ -243,6 +286,7 @@ release-gitlab-generic-package:
     - build-x86_64-linux-gnu
     - build-x86_64-linux-musl
     - build-macos
+    - build-x86_64-windows
   only:
     - /^v(\d+\.)*\d+$/
   variables:
@@ -252,6 +296,7 @@ release-gitlab-generic-package:
     LINUX_MUSL_BIN_GTK_COPY: "prs-gtk3-copy-x86_64-unknown-linux-musl"
     MACOS_BIN: "prs-x86_64-apple-darwin"
     MACOS_BIN_GTK_COPY: "prs-gtk3-copy-x86_64-apple-darwin"
+    WINDOWS_BIN: "prs-x86_64-pc-windows-msvc.exe"
   before_script: []
   script:
     # Get version based on tag, determine registry URL
@@ -271,6 +316,8 @@ release-gitlab-generic-package:
       curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file ${MACOS_BIN} ${PACKAGE_REGISTRY_URL}/${MACOS_BIN}
     - |
       curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file ${MACOS_BIN_GTK_COPY} ${PACKAGE_REGISTRY_URL}/${MACOS_BIN_GTK_COPY}
+    - |
+      curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file ${WINDOWS_BIN} ${PACKAGE_REGISTRY_URL}/${WINDOWS_BIN}
 
 # Publish GitLab release
 release-gitlab-release:
@@ -285,6 +332,7 @@ release-gitlab-release:
     LINUX_MUSL_BIN_GTK_COPY: "prs-gtk3-copy-x86_64-unknown-linux-musl"
     MACOS_BIN: "prs-x86_64-apple-darwin"
     MACOS_BIN_GTK_COPY: "prs-gtk3-copy-x86_64-apple-darwin"
+    WINDOWS_BIN: "prs-x86_64-pc-windows-msvc.exe"
   before_script: []
   script:
     # Get version based on tag, determine registry URL
@@ -299,7 +347,8 @@ release-gitlab-release:
         --assets-link "{\"name\":\"${LINUX_MUSL_BIN}\",\"url\":\"${PACKAGE_REGISTRY_URL}/${LINUX_MUSL_BIN}\"}" \
         --assets-link "{\"name\":\"${LINUX_MUSL_BIN_GTK_COPY}\",\"url\":\"${PACKAGE_REGISTRY_URL}/${LINUX_MUSL_BIN_GTK_COPY}\"}" \
         --assets-link "{\"name\":\"${MACOS_BIN}\",\"url\":\"${PACKAGE_REGISTRY_URL}/${MACOS_BIN}\"}" \
-        --assets-link "{\"name\":\"${MACOS_BIN_GTK_COPY}\",\"url\":\"${PACKAGE_REGISTRY_URL}/${MACOS_BIN_GTK_COPY}\"}"
+        --assets-link "{\"name\":\"${MACOS_BIN_GTK_COPY}\",\"url\":\"${PACKAGE_REGISTRY_URL}/${MACOS_BIN_GTK_COPY}\"}" \
+        --assets-link "{\"name\":\"${WINDOWS_BIN}\",\"url\":\"${PACKAGE_REGISTRY_URL}/${WINDOWS_BIN}\"}"
 
 # Publish GitHub release
 release-github:
@@ -329,6 +378,7 @@ release-github:
     - ./github-release upload --token "$GITHUB_TOKEN" --owner timvisee --repo prs --tag "$CI_COMMIT_REF_NAME" --file ./prs-gtk3-copy-x86_64-unknown-linux-musl --name prs-gtk3-copy-$CI_COMMIT_REF_NAME-linux-x64-static
     - ./github-release upload --token "$GITHUB_TOKEN" --owner timvisee --repo prs --tag "$CI_COMMIT_REF_NAME" --file ./prs-x86_64-apple-darwin --name prs-$CI_COMMIT_REF_NAME-macos
     - ./github-release upload --token "$GITHUB_TOKEN" --owner timvisee --repo prs --tag "$CI_COMMIT_REF_NAME" --file ./prs-gtk3-copy-x86_64-apple-darwin --name prs-gtk3-copy-$CI_COMMIT_REF_NAME-macos
+    - ./github-release upload --token "$GITHUB_TOKEN" --owner timvisee --repo prs --tag "$CI_COMMIT_REF_NAME" --file ./prs-x86_64-pc-windows-msvc.exe --name prs-$CI_COMMIT_REF_NAME-windows.exe
 
 # Cargo crate release
 release-crate:

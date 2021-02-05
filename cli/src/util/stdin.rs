@@ -7,7 +7,10 @@ use thiserror::Error;
 /// Read file from stdin.
 fn read_file(prompt: bool) -> Result<Vec<u8>> {
     if prompt {
+        #[cfg(not(windows))]
         eprintln!("Enter input. Use [CTRL+D] to stop:");
+        #[cfg(windows)]
+        eprintln!("Enter input. Use [CTRL+Z] to stop:");
     }
 
     let mut data = vec![];

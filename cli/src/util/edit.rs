@@ -21,6 +21,13 @@ pub fn edit(plaintext: &Plaintext) -> Result<Option<Plaintext>> {
     builder.suffix(".txt");
     let file = builder.tempfile_in(dir()).map_err(Err::Create)?;
 
+    // Show Windows users where to save the file because notepad doesn't remember properly
+    #[cfg(windows)]
+    eprintln!(
+        "Opening editor, save edited file at: {}",
+        file.path().display()
+    );
+
     // Attempt to edit plaintext, explicitly close/remove file, handle errors last
     let new_plaintext = write_edit_read(plaintext, file.path());
     file.close().map_err(Err::Close)?;
@@ -49,6 +56,17 @@ fn write_edit_read(plaintext: &Plaintext, file: &Path) -> Result<Plaintext> {
 /// This attempts to use a secure directory if available, such as `/dev/shm` which doesn't store
 /// anything on disk. Otherwise it defaults to the systems temporary directory.
 fn dir() -> PathBuf {
+    // Default to home directory on Windows due to notepad issues
+    // Notepad, the default editor on Windows, is too retarded to save at the path we opened the
+    // file at. Instead it always shows the 'Save As' dialog, no matter what, which defaults to the
+    // users home folder. We'll just store the file there then...
+    #[cfg(windows)]
+    {
+        if let Some(home) = env::home_dir() {
+            return home;
+        }
+    }
+
     // Default to temporary dir
     #[allow(unused_mut)]
     let mut dir = env::temp_dir().into();

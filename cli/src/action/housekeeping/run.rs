@@ -71,7 +71,7 @@ fn set_store_permissions(store: &Store) -> Result<(), std::io::Error> {
 
 /// Set the password store directory permissions to a secure default.
 #[cfg(not(unix))]
-fn set_store_permissions(store: &Store) -> Result<(), std::io::Error> {
+fn set_store_permissions(_store: &Store) -> Result<(), std::io::Error> {
     // Not supported on non-Unix
     Ok(())
 }

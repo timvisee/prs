@@ -22,15 +22,16 @@ use crate::util::error::{quit_error_msg, ErrorHints};
 /// Invoke a command.
 ///
 /// Quit on error.
+// TODO: provide list of arguments instead of a command string for better reliability/compatability
 pub fn invoke_cmd(cmd: String, dir: Option<&Path>, verbose: bool) -> Result<(), std::io::Error> {
     if verbose {
         eprintln!("Invoking: {}\n", cmd);
     }
 
     // Invoke command
-    // TODO: make this compatible with Windows
-    let mut process = Command::new("sh");
-    process.arg("-c").arg(&cmd);
+    let mut process = Command::new(if cfg!(not(windows)) { "sh" } else { "cmd" });
+    process.arg(if cfg!(not(windows)) { "-c" } else { "/C" });
+    process.arg(&cmd);
     if let Some(dir) = dir {
         process.current_dir(dir);
     }

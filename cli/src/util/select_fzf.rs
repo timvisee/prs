@@ -4,6 +4,12 @@ use std::process::{Command, Stdio};
 
 use prs_lib::{Key, Secret};
 
+/// Binary name.
+#[cfg(not(windows))]
+const BIN_NAME: &str = "fzf";
+#[cfg(windows)]
+const BIN_NAME: &str = "fzf.exe";
+
 /// Select secret.
 pub fn select_secret(secrets: &[Secret]) -> Option<&Secret> {
     // Return if theres just one to choose
@@ -38,7 +44,7 @@ fn select_item<'a, S: AsRef<str>>(prompt: &'a str, items: &'a [S]) -> Option<Str
     items.sort_unstable();
 
     // Spawn fzf
-    let child = Command::new("fzf")
+    let child = Command::new(prs_lib::util::bin_path(BIN_NAME))
         .arg("--prompt")
         .arg(format!("{}: ", prompt))
         .stdin(Stdio::piped())

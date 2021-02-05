@@ -8,8 +8,16 @@ use std::time::SystemTime;
 use anyhow::Result;
 use thiserror::Error;
 
+use crate::util;
+
 // Re-exports
 pub use git_state::{git_state, RepositoryState};
+
+/// Binary name.
+#[cfg(not(windows))]
+pub const BIN_NAME: &str = "git";
+#[cfg(windows)]
+pub const BIN_NAME: &str = "git.exe";
 
 /// The git FETCH_HEAD file.
 const GIT_FETCH_HEAD_FILE: &str = ".git/FETCH_HEAD";
@@ -255,7 +263,7 @@ where
     I: IntoIterator<Item = S>,
     S: AsRef<OsStr>,
 {
-    let mut cmd = Command::new("git");
+    let mut cmd = Command::new(util::bin_path(BIN_NAME));
 
     if let Some(dir) = dir {
         cmd.arg("-C");

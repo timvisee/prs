@@ -6,6 +6,12 @@ use thiserror::Error;
 use crate::cmd::matcher::{git::GitMatcher, MainMatcher, Matcher};
 use crate::util;
 
+/// Binary name.
+#[cfg(not(windows))]
+pub const BIN_NAME: &str = "git";
+#[cfg(windows)]
+pub const BIN_NAME: &str = "git.exe";
+
 /// Git action.
 pub struct Git<'a> {
     cmd_matches: &'a ArgMatches<'a>,
@@ -30,9 +36,15 @@ impl<'a> Git<'a> {
 }
 
 /// Invoke a git command.
+// TODO: call through Command directly, possibly through lib interface
 pub fn git(store: &Store, cmd: String, verbose: bool) -> Result<()> {
     util::invoke_cmd(
-        format!("git -C {:?} {}", store.root.display(), cmd),
+        format!(
+            "{} -C {} {}",
+            prs_lib::util::bin_path(BIN_NAME),
+            store.root.display(),
+            cmd
+        ),
         Some(&store.root),
         verbose,
     )

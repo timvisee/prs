@@ -17,6 +17,12 @@ use crate::util::{
     style, sync,
 };
 
+/// Binary name.
+#[cfg(not(windows))]
+const BIN_NAME: &str = "gpg";
+#[cfg(windows)]
+const BIN_NAME: &str = "gpg.exe";
+
 /// A recipients generate action.
 pub struct Generate<'a> {
     cmd_matches: &'a ArgMatches<'a>,
@@ -118,6 +124,7 @@ impl<'a> Generate<'a> {
 /// Invoke GPG generate command.
 ///
 /// Return new keys as recipients.
+// TODO: call through Command directly, possibly through lib interface
 pub fn gpg_generate(quiet: bool, verbose: bool) -> Result<Recipients> {
     // List recipients before
     let mut context = crypto::context(crypto::PROTO)?;
@@ -127,7 +134,12 @@ pub fn gpg_generate(quiet: bool, verbose: bool) -> Result<Recipients> {
     if !quiet {
         eprintln!("===== GPG START =====");
     }
-    util::invoke_cmd("gpg --full-generate-key".into(), None, verbose).map_err(Err::Invoke)?;
+    util::invoke_cmd(
+        format!("{} --full-generate-key", prs_lib::util::bin_path(BIN_NAME)),
+        None,
+        verbose,
+    )
+    .map_err(Err::Invoke)?;
     if !quiet {
         eprintln!("===== GPG END =====");
     }

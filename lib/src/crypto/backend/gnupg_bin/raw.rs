@@ -152,6 +152,11 @@ pub struct KeyId(pub String, pub Vec<String>);
 /// Parse key list output from gnupg.
 // TODO: throw proper errors on parse failure
 fn parse_key_list(list: String) -> Option<Vec<KeyId>> {
+    // Return empty list if there's no key loaded
+    if list.trim().is_empty() {
+        return Some(vec![]);
+    }
+
     let mut lines: VecDeque<_> = list.lines().collect();
 
     // Second line must be a line

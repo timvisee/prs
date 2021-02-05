@@ -27,7 +27,12 @@ pub fn store_public_keys_dir(store: &Store) -> PathBuf {
 
 /// Read GPG fingerprints from store.
 pub fn store_read_gpg_fingerprints(store: &Store) -> Result<Vec<String>> {
-    read_fingerprints(store_gpg_ids_file(store))
+    let path = store_gpg_ids_file(store);
+    if path.is_file() {
+        read_fingerprints(path)
+    } else {
+        Ok(vec![])
+    }
 }
 
 /// Write GPG fingerprints to a store.

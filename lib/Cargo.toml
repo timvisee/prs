@@ -34,7 +34,7 @@ _crypto-gpg = []
 anyhow = "1.0"
 git-state = "0.1"
 secstr = "0.4"
-shellexpand = "2.0"
+shellexpand = { version = "*", git = "https://github.com/timvisee/shellexpand.git", branch = "windows-paths" }
 thiserror = "1.0"
 walkdir = "2.0"
 which = "4.0"

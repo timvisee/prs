@@ -7,8 +7,6 @@ mod action;
 mod cmd;
 mod util;
 
-use std::process;
-
 use anyhow::Result;
 use prs_lib::{crypto, Store};
 
@@ -16,7 +14,7 @@ use crate::{
     cmd::matcher::{MainMatcher, Matcher},
     cmd::Handler,
     util::{
-        error::{quit_error, ErrorHints},
+        error::{quit, quit_error, ErrorHints},
         style,
     },
 };
@@ -219,5 +217,5 @@ pub fn print_main_info() -> ! {
         style::highlight(&format!("{} help [SUBCOMMAND]", bin))
     );
 
-    process::exit(1)
+    quit()
 }

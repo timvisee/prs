@@ -8,6 +8,7 @@ use super::{CmdArg, CmdArgOption};
 pub struct ArgTimeout {}
 
 impl ArgTimeout {
+    #[cfg(feature = "clipboard")]
     pub fn value_or_default<'a, 'b: 'a>(matches: &'a ArgMatches<'b>) -> Result<u64> {
         Self::value(matches).unwrap_or(Ok(crate::CLIPBOARD_TIMEOUT))
     }

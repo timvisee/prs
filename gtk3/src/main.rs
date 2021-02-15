@@ -20,6 +20,7 @@ use prs_lib::{
 const APP_ID: &str = "com.timvisee.prs.gtk3-copy";
 
 /// Application name.
+#[cfg(all(feature = "notify", not(target_env = "musl")))]
 const APP_NAME: &str = "prs";
 
 /// Application window title.
@@ -37,6 +38,7 @@ fn main() {
 
     // When activated, shuts down the application
     let quit = gio::SimpleAction::new("quit", None);
+    #[cfg(all(feature = "notify", not(target_env = "musl")))]
     quit.connect_activate(clone!(@weak application => move |_action, _parameter| {
         application.quit();
     }));

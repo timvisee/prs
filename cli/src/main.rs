@@ -21,6 +21,7 @@ use crate::{
 };
 
 /// Clipboard timeout in seconds.
+#[cfg(feature = "clipboard")]
 const CLIPBOARD_TIMEOUT: u64 = 20;
 
 fn main() {

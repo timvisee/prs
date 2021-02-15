@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.2.0 (2021-02-15)
+- Add Windows support, and Windows release binary
+- Add GPGME cryptography backend for GPG support (default, compiler feature: `backend-gpgme`)
+- Add GnuPG binary cryptography backend for GPG support (works on Windows, compiler feature: `backend-gnupg-bin`)
+- Add cryptography framework, allow use of different cryptography with different backends
+- Fix cancelling interactive secret selection not actually cancelling the action
+- Use `fzf` binary instead of `skim` for interactive selection on on non-Unix platforms
+- Do not quit with non-zero exit code when no subcommand is given
+- Disable colored output on Windows for compatibility
+- Always enable `alias` feature by default, instead of doing this just on Unix/Windows
+- Update dependencies
+
 ## 0.1.7 (2021-02-01)
 - Always end secret output to stdout with newline
 - Update dependencies

@@ -12,6 +12,7 @@ use crate::util::{
     error::{self, ErrorHints},
     style,
 };
+use crate::vendor::shellexpand;
 
 /// Clone store action.
 pub struct Clone<'a> {

@@ -12,6 +12,7 @@ use crate::util::{
     error::{self, ErrorHints},
     style,
 };
+use crate::vendor::shellexpand;
 
 /// Init store action.
 pub struct Init<'a> {

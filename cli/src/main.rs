@@ -6,6 +6,7 @@ extern crate derive_builder;
 mod action;
 mod cmd;
 mod util;
+mod vendor;
 
 use anyhow::Result;
 use prs_lib::{crypto, Store};

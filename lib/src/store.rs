@@ -11,6 +11,7 @@ use walkdir::{DirEntry, WalkDir};
 use crate::{
     crypto::{self, prelude::*},
     sync::Sync,
+    vendor::shellexpand,
     Recipients,
 };
 

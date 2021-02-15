@@ -4,6 +4,7 @@ pub mod store;
 pub mod sync;
 pub mod types;
 pub mod util;
+mod vendor;
 
 // Re-exports
 pub use crypto::{recipients::Recipients, Key};

@@ -49,7 +49,6 @@ edit = "0.1"
 libc = "0.2"
 prs-lib = { version = "0.1.7", path = "../lib", default-features = false }
 rand = "0.8"
-shellexpand = { version = "*", git = "https://github.com/timvisee/shellexpand.git", branch = "windows-paths" }
 thiserror = "1.0"
 walkdir = "2.0"
 
@@ -58,6 +57,11 @@ notify-rust = { version = "4.0", optional = true }
 
 # Clipboard support
 base64 = { version = "0.13", optional = true }
+
+# Vendored shellexpand fork until crate is updated
+# See ./src/vendor/shellexpand.rs
+dirs-next = "2.0"
+# shellexpand = { version = "*", git = "https://github.com/timvisee/shellexpand.git", branch = "windows-paths" }
 
 # Clipboard support for non-X11
 [target.'cfg(not(all(unix, not(any(target_os="macos", target_os="android", target_os="emscripten")))))'.dependencies]

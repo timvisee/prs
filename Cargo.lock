@@ -1421,12 +1421,12 @@ dependencies = [
  "colored",
  "copypasta-ext",
  "derive_builder",
+ "dirs-next",
  "edit",
  "libc",
  "notify-rust",
  "prs-lib",
  "rand",
- "shellexpand",
  "skim",
  "thiserror",
  "walkdir",
@@ -1452,11 +1452,11 @@ name = "prs-lib"
 version = "0.1.7"
 dependencies = [
  "anyhow",
+ "dirs-next",
  "git-state",
  "gpgme",
  "regex",
  "secstr",
- "shellexpand",
  "thiserror",
  "version-compare 0.0.11",
  "walkdir",
@@ -1666,14 +1666,6 @@ name = "serde"
 version = "1.0.123"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "92d5161132722baa40d802cc70b15262b98258453e85e5d1d365c757c73869ae"
-
-[[package]]
-name = "shellexpand"
-version = "2.1.0"
-source = "git+https://github.com/timvisee/shellexpand.git?branch=windows-paths#179447a3f8fccd765acfd2eed15a54c716c49cfe"
-dependencies = [
- "dirs-next",
-]
 
 [[package]]
 name = "shlex"

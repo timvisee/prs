@@ -139,7 +139,7 @@ to be an error, please feel free to contribute.
     - Arch: `pacman -S git gnupg`
     - Alpine: `apk add git gnupg`
     - macOS: `brew install gpg`
-    - Windows: `scoop install git gpg`
+    - Windows: `scoop install git gpg fzf`
 </details>
 
 <details>

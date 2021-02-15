@@ -359,6 +359,7 @@ release-github:
     - build-x86_64-linux-gnu
     - build-x86_64-linux-musl
     - build-macos
+    - build-x86_64-windows
   before_script: []
   script:
     # Install dependencies

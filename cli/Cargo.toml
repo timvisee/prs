@@ -60,6 +60,7 @@ base64 = { version = "0.13", optional = true }
 
 # Vendored shellexpand fork until crate is updated
 # See ./src/vendor/shellexpand.rs
+# When removing, keep dirs-next, but only for Windows
 dirs-next = "2.0"
 # shellexpand = { version = "*", git = "https://github.com/timvisee/shellexpand.git", branch = "windows-paths" }
 

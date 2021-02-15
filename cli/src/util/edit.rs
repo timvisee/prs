@@ -62,7 +62,7 @@ fn dir() -> PathBuf {
     // users home folder. We'll just store the file there then...
     #[cfg(windows)]
     {
-        if let Some(home) = env::home_dir() {
+        if let Some(home) = dirs_next::home_dir() {
             return home;
         }
     }

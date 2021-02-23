@@ -3,6 +3,7 @@ use std::sync::{Arc, Mutex};
 
 use gdk::prelude::*;
 use gio::prelude::*;
+#[cfg(all(feature = "notify", not(target_env = "musl")))]
 use glib::clone;
 use gtk::prelude::*;
 #[cfg(all(feature = "notify", target_os = "linux", not(target_env = "musl")))]

@@ -277,10 +277,9 @@ mv ./prs /usr/local/bin/prs
 ## Build
 To build and install `prs` yourself, make sure you meet the 'Build' [requirements](#requirements).
 
-To build on Windows you must change the default feature set. By default `prs`
-build with the GPGME cryptography backend which is not supported on Windows, the
-alternative GnuPG binary backend (`backend-gnupg-bin`) backend is supported. See
-[compiler features](#compile-features-use-flags).
+_Not all features are supported on Windows. The default configuration should
+work. When changing compile time features, make sure to check for compatibility.
+See [compiler features](#compile-features-use-flags)._
 
 ### Compile and install
 To compile and install `prs` with the default features follow these steps:
@@ -303,7 +302,7 @@ To compile and install `prs` with the default features follow these steps:
   cd prs
 
   # Compile and install
-  cargo install --path prs-cli -f
+  cargo install --path cli -f
 
   # Start using ffsend
   prs --help
@@ -323,8 +322,8 @@ of which are enabled by default:
 
 | Feature             | In                    | Enabled | Description                                                |
 | :-----------------: | :-------------------: | :-----: | :--------------------------------------------------------- |
-| `backend-gpgme`     | _all_                 | Default | GPG crypto backend using GPGME (not supported on Windows)  |
-| `backend-gnupg-bin` | _all_                 |         | GPG crypto backend using GnuPG binary                      |
+| `backend-gpgme`     | _all_                 |         | GPG crypto backend using GPGME (not supported on Windows)  |
+| `backend-gnupg-bin` | _all_                 | Default | GPG crypto backend using GnuPG binary                      |
 | `alias`             | `prc-cli`             | Default | Support for secret aliases (partially supported on Windows)|
 | `clipboard`         | `prs-cli`             | Default | Clipboard support: copy secret to clipboard                |
 | `notify`            | `prs-cli`, `prs-gtk3` | Default | Notification support: notify on clipboard clear            |
@@ -347,9 +346,6 @@ cargo install --path cli --no-default-features --features backend-gnupg-bin
 # With alias, clipboard and notification support, one of
 cargo install --path cli --no-default-features --features backend-gpgme,alias,clipboard,notify
 cargo install --path cli --no-default-features --features backend-gnupg-bin,alias,clipboard,notify
-
-# Minimum configuration for Windowds
-cargo install --path cli --no-default-features --features backend-gnupg-bin
 ```
 
 ## Security

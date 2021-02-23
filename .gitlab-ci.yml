@@ -14,6 +14,9 @@ variables:
   TARGET: x86_64-unknown-linux-gnu
   APT_GTK_LIBS: libgtk-3-dev
   BREW_PACKAGES: gpg gpgme gtk+3
+  FEATURES_CLI_UNIX: backend-gpgme,alias,clipboard,notify
+  FEATURES_GTK3_UNIX: backend-gpgme
+  FEATURES_CLI_WINDOWS: backend-gnupg-bin,clipboard,notify
 
 # Install compiler and OpenSSL dependencies
 before_script:
@@ -56,6 +59,8 @@ before_script:
     <<: *rust-build-cache
   script:
     - cargo check --verbose
+    - cd cli; cargo check --no-default-features --features $FEATURES_CLI_UNIX --verbose; cd ..
+    - cd gtk3; cargo check --no-default-features --features $FEATURES_GTK3_UNIX --verbose; cd ..
     - cd lib; cargo check --no-default-features --features backend-gpgme --verbose; cd ..
     - cd lib; cargo check --no-default-features --features backend-gnupg-bin --verbose; cd ..
     - cd cli; cargo check --no-default-features --features backend-gpgme --verbose; cd ..
@@ -100,6 +105,8 @@ check-windows:
   cache: {}
   <<: *before_script-windows
   script:
+    - cargo check --verbose
+    - cd lib; cargo check --no-default-features --features $FEATURES_CLI_WINDOWS --verbose; cd ..
     - cd lib; cargo check --no-default-features --features backend-gnupg-bin --verbose; cd ..
     - cd cli; cargo check --no-default-features --features backend-gnupg-bin --verbose; cd ..
 
@@ -110,7 +117,8 @@ build-x86_64-linux-gnu:
   cache:
     <<: *rust-build-cache
   script:
-    - cargo build --target=$TARGET --release --verbose
+    - cd cli; cargo build --target=$TARGET --release --no-default-features --features $FEATURES_CLI_UNIX --verbose; cd ..
+    - cd gtk3; cargo build --target=$TARGET --release --no-default-features --features $FEATURES_GTK3_UNIX --verbose; cd ..
     - mv target/$TARGET/release/prs ./prs-$TARGET
     - mv target/$TARGET/release/prs-gtk3-copy ./prs-gtk3-copy-$TARGET
     - strip -g ./prs-$TARGET
@@ -145,7 +153,8 @@ build-x86_64-linux-musl:
     - ./ci/gpgme/build
 
     - rustup target add $TARGET
-    - cargo build --target=$TARGET --release --verbose
+    - cd cli; cargo build --target=$TARGET --release --no-default-features $FEATURES_CLI_UNIX --verbose; cd ..
+    - cd gtk3; cargo build --target=$TARGET --release --no-default-features $FEATURES_GTK3_UNIX --verbose; cd ..
 
     # Prepare the release artifact, strip it
     - find . -name prs -exec ls -lah {} \;
@@ -182,7 +191,8 @@ build-macos:
     - brew upgrade
     - brew install $BREW_PACKAGES
   script:
-    - cargo build --target=$TARGET --release --verbose
+    - cd cli; cargo build --target=$TARGET --release --no-default-features $FEATURES_CLI_UNIX --verbose; cd ..
+    - cd gtk3; cargo build --target=$TARGET --release --no-default-features $FEATURES_GTK3_UNIX --verbose; cd ..
     - mv target/$TARGET/release/prs ./prs-$TARGET
     - mv target/$TARGET/release/prs-gtk3-copy ./prs-gtk3-copy-$TARGET
   artifacts:
@@ -202,7 +212,7 @@ build-x86_64-windows:
     TARGET: x86_64-pc-windows-msvc
   <<: *before_script-windows
   script:
-    - cd cli; cargo build --target=$TARGET --release --no-default-features --features backend-gnupg-bin,clipboard,notify --verbose; cd ..
+    - cd cli; cargo build --target=$TARGET --release --no-default-features --features $FEATURES_CLI_WINDOWS --verbose; cd ..
     - mv target\$env:TARGET\release\prs.exe .\prs-$env:TARGET.exe
   artifacts:
     name: prs-x86_64-windows

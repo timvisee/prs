@@ -20,7 +20,7 @@ default-run = "prs"
 gitlab = { repository = "timvisee/prs", branch = "master" }
 
 [features]
-default = ["backend-gpgme", "alias", "clipboard", "notify"]
+default = ["backend-gnupg-bin", "alias", "clipboard", "notify"]
 
 # Backend using GPGME for GnuPG crypto
 backend-gpgme = ["prs-lib/backend-gpgme"]

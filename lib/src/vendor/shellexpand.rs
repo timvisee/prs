@@ -1,7 +1,7 @@
 // `shellexpand` crate fork, vendored in this file to allow releasing new prs crates, until
 // shellexpand itself is updated.
 //
-// See the used for here:
+// See the used patch here:
 // https://github.com/timvisee/shellexpand/tree/windows-paths
 //
 // See the original source and license here:

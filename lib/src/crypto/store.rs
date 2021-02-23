@@ -248,6 +248,7 @@ impl StoreRecipients for Recipients {
     }
 }
 
+/// Store crypto error.
 #[derive(Debug, Error)]
 pub enum Err {
     #[error("failed to write to file")]

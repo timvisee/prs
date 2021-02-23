@@ -95,14 +95,14 @@ impl fmt::Display for Key {
     }
 }
 
-/// Get crypto context for given crypto type at runtime.
+/// Get crypto context for given proto type at runtime.
 ///
-/// This selects a compatibel crypto context at runtime.
+/// This selects a compatible crypto context at runtime.
 ///
 /// # Errors
 ///
-/// Errors if no compatible crypto context is available because no backend is providing it. Also
-/// errors if creating the context fails.
+/// Errors if no compatible crypto context is available for the selected protocol because no
+/// backend is providing it. Also errors if creating the context fails.
 #[allow(unreachable_code)]
 pub fn context(proto: Proto) -> Result<Context, Err> {
     // Select proper crypto backend
@@ -255,7 +255,8 @@ pub trait IsContext {
 
 /// A pool of proto contexts.
 ///
-/// Makes using multiple contexts easy.
+/// Makes using multiple contexts easy, by caching contexts by protocol type and initializing them
+/// on demand.
 pub struct ContextPool {
     /// All loaded contexts.
     contexts: HashMap<Proto, Context>,

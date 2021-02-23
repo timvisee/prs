@@ -44,7 +44,7 @@ compatible clients, extensions and migration scripts.
 - Easily edit secrets using your default editor
 - Supports smart aliases, property selection
 - Compatible with [`pass`][pass]
-- Supports Linux, macOS, Windows, FreeBSD and others
+- Supports Linux, macOS, Windows, FreeBSD and others, supports X11 and Wayland
 - Supports multiple cryptography backends (more backends & crypto in the future)
 - Scriptable with `-y`, `-f`, `-I` flags
 - Accurate & useful error reporting

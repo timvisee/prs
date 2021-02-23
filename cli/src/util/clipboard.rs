@@ -4,6 +4,7 @@ use std::thread;
 use std::time::Duration;
 
 use anyhow::Result;
+use copypasta_ext::display::DisplayServer;
 use copypasta_ext::prelude::*;
 #[cfg(all(feature = "notify", target_os = "linux", not(target_env = "musl")))]
 use notify_rust::Hint;
@@ -44,6 +45,14 @@ pub fn copy_timeout(data: &[u8], timeout: u64, report: bool) -> Result<()> {
     #[cfg(target_os = "windows")]
     return copy_timeout_windows(data, timeout, report);
 
+    #[cfg(all(
+        unix,
+        not(any(target_os = "macos", target_os = "android", target_os = "emscripten")),
+    ))]
+    if is_wayland() {
+        return copy_timeout_wayland_bin(data, timeout, report);
+    }
+
     // X11 with musl
     #[cfg(all(
         unix,
@@ -71,7 +80,7 @@ pub fn copy_timeout(data: &[u8], timeout: u64, report: bool) -> Result<()> {
 ///
 /// Forks & detaches two processes to set/keep clipboard contents and to drive the timeout.
 ///
-/// Based on: https://docs.rs/copypasta-ext/0.3.2/copypasta_ext/x11_fork/index.html
+/// Based on: https://docs.rs/copypasta-ext/0.3.4/copypasta_ext/x11_fork/index.html
 // TODO: add support for Wayland on Linux as well
 #[cfg(all(
     unix,
@@ -166,6 +175,73 @@ fn copy_timeout_x11(data: &[u8], timeout: u64, report: bool) -> Result<()> {
     Ok(())
 }
 
+/// Copy with timeout on Wayland using the wl-copy and wl-paste binaries.
+///
+/// Keeps clipboard contents in clipboard even if application quits. Doesn't fuck with other
+/// clipboard contents and reverts back to previous contents once a timeout is reached.
+///
+/// Forks & detaches two processes to set/keep clipboard contents and to drive the timeout.
+///
+/// Based on: https://docs.rs/copypasta-ext/0.3.4/copypasta_ext/wayland_fork/index.html
+#[cfg(all(
+    unix,
+    not(any(target_os = "macos", target_os = "android", target_os = "emscripten")),
+))]
+fn copy_timeout_wayland_bin(data: &[u8], timeout: u64, report: bool) -> Result<()> {
+    use copypasta_ext::wayland_bin::WaylandBinClipboardContext as ClipboardContext;
+
+    let data = std::str::from_utf8(data).map_err(Err::Utf8)?;
+    let bin = crate::util::bin_name();
+
+    // Remember previous clipboard contents
+    let mut ctx = ClipboardContext::new().map_err(Err::Clipboard)?;
+    let previous = ctx.get_contents().unwrap_or_else(|_| String::new());
+
+    // Set clipboard
+    ctx.set_contents(data.to_string()).map_err(Err::Clipboard)?;
+
+    // Detach fork to revert clipboard after timeout unless changed
+    match unsafe { libc::fork() } {
+        -1 => panic!("failed to fork"),
+        0 => {
+            thread::sleep(Duration::from_secs(timeout));
+
+            // Obtain new clipboard context, get current contents
+            let mut ctx = ClipboardContext::new().expect(&format!(
+                "{}: failed to obtain Wayland clipboard context",
+                bin,
+            ));
+            let now = ctx.get_contents().expect(&format!(
+                "{}: failed to get clipboard contents through forked process",
+                bin,
+            ));
+
+            // If clipboard contents didn't change, revert back to previous
+            if data == now {
+                ctx.set_contents(previous).expect(&format!(
+                    "{}: failed to revert clipboard contents through forked process",
+                    bin,
+                ));
+
+                // Update cleared state, show notification
+                let _ = notify_cleared();
+            }
+
+            error::quit();
+        }
+        _pid => {}
+    }
+
+    if report {
+        eprintln!(
+            "Secret copied to clipboard. Clearing after {} seconds...",
+            timeout
+        );
+    }
+
+    Ok(())
+}
+
 /// Copy with timeout on X11 using xclip or xsel binaries.
 ///
 /// Keeps clipboard contents in clipboard even if application quits. Doesn't fuck with other
@@ -173,7 +249,7 @@ fn copy_timeout_x11(data: &[u8], timeout: u64, report: bool) -> Result<()> {
 ///
 /// Forks & detaches two processes to set/keep clipboard contents and to drive the timeout.
 ///
-/// Based on: https://docs.rs/copypasta-ext/0.3.2/copypasta_ext/x11_fork/index.html
+/// Based on: https://docs.rs/copypasta-ext/0.3.4/copypasta_ext/x11_fork/index.html
 #[cfg(all(
     unix,
     not(any(target_os = "macos", target_os = "android", target_os = "emscripten")),
@@ -371,6 +447,18 @@ pub(crate) fn notify_cleared() -> Result<()> {
     // Fallback if we cannot notify
     eprintln!("Secret cleared from clipboard");
     Ok(())
+}
+
+/// Check if running on Wayland.
+///
+/// This checks at runtime whether the user is running the Wayland display server. This is a best
+/// effort, and may not be reliable.
+#[cfg(all(
+    unix,
+    not(any(target_os = "macos", target_os = "android", target_os = "emscripten")),
+))]
+fn is_wayland() -> bool {
+    DisplayServer::select() == DisplayServer::Wayland
 }
 
 #[derive(Debug, Error)]

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.1 (2021-02-23)
+- Add Wayland support
+- Use GnuPG binary backend by default, instead of GPGME backend
+- Update dependencies
+
 ## 0.2.0 (2021-02-15)
 - Add Windows support, and Windows release binary
 - Add GPGME cryptography backend for GPG support (default, compiler feature: `backend-gpgme`)

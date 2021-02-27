@@ -91,6 +91,7 @@ where
 {
     let mut cmd = Command::new(bin);
     cmd.stdin(Stdio::piped())
+        .env("LANG", "en")
         .env("LANGUAGE", "en")
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())

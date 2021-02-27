@@ -130,7 +130,7 @@ fn test_gpg_compat(path: &Path) -> Result<()> {
 /// GnuPG binary context error.
 #[derive(Debug, Error)]
 pub enum Err {
-    #[error("failed to obtain GPGME cryptography context")]
+    #[error("failed to obtain GnuPG binary cryptography context")]
     Context(#[source] anyhow::Error),
 
     #[error("failed to find GnuPG gpg binary")]

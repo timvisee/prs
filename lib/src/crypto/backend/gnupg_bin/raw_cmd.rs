@@ -121,7 +121,7 @@ fn parse_text(bytes: &[u8]) -> Result<String, std::str::Utf8Error> {
     // Try to parse as UTF-16 on Windows
     #[cfg(windows)]
     if let Some(s) = u8_as_utf16(bytes) {
-        return s;
+        return Ok(s);
     }
 
     Err(err)

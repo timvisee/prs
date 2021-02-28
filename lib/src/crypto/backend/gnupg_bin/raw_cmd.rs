@@ -66,7 +66,7 @@ where
     I: IntoIterator<Item = S>,
     S: AsRef<OsStr>,
 {
-    Ok(parse_text(&gpg_stdout_ok_bin(bin, args)?)
+    Ok(parse_output(&gpg_stdout_ok_bin(bin, args)?)
         .map_err(|err| Err::GpgCli(err.into()))?
         .trim()
         .into())
@@ -113,15 +113,14 @@ fn cmd_assert_status(status: ExitStatus) -> Result<()> {
 ///
 /// Command output formatting might not always be consistent. This function tries to parse both as
 /// UTF-8 and UTF-16.
-fn parse_text(bytes: &[u8]) -> Result<String, std::str::Utf8Error> {
+fn parse_output(bytes: &[u8]) -> Result<String, std::str::Utf8Error> {
     // Try to parse as UTF-8, remember error on failure
     let err = match std::str::from_utf8(bytes) {
         Ok(s) => return Ok(s.into()),
         Err(err) => err,
     };
 
-    // Try to parse as UTF-16 on Windows
-    #[cfg(windows)]
+    // Try to parse as UTF-16
     if let Some(s) = u8_as_utf16(bytes) {
         return Ok(s);
     }
@@ -130,7 +129,6 @@ fn parse_text(bytes: &[u8]) -> Result<String, std::str::Utf8Error> {
 }
 
 /// Try to parse u8 slice as UTF-16 string.
-#[cfg(windows)]
 fn u8_as_utf16(bytes: &[u8]) -> Option<String> {
     // Bytes must be multiple of 2
     if bytes.len() % 2 != 0 {

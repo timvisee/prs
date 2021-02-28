@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.2 (2021-02-28)
+- Add `PASSWORD_STORE_DIR` environment variable to customize password store path
+- Fix GnuPG binary backend errors on systems providing non-English `LANG`/`LANGUAGE` value to it
+- Fix GnuPG binary backend reporting GPGME backend errors
+- Improve GnuPG binary output parsing, fall back to UTF-16 decoding
+- Update dependencies
+
 ## 0.2.1 (2021-02-23)
 - Add Wayland support
 - Use GnuPG binary backend by default, instead of GPGME backend

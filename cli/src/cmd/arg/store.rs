@@ -15,6 +15,7 @@ impl CmdArg for ArgStore {
             .long("store")
             .short("s")
             .value_name("PATH")
+            .env("PASSWORD_STORE_DIR")
             .global(true)
             .help("Password store to use")
     }
@@ -25,6 +26,7 @@ impl<'a> CmdArgOption<'a> for ArgStore {
 
     fn value<'b: 'a>(matches: &'a ArgMatches<'b>) -> Self::Value {
         Self::value_raw(matches)
+            .filter(|p| !p.trim().is_empty())
             .unwrap_or(prs_lib::STORE_DEFAULT_ROOT)
             .to_string()
     }

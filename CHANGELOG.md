@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.3 (2021-03-04)
+- Show tree style output for `list` command (this changes the default behaviour)
+- Add `-l` flag to `list` command to output as plain file list
+- Update dependencies
+
 ## 0.2.2 (2021-02-28)
 - Add `PASSWORD_STORE_DIR` environment variable to customize password store path
 - Fix GnuPG binary backend errors on systems providing non-English `LANG`/`LANGUAGE` value to it

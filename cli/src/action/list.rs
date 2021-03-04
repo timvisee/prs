@@ -1,5 +1,8 @@
+use std::io;
+
 use anyhow::Result;
 use clap::ArgMatches;
+use text_trees::{FormatCharacters, StringTreeNode, TreeFormatting};
 use thiserror::Error;
 
 use prs_lib::{store::SecretIterConfig, Secret, Store};
@@ -35,10 +38,87 @@ impl<'a> List<'a> {
             .collect();
         secrets.sort_unstable_by(|a, b| a.name.cmp(&b.name));
 
-        secrets.iter().for_each(|s| println!("{}", s.name));
+        // Show a list or tree
+        if matcher_list.list() {
+            secrets.iter().for_each(|s| println!("{}", s.name));
+        } else {
+            display_tree(&secrets);
+        }
 
         Ok(())
     }
+}
+
+/// Display a secrets tree.
+fn display_tree(secrets: &[Secret]) {
+    // Build tree nodes from secrets list
+    let names: Vec<_> = secrets.iter().map(|s| s.name.as_str()).collect();
+    let nodes = tree_nodes("", &names);
+
+    // Build root tree, print to stdout
+    StringTreeNode::with_child_nodes(".".into(), nodes.into_iter())
+        .write_with_format(
+            &mut io::stdout(),
+            &TreeFormatting::dir_tree(FormatCharacters::box_chars()),
+        )
+        .expect("failed to print tree list");
+}
+
+/// Build tree nodes from given secret names.
+///
+/// The prefix defines the prefix to ignore from secret names. Should be `""` when parsing a new
+/// tree.
+///
+/// # Warnings
+///
+/// The given list must be sorted.
+fn tree_nodes(prefix: &str, mut secrets: &[&str]) -> Vec<StringTreeNode> {
+    let mut nodes = vec![];
+
+    // Walk through secret names, build list of tree nodes
+    while !secrets.is_empty() {
+        // Find name of a child node, return if we don't have child
+        let child_name = secrets[0]
+            .trim_start_matches(prefix)
+            .trim_start_matches('/')
+            .split('/')
+            .next()
+            .unwrap();
+        if child_name.trim().is_empty() {
+            return vec![];
+        }
+
+        // Build new prefix including child node
+        let child_prefix = if prefix.is_empty() {
+            child_name.to_string()
+        } else {
+            format!("{}/{}", prefix, child_name)
+        };
+
+        // Find position after last child having selected name
+        let next_child_name = secrets[1..]
+            .iter()
+            .position(|s| {
+                s.trim_start_matches(prefix)
+                    .trim_start_matches('/')
+                    .split('/')
+                    .next()
+                    .unwrap()
+                    != child_name
+            })
+            .unwrap_or(secrets.len() - 1)
+            + 1;
+
+        // Take children with same name from list, build child node
+        let (children, todo) = secrets.split_at(next_child_name);
+        secrets = todo;
+        nodes.push(StringTreeNode::with_child_nodes(
+            child_name.into(),
+            tree_nodes(&child_prefix, children).into_iter(),
+        ));
+    }
+
+    nodes
 }
 
 #[derive(Debug, Error)]

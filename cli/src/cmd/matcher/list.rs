@@ -19,6 +19,11 @@ impl<'a: 'b, 'b> ListMatcher<'a> {
         ArgStore::value(self.matches)
     }
 
+    /// Whether to show as plain list.
+    pub fn list(&self) -> bool {
+        self.matches.is_present("list")
+    }
+
     /// Whether to only show aliases.
     pub fn only_aliases(&self) -> bool {
         self.matches.is_present("aliases")

@@ -14,6 +14,13 @@ impl CmdList {
             .arg(ArgQuery::build())
             .arg(ArgStore::build())
             .arg(
+                Arg::with_name("list")
+                    .long("list")
+                    .short("l")
+                    .alias("no-tree")
+                    .help("Show as list, not as tree"),
+            )
+            .arg(
                 Arg::with_name("aliases")
                     .long("aliases")
                     .short("a")

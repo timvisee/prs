@@ -1584,6 +1584,7 @@ dependencies = [
  "prs-lib",
  "rand",
  "skim",
+ "text_trees",
  "thiserror",
  "walkdir",
  "x11-clipboard",
@@ -2174,6 +2175,12 @@ checksum = "2dfed899f0eb03f32ee8c6a0aabdb8a7949659e3466561fc0adf54e26d88c5f4"
 dependencies = [
  "winapi-util",
 ]
+
+[[package]]
+name = "text_trees"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "419ea7ab2f07ffc59c5e9424bcb73677933940f8bdadbe21649c1584dc06d0cf"
 
 [[package]]
 name = "textwrap"

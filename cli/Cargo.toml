@@ -49,6 +49,7 @@ edit = "0.1"
 libc = "0.2"
 prs-lib = { version = "0.2.2", path = "../lib", default-features = false }
 rand = "0.8"
+text_trees = "0.1"
 thiserror = "1.0"
 walkdir = "2.0"
 

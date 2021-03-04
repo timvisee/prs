@@ -1,5 +1,5 @@
 #!/bin/bash
 
-secret=$(prs list | rofi -p "secret" -dmenu -i)
+secret=$(prs list --list | rofi -p "secret" -dmenu -i)
 
 [[ ! -z "$secret" ]] && xdotool type "$(prs show "$secret" --password --quiet)"

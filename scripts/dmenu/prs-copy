@@ -1,5 +1,5 @@
 #!/bin/bash
 
-secret=$(prs list | dmenu -p "secret" -i)
+secret=$(prs list --list | dmenu -p "secret" -i)
 
 [[ ! -z "$secret" ]] && prs copy "$secret"

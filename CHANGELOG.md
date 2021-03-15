@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.4 (2021-03-15)
+- Fix error caused by unexpected output from `gpg` binary
+- Update dependencies
+
 ## 0.2.3 (2021-03-04)
 - Show tree style output for `list` command (this changes the default behaviour)
 - Add `-l` flag to `list` command to output as plain file list

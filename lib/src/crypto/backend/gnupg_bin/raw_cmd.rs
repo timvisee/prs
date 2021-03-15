@@ -89,10 +89,13 @@ where
     I: IntoIterator<Item = S>,
     S: AsRef<OsStr>,
 {
+    // TODO: select proper locale here, must be available on system
+    // TODO: see: https://linuxconfig.org/how-to-list-all-available-locales-on-rhel7-linux
+
     let mut cmd = Command::new(bin);
     cmd.stdin(Stdio::piped())
-        .env("LANG", "en")
-        .env("LANGUAGE", "en")
+        .env("LANG", "en_US.UTF-8")
+        .env("LANGUAGE", "en_US.UTF-8")
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .args(args);

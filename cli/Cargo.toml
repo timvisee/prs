@@ -54,7 +54,7 @@ thiserror = "1.0"
 walkdir = "2.0"
 
 # Notification support
-notify-rust = { version = "4.0", optional = true }
+notify-rust = { version = "~4.2.2", optional = true }
 
 # Clipboard support
 base64 = { version = "0.13", optional = true }

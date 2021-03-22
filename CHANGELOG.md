@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.5 (2021-03-22)
+- Disable git SSH connection reuse, until additional logic to handle failures is
+  implemented
+  (https://github.com/timvisee/prs/issues/5#issuecomment-803940880)
+- Update dependencies
+
 ## 0.2.4 (2021-03-15)
 - Fix error caused by unexpected output from `gpg` binary
 - Update dependencies

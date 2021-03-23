@@ -169,9 +169,9 @@ to be an error, please feel free to contribute.
   _`--feature=clipboard`_
 
   - Run:
-    - Ubuntu, Debian and derivatives: `apt install xorg libx11-xcb-dev`
-    - CentOS/Red Hat/openSUSE/Fedora: `yum install pkgconfig xorg libxcb`
-    - Arch: `pacman -S pkgconf xorg-server python3 libxcb`
+    - Ubuntu, Debian and derivatives: `apt install xorg libx11-xcb-dev wl-clipboard`
+    - CentOS/Red Hat/openSUSE/Fedora: `yum install pkgconfig xorg libxcb wl-clipboard`
+    - Arch: `pacman -S pkgconf xorg-server python3 libxcb wl-clipboard`
     - Alpine: _?_
     - macOS: _none_
     - Windows: _none_
@@ -182,6 +182,9 @@ to be an error, please feel free to contribute.
     - Alpine: _?_
     - macOS: _none_
     - Windows: _none_
+
+  Note: `xorg`, `libx11-xcb` are only required at runtime when using X11.
+  `wl-clipboard` are only required at runtime when using Wayland.
 </details>
 
 <details>

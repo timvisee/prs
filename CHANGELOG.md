@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.6 (2021-03-29)
+- Fix errors when `git` or `gpg` binary path contains spaces, notably on Windows
+- Update dependencies
+
 ## 0.2.5 (2021-03-22)
 - Disable git SSH connection reuse, until additional logic to handle failures is
   implemented

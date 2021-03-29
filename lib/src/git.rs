@@ -6,8 +6,6 @@ use std::time::SystemTime;
 use anyhow::Result;
 use thiserror::Error;
 
-use crate::util;
-
 // Re-exports
 pub use git_state::{git_state, RepositoryState};
 
@@ -263,7 +261,7 @@ where
     I: IntoIterator<Item = S>,
     S: AsRef<OsStr>,
 {
-    let mut cmd = Command::new(util::bin_path(BIN_NAME));
+    let mut cmd = Command::new(BIN_NAME);
 
     if let Some(dir) = dir {
         cmd.arg("-C");

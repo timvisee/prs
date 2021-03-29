@@ -44,7 +44,7 @@ fn select_item<'a, S: AsRef<str>>(prompt: &'a str, items: &'a [S]) -> Option<Str
     items.sort_unstable();
 
     // Spawn fzf
-    let child = Command::new(prs_lib::util::bin_path(BIN_NAME))
+    let child = Command::new(BIN_NAME)
         .arg("--prompt")
         .arg(format!("{}: ", prompt))
         .stdin(Stdio::piped())

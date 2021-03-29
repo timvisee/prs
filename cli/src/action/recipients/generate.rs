@@ -134,12 +134,8 @@ pub fn gpg_generate(quiet: bool, verbose: bool) -> Result<Recipients> {
     if !quiet {
         eprintln!("===== GPG START =====");
     }
-    util::invoke_cmd(
-        format!("{} --full-generate-key", prs_lib::util::bin_path(BIN_NAME)),
-        None,
-        verbose,
-    )
-    .map_err(Err::Invoke)?;
+    util::invoke_cmd(format!("{} --full-generate-key", BIN_NAME), None, verbose)
+        .map_err(Err::Invoke)?;
     if !quiet {
         eprintln!("===== GPG END =====");
     }

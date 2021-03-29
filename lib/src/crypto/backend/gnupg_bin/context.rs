@@ -9,7 +9,7 @@ use version_compare::Version;
 use super::raw;
 use super::raw_cmd::gpg_stdout_ok;
 use crate::crypto::{proto, IsContext, Key, Proto};
-use crate::{util, Ciphertext, Plaintext, Recipients};
+use crate::{Ciphertext, Plaintext, Recipients};
 
 /// Binary name.
 #[cfg(not(windows))]
@@ -100,7 +100,7 @@ impl IsContext for Context {
 /// Find the gpg binary.
 // TODO: also try default path at /usr/bin/gpg
 fn find_gpg_bin() -> Result<PathBuf> {
-    let path = which::which(util::bin_path(BIN_NAME)).map_err(Err::Unavailable)?;
+    let path = which::which(BIN_NAME).map_err(Err::Unavailable)?;
     test_gpg_compat(&path)?;
     Ok(path)
 }

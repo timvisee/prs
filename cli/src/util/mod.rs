@@ -22,6 +22,7 @@ use crate::util::error::{quit_error_msg, ErrorHints};
 /// Invoke a command.
 ///
 /// Quit on error.
+// TODO: do not wrap commands in sh/cmd, we should not have to do this and only causes problems
 // TODO: provide list of arguments instead of a command string for better reliability/compatability
 pub fn invoke_cmd(cmd: String, dir: Option<&Path>, verbose: bool) -> Result<(), std::io::Error> {
     if verbose {

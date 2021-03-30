@@ -3,6 +3,7 @@
 ## 0.2.7 (2021-03-30)
 - Do not allow users to remove last recipient from store, which would
   irrecoverably void it (https://gitlab.com/timvisee/prs/-/issues/32)
+- Update dependencies
 
 ## 0.2.6 (2021-03-29)
 - Fix errors when `git` or `gpg` binary path contains spaces, notably on Windows

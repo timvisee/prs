@@ -307,7 +307,7 @@ To compile and install `prs` with the default features follow these steps:
   # Compile and install
   cargo install --path cli -f
 
-  # Start using ffsend
+  # Start using prs
   prs --help
 
   # or run it directly from cargo

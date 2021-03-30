@@ -41,6 +41,20 @@ impl<'a> Remove<'a> {
             .ok_or(Err::NoneSelected)?
             .clone();
 
+        // Do not allow removing last recipient unless forcing
+        if recipients.keys().len() == 1 && !matcher_main.force() {
+            error::print_error_msg(
+                "cannot remove last recipient from store, you will permanently loose access to it",
+            );
+            error::ErrorHintsBuilder::default()
+                .force(true)
+                .verbose(false)
+                .build()
+                .unwrap()
+                .print();
+            error::quit();
+        }
+
         // Confirm removal
         if !matcher_main.force() {
             eprintln!("{}", key);

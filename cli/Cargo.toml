@@ -1,6 +1,6 @@
 [package]
 name = "prs-cli"
-version = "0.2.6"
+version = "0.2.7"
 authors = ["Tim Visee <3a4fb3964f@sinenomine.email>"]
 license = "GPL-3.0"
 readme = "../README.md"
@@ -47,7 +47,7 @@ colored = "2.0"
 derive_builder = "0.9"
 edit = "0.1"
 libc = "0.2"
-prs-lib = { version = "0.2.6", path = "../lib", default-features = false }
+prs-lib = { version = "0.2.7", path = "../lib", default-features = false }
 rand = "0.8"
 text_trees = "0.1"
 thiserror = "1.0"

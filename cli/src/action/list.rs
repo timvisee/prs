@@ -38,6 +38,11 @@ impl<'a> List<'a> {
             .collect();
         secrets.sort_unstable_by(|a, b| a.name.cmp(&b.name));
 
+        // Return nothing if we have an empty list
+        if secrets.is_empty() {
+            return Ok(());
+        }
+
         // Show a list or tree
         if matcher_list.list() {
             secrets.iter().for_each(|s| println!("{}", s.name));

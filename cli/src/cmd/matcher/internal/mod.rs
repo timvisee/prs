@@ -1,5 +1,6 @@
 #[cfg(feature = "clipboard")]
 pub mod clip_revert;
+pub mod completions;
 
 use clap::ArgMatches;
 
@@ -17,6 +18,11 @@ impl<'a: 'b, 'b> InternalMatcher<'a> {
     #[cfg(feature = "clipboard")]
     pub fn clip_revert(&'a self) -> Option<clip_revert::ClipRevertMatcher> {
         clip_revert::ClipRevertMatcher::with(&self.root)
+    }
+
+    /// Get the internal completions generator sub command, if matched.
+    pub fn completions(&'a self) -> Option<completions::CompletionsMatcher> {
+        completions::CompletionsMatcher::with(&self.root)
     }
 }
 

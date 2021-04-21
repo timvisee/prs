@@ -1,5 +1,6 @@
 #[cfg(feature = "clipboard")]
 pub mod clip_revert;
+pub mod completions;
 
 use clap::{App, AppSettings, SubCommand};
 
@@ -12,7 +13,8 @@ impl CmdInternal {
         let mut cmd = SubCommand::with_name("_internal")
             .about("Commands used by prs internally")
             .setting(AppSettings::Hidden)
-            .setting(AppSettings::SubcommandRequiredElseHelp);
+            .setting(AppSettings::SubcommandRequiredElseHelp)
+            .subcommand(completions::CmdCompletions::build());
 
         #[cfg(feature = "clipboard")]
         {

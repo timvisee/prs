@@ -43,7 +43,7 @@ impl<'a> Completions<'a> {
                     format!("{}", shell).to_lowercase()
                 );
             }
-            app.gen_completions(crate_name!(), shell, &dir);
+            app.gen_completions(matcher_completions.name(), shell, &dir);
             if !quiet {
                 eprintln!(" done.");
             }

@@ -29,5 +29,16 @@ impl CmdCompletions {
                     .value_name("DIR")
                     .help("Shell completion files output directory"),
             )
+            .arg(
+                Arg::with_name("name")
+                    .long("name")
+                    .short("n")
+                    .alias("bin")
+                    .alias("binary")
+                    .alias("bin-name")
+                    .alias("binary-name")
+                    .value_name("NAME")
+                    .help("Name of binary to generate completions for"),
+            )
     }
 }

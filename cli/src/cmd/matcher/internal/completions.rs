@@ -4,6 +4,7 @@ use std::str::FromStr;
 use clap::{ArgMatches, Shell};
 
 use super::Matcher;
+use crate::util;
 
 /// The completions completions command matcher.
 pub struct CompletionsMatcher<'a> {
@@ -51,6 +52,14 @@ impl<'a: 'b, 'b> CompletionsMatcher<'a> {
             .value_of("output")
             .map(PathBuf::from)
             .unwrap_or_else(|| PathBuf::from("./"))
+    }
+
+    /// Name of binary to generate completions for.
+    pub fn name(&'a self) -> String {
+        self.matches
+            .value_of("name")
+            .map(|n| n.into())
+            .unwrap_or(util::bin_name())
     }
 }
 

@@ -57,7 +57,7 @@ impl<'a: 'b, 'b> CompletionsMatcher<'a> {
 impl<'a> Matcher<'a> for CompletionsMatcher<'a> {
     fn with(matches: &'a ArgMatches) -> Option<Self> {
         matches
-            .subcommand_matches("_internal")?
+            .subcommand_matches("internal")?
             .subcommand_matches("completions")
             .map(|matches| CompletionsMatcher { matches })
     }

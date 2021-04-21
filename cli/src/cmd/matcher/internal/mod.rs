@@ -28,7 +28,7 @@ impl<'a: 'b, 'b> InternalMatcher<'a> {
 
 impl<'a> Matcher<'a> for InternalMatcher<'a> {
     fn with(root: &'a ArgMatches) -> Option<Self> {
-        root.subcommand_matches("_internal")
+        root.subcommand_matches("internal")
             .map(|matches| InternalMatcher {
                 root,
                 _matches: matches,

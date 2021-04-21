@@ -24,7 +24,7 @@ impl<'a: 'b, 'b> ClipRevertMatcher<'a> {
 impl<'a> Matcher<'a> for ClipRevertMatcher<'a> {
     fn with(matches: &'a ArgMatches) -> Option<Self> {
         matches
-            .subcommand_matches("_internal")?
+            .subcommand_matches("internal")?
             .subcommand_matches("clip-revert")
             .map(|matches| ClipRevertMatcher { matches })
     }

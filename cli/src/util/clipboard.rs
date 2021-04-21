@@ -352,7 +352,7 @@ fn copy_timeout_process(data: &[u8], timeout: u64, report: bool) -> Result<()> {
 
     // Spawn & disown background process to revert clipboard, send previous contents to it
     let process = Command::new(current_exe)
-        .arg("_internal")
+        .arg("internal")
         .arg("clip-revert")
         .arg("--previous-base64-stdin")
         .arg("--timeout")

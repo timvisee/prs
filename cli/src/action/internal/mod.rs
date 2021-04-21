@@ -1,5 +1,6 @@
 #[cfg(feature = "clipboard")]
 pub mod clip_revert;
+pub mod completions;
 
 use anyhow::Result;
 use clap::ArgMatches;
@@ -26,6 +27,10 @@ impl<'a> Internal<'a> {
         #[cfg(feature = "clipboard")]
         if matcher_internal.clip_revert().is_some() {
             return clip_revert::ClipRevert::new(self.cmd_matches).invoke();
+        }
+
+        if matcher_internal.completions().is_some() {
+            return completions::Completions::new(self.cmd_matches).invoke();
         }
 
         // Unreachable, clap will print help for missing sub command instead

@@ -43,7 +43,11 @@ impl<'a> Completions<'a> {
                     format!("{}", shell).to_lowercase()
                 );
             }
-            app.gen_completions(matcher_completions.name(), shell, &dir);
+            if matcher_completions.stdout() {
+                app.gen_completions_to(matcher_completions.name(), shell, &mut std::io::stdout());
+            } else {
+                app.gen_completions(matcher_completions.name(), shell, &dir);
+            }
             if !quiet {
                 eprintln!(" done.");
             }

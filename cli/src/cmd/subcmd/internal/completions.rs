@@ -30,6 +30,14 @@ impl CmdCompletions {
                     .help("Shell completion files output directory"),
             )
             .arg(
+                Arg::with_name("stdout")
+                    .long("stdout")
+                    .short("s")
+                    .alias("print")
+                    .help("Output completion files to stdout instead")
+                    .conflicts_with("output"),
+            )
+            .arg(
                 Arg::with_name("name")
                     .long("name")
                     .short("n")

@@ -54,6 +54,11 @@ impl<'a: 'b, 'b> CompletionsMatcher<'a> {
             .unwrap_or_else(|| PathBuf::from("./"))
     }
 
+    /// Whether to print completion scripts to stdout.
+    pub fn stdout(&'a self) -> bool {
+        self.matches.is_present("stdout")
+    }
+
     /// Name of binary to generate completions for.
     pub fn name(&'a self) -> String {
         self.matches

@@ -481,7 +481,7 @@ release-aur:
   script:
     # Install dependencies
     - echo "Installing required build packages..."
-    - pacman -Syu --noconfirm sudo base-devel binutils openssh rust cargo cmake git openssl
+    - pacman -Syu --noconfirm sudo base-devel binutils openssh rust cargo cmake git openssl python libxcb
 
     - cd ./pkg/aur
 
@@ -493,7 +493,7 @@ release-aur:
     # Determine remote URLs and SHA checksums
     - echo "Getting SHA checksums for remote files..."
     - URL_SOURCE=https://gitlab.com/timvisee/prs/-/archive/v$VERSION/prs-v$VERSION.tar.gz
-    - 'SHA_SOURCE=$(curl -sSL "$URL_SOURCE" | sha256sum | cut -d" " -f1)'
+    - 'SHA_SOURCE=$(curl -sSL "$URL_SOURCE" | sha512sum | cut -d" " -f1)'
     - 'echo "Source checksum: $SHA_SOURCE ($URL_SOURCE)"'
 
     # Update PKGBUILDs

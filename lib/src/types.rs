@@ -380,7 +380,7 @@ mod tests {
     #[quickcheck]
     fn plaintext_must_zero_on_drop(plaintext: String) -> bool {
         // Skip all-zero/empty because we cannot reliably test
-        if plaintext.bytes().all(|b| b == 0) {
+        if plaintext.len() < 16 || plaintext.bytes().all(|b| b == 0) {
             return true;
         }
 
@@ -411,7 +411,7 @@ mod tests {
     #[quickcheck]
     fn ciphertext_must_zero_on_drop(ciphertext: Vec<u8>) -> bool {
         // Skip all-zero/empty because we cannot reliably test
-        if ciphertext.iter().all(|b| *b == 0) {
+        if ciphertext.len() < 16 || ciphertext.iter().all(|b| *b == 0) {
             return true;
         }
 

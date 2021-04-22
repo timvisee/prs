@@ -4,6 +4,10 @@ use std::thread;
 use std::time::Duration;
 
 use anyhow::Result;
+#[cfg(all(
+    unix,
+    not(any(target_os = "macos", target_os = "android", target_os = "emscripten")),
+))]
 use copypasta_ext::display::DisplayServer;
 use copypasta_ext::prelude::*;
 #[cfg(all(feature = "notify", target_os = "linux", not(target_env = "musl")))]

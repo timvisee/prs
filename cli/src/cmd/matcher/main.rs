@@ -1,6 +1,3 @@
-// TODO: remove this once most CLI handling has been implemented
-#![allow(unused)]
-
 use clap::ArgMatches;
 
 use super::Matcher;

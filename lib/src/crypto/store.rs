@@ -78,8 +78,8 @@ pub fn store_load_keys(store: &Store) -> Result<Vec<Key>> {
     // TODO: what to do if recipients is empty?
     // TODO: what to do if key listed in file is not found, attempt to install?
 
-    // TODO: do not crash here if GPG ids file is not found!
     // Load GPG keys
+    // TODO: do not crash here if GPG ids file is not found!
     let fingerprints = store_read_gpg_fingerprints(store)?;
 
     if !fingerprints.is_empty() {
@@ -112,8 +112,6 @@ pub fn store_save_keys(store: &Store, keys: &[Key]) -> Result<()> {
         .collect();
     store_write_gpg_fingerprints(store, &gpg_fingerprints)?;
 
-    // NEWPROTO: if a new proto is added, keys for a store should be saved here
-
     // Sync public keys for all proto's
     store_sync_public_key_files(store, keys)?;
 
@@ -144,7 +142,6 @@ pub fn store_sync_public_key_files(store: &Store, keys: &[Key]) -> Result<()> {
 
     // List key files in keys directory
     // TODO: this is duplicate, use share function
-    // TODO: only list files that match fingerprint format (file name)
     let files: Vec<(PathBuf, String)> = dir
         .read_dir()
         .map_err(Err::SyncKeyFiles)?

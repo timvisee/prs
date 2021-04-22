@@ -52,8 +52,6 @@ impl<'a> Add<'a> {
         tmp.remove_all(recipients.keys());
         let key = select::select_key(tmp.keys()).ok_or(Err::NoneSelected)?;
         recipients.add(key.clone());
-
-        // TODO: implement save on recipients through trait
         recipients.save(&store)?;
 
         if prs_lib::store::can_decrypt(&store) {
@@ -84,7 +82,6 @@ impl<'a> Add<'a> {
 }
 
 /// Cannot decrypt on this machine, show recrypt hints.
-// TODO: move this somewhere central
 pub(crate) fn cannot_decrypt_show_recrypt_hints() {
     // TODO: only show this if adding secret key
     error::print_warning("cannot read secrets on this machine");

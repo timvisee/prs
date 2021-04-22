@@ -36,8 +36,6 @@ impl<'a> Init<'a> {
             );
         }
 
-        // TODO: add default files (.gitattributes, etc)
-
         // Initialize git
         sync.init().map_err(Err::Init)?;
 

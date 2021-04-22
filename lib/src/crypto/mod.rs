@@ -220,7 +220,6 @@ pub trait IsContext {
     /// Find public keys from keychain for fingerprints.
     ///
     /// Skips fingerprints no key is found for.
-    // TODO: throw errors on other error than not-found
     fn find_public_keys(&mut self, fingerprints: &[&str]) -> Result<Vec<Key>> {
         let keys = self.keys_public()?;
         Ok(fingerprints

@@ -21,7 +21,6 @@ impl<'a> Duplicate<'a> {
     }
 
     /// Invoke the duplicate action.
-    // TODO: re-implement error handling
     pub fn invoke(&self) -> Result<()> {
         // Create the command matchers
         let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();

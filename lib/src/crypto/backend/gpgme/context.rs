@@ -73,9 +73,6 @@ impl IsContext for Context {
             .collect())
     }
 
-    // TODO: implement: get_public_key
-    // TODO: implement: find_public_keys
-
     fn import_key(&mut self, key: &[u8]) -> Result<()> {
         raw::import_key(&mut self.context, key)
     }

@@ -144,7 +144,6 @@ impl Plaintext {
     ///
     /// Optionally adds platform newline.
     pub fn append(&mut self, other: Plaintext, newline: bool) {
-        // TODO: do not use temporary (unsecure) buffer here
         let mut data = self.unsecure_ref().to_vec();
         if newline {
             data.extend_from_slice(NEWLINE.as_bytes());

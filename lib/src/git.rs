@@ -61,7 +61,6 @@ pub fn git_commit(repo: &Path, msg: &str, commit_empty: bool) -> Result<()> {
         return Ok(());
     }
 
-    // TODO: add -q
     let mut args = vec!["commit", "-q", "--no-edit", "-m", msg];
     if commit_empty {
         args.push("--allow-empty");

@@ -1,6 +1,3 @@
-// TODO: remove when application is in a more complete state
-#![allow(unused)]
-
 use std::borrow::Borrow;
 use std::fmt::{Debug, Display};
 use std::io::{self, Write};

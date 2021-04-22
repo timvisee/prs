@@ -40,8 +40,6 @@ impl<'a> Remove<'a> {
         let secret =
             select::store_select_secret(&store, matcher_remove.query()).ok_or(Err::NoneSelected)?;
 
-        // TODO: if this secret is a symlink, ask whether to remove target file as well?
-
         if !remove_confirm(&store, &secret, &matcher_main, &mut Vec::new())? {
             if matcher_main.verbose() {
                 eprintln!("Removal cancelled");

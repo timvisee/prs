@@ -40,8 +40,6 @@ impl<'a> Init<'a> {
         // Initialize store
         fs::create_dir_all(&path).map_err(Err::Init)?;
 
-        // TODO: initialize sync here?
-
         // Open new store
         let store = Store::open(&path).map_err(Err::Store)?;
 

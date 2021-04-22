@@ -69,7 +69,6 @@ impl<'a> Add<'a> {
 
         // Encrypt and write changed plaintext
         // TODO: select proper recipients (use from current file?)
-        // TODO: log recipients to encrypt for
         let recipients = store.recipients()?;
         crypto::context(crypto::PROTO)?
             .encrypt_file(&recipients, plaintext, &path)

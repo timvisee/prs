@@ -64,7 +64,6 @@ impl<'a> Edit<'a> {
 
         // Encrypt and write changed plaintext
         // TODO: select proper recipients (use from current file?)
-        // TODO: log recipients to encrypt for
         let recipients = store.recipients()?;
         context
             .encrypt_file(&recipients, plaintext, &secret.path)

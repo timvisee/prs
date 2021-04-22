@@ -37,7 +37,6 @@ pub fn select_key(keys: &[Key]) -> Option<&Key> {
 }
 
 /// Interactively select one of the given items.
-// TODO: better error handling
 fn select_item<'a, S: AsRef<str>>(prompt: &'a str, items: &'a [S]) -> Option<String> {
     // Build sorted list of string references as items
     let mut items = items.into_iter().map(|i| i.as_ref()).collect::<Vec<_>>();

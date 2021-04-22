@@ -202,7 +202,6 @@ impl Secret {
 
     /// Construct secret at given path in the given password store root.
     pub fn in_root(root: &Path, path: PathBuf) -> Self {
-        // TODO: use path.display() as fallback
         let name: String = relative_path(root, &path)
             .ok()
             .and_then(|f| f.to_str())

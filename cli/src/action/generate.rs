@@ -106,7 +106,6 @@ impl<'a> Generate<'a> {
         // Encrypt and write changed plaintext if we need to store
         if let Some(dest) = &dest {
             // TODO: select proper recipients (use from current file?)
-            // TODO: log recipients to encrypt for
             let recipients = store.recipients()?;
             context
                 .encrypt_file(&recipients, plaintext.clone(), &dest.0)

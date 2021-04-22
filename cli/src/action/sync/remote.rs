@@ -93,7 +93,6 @@ impl<'a> Remote<'a> {
 
 #[derive(Debug, Error)]
 pub enum Err {
-    // TODO: add relevant errors here
     #[error("failed to access password store")]
     Store(#[source] anyhow::Error),
 }

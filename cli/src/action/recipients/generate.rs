@@ -81,7 +81,6 @@ impl<'a> Generate<'a> {
             for key in new_keys {
                 recipients.add(key.clone());
             }
-            // TODO: implement save on recipients through trait
             recipients.save(&store)?;
 
             if prs_lib::store::can_decrypt(&store) {
@@ -124,7 +123,6 @@ impl<'a> Generate<'a> {
 /// Invoke GPG generate command.
 ///
 /// Return new keys as recipients.
-// TODO: call through Command directly, possibly through lib interface
 pub fn gpg_generate(quiet: bool, verbose: bool) -> Result<Recipients> {
     // List recipients before
     let mut context = crypto::context(crypto::PROTO)?;

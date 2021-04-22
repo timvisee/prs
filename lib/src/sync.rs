@@ -181,7 +181,6 @@ impl<'a> Sync<'a> {
     }
 
     /// Check whether sync has been initialized in this store.
-    // TODO: make private?
     pub fn is_init(&self) -> bool {
         self.path().join(STORE_GIT_DIR).is_dir()
     }
@@ -239,7 +238,6 @@ impl<'a> Sync<'a> {
 /// Some states block sync usage, including:
 /// - Sync not initialized
 /// - Git repository is dirty
-// TODO: add NoRemote state?
 #[derive(Debug)]
 pub enum Readyness {
     /// Sync is not initialized for this store.

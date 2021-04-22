@@ -119,8 +119,8 @@ impl Plaintext {
 
     /// Get line with the given property.
     ///
-    /// Returns line with the given property. The property prefix is removed, and only the value is
-    /// returned. Returns an error if the property does not exist.
+    /// Returns line with the given property. The property prefix is removed, and only the trimmed
+    /// value is returned. Returns an error if the property does not exist.
     ///
     /// This will never return the first line being the password.
     pub fn property(self, property: &str) -> Result<Plaintext> {
@@ -129,21 +129,14 @@ impl Plaintext {
             .map_err(Err::Utf8)?
             .lines()
             .skip(1)
-            .filter_map(|line| {
+            .find_map(|line| {
                 let mut parts = line.splitn(2, PROPERTY_DELIMITER);
                 if parts.next().unwrap().trim().to_uppercase() == property {
-                    Some(
-                        parts
-                            .next()
-                            .map(|value| value.trim_start())
-                            .unwrap_or("")
-                            .into(),
-                    )
+                    Some(parts.next().map(|value| value.trim()).unwrap_or("").into())
                 } else {
                     None
                 }
             })
-            .next()
             .ok_or_else(|| Err::Property(property.to_lowercase()).into())
     }
 

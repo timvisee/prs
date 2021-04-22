@@ -479,6 +479,10 @@ release-aur:
     - /^v(\d+\.)*\d+$/
   before_script: []
   script:
+    # Install dependencies
+    - echo "Installing required build packages..."
+    - pacman -Syu --noconfirm sudo base-devel binutils openssh rust cargo cmake git openssl
+
     - cd ./pkg/aur
 
     # Determine the version number we're releasing for
@@ -497,10 +501,6 @@ release-aur:
     - sed "s/__PKGVER__/$VERSION/" -i prs/PKGBUILD
     - sed "s/__PKGVER__/$VERSION.r1.$VERSION_HASH/" -i prs-git/PKGBUILD
     - sed "s/__SHA512SUM__/$SHA_SOURCE/" -i prs/PKGBUILD
-
-    # Install dependencies
-    - echo "Installing required build packages..."
-    - pacman -Syu --noconfirm sudo base-devel binutils openssh rust cargo cmake git openssl
 
     # Prepare for make
     - mkdir -p /.cargo

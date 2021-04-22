@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.8 (2021-04-22)
+- Add `internal completions` command to generate shell completion scripts
+- Output nothing from `list` command if we have no secrets
+- Trim end of value when selecting property from secret using `show --property`
+- Rename hidden `_internal` command to `internal`
+- Update dependencies
+
 ## 0.2.7 (2021-03-30)
 - Do not allow users to remove last recipient from store, which would
   irrecoverably void it (https://gitlab.com/timvisee/prs/-/issues/32)

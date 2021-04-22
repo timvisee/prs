@@ -5,7 +5,7 @@
 # See: https://gitlab.com/timvisee/prs
 
 pkgname=prs-git
-pkgver=0.2.7.r1.g0b90393
+pkgver=__PKGVER__
 pkgrel=1
 pkgdesc="Secure, fast & convenient password manager CLI using GPG and git to sync (git)"
 arch=('any')

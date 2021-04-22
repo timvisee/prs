@@ -5,6 +5,12 @@ pub mod sync;
 pub mod types;
 mod vendor;
 
+#[cfg(test)]
+extern crate quickcheck;
+#[cfg(test)]
+#[macro_use(quickcheck)]
+extern crate quickcheck_macros;
+
 // Re-exports
 pub use crypto::{recipients::Recipients, Key};
 pub use store::{Secret, Store};

@@ -309,6 +309,15 @@ mod tests {
         assert_eq!(plaintext.unsecure_to_str().unwrap(), "\n\n\n\n\n\n\n");
     }
 
+    #[quickcheck]
+    fn plaintext_append_string(a: String, b: String, c: String) {
+        // Appending lots of random stuff and parsing as string should never fail
+        let mut plaintext = Plaintext::from(a);
+        plaintext.append(Plaintext::from(b), false);
+        plaintext.append(Plaintext::from(c), true);
+        plaintext.unsecure_to_str().unwrap();
+    }
+
     #[test]
     fn plaintext_property() {
         // Never select property from first line, but do from others
@@ -369,10 +378,15 @@ mod tests {
         }
     }
 
-    #[test]
-    fn plaintext_must_zero_on_drop() {
+    #[quickcheck]
+    fn plaintext_must_zero_on_drop(plaintext: String) -> bool {
+        // Skip empty, because memory will always match
+        if plaintext.is_empty() {
+            return true;
+        }
+
         // Create plaintext, remember memory range and data, then drop plaintext
-        let plaintext = Plaintext::from("abcdefghijklmnopqrstuvwxyz");
+        let plaintext = Plaintext::from(plaintext);
         let must_not_match = plaintext.0.unsecure().to_vec();
         let range = plaintext.0.unsecure().as_ptr_range();
         drop(plaintext);
@@ -383,7 +397,7 @@ mod tests {
         };
 
         // Memory must have been explicitly zeroed, it must never be the same as before
-        assert_ne!(slice, &must_not_match);
+        slice != &must_not_match
     }
 
     #[test]
@@ -395,10 +409,15 @@ mod tests {
         );
     }
 
-    #[test]
-    fn ciphertext_must_zero_on_drop() {
+    #[quickcheck]
+    fn ciphertext_must_zero_on_drop(ciphertext: Vec<u8>) -> bool {
+        // Skip empty, because memory will always match
+        if ciphertext.is_empty() {
+            return true;
+        }
+
         // Create ciphertext, remember memory range and data, then drop ciphertext
-        let ciphertext = Ciphertext::from(b"abcdefghijklmnopqrstuvwxyz".to_vec());
+        let ciphertext = Ciphertext::from(ciphertext);
         let must_not_match = ciphertext.0.unsecure().to_vec();
         let range = ciphertext.0.unsecure().as_ptr_range();
         drop(ciphertext);
@@ -409,6 +428,6 @@ mod tests {
         };
 
         // Memory must have been explicitly zeroed, it must never be the same as before
-        assert_ne!(slice, &must_not_match);
+        slice != &must_not_match
     }
 }

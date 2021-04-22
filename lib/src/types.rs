@@ -379,8 +379,8 @@ mod tests {
 
     #[quickcheck]
     fn plaintext_must_zero_on_drop(plaintext: String) -> bool {
-        // Skip empty, because memory will always match
-        if plaintext.is_empty() {
+        // Skip all-zero/empty because we cannot reliably test
+        if plaintext.bytes().all(|b| b == 0) {
             return true;
         }
 
@@ -410,8 +410,8 @@ mod tests {
 
     #[quickcheck]
     fn ciphertext_must_zero_on_drop(ciphertext: Vec<u8>) -> bool {
-        // Skip empty, because memory will always match
-        if ciphertext.is_empty() {
+        // Skip all-zero/empty because we cannot reliably test
+        if ciphertext.iter().all(|b| *b == 0) {
             return true;
         }
 

@@ -198,3 +198,217 @@ pub enum Err {
     #[error("property '{}' does not exist in plaintext", _0)]
     Property(String),
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn plaintext_empty() {
+        let empty = Plaintext::empty();
+        assert!(empty.is_empty(), "empty plaintext should be empty");
+    }
+
+    #[test]
+    fn plaintext_is_empty() {
+        // Test empty
+        let mut plaintext = Plaintext::from("");
+        assert!(plaintext.is_empty(), "empty plaintext should be empty");
+        assert!(
+            plaintext.unsecure_ref().is_empty(),
+            "empty plaintext should be empty"
+        );
+
+        // Test not empty
+        plaintext.append(Plaintext::from("abc"), false);
+        assert!(!plaintext.is_empty(), "empty plaintext should not be empty");
+        assert!(
+            !plaintext.unsecure_ref().is_empty(),
+            "empty plaintext should not be empty"
+        );
+    }
+
+    #[test]
+    fn plaintext_first_line() {
+        // (input, output)
+        let set = vec![
+            ("", ""),
+            ("\n", ""),
+            ("abc", "abc"),
+            ("abc\n", "abc"),
+            ("abc\ndef\r\nghi", "abc"),
+            ("abc\r\ndef\nghi", "abc"),
+        ];
+
+        for (input, output) in set {
+            assert_eq!(
+                Plaintext::from(input)
+                    .first_line()
+                    .unwrap()
+                    .unsecure_to_str()
+                    .unwrap(),
+                output,
+                "first line of plaintext is incorrect",
+            );
+        }
+    }
+
+    #[test]
+    fn plaintext_except_first_line() {
+        // (input, output)
+        let set = vec![
+            ("", ""),
+            ("\n", ""),
+            ("abc", ""),
+            ("abc\n", ""),
+            ("abc\ndef\r\nghi", "def\nghi"),
+            ("abc\r\ndef\nghi", "def\nghi"),
+        ];
+
+        for (input, output) in set {
+            assert_eq!(
+                Plaintext::from(input)
+                    .except_first_line()
+                    .unwrap()
+                    .unsecure_to_str()
+                    .unwrap(),
+                output,
+                "first line of plaintext is incorrect",
+            );
+        }
+    }
+
+    #[test]
+    fn plaintext_append() {
+        // Append to empty without newline
+        let mut plaintext = Plaintext::empty();
+        plaintext.append(Plaintext::from("abc"), false);
+        assert_eq!(plaintext.unsecure_to_str().unwrap(), "abc");
+        plaintext.append(Plaintext::from("def"), false);
+        assert_eq!(plaintext.unsecure_to_str().unwrap(), "abcdef");
+
+        // Append to empty with newline
+        let mut plaintext = Plaintext::empty();
+        plaintext.append(Plaintext::from("abc"), true);
+        assert_eq!(plaintext.unsecure_to_str().unwrap(), "\nabc");
+        plaintext.append(Plaintext::from("def"), true);
+        assert_eq!(plaintext.unsecure_to_str().unwrap(), "\nabc\ndef");
+
+        // Append empty to empty
+        let mut plaintext = Plaintext::empty();
+        plaintext.append(Plaintext::empty(), false);
+        assert!(plaintext.is_empty());
+        plaintext.append(Plaintext::empty(), true);
+        assert_eq!(plaintext.unsecure_to_str().unwrap(), "\n");
+
+        // Keep existing newlines
+        let mut plaintext = Plaintext::from("\n\n");
+        plaintext.append(Plaintext::from("\n\n"), false);
+        assert_eq!(plaintext.unsecure_to_str().unwrap(), "\n\n\n\n");
+        plaintext.append(Plaintext::from("\n\n"), true);
+        assert_eq!(plaintext.unsecure_to_str().unwrap(), "\n\n\n\n\n\n\n");
+    }
+
+    #[test]
+    fn plaintext_property() {
+        // Never select property from first line, but do from others
+        assert!(
+            Plaintext::from("Name: abc").property("name").is_err(),
+            "should never select property from first line"
+        );
+        assert_eq!(
+            Plaintext::from("Name: abc\nName: def")
+                .property("name")
+                .unwrap()
+                .unsecure_to_str()
+                .unwrap(),
+            "def",
+            "should select property value from all but the first line"
+        );
+
+        // (input, property to select, output)
+        #[rustfmt::skip]
+        let set = vec![
+            // Nothing/empty
+            ("", "", None),
+
+            // Properties
+            ("\nName: abc", "Name", Some("abc")),
+            ("\n   Name   :   abc   ", "Name", Some("abc")),
+            ("\nName: abc\nName: def", "Name", Some("abc")),
+            ("\nName: abc\nMail: abc@example.com", "Mail", Some("abc@example.com")),
+            ("\nName: abc\nMail: abc@example.com", "Name", Some("abc")),
+
+            // Empty property
+            ("\nEmpty:", "Empty", Some("")),
+            ("\nEmpty:   ", "Empty", Some("")),
+
+            // Missing
+            ("\nName: abc\nMail: abc@example.com", "missing", None),
+
+            // Capitalization
+            ("\nName: abc", "name", Some("abc")),
+            ("\nName: abc", "NAME", Some("abc")),
+            ("\nName: abc", "nAME", Some("abc")),
+            ("\nNAME: abc", "name", Some("abc")),
+            ("\nnAmE: abc", "name", Some("abc")),
+            ("\nNAME: abc\nname: def", "name", Some("abc")),
+        ];
+
+        for (input, property, output) in set {
+            let val = Plaintext::from(input).property(property).ok();
+            if let Some(output) = output {
+                assert_eq!(
+                    val.unwrap().unsecure_to_str().unwrap(),
+                    output,
+                    "incorrect property value",
+                );
+            } else {
+                assert!(val.is_none(), "no property should be selected",);
+            }
+        }
+    }
+
+    #[test]
+    fn plaintext_must_zero_on_drop() {
+        // Create plaintext, remember memory range and data, then drop plaintext
+        let plaintext = Plaintext::from("abcdefghijklmnopqrstuvwxyz");
+        let must_not_match = plaintext.0.unsecure().to_vec();
+        let range = plaintext.0.unsecure().as_ptr_range();
+        drop(plaintext);
+
+        // Retake same slice of memory that we've dropped
+        let slice: &[u8] = unsafe {
+            std::slice::from_raw_parts(range.start, range.end as usize - range.start as usize)
+        };
+
+        // Memory must have been explicitly zeroed, it must never be the same as before
+        assert_ne!(slice, &must_not_match);
+    }
+
+    #[test]
+    fn ciphertext_empty() {
+        let empty = Ciphertext::empty();
+        assert!(
+            empty.unsecure_ref().is_empty(),
+            "empty ciphertext should be empty"
+        );
+    }
+
+    #[test]
+    fn ciphertext_must_zero_on_drop() {
+        // Create ciphertext, remember memory range and data, then drop ciphertext
+        let ciphertext = Ciphertext::from(b"abcdefghijklmnopqrstuvwxyz".to_vec());
+        let must_not_match = ciphertext.0.unsecure().to_vec();
+        let range = ciphertext.0.unsecure().as_ptr_range();
+        drop(ciphertext);
+
+        // Retake same slice of memory that we've dropped
+        let slice: &[u8] = unsafe {
+            std::slice::from_raw_parts(range.start, range.end as usize - range.start as usize)
+        };
+
+        // Memory must have been explicitly zeroed, it must never be the same as before
+        assert_ne!(slice, &must_not_match);
+    }
+}

@@ -1,4 +1,4 @@
-use clap::{App, SubCommand};
+use clap::App;
 
 use crate::cmd::arg::{ArgStore, CmdArg};
 
@@ -6,8 +6,8 @@ use crate::cmd::arg::{ArgStore, CmdArg};
 pub struct CmdInit;
 
 impl CmdInit {
-    pub fn build<'a, 'b>() -> App<'a, 'b> {
-        SubCommand::with_name("init")
+    pub fn build<'a>() -> App<'a> {
+        App::new("init")
             .alias("initialize")
             .about("Initialize new password store")
             .arg(ArgStore::build())

@@ -11,12 +11,12 @@ use crate::util::{clipboard, select};
 
 /// Copy secret to clipboard action.
 pub struct Copy<'a> {
-    cmd_matches: &'a ArgMatches<'a>,
+    cmd_matches: &'a ArgMatches,
 }
 
 impl<'a> Copy<'a> {
     /// Construct a new copy action.
-    pub fn new(cmd_matches: &'a ArgMatches<'a>) -> Self {
+    pub fn new(cmd_matches: &'a ArgMatches) -> Self {
         Self { cmd_matches }
     }
 

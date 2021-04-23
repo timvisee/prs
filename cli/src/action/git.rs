@@ -14,12 +14,12 @@ pub const BIN_NAME: &str = "git.exe";
 
 /// Git action.
 pub struct Git<'a> {
-    cmd_matches: &'a ArgMatches<'a>,
+    cmd_matches: &'a ArgMatches,
 }
 
 impl<'a> Git<'a> {
     /// Construct a new git action.
-    pub fn new(cmd_matches: &'a ArgMatches<'a>) -> Self {
+    pub fn new(cmd_matches: &'a ArgMatches) -> Self {
         Self { cmd_matches }
     }
 

@@ -11,12 +11,12 @@ use crate::util::clipboard;
 
 /// A internal clipboard revert action.
 pub struct ClipRevert<'a> {
-    cmd_matches: &'a ArgMatches<'a>,
+    cmd_matches: &'a ArgMatches,
 }
 
 impl<'a> ClipRevert<'a> {
     /// Construct a new clipboard revert action.
-    pub fn new(cmd_matches: &'a ArgMatches<'a>) -> Self {
+    pub fn new(cmd_matches: &'a ArgMatches) -> Self {
         Self { cmd_matches }
     }
 

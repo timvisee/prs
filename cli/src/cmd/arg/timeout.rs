@@ -9,7 +9,7 @@ pub struct ArgTimeout {}
 
 impl ArgTimeout {
     #[cfg(feature = "clipboard")]
-    pub fn value_or_default<'a, 'b: 'a>(matches: &'a ArgMatches<'b>) -> Result<u64> {
+    pub fn value_or_default<'a, 'b: 'a>(matches: &'a ArgMatches) -> Result<u64> {
         Self::value(matches).unwrap_or(Ok(crate::CLIPBOARD_TIMEOUT))
     }
 }
@@ -19,23 +19,23 @@ impl CmdArg for ArgTimeout {
         "timeout"
     }
 
-    fn build<'b, 'c>() -> Arg<'b, 'c> {
-        Arg::with_name("timeout")
+    fn build<'b>() -> Arg<'b> {
+        Arg::new("timeout")
             .long("timeout")
-            .short("t")
+            .short('t')
             .alias("time")
             .alias("seconds")
             .alias("second")
             .value_name("SECONDS")
             .global(true)
-            .help("Timeout after which to clear clipboard")
+            .about("Timeout after which to clear clipboard")
     }
 }
 
 impl<'a> CmdArgOption<'a> for ArgTimeout {
     type Value = Option<Result<u64>>;
 
-    fn value<'b: 'a>(matches: &'a ArgMatches<'b>) -> Self::Value {
+    fn value<'b: 'a>(matches: &'a ArgMatches) -> Self::Value {
         Self::value_raw(matches).map(|t| t.parse().map_err(|err| Err::Parse(err).into()))
     }
 }

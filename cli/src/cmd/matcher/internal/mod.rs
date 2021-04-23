@@ -9,8 +9,8 @@ use super::Matcher;
 /// The internal matcher.
 pub struct InternalMatcher<'a> {
     #[allow(unused)]
-    root: &'a ArgMatches<'a>,
-    _matches: &'a ArgMatches<'a>,
+    root: &'a ArgMatches,
+    _matches: &'a ArgMatches,
 }
 
 impl<'a: 'b, 'b> InternalMatcher<'a> {

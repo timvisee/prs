@@ -16,12 +16,12 @@ use crate::util::{cli, error, select, sync};
 
 /// Remove secret action.
 pub struct Remove<'a> {
-    cmd_matches: &'a ArgMatches<'a>,
+    cmd_matches: &'a ArgMatches,
 }
 
 impl<'a> Remove<'a> {
     /// Construct a new remove action.
-    pub fn new(cmd_matches: &'a ArgMatches<'a>) -> Self {
+    pub fn new(cmd_matches: &'a ArgMatches) -> Self {
         Self { cmd_matches }
     }
 

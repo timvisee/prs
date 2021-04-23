@@ -12,8 +12,8 @@ use super::Matcher;
 
 /// The recipients matcher.
 pub struct RecipientsMatcher<'a> {
-    root: &'a ArgMatches<'a>,
-    matches: &'a ArgMatches<'a>,
+    root: &'a ArgMatches,
+    matches: &'a ArgMatches,
 }
 
 impl<'a: 'b, 'b> RecipientsMatcher<'a> {

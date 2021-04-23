@@ -17,12 +17,12 @@ use crate::{
 
 /// A housekeeping recrypt action.
 pub struct Recrypt<'a> {
-    cmd_matches: &'a ArgMatches<'a>,
+    cmd_matches: &'a ArgMatches,
 }
 
 impl<'a> Recrypt<'a> {
     /// Construct a new recrypt action.
-    pub fn new(cmd_matches: &'a ArgMatches<'a>) -> Self {
+    pub fn new(cmd_matches: &'a ArgMatches) -> Self {
         Self { cmd_matches }
     }
 

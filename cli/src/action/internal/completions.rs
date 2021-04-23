@@ -9,12 +9,12 @@ use crate::cmd::matcher::{internal::completions::CompletionsMatcher, main::MainM
 
 /// A file completions action.
 pub struct Completions<'a> {
-    cmd_matches: &'a ArgMatches<'a>,
+    cmd_matches: &'a ArgMatches,
 }
 
 impl<'a> Completions<'a> {
     /// Construct a new completions action.
-    pub fn new(cmd_matches: &'a ArgMatches<'a>) -> Self {
+    pub fn new(cmd_matches: &'a ArgMatches) -> Self {
         Self { cmd_matches }
     }
 
@@ -44,9 +44,9 @@ impl<'a> Completions<'a> {
                 );
             }
             if matcher_completions.stdout() {
-                app.gen_completions_to(matcher_completions.name(), shell, &mut std::io::stdout());
+                shell.generate(&mut app, matcher_completions.name(), &mut std::io::stdout());
             } else {
-                app.gen_completions(matcher_completions.name(), shell, &dir);
+                shell.generate_to(&mut app, matcher_completions.name(), &dir);
             }
             if !quiet {
                 eprintln!(" done.");

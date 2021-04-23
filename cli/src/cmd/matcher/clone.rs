@@ -5,7 +5,7 @@ use crate::cmd::arg::{ArgStore, CmdArgOption};
 
 /// The clone command matcher.
 pub struct CloneMatcher<'a> {
-    matches: &'a ArgMatches<'a>,
+    matches: &'a ArgMatches,
 }
 
 impl<'a: 'b, 'b> CloneMatcher<'a> {

@@ -4,7 +4,7 @@ use super::Matcher;
 
 /// The recipients list command matcher.
 pub struct ListMatcher<'a> {
-    _matches: &'a ArgMatches<'a>,
+    _matches: &'a ArgMatches,
 }
 
 impl<'a: 'b, 'b> ListMatcher<'a> {}

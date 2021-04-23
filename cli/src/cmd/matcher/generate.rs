@@ -15,7 +15,7 @@ const PASSPHRASE_LENGTH: u16 = 5;
 
 /// The generate command matcher.
 pub struct GenerateMatcher<'a> {
-    matches: &'a ArgMatches<'a>,
+    matches: &'a ArgMatches,
 }
 
 impl<'a: 'b, 'b> GenerateMatcher<'a> {

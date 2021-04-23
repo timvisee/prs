@@ -4,7 +4,7 @@ use super::Matcher;
 
 /// The sync init command matcher.
 pub struct InitMatcher<'a> {
-    _matches: &'a ArgMatches<'a>,
+    _matches: &'a ArgMatches,
 }
 
 impl<'a: 'b, 'b> InitMatcher<'a> {}

@@ -1,4 +1,4 @@
-use clap::{App, Arg, SubCommand};
+use clap::{App, Arg};
 
 use crate::cmd::arg::{ArgQuery, ArgStore, CmdArg};
 
@@ -6,39 +6,39 @@ use crate::cmd::arg::{ArgQuery, ArgStore, CmdArg};
 pub struct CmdList;
 
 impl CmdList {
-    pub fn build<'a, 'b>() -> App<'a, 'b> {
-        SubCommand::with_name("list")
+    pub fn build<'a>() -> App<'a> {
+        App::new("list")
             .alias("ls")
             .alias("l")
             .about("List all secrets")
             .arg(ArgQuery::build())
             .arg(ArgStore::build())
             .arg(
-                Arg::with_name("list")
+                Arg::new("list")
                     .long("list")
-                    .short("l")
+                    .short('l')
                     .alias("no-tree")
-                    .help("Show as list, not as tree"),
+                    .about("Show as list, not as tree"),
             )
             .arg(
-                Arg::with_name("aliases")
+                Arg::new("aliases")
                     .long("aliases")
-                    .short("a")
+                    .short('a')
                     .alias("symlinks")
                     .alias("only-aliases")
                     .alias("only-symlinks")
-                    .help("Show only alises"),
+                    .about("Show only alises"),
             )
             .arg(
-                Arg::with_name("non-aliases")
+                Arg::new("non-aliases")
                     .long("non-aliases")
-                    .short("A")
+                    .short('A')
                     .alias("non-symlinks")
                     .alias("no-aliases")
                     .alias("no-symlinks")
                     .alias("only-non-aliases")
                     .alias("only-non-symlinks")
-                    .help("Show only non-alises")
+                    .about("Show only non-alises")
                     .conflicts_with("aliases"),
             )
     }

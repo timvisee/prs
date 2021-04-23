@@ -17,12 +17,12 @@ use crate::{
 
 /// A housekeeping sync-keys action.
 pub struct SyncKeys<'a> {
-    cmd_matches: &'a ArgMatches<'a>,
+    cmd_matches: &'a ArgMatches,
 }
 
 impl<'a> SyncKeys<'a> {
     /// Construct a new sync-keys action.
-    pub fn new(cmd_matches: &'a ArgMatches<'a>) -> Self {
+    pub fn new(cmd_matches: &'a ArgMatches) -> Self {
         Self { cmd_matches }
     }
 

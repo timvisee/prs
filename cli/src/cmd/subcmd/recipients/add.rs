@@ -1,26 +1,26 @@
-use clap::{App, Arg, SubCommand};
+use clap::{App, Arg};
 
 /// The recipient add command definition.
 pub struct CmdAdd;
 
 impl CmdAdd {
-    pub fn build<'a, 'b>() -> App<'a, 'b> {
-        SubCommand::with_name("add")
+    pub fn build<'a>() -> App<'a> {
+        App::new("add")
             .alias("a")
             .about("Add store recipient")
             .arg(
-                Arg::with_name("secret")
+                Arg::new("secret")
                     .long("secret")
                     .alias("private")
-                    .help("Add public key we have private key for"),
+                    .about("Add public key we have private key for"),
             )
             .arg(
-                Arg::with_name("no-recrypt")
+                Arg::new("no-recrypt")
                     .long("no-recrypt")
                     .alias("no-reencrypt")
                     .alias("skip-recrypt")
                     .alias("skip-reencrypt")
-                    .help("Skip re-encrypting all secrets"),
+                    .about("Skip re-encrypting all secrets"),
             )
     }
 }

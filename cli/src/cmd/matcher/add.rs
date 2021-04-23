@@ -5,7 +5,7 @@ use crate::cmd::arg::{ArgStore, CmdArgOption};
 
 /// The add command matcher.
 pub struct AddMatcher<'a> {
-    matches: &'a ArgMatches<'a>,
+    matches: &'a ArgMatches,
 }
 
 impl<'a: 'b, 'b> AddMatcher<'a> {

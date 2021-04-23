@@ -5,7 +5,7 @@ use crate::cmd::arg::{ArgStore, CmdArgOption};
 
 /// The git command matcher.
 pub struct GitMatcher<'a> {
-    matches: &'a ArgMatches<'a>,
+    matches: &'a ArgMatches,
 }
 
 impl<'a: 'b, 'b> GitMatcher<'a> {

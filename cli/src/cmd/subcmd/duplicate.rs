@@ -1,4 +1,4 @@
-use clap::{App, Arg, SubCommand};
+use clap::{App, Arg};
 
 use crate::cmd::arg::{ArgQuery, ArgStore, CmdArg};
 
@@ -6,15 +6,15 @@ use crate::cmd::arg::{ArgQuery, ArgStore, CmdArg};
 pub struct CmdDuplicate;
 
 impl CmdDuplicate {
-    pub fn build<'a, 'b>() -> App<'a, 'b> {
-        SubCommand::with_name("duplicate")
+    pub fn build<'a>() -> App<'a> {
+        App::new("duplicate")
             .alias("dup")
             .about("Duplicate a secret")
             .long_about("Duplicate the contents of a secret to a new file")
             .arg(ArgQuery::build().required(true))
             .arg(
-                Arg::with_name("DEST")
-                    .help("Secret destination path")
+                Arg::new("DEST")
+                    .about("Secret destination path")
                     .required(true),
             )
             .arg(ArgStore::build())

@@ -4,7 +4,7 @@ use super::Matcher;
 
 /// The sync remote command matcher.
 pub struct RemoteMatcher<'a> {
-    matches: &'a ArgMatches<'a>,
+    matches: &'a ArgMatches,
 }
 
 impl<'a: 'b, 'b> RemoteMatcher<'a> {

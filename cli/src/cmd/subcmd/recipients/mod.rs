@@ -4,7 +4,7 @@ pub mod generate;
 pub mod list;
 pub mod remove;
 
-use clap::{App, AppSettings, SubCommand};
+use clap::{App, AppSettings};
 
 use crate::cmd::arg::{ArgStore, CmdArg};
 
@@ -12,8 +12,8 @@ use crate::cmd::arg::{ArgStore, CmdArg};
 pub struct CmdRecipients;
 
 impl CmdRecipients {
-    pub fn build<'a, 'b>() -> App<'a, 'b> {
-        SubCommand::with_name("recipients")
+    pub fn build<'a>() -> App<'a> {
+        App::new("recipients")
             .about("Manage store recipients")
             .alias("recipient")
             .alias("recip")

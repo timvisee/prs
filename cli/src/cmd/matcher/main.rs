@@ -4,7 +4,7 @@ use super::Matcher;
 
 /// The main command matcher.
 pub struct MainMatcher<'a> {
-    matches: &'a ArgMatches<'a>,
+    matches: &'a ArgMatches,
 }
 
 impl<'a: 'b, 'b> MainMatcher<'a> {

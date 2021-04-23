@@ -1,4 +1,4 @@
-use clap::{App, Arg, SubCommand};
+use clap::{App, Arg};
 
 use crate::cmd::arg::{ArgStore, CmdArg};
 
@@ -6,12 +6,12 @@ use crate::cmd::arg::{ArgStore, CmdArg};
 pub struct CmdClone;
 
 impl CmdClone {
-    pub fn build<'a, 'b>() -> App<'a, 'b> {
-        SubCommand::with_name("clone")
+    pub fn build<'a>() -> App<'a> {
+        App::new("clone")
             .about("Clone existing password store")
             .arg(
-                Arg::with_name("GIT_URL")
-                    .help("Remote git URL to clone from")
+                Arg::new("GIT_URL")
+                    .about("Remote git URL to clone from")
                     .required(true),
             )
             .arg(ArgStore::build())

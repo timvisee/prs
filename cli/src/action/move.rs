@@ -13,12 +13,12 @@ use crate::util::{cli, error, select, sync};
 
 /// Move secret action.
 pub struct Move<'a> {
-    cmd_matches: &'a ArgMatches<'a>,
+    cmd_matches: &'a ArgMatches,
 }
 
 impl<'a> Move<'a> {
     /// Construct a new move action.
-    pub fn new(cmd_matches: &'a ArgMatches<'a>) -> Self {
+    pub fn new(cmd_matches: &'a ArgMatches) -> Self {
         Self { cmd_matches }
     }
 

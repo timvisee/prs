@@ -12,6 +12,8 @@ impl CmdAdd {
             .alias("new")
             .alias("n")
             .alias("create")
+            .alias("insert")
+            .alias("ins")
             .about("Add a secret")
             .arg(
                 Arg::with_name("DEST")

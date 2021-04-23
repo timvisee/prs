@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.9 (2021-04-23)
+- Add `insert` alias for `add`
+- Fix panic when generating ZSH shell completions
+  (https://github.com/timvisee/prs/issues/7#issuecomment-825482490)
+- Improved command-line argument handling, updated `clap` to `v3.0`
+- Update dependencies
+
 ## 0.2.8 (2021-04-22)
 - Add `internal completions` command to generate shell completion scripts
 - Output nothing from `list` command if we have no secrets

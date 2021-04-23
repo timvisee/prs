@@ -1,4 +1,4 @@
-use clap::{App, Arg, SubCommand};
+use clap::{App, Arg};
 
 #[cfg(feature = "clipboard")]
 use crate::cmd::arg::ArgTimeout;
@@ -8,65 +8,65 @@ use crate::cmd::arg::{ArgStore, CmdArg};
 pub struct CmdGenerate;
 
 impl CmdGenerate {
-    pub fn build<'a, 'b>() -> App<'a, 'b> {
-        let cmd = SubCommand::with_name("generate")
+    pub fn build<'a>() -> App<'a> {
+        let cmd = App::new("generate")
             .alias("gen")
             .alias("g")
             .alias("random")
             .about("Generate a secure secret")
             .arg(
-                Arg::with_name("DEST")
-                    .help("Secret destination path")
-                    .required_unless_one(&["show", "copy"]),
+                Arg::new("DEST")
+                    .about("Secret destination path")
+                    .required_unless_present_any(&["show", "copy"]),
             )
             .arg(
-                Arg::with_name("passphrase")
+                Arg::new("passphrase")
                     .long("passphrase")
-                    .short("P")
-                    .help("Generate passhprase instead of random string"),
+                    .short('P')
+                    .about("Generate passhprase instead of random string"),
             )
             .arg(
-                Arg::with_name("length")
+                Arg::new("length")
                     .value_name("NUM")
                     .long("length")
-                    .short("l")
+                    .short('l')
                     .alias("len")
-                    .help("Generated password length in characters")
-                    .long_help(
+                    .about("Generated password length in characters")
+                    .long_about(
                         "Generated password length in characters. Passphrase length in words.",
                     ),
             )
             .arg(
-                Arg::with_name("edit")
+                Arg::new("edit")
                     .long("edit")
-                    .short("e")
-                    .help("Edit secret after generation"),
+                    .short('e')
+                    .about("Edit secret after generation"),
             )
             .arg(
-                Arg::with_name("stdin")
+                Arg::new("stdin")
                     .long("stdin")
-                    .short("S")
+                    .short('S')
                     .alias("from-stdin")
-                    .help("Append to generated secret from stdin")
+                    .about("Append to generated secret from stdin")
                     .conflicts_with("edit"),
             )
             .arg(
-                Arg::with_name("show")
+                Arg::new("show")
                     .long("show")
                     .alias("cat")
                     .alias("display")
-                    .help("Display secret after generation"),
+                    .about("Display secret after generation"),
             )
             .arg(ArgStore::build());
 
         #[cfg(feature = "clipboard")]
         let cmd = cmd
             .arg(
-                Arg::with_name("copy")
+                Arg::new("copy")
                     .long("copy")
-                    .short("c")
+                    .short('c')
                     .alias("cp")
-                    .help("Copy secret to clipboard"),
+                    .about("Copy secret to clipboard"),
             )
             .arg(ArgTimeout::build().requires("copy"));
 

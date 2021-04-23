@@ -4,7 +4,7 @@ use super::Matcher;
 
 /// The housekeeping run command matcher.
 pub struct RunMatcher<'a> {
-    _matches: &'a ArgMatches<'a>,
+    _matches: &'a ArgMatches,
 }
 
 impl<'a: 'b, 'b> RunMatcher<'a> {}

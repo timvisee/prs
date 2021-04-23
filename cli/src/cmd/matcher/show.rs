@@ -6,7 +6,7 @@ use crate::cmd::arg::{ArgProperty, ArgQuery, ArgStore, ArgTimeout, CmdArgOption}
 
 /// The show command matcher.
 pub struct ShowMatcher<'a> {
-    matches: &'a ArgMatches<'a>,
+    matches: &'a ArgMatches,
 }
 
 impl<'a: 'b, 'b> ShowMatcher<'a> {

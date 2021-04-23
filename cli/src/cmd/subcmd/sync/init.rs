@@ -1,11 +1,11 @@
-use clap::{App, SubCommand};
+use clap::App;
 
 /// The sync init command definition.
 pub struct CmdInit;
 
 impl CmdInit {
-    pub fn build<'a, 'b>() -> App<'a, 'b> {
-        SubCommand::with_name("init")
+    pub fn build<'a>() -> App<'a> {
+        App::new("init")
             .alias("initialize")
             .about("Initialize sync")
     }

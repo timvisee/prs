@@ -1,4 +1,4 @@
-use clap::{App, Arg, SubCommand};
+use clap::{App, Arg};
 
 use crate::cmd::arg::{ArgProperty, ArgQuery, ArgStore, ArgTimeout, CmdArg};
 
@@ -6,22 +6,22 @@ use crate::cmd::arg::{ArgProperty, ArgQuery, ArgStore, ArgTimeout, CmdArg};
 pub struct CmdShow;
 
 impl CmdShow {
-    pub fn build<'a, 'b>() -> App<'a, 'b> {
-        SubCommand::with_name("show")
+    pub fn build<'a>() -> App<'a> {
+        App::new("show")
             .alias("s")
             .alias("cat")
             .alias("display")
             .about("Display a secret")
             .arg(
-                Arg::with_name("first")
+                Arg::new("first")
                     .long("first")
                     .alias("password")
                     .alias("pass")
-                    .help("Show only the first line of the secret"),
+                    .about("Show only the first line of the secret"),
             )
             .arg(ArgQuery::build())
             .arg(ArgStore::build())
-            .arg(ArgTimeout::build().help("Timeout after which to clear output"))
+            .arg(ArgTimeout::build().about("Timeout after which to clear output"))
             .arg(ArgProperty::build().conflicts_with("first"))
     }
 }

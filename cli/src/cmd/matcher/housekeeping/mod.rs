@@ -10,8 +10,8 @@ use super::Matcher;
 
 /// The housekeeping matcher.
 pub struct HousekeepingMatcher<'a> {
-    root: &'a ArgMatches<'a>,
-    matches: &'a ArgMatches<'a>,
+    root: &'a ArgMatches,
+    matches: &'a ArgMatches,
 }
 
 impl<'a: 'b, 'b> HousekeepingMatcher<'a> {

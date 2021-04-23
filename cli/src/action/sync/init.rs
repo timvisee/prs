@@ -11,12 +11,12 @@ use crate::{
 
 /// A sync init action.
 pub struct Init<'a> {
-    cmd_matches: &'a ArgMatches<'a>,
+    cmd_matches: &'a ArgMatches,
 }
 
 impl<'a> Init<'a> {
     /// Construct a new init action.
-    pub fn new(cmd_matches: &'a ArgMatches<'a>) -> Self {
+    pub fn new(cmd_matches: &'a ArgMatches) -> Self {
         Self { cmd_matches }
     }
 

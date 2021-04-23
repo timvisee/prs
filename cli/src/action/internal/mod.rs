@@ -9,12 +9,12 @@ use crate::cmd::matcher::{InternalMatcher, Matcher};
 
 /// An internal action.
 pub struct Internal<'a> {
-    cmd_matches: &'a ArgMatches<'a>,
+    cmd_matches: &'a ArgMatches,
 }
 
 impl<'a> Internal<'a> {
     /// Construct a new internal action.
-    pub fn new(cmd_matches: &'a ArgMatches<'a>) -> Self {
+    pub fn new(cmd_matches: &'a ArgMatches) -> Self {
         Self { cmd_matches }
     }
 

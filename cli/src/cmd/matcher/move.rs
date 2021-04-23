@@ -5,7 +5,7 @@ use crate::cmd::arg::{ArgQuery, ArgStore, CmdArgOption};
 
 /// The move command matcher.
 pub struct MoveMatcher<'a> {
-    matches: &'a ArgMatches<'a>,
+    matches: &'a ArgMatches,
 }
 
 impl<'a: 'b, 'b> MoveMatcher<'a> {

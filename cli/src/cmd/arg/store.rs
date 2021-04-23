@@ -10,21 +10,21 @@ impl CmdArg for ArgStore {
         "store"
     }
 
-    fn build<'b, 'c>() -> Arg<'b, 'c> {
-        Arg::with_name("store")
+    fn build<'b>() -> Arg<'b> {
+        Arg::new("store")
             .long("store")
-            .short("s")
+            .short('s')
             .value_name("PATH")
             .env("PASSWORD_STORE_DIR")
             .global(true)
-            .help("Password store to use")
+            .about("Password store to use")
     }
 }
 
 impl<'a> CmdArgOption<'a> for ArgStore {
     type Value = String;
 
-    fn value<'b: 'a>(matches: &'a ArgMatches<'b>) -> Self::Value {
+    fn value<'b: 'a>(matches: &'a ArgMatches) -> Self::Value {
         Self::value_raw(matches)
             .filter(|p| !p.trim().is_empty())
             .unwrap_or(prs_lib::STORE_DEFAULT_ROOT)

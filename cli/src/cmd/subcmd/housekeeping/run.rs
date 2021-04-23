@@ -1,10 +1,10 @@
-use clap::{App, SubCommand};
+use clap::App;
 
 /// The housekeeping run command definition.
 pub struct CmdRun;
 
 impl CmdRun {
-    pub fn build<'a, 'b>() -> App<'a, 'b> {
-        SubCommand::with_name("run").about("Run housekeeping tasks")
+    pub fn build<'a>() -> App<'a> {
+        App::new("run").about("Run housekeeping tasks")
     }
 }

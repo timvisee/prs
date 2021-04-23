@@ -1,12 +1,12 @@
-use clap::{App, Arg, SubCommand};
+use clap::{App, Arg};
 
 /// The sync remote command definition.
 pub struct CmdRemote;
 
 impl CmdRemote {
-    pub fn build<'a, 'b>() -> App<'a, 'b> {
-        SubCommand::with_name("remote")
+    pub fn build<'a>() -> App<'a> {
+        App::new("remote")
             .about("Get or set git remote URL for sync")
-            .arg(Arg::with_name("GIT_URL").help("Remote git URL to set"))
+            .arg(Arg::new("GIT_URL").about("Remote git URL to set"))
     }
 }

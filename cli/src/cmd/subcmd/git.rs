@@ -1,4 +1,4 @@
-use clap::{App, AppSettings, Arg, SubCommand};
+use clap::{App, AppSettings, Arg};
 
 use crate::cmd::arg::{ArgStore, CmdArg};
 
@@ -6,12 +6,12 @@ use crate::cmd::arg::{ArgStore, CmdArg};
 pub struct CmdGit;
 
 impl CmdGit {
-    pub fn build<'a, 'b>() -> App<'a, 'b> {
-        SubCommand::with_name("git")
+    pub fn build<'a>() -> App<'a> {
+        App::new("git")
             .about("Invoke git command in password store")
             .arg(
-                Arg::with_name("COMMAND")
-                    .help("Git command to invoke")
+                Arg::new("COMMAND")
+                    .about("Git command to invoke")
                     .multiple(true),
             )
             .arg(ArgStore::build())

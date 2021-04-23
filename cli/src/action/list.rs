@@ -11,12 +11,12 @@ use crate::cmd::matcher::{list::ListMatcher, Matcher};
 
 /// List secrets action.
 pub struct List<'a> {
-    cmd_matches: &'a ArgMatches<'a>,
+    cmd_matches: &'a ArgMatches,
 }
 
 impl<'a> List<'a> {
     /// Construct a new list action.
-    pub fn new(cmd_matches: &'a ArgMatches<'a>) -> Self {
+    pub fn new(cmd_matches: &'a ArgMatches) -> Self {
         Self { cmd_matches }
     }
 

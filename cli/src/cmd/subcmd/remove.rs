@@ -1,4 +1,4 @@
-use clap::{App, SubCommand};
+use clap::App;
 
 use crate::cmd::arg::{ArgQuery, ArgStore, CmdArg};
 
@@ -6,8 +6,8 @@ use crate::cmd::arg::{ArgQuery, ArgStore, CmdArg};
 pub struct CmdRemove;
 
 impl CmdRemove {
-    pub fn build<'a, 'b>() -> App<'a, 'b> {
-        SubCommand::with_name("remove")
+    pub fn build<'a>() -> App<'a> {
+        App::new("remove")
             .alias("rm")
             .alias("delete")
             .alias("del")

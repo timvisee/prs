@@ -12,12 +12,12 @@ use crate::util::{cli, error, select, sync};
 
 /// Alias secret action.
 pub struct Alias<'a> {
-    cmd_matches: &'a ArgMatches<'a>,
+    cmd_matches: &'a ArgMatches,
 }
 
 impl<'a> Alias<'a> {
     /// Construct a new alias action.
-    pub fn new(cmd_matches: &'a ArgMatches<'a>) -> Self {
+    pub fn new(cmd_matches: &'a ArgMatches) -> Self {
         Self { cmd_matches }
     }
 

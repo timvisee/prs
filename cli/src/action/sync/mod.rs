@@ -21,12 +21,12 @@ use crate::{
 
 /// Sync secrets action.
 pub struct Sync<'a> {
-    cmd_matches: &'a ArgMatches<'a>,
+    cmd_matches: &'a ArgMatches,
 }
 
 impl<'a> Sync<'a> {
     /// Construct a new sync action.
-    pub fn new(cmd_matches: &'a ArgMatches<'a>) -> Self {
+    pub fn new(cmd_matches: &'a ArgMatches) -> Self {
         Self { cmd_matches }
     }
 

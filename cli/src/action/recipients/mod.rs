@@ -11,12 +11,12 @@ use crate::cmd::matcher::{Matcher, RecipientsMatcher};
 
 /// A file recipients action.
 pub struct Recipients<'a> {
-    cmd_matches: &'a ArgMatches<'a>,
+    cmd_matches: &'a ArgMatches,
 }
 
 impl<'a> Recipients<'a> {
     /// Construct a new recipients action.
-    pub fn new(cmd_matches: &'a ArgMatches<'a>) -> Self {
+    pub fn new(cmd_matches: &'a ArgMatches) -> Self {
         Self { cmd_matches }
     }
 

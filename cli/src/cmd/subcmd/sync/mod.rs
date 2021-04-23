@@ -1,7 +1,7 @@
 pub mod init;
 pub mod remote;
 
-use clap::{App, SubCommand};
+use clap::App;
 
 use crate::cmd::arg::{ArgStore, CmdArg};
 
@@ -9,8 +9,8 @@ use crate::cmd::arg::{ArgStore, CmdArg};
 pub struct CmdSync;
 
 impl CmdSync {
-    pub fn build<'a, 'b>() -> App<'a, 'b> {
-        SubCommand::with_name("sync")
+    pub fn build<'a>() -> App<'a> {
+        App::new("sync")
             .alias("s")
             .about("Sync password store")
             .subcommand(init::CmdInit::build())

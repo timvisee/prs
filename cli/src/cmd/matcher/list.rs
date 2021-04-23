@@ -5,7 +5,7 @@ use crate::cmd::arg::{ArgQuery, ArgStore, CmdArgOption};
 
 /// The list command matcher.
 pub struct ListMatcher<'a> {
-    matches: &'a ArgMatches<'a>,
+    matches: &'a ArgMatches,
 }
 
 impl<'a: 'b, 'b> ListMatcher<'a> {

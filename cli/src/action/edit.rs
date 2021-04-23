@@ -11,12 +11,12 @@ use crate::util::{cli, edit, error, select, stdin, sync};
 
 /// Edit secret plaintext action.
 pub struct Edit<'a> {
-    cmd_matches: &'a ArgMatches<'a>,
+    cmd_matches: &'a ArgMatches,
 }
 
 impl<'a> Edit<'a> {
     /// Construct a new edit action.
-    pub fn new(cmd_matches: &'a ArgMatches<'a>) -> Self {
+    pub fn new(cmd_matches: &'a ArgMatches) -> Self {
         Self { cmd_matches }
     }
 

@@ -4,14 +4,14 @@ use super::matcher::{self, Matcher};
 use super::subcmd;
 
 /// CLI argument handler.
-pub struct Handler<'a> {
+pub struct Handler {
     /// The CLI matches.
-    matches: ArgMatches<'a>,
+    matches: ArgMatches,
 }
 
-impl<'a: 'b, 'b> Handler<'a> {
+impl<'a> Handler {
     /// Build the application CLI definition.
-    pub fn build() -> App<'a, 'b> {
+    pub fn build() -> App<'a> {
         // Build the CLI application definition
         let app = App::new(crate_name!())
             .version(crate_version!())
@@ -20,43 +20,43 @@ impl<'a: 'b, 'b> Handler<'a> {
             .global_setting(AppSettings::GlobalVersion)
             .global_setting(AppSettings::VersionlessSubcommands)
             .arg(
-                Arg::with_name("force")
+                Arg::new("force")
                     .long("force")
-                    .short("f")
+                    .short('f')
                     .global(true)
-                    .help("Force the action, ignore warnings"),
+                    .about("Force the action, ignore warnings"),
             )
             .arg(
-                Arg::with_name("no-interact")
+                Arg::new("no-interact")
                     .long("no-interact")
-                    .short("I")
+                    .short('I')
                     .alias("no-interactive")
                     .alias("non-interactive")
                     .global(true)
-                    .help("Not interactive, do not prompt"),
+                    .about("Not interactive, do not prompt"),
             )
             .arg(
-                Arg::with_name("yes")
+                Arg::new("yes")
                     .long("yes")
-                    .short("y")
+                    .short('y')
                     .alias("assume-yes")
                     .global(true)
-                    .help("Assume yes for prompts"),
+                    .about("Assume yes for prompts"),
             )
             .arg(
-                Arg::with_name("quiet")
+                Arg::new("quiet")
                     .long("quiet")
-                    .short("q")
+                    .short('q')
                     .global(true)
-                    .help("Produce output suitable for logging and automation"),
+                    .about("Produce output suitable for logging and automation"),
             )
             .arg(
-                Arg::with_name("verbose")
+                Arg::new("verbose")
                     .long("verbose")
-                    .short("v")
+                    .short('v')
                     .multiple(true)
                     .global(true)
-                    .help("Enable verbose information and logging"),
+                    .about("Enable verbose information and logging"),
             )
             .subcommand(subcmd::CmdAdd::build())
             .subcommand(subcmd::CmdClone::build())
@@ -89,7 +89,7 @@ impl<'a: 'b, 'b> Handler<'a> {
     }
 
     /// Parse CLI arguments.
-    pub fn parse() -> Handler<'a> {
+    pub fn parse() -> Handler {
         Handler {
             matches: Handler::build().get_matches(),
         }

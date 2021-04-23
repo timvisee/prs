@@ -11,12 +11,12 @@ use crate::util::{cli, error, select, sync};
 
 /// Duplicate secret action.
 pub struct Duplicate<'a> {
-    cmd_matches: &'a ArgMatches<'a>,
+    cmd_matches: &'a ArgMatches,
 }
 
 impl<'a> Duplicate<'a> {
     /// Construct a new duplicate action.
-    pub fn new(cmd_matches: &'a ArgMatches<'a>) -> Self {
+    pub fn new(cmd_matches: &'a ArgMatches) -> Self {
         Self { cmd_matches }
     }
 

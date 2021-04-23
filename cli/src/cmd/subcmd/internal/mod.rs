@@ -2,15 +2,15 @@
 pub mod clip_revert;
 pub mod completions;
 
-use clap::{App, AppSettings, SubCommand};
+use clap::{App, AppSettings};
 
 /// The internal command definition.
 pub struct CmdInternal;
 
 impl CmdInternal {
-    pub fn build<'a, 'b>() -> App<'a, 'b> {
+    pub fn build<'a>() -> App<'a> {
         #[allow(unused)]
-        let mut cmd = SubCommand::with_name("internal")
+        let mut cmd = App::new("internal")
             .about("Commands used by prs internally")
             .setting(AppSettings::Hidden)
             .setting(AppSettings::SubcommandRequiredElseHelp)

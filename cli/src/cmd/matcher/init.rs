@@ -5,7 +5,7 @@ use crate::cmd::arg::{ArgStore, CmdArgOption};
 
 /// The init command matcher.
 pub struct InitMatcher<'a> {
-    matches: &'a ArgMatches<'a>,
+    matches: &'a ArgMatches,
 }
 
 impl<'a: 'b, 'b> InitMatcher<'a> {

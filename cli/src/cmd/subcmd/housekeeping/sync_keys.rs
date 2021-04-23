@@ -1,18 +1,18 @@
-use clap::{App, Arg, SubCommand};
+use clap::{App, Arg};
 
 /// The housekeeping sync-keys command definition.
 pub struct CmdSyncKeys;
 
 impl CmdSyncKeys {
-    pub fn build<'a, 'b>() -> App<'a, 'b> {
-        SubCommand::with_name("sync-keys")
+    pub fn build<'a>() -> App<'a> {
+        App::new("sync-keys")
             .alias("sync-recipients")
             .about("Sync public keys in store, import missing keys")
             .arg(
-                Arg::with_name("no-import")
+                Arg::new("no-import")
                     .long("no-import")
                     .alias("skip-import")
-                    .help("Skip importing missing keys to keychain"),
+                    .about("Skip importing missing keys to keychain"),
             )
     }
 }

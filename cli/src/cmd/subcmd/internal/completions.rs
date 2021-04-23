@@ -1,52 +1,56 @@
-use clap::{App, Arg, Shell, SubCommand};
+use clap::{App, Arg};
+
+use crate::cmd::matcher::internal::completions::Shell;
 
 /// The generate completions command definition.
 pub struct CmdCompletions;
 
 impl CmdCompletions {
-    pub fn build<'a, 'b>() -> App<'a, 'b> {
-        SubCommand::with_name("completions")
+    pub fn build<'a>() -> App<'a> {
+        let shell_variants: Vec<_> = Shell::variants().into_iter().map(|v| v.name()).collect();
+
+        App::new("completions")
             .about("Shell completions")
             .alias("completion")
             .alias("complete")
             .arg(
-                Arg::with_name("SHELL")
-                    .help("Shell type to generate completions for")
+                Arg::new("SHELL")
+                    .about("Shell type to generate completions for")
                     .required(true)
                     .multiple(true)
                     .takes_value(true)
                     .possible_value("all")
-                    .possible_values(&Shell::variants())
+                    .possible_values(&shell_variants)
                     .case_insensitive(true),
             )
             .arg(
-                Arg::with_name("output")
+                Arg::new("output")
                     .long("output")
-                    .short("o")
+                    .short('o')
                     .alias("output-dir")
                     .alias("out")
                     .alias("dir")
                     .value_name("DIR")
-                    .help("Shell completion files output directory"),
+                    .about("Shell completion files output directory"),
             )
             .arg(
-                Arg::with_name("stdout")
+                Arg::new("stdout")
                     .long("stdout")
-                    .short("s")
+                    .short('s')
                     .alias("print")
-                    .help("Output completion files to stdout instead")
+                    .about("Output completion files to stdout instead")
                     .conflicts_with("output"),
             )
             .arg(
-                Arg::with_name("name")
+                Arg::new("name")
                     .long("name")
-                    .short("n")
+                    .short('n')
                     .alias("bin")
                     .alias("binary")
                     .alias("bin-name")
                     .alias("binary-name")
                     .value_name("NAME")
-                    .help("Name of binary to generate completions for"),
+                    .about("Name of binary to generate completions for"),
             )
     }
 }

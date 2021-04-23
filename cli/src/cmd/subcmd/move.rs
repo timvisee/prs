@@ -1,4 +1,4 @@
-use clap::{App, Arg, SubCommand};
+use clap::{App, Arg};
 
 use crate::cmd::arg::{ArgQuery, ArgStore, CmdArg};
 
@@ -6,8 +6,8 @@ use crate::cmd::arg::{ArgQuery, ArgStore, CmdArg};
 pub struct CmdMove;
 
 impl CmdMove {
-    pub fn build<'a, 'b>() -> App<'a, 'b> {
-        SubCommand::with_name("move")
+    pub fn build<'a>() -> App<'a> {
+        App::new("move")
             .alias("mov")
             .alias("mv")
             .alias("rename")
@@ -15,8 +15,8 @@ impl CmdMove {
             .about("Move a secret")
             .arg(ArgQuery::build().required(true))
             .arg(
-                Arg::with_name("DEST")
-                    .help("Secret destination path")
+                Arg::new("DEST")
+                    .about("Secret destination path")
                     .required(true),
             )
             .arg(ArgStore::build())

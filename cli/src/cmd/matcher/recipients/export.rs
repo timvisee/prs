@@ -4,7 +4,7 @@ use super::Matcher;
 
 /// The recipients export command matcher.
 pub struct ExportMatcher<'a> {
-    matches: &'a ArgMatches<'a>,
+    matches: &'a ArgMatches,
 }
 
 impl<'a: 'b, 'b> ExportMatcher<'a> {

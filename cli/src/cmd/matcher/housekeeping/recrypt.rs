@@ -5,7 +5,7 @@ use crate::cmd::arg::{ArgQuery, CmdArgOption};
 
 /// The housekeeping recrypt command matcher.
 pub struct RecryptMatcher<'a> {
-    matches: &'a ArgMatches<'a>,
+    matches: &'a ArgMatches,
 }
 
 impl<'a: 'b, 'b> RecryptMatcher<'a> {

@@ -8,8 +8,8 @@ use crate::cmd::arg::{ArgStore, CmdArgOption};
 
 /// The sync command matcher.
 pub struct SyncMatcher<'a> {
-    root: &'a ArgMatches<'a>,
-    matches: &'a ArgMatches<'a>,
+    root: &'a ArgMatches,
+    matches: &'a ArgMatches,
 }
 
 impl<'a: 'b, 'b> SyncMatcher<'a> {

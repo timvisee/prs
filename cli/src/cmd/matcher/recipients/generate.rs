@@ -4,7 +4,7 @@ use super::Matcher;
 
 /// The recipients generate command matcher.
 pub struct GenerateMatcher<'a> {
-    matches: &'a ArgMatches<'a>,
+    matches: &'a ArgMatches,
 }
 
 impl<'a: 'b, 'b> GenerateMatcher<'a> {

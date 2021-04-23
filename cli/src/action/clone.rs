@@ -16,12 +16,12 @@ use crate::vendor::shellexpand;
 
 /// Clone store action.
 pub struct Clone<'a> {
-    cmd_matches: &'a ArgMatches<'a>,
+    cmd_matches: &'a ArgMatches,
 }
 
 impl<'a> Clone<'a> {
     /// Construct a new clone action.
-    pub fn new(cmd_matches: &'a ArgMatches<'a>) -> Self {
+    pub fn new(cmd_matches: &'a ArgMatches) -> Self {
         Self { cmd_matches }
     }
 

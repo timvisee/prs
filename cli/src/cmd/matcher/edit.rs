@@ -5,7 +5,7 @@ use crate::cmd::arg::{ArgQuery, ArgStore, CmdArgOption};
 
 /// The edit command matcher.
 pub struct EditMatcher<'a> {
-    matches: &'a ArgMatches<'a>,
+    matches: &'a ArgMatches,
 }
 
 impl<'a: 'b, 'b> EditMatcher<'a> {

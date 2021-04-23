@@ -9,12 +9,12 @@ use crate::cmd::matcher::{HousekeepingMatcher, Matcher};
 
 /// A file housekeeping action.
 pub struct Housekeeping<'a> {
-    cmd_matches: &'a ArgMatches<'a>,
+    cmd_matches: &'a ArgMatches,
 }
 
 impl<'a> Housekeeping<'a> {
     /// Construct a new housekeeping action.
-    pub fn new(cmd_matches: &'a ArgMatches<'a>) -> Self {
+    pub fn new(cmd_matches: &'a ArgMatches) -> Self {
         Self { cmd_matches }
     }
 

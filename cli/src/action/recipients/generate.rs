@@ -25,12 +25,12 @@ const BIN_NAME: &str = "gpg.exe";
 
 /// A recipients generate action.
 pub struct Generate<'a> {
-    cmd_matches: &'a ArgMatches<'a>,
+    cmd_matches: &'a ArgMatches,
 }
 
 impl<'a> Generate<'a> {
     /// Construct a new generate action.
-    pub fn new(cmd_matches: &'a ArgMatches<'a>) -> Self {
+    pub fn new(cmd_matches: &'a ArgMatches) -> Self {
         Self { cmd_matches }
     }
 

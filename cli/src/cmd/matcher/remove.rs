@@ -5,7 +5,7 @@ use crate::cmd::arg::{ArgQuery, ArgStore, CmdArgOption};
 
 /// The remove command matcher.
 pub struct RemoveMatcher<'a> {
-    matches: &'a ArgMatches<'a>,
+    matches: &'a ArgMatches,
 }
 
 impl<'a: 'b, 'b> RemoveMatcher<'a> {

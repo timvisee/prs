@@ -6,7 +6,7 @@ use crate::cmd::arg::ArgTimeout;
 
 /// The internal clipboard revert command matcher.
 pub struct ClipRevertMatcher<'a> {
-    matches: &'a ArgMatches<'a>,
+    matches: &'a ArgMatches,
 }
 
 impl<'a: 'b, 'b> ClipRevertMatcher<'a> {

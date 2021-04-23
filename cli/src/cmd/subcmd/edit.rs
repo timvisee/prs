@@ -16,8 +16,7 @@ impl CmdEdit {
                     .long("stdin")
                     .short('S')
                     .alias("from-stdin")
-                    .about("Read secret from stdin, do not open editor")
-                    .conflicts_with("empty"),
+                    .about("Read secret from stdin, do not open editor"),
             )
             .arg(ArgStore::build())
     }

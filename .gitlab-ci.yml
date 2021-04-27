@@ -536,7 +536,7 @@ release-aur:
     - git config --global user.email "tim@visee.me"
 
     # Publish prs package (clone AUR repo, commit update, push)
-    - git clone ssh://aur@aur.archlinux.org/prs.git aur-cprs
+    - git clone ssh://aur@aur.archlinux.org/prs.git aur-prs
     - cd aur-prs
     - cp ../prs/{PKGBUILD,.SRCINFO} ./
     - git add PKGBUILD .SRCINFO

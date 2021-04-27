@@ -477,6 +477,7 @@ release-aur:
   stage: release
   only:
     - /^v(\d+\.)*\d+$/
+  timeout: 1h 30m
   before_script: []
   script:
     # Install dependencies

@@ -56,6 +56,7 @@ impl<'a> Handler {
                     .short('v')
                     .multiple(true)
                     .global(true)
+                    .takes_value(false)
                     .about("Enable verbose information and logging"),
             )
             .subcommand(subcmd::CmdAdd::build())

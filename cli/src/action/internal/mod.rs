@@ -21,7 +21,6 @@ impl<'a> Internal<'a> {
     /// Invoke the internal action.
     pub fn invoke(&self) -> Result<()> {
         // Create the command matcher
-        #[allow(unused)]
         let matcher_internal = InternalMatcher::with(self.cmd_matches).unwrap();
 
         #[cfg(feature = "clipboard")]

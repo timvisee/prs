@@ -9,7 +9,7 @@ pub struct CmdInternal;
 
 impl CmdInternal {
     pub fn build<'a>() -> App<'a> {
-        #[allow(unused)]
+        #[allow(unused_mut)]
         let mut cmd = App::new("internal")
             .about("Commands used by prs internally")
             .setting(AppSettings::Hidden)

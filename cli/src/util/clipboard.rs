@@ -426,7 +426,6 @@ pub(crate) fn plaintext_copy(
 }
 
 /// Show notification to user about cleared clipboard.
-#[allow(unreachable_code)]
 pub(crate) fn notify_cleared() -> Result<()> {
     // Do not show notification with not notify or on musl due to segfault
     #[cfg(all(feature = "notify", not(target_env = "musl")))]
@@ -448,8 +447,11 @@ pub(crate) fn notify_cleared() -> Result<()> {
     }
 
     // Fallback if we cannot notify
-    eprintln!("Secret cleared from clipboard");
-    Ok(())
+    #[allow(unreachable_code)]
+    {
+        eprintln!("Secret cleared from clipboard");
+        Ok(())
+    }
 }
 
 /// Check if running on Wayland.
@@ -465,7 +467,6 @@ fn is_wayland() -> bool {
 }
 
 #[derive(Debug, Error)]
-#[allow(dead_code)]
 pub enum Err {
     #[error("failed to parse clipboard contents as UTF-8")]
     Utf8(#[source] std::str::Utf8Error),

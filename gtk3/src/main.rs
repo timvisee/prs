@@ -299,7 +299,6 @@ fn copy(text: String, timeout: u32) {
 }
 
 /// Show notification to user about cleared clipboard.
-#[allow(unreachable_code)]
 fn notify_cleared() {
     // Do not show notification with not notify or on musl due to segfault
     #[cfg(all(feature = "notify", not(target_env = "musl")))]
@@ -321,7 +320,10 @@ fn notify_cleared() {
     }
 
     // Fallback if we cannot notify
-    eprintln!("Secret cleared from clipboard");
+    #[allow(unreachable_code)]
+    {
+        eprintln!("Secret cleared from clipboard");
+    }
 }
 
 /// Show an error dialog.

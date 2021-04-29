@@ -174,7 +174,7 @@ impl ErrorHints {
                 highlight(&format!("{} git status", bin))
             );
             eprintln!(
-                "To make changes while the store repository is dirty try '{}'",
+                "To make changes while the store repository is dirty add '{}'",
                 highlight("--allow-dirty")
             );
         }
@@ -182,10 +182,10 @@ impl ErrorHints {
             eprintln!("Use '{}' to force", highlight("--force"));
         }
         if self.verbose {
-            eprintln!("For detailed errors try '{}'", highlight("--verbose"));
+            eprintln!("For detailed errors add '{}'", highlight("--verbose"));
         }
         if self.help {
-            eprintln!("For more information try '{}'", highlight("--help"));
+            eprintln!("For more information add '{}'", highlight("--help"));
         }
 
         // Flush

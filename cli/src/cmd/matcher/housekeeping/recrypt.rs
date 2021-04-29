@@ -14,10 +14,6 @@ impl<'a: 'b, 'b> RecryptMatcher<'a> {
         ArgQuery::value(self.matches)
     }
 
-    pub fn _all(&self) -> bool {
-        self.matches.is_present("all")
-    }
-
     /// Whether to allow a dirty repository for syncing.
     pub fn allow_dirty(&self) -> bool {
         ArgAllowDirty::is_present(self.matches)

@@ -170,6 +170,10 @@ impl ErrorHints {
         }
         if self.allow_dirty {
             eprintln!(
+                "Use '{}' to show uncommitted changes",
+                highlight(&format!("{} git status", bin))
+            );
+            eprintln!(
                 "To make changes while the store repository is dirty try '{}'",
                 highlight("--allow-dirty")
             );

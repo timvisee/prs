@@ -473,7 +473,7 @@ release-docker-hub:
 
 # AUR packages release
 release-aur:
-  image: archlinux/base
+  image: archlinux
   stage: release
   only:
     - /^v(\d+\.)*\d+$/

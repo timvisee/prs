@@ -29,8 +29,11 @@ impl<'a> Edit<'a> {
         let store = Store::open(matcher_edit.store()).map_err(Err::Store)?;
         let sync = store.sync();
 
-        sync::ensure_ready(&sync);
-        sync.prepare()?;
+        // Prepare sync
+        sync::ensure_ready(&sync, matcher_edit.allow_dirty());
+        if !matcher_edit.no_sync() {
+            sync.prepare()?;
+        }
 
         let secret =
             select::store_select_secret(&store, matcher_edit.query()).ok_or(Err::NoneSelected)?;
@@ -71,7 +74,10 @@ impl<'a> Edit<'a> {
             .encrypt_file(&recipients, plaintext, &secret.path)
             .map_err(Err::Write)?;
 
-        sync.finalize(format!("Edit secret {}", secret.name))?;
+        // Finalize sync
+        if !matcher_edit.no_sync() {
+            sync.finalize(format!("Edit secret {}", secret.name))?;
+        }
 
         if !matcher_main.quiet() {
             eprintln!("Secret updated");

@@ -31,8 +31,11 @@ impl<'a> Move<'a> {
         let store = Store::open(matcher_move.store()).map_err(Err::Store)?;
         let sync = store.sync();
 
-        sync::ensure_ready(&sync);
-        sync.prepare()?;
+        // Prepare sync
+        sync::ensure_ready(&sync, matcher_move.allow_dirty());
+        if !matcher_move.no_sync() {
+            sync.prepare()?;
+        }
 
         let secret =
             select::store_select_secret(&store, matcher_move.query()).ok_or(Err::NoneSelected)?;
@@ -74,7 +77,10 @@ impl<'a> Move<'a> {
 
         super::remove::remove_empty_secret_dir(&secret);
 
-        sync.finalize(format!("Move from {} to {}", secret.name, new_secret.name))?;
+        // Finalize sync
+        if !matcher_move.no_sync() {
+            sync.finalize(format!("Move from {} to {}", secret.name, new_secret.name))?;
+        }
 
         if !matcher_main.quiet() {
             eprintln!("Secret moved");

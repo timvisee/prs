@@ -4,7 +4,7 @@ pub mod remote;
 use clap::ArgMatches;
 
 use super::Matcher;
-use crate::cmd::arg::{ArgStore, CmdArgOption};
+use crate::cmd::arg::{ArgAllowDirty, ArgStore, CmdArgFlag, CmdArgOption};
 
 /// The sync command matcher.
 pub struct SyncMatcher<'a> {
@@ -26,6 +26,11 @@ impl<'a: 'b, 'b> SyncMatcher<'a> {
     /// The store.
     pub fn store(&self) -> String {
         ArgStore::value(self.matches)
+    }
+
+    /// Whether to allow a dirty repository for syncing.
+    pub fn allow_dirty(&self) -> bool {
+        ArgAllowDirty::is_present(self.matches)
     }
 }
 

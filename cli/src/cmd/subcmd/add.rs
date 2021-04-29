@@ -1,6 +1,6 @@
 use clap::{App, Arg};
 
-use crate::cmd::arg::{ArgStore, CmdArg};
+use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, ArgStore, CmdArg};
 
 /// The add command definition.
 pub struct CmdAdd;
@@ -35,5 +35,7 @@ impl CmdAdd {
                     .conflicts_with("empty"),
             )
             .arg(ArgStore::build())
+            .arg(ArgAllowDirty::build())
+            .arg(ArgNoSync::build())
     }
 }

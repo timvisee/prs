@@ -36,8 +36,11 @@ impl<'a> Recrypt<'a> {
         let store = Store::open(matcher_housekeeping.store()).map_err(Err::Store)?;
         let sync = store.sync();
 
-        sync::ensure_ready(&sync);
-        sync.prepare()?;
+        // Prepare sync
+        sync::ensure_ready(&sync, matcher_recrypt.allow_dirty());
+        if !matcher_recrypt.no_sync() {
+            sync.prepare()?;
+        }
 
         // Import new keys
         crypto::store::import_missing_keys_from_store(&store).map_err(Err::ImportRecipients)?;
@@ -51,7 +54,10 @@ impl<'a> Recrypt<'a> {
             matcher_main.verbose(),
         )?;
 
-        sync.finalize("Re-encrypt secrets")?;
+        // Finalize sync
+        if !matcher_recrypt.no_sync() {
+            sync.finalize("Re-encrypt secrets")?;
+        }
 
         Ok(())
     }

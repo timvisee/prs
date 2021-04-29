@@ -1,5 +1,7 @@
 use clap::{App, Arg};
 
+use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, CmdArg};
+
 /// The recipient generate command definition.
 pub struct CmdGenerate;
 
@@ -24,5 +26,7 @@ impl CmdGenerate {
                     .about("Skip re-encrypting all secrets")
                     .conflicts_with("no-add"),
             )
+            .arg(ArgAllowDirty::build())
+            .arg(ArgNoSync::build())
     }
 }

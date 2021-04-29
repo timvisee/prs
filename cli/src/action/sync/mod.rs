@@ -68,7 +68,7 @@ impl<'a> Sync<'a> {
             _ => {}
         }
 
-        sync::ensure_ready(&sync);
+        sync::ensure_ready(&sync, matcher_sync.allow_dirty());
 
         // Prepare, commit, finalize
         sync.prepare()?;

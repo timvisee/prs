@@ -30,8 +30,11 @@ impl<'a> Alias<'a> {
         let store = Store::open(matcher_alias.store()).map_err(Err::Store)?;
         let sync = store.sync();
 
-        sync::ensure_ready(&sync);
-        sync.prepare()?;
+        // Prepare sync
+        sync::ensure_ready(&sync, matcher_alias.allow_dirty());
+        if !matcher_alias.no_sync() {
+            sync.prepare()?;
+        }
 
         let secret =
             select::store_select_secret(&store, matcher_alias.query()).ok_or(Err::NoneSelected)?;
@@ -62,10 +65,13 @@ impl<'a> Alias<'a> {
         // Create alias
         create_alias(&store, &secret, &path, &path)?;
 
-        sync.finalize(format!(
-            "Alias from {} to {}",
-            secret.name, link_secret.name
-        ))?;
+        // Finalize sync
+        if !matcher_alias.no_sync() {
+            sync.finalize(format!(
+                "Alias from {} to {}",
+                secret.name, link_secret.name
+            ))?;
+        }
 
         if !matcher_main.quiet() {
             eprintln!("Secret aliased");

@@ -1,6 +1,7 @@
 use clap::ArgMatches;
 
 use super::Matcher;
+use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, CmdArgFlag};
 
 /// The recipients add command matcher.
 pub struct AddMatcher<'a> {
@@ -16,6 +17,16 @@ impl<'a: 'b, 'b> AddMatcher<'a> {
     /// Check whether to add a secret key.
     pub fn secret(&self) -> bool {
         self.matches.is_present("secret")
+    }
+
+    /// Whether to allow a dirty repository for syncing.
+    pub fn allow_dirty(&self) -> bool {
+        ArgAllowDirty::is_present(self.matches)
+    }
+
+    /// Whether to not sync.
+    pub fn no_sync(&self) -> bool {
+        ArgNoSync::is_present(self.matches)
     }
 }
 

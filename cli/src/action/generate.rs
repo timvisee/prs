@@ -49,8 +49,10 @@ impl<'a> Generate<'a> {
 
         // Prepare store sync if we will store the secret
         if dest.is_some() {
-            sync::ensure_ready(&sync);
-            sync.prepare()?;
+            sync::ensure_ready(&sync, matcher_generate.allow_dirty());
+            if !matcher_generate.no_sync() {
+                sync.prepare()?;
+            }
         }
 
         // Generate secure password/passphrase plaintext
@@ -131,7 +133,9 @@ impl<'a> Generate<'a> {
 
         // Finalize store sync if we saved the secret
         if let Some(dest) = &dest {
-            sync.finalize(format!("Generate secret to {}", dest.1.name))?;
+            if !matcher_generate.no_sync() {
+                sync.finalize(format!("Generate secret to {}", dest.1.name))?;
+            }
         }
 
         // Determine whehter we outputted anything to stdout/stderr

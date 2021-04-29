@@ -1,5 +1,7 @@
 use clap::{App, Arg};
 
+use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, CmdArg};
+
 /// The housekeeping sync-keys command definition.
 pub struct CmdSyncKeys;
 
@@ -14,5 +16,7 @@ impl CmdSyncKeys {
                     .alias("skip-import")
                     .about("Skip importing missing keys to keychain"),
             )
+            .arg(ArgAllowDirty::build())
+            .arg(ArgNoSync::build())
     }
 }

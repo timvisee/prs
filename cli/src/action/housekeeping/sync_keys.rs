@@ -40,8 +40,11 @@ impl<'a> SyncKeys<'a> {
         let store = Store::open(matcher_housekeeping.store()).map_err(Err::Store)?;
         let sync = store.sync();
 
-        sync::ensure_ready(&sync);
-        sync.prepare()?;
+        // Prepare sync
+        sync::ensure_ready(&sync, matcher_sync_keys.allow_dirty());
+        if !matcher_sync_keys.no_sync() {
+            sync.prepare()?;
+        }
 
         // Import missing keys into keychain
         if !matcher_sync_keys.no_import() {
@@ -53,7 +56,10 @@ impl<'a> SyncKeys<'a> {
         let recipients = store.recipients().map_err(Err::Load)?;
         crypto::store::store_sync_public_key_files(&store, recipients.keys())?;
 
-        sync.finalize("Sync keys")?;
+        // Finalize sync
+        if !matcher_sync_keys.no_sync() {
+            sync.finalize("Sync keys")?;
+        }
 
         if !matcher_main.quiet() {
             eprintln!("Keys synced");

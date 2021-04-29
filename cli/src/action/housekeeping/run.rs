@@ -8,7 +8,10 @@ use thiserror::Error;
 use prs_lib::Store;
 
 use crate::{
-    cmd::matcher::{housekeeping::HousekeepingMatcher, MainMatcher, Matcher},
+    cmd::matcher::{
+        housekeeping::{run::RunMatcher, HousekeepingMatcher},
+        MainMatcher, Matcher,
+    },
     util::sync,
 };
 
@@ -28,10 +31,11 @@ impl<'a> Run<'a> {
         // Create the command matchers
         let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
         let matcher_housekeeping = HousekeepingMatcher::with(self.cmd_matches).unwrap();
+        let matcher_run = RunMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(matcher_housekeeping.store()).map_err(Err::Store)?;
 
-        housekeeping(&store)?;
+        housekeeping(&store, matcher_run.allow_dirty(), matcher_run.no_sync())?;
 
         if !matcher_main.quiet() {
             eprintln!("Housekeeping done");
@@ -42,11 +46,14 @@ impl<'a> Run<'a> {
 }
 
 /// Run housekeeping tasks.
-pub(crate) fn housekeeping(store: &Store) -> Result<()> {
+pub(crate) fn housekeeping(store: &Store, allow_dirty: bool, no_sync: bool) -> Result<()> {
     let sync = store.sync();
 
-    sync::ensure_ready(&sync);
-    sync.prepare()?;
+    // Prepare sync
+    sync::ensure_ready(&sync, allow_dirty);
+    if !no_sync {
+        sync.prepare()?;
+    }
 
     set_store_permissions(&store).map_err(Err::Perms)?;
 
@@ -54,7 +61,12 @@ pub(crate) fn housekeeping(store: &Store) -> Result<()> {
         set_git_attributes(&store).map_err(Err::GitAttributes)?;
     }
 
-    sync.finalize("Housekeeping")
+    // Finalize sync
+    if !no_sync {
+        sync.finalize("Housekeeping")?;
+    }
+
+    Ok(())
 }
 
 /// Set the password store directory permissions to a secure default.

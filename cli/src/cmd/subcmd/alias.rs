@@ -1,6 +1,6 @@
 use clap::{App, Arg};
 
-use crate::cmd::arg::{ArgQuery, ArgStore, CmdArg};
+use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, ArgQuery, ArgStore, CmdArg};
 
 /// The alias command definition.
 pub struct CmdAlias;
@@ -20,5 +20,7 @@ impl CmdAlias {
                     .required(true),
             )
             .arg(ArgStore::build())
+            .arg(ArgAllowDirty::build())
+            .arg(ArgNoSync::build())
     }
 }

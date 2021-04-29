@@ -34,8 +34,11 @@ impl<'a> Remove<'a> {
         let store = Store::open(matcher_remove.store()).map_err(Err::Store)?;
         let sync = store.sync();
 
-        sync::ensure_ready(&sync);
-        sync.prepare()?;
+        // Prepare sync
+        sync::ensure_ready(&sync, matcher_remove.allow_dirty());
+        if !matcher_remove.no_sync() {
+            sync.prepare()?;
+        }
 
         let secret =
             select::store_select_secret(&store, matcher_remove.query()).ok_or(Err::NoneSelected)?;
@@ -47,7 +50,10 @@ impl<'a> Remove<'a> {
             error::quit();
         };
 
-        sync.finalize(format!("Remove secret {}", secret.name))?;
+        // Finalize sync
+        if !matcher_remove.no_sync() {
+            sync.finalize(format!("Remove secret {}", secret.name))?;
+        }
 
         if !matcher_main.quiet() {
             eprintln!("Secret removed");

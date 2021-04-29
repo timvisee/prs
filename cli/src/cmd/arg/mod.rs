@@ -1,3 +1,5 @@
+pub mod allow_dirty;
+pub mod no_sync;
 pub mod property;
 pub mod query;
 pub mod store;
@@ -5,7 +7,9 @@ pub mod timeout;
 
 use clap::{Arg, ArgMatches};
 
-// Re-eexport to arg module
+// Re-export to arg module
+pub use self::allow_dirty::ArgAllowDirty;
+pub use self::no_sync::ArgNoSync;
 pub use self::property::ArgProperty;
 pub use self::query::ArgQuery;
 pub use self::store::ArgStore;

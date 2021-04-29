@@ -1,7 +1,7 @@
 use clap::ArgMatches;
 
 use super::Matcher;
-use crate::cmd::arg::{ArgStore, CmdArgOption};
+use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, ArgStore, CmdArgFlag, CmdArgOption};
 
 /// The add command matcher.
 pub struct AddMatcher<'a> {
@@ -27,6 +27,16 @@ impl<'a: 'b, 'b> AddMatcher<'a> {
     /// The store.
     pub fn store(&self) -> String {
         ArgStore::value(self.matches)
+    }
+
+    /// Whether to allow a dirty repository for syncing.
+    pub fn allow_dirty(&self) -> bool {
+        ArgAllowDirty::is_present(self.matches)
+    }
+
+    /// Whether to not sync.
+    pub fn no_sync(&self) -> bool {
+        ArgNoSync::is_present(self.matches)
     }
 }
 

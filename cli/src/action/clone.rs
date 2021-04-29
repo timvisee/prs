@@ -43,7 +43,8 @@ impl<'a> Clone<'a> {
         crypto::store::import_missing_keys_from_store(&store).map_err(Err::ImportRecipients)?;
 
         // Run housekeeping
-        crate::action::housekeeping::run::housekeeping(&store).map_err(Err::Housekeeping)?;
+        crate::action::housekeeping::run::housekeeping(&store, true, false)
+            .map_err(Err::Housekeeping)?;
 
         // Check whether the store has any key we own the secret for, default to false
         let store_has_our_secret = store

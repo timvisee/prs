@@ -3,7 +3,7 @@ pub mod remote;
 
 use clap::App;
 
-use crate::cmd::arg::{ArgStore, CmdArg};
+use crate::cmd::arg::{ArgAllowDirty, ArgStore, CmdArg};
 
 /// The sync command definition.
 pub struct CmdSync;
@@ -16,5 +16,6 @@ impl CmdSync {
             .subcommand(init::CmdInit::build())
             .subcommand(remote::CmdRemote::build())
             .arg(ArgStore::build())
+            .arg(ArgAllowDirty::build())
     }
 }

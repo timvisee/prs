@@ -1,6 +1,6 @@
 use clap::{App, Arg};
 
-use crate::cmd::arg::{ArgQuery, CmdArg};
+use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, ArgQuery, CmdArg};
 
 /// The housekeeping recrypt command definition.
 pub struct CmdRecrypt;
@@ -18,5 +18,7 @@ impl CmdRecrypt {
                     .conflicts_with("QUERY"),
             )
             .arg(ArgQuery::build().required_unless_present("all"))
+            .arg(ArgAllowDirty::build())
+            .arg(ArgNoSync::build())
     }
 }

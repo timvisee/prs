@@ -31,8 +31,11 @@ impl<'a> Remove<'a> {
         let store = Store::open(matcher_recipients.store()).map_err(Err::Store)?;
         let sync = store.sync();
 
-        sync::ensure_ready(&sync);
-        sync.prepare()?;
+        // Prepare sync
+        sync::ensure_ready(&sync, matcher_remove.allow_dirty());
+        if !matcher_remove.no_sync() {
+            sync.prepare()?;
+        }
 
         let mut recipients = store.recipients().map_err(Err::Load)?;
 
@@ -83,7 +86,10 @@ impl<'a> Remove<'a> {
             .map_err(Err::Recrypt)?;
         }
 
-        sync.finalize(format!("Remove recipient {}", key.fingerprint(true)))?;
+        // Finalize sync
+        if !matcher_remove.no_sync() {
+            sync.finalize(format!("Remove recipient {}", key.fingerprint(true)))?;
+        }
 
         if !matcher_main.quiet() {
             eprintln!("Removed recipient: {}", key);

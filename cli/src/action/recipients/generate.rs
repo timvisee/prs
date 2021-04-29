@@ -44,8 +44,11 @@ impl<'a> Generate<'a> {
         let store = Store::open(matcher_recipients.store()).map_err(Err::Store)?;
         let sync = store.sync();
 
-        sync::ensure_ready(&sync);
-        sync.prepare()?;
+        // Prepare sync
+        sync::ensure_ready(&sync, matcher_generate.allow_dirty());
+        if !matcher_generate.no_sync() {
+            sync.prepare()?;
+        }
 
         // Show warning to user
         if !matcher_main.force() {
@@ -100,14 +103,17 @@ impl<'a> Generate<'a> {
                 }
             }
 
-            sync.finalize(format!(
-                "Generate and add recipient {}",
-                new_keys
-                    .into_iter()
-                    .map(|k| k.fingerprint(true))
-                    .collect::<Vec<_>>()
-                    .join(", "),
-            ))?;
+            // Finalize sync
+            if !matcher_generate.no_sync() {
+                sync.finalize(format!(
+                    "Generate and add recipient {}",
+                    new_keys
+                        .into_iter()
+                        .map(|k| k.fingerprint(true))
+                        .collect::<Vec<_>>()
+                        .join(", "),
+                ))?;
+            }
 
             if !matcher_main.quiet() {
                 for key in new_keys {

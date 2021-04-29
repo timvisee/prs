@@ -29,8 +29,11 @@ impl<'a> Duplicate<'a> {
         let store = Store::open(matcher_duplicate.store()).map_err(Err::Store)?;
         let sync = store.sync();
 
-        sync::ensure_ready(&sync);
-        sync.prepare()?;
+        // Prepare sync
+        sync::ensure_ready(&sync, matcher_duplicate.allow_dirty());
+        if !matcher_duplicate.no_sync() {
+            sync.prepare()?;
+        }
 
         let secret = select::store_select_secret(&store, matcher_duplicate.query())
             .ok_or(Err::NoneSelected)?;
@@ -58,10 +61,13 @@ impl<'a> Duplicate<'a> {
         // Copy secret
         fs::copy(&secret.path, path).map_err(Err::Copy)?;
 
-        sync.finalize(format!(
-            "Duplicate from {} to {}",
-            secret.name, new_secret.name
-        ))?;
+        // Finalize sync
+        if !matcher_duplicate.no_sync() {
+            sync.finalize(format!(
+                "Duplicate from {} to {}",
+                secret.name, new_secret.name
+            ))?;
+        }
 
         if !matcher_main.quiet() {
             eprintln!("Secret duplicated");

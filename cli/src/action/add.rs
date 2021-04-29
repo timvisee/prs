@@ -30,8 +30,11 @@ impl<'a> Add<'a> {
         let sync = store.sync();
         let dest = matcher_add.destination();
 
-        sync::ensure_ready(&sync);
-        sync.prepare()?;
+        // Prepare sync
+        sync::ensure_ready(&sync, matcher_add.allow_dirty());
+        if !matcher_add.no_sync() {
+            sync.prepare()?;
+        }
 
         // Normalize destination path
         let path = store
@@ -74,7 +77,10 @@ impl<'a> Add<'a> {
             .encrypt_file(&recipients, plaintext, &path)
             .map_err(Err::Write)?;
 
-        sync.finalize(format!("Add secret to {}", secret.name))?;
+        // Finalize sync
+        if !matcher_add.no_sync() {
+            sync.finalize(format!("Add secret to {}", secret.name))?;
+        }
 
         if !matcher_main.quiet() {
             eprintln!("Secret added");

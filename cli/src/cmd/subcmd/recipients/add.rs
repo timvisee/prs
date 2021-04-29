@@ -1,5 +1,7 @@
 use clap::{App, Arg};
 
+use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, CmdArg};
+
 /// The recipient add command definition.
 pub struct CmdAdd;
 
@@ -22,5 +24,7 @@ impl CmdAdd {
                     .alias("skip-reencrypt")
                     .about("Skip re-encrypting all secrets"),
             )
+            .arg(ArgAllowDirty::build())
+            .arg(ArgNoSync::build())
     }
 }

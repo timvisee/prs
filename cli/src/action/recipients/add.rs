@@ -34,8 +34,10 @@ impl<'a> Add<'a> {
         let store = Store::open(matcher_recipients.store()).map_err(Err::Store)?;
         let sync = store.sync();
 
-        sync::ensure_ready(&sync);
-        sync.prepare()?;
+        sync::ensure_ready(&sync, matcher_add.allow_dirty());
+        if !matcher_add.no_sync() {
+            sync.prepare()?;
+        }
 
         let mut context = crypto::context(crypto::PROTO)?;
         let mut recipients = store.recipients().map_err(Err::Load)?;

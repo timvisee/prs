@@ -1,7 +1,7 @@
 use clap::ArgMatches;
 
 use super::Matcher;
-use crate::cmd::arg::{ArgQuery, CmdArgOption};
+use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, ArgQuery, CmdArgFlag, CmdArgOption};
 
 /// The housekeeping recrypt command matcher.
 pub struct RecryptMatcher<'a> {
@@ -16,6 +16,16 @@ impl<'a: 'b, 'b> RecryptMatcher<'a> {
 
     pub fn _all(&self) -> bool {
         self.matches.is_present("all")
+    }
+
+    /// Whether to allow a dirty repository for syncing.
+    pub fn allow_dirty(&self) -> bool {
+        ArgAllowDirty::is_present(self.matches)
+    }
+
+    /// Whether to not sync.
+    pub fn no_sync(&self) -> bool {
+        ArgNoSync::is_present(self.matches)
     }
 }
 

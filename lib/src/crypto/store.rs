@@ -141,7 +141,6 @@ pub fn store_sync_public_key_files(store: &Store, keys: &[Key]) -> Result<()> {
     fs::create_dir_all(&dir).map_err(Err::SyncKeyFiles)?;
 
     // List key files in keys directory
-    // TODO: this is duplicate, use share function
     let files: Vec<(PathBuf, String)> = dir
         .read_dir()
         .map_err(Err::SyncKeyFiles)?

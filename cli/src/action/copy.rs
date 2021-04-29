@@ -7,7 +7,7 @@ use prs_lib::{
 use thiserror::Error;
 
 use crate::cmd::matcher::{copy::CopyMatcher, MainMatcher, Matcher};
-use crate::util::{clipboard, select};
+use crate::util::{clipboard, secret, select};
 
 /// Copy secret to clipboard action.
 pub struct Copy<'a> {
@@ -30,7 +30,7 @@ impl<'a> Copy<'a> {
         let secret =
             select::store_select_secret(&store, matcher_copy.query()).ok_or(Err::NoneSelected)?;
 
-        super::show::print_secret_name(matcher_copy.query(), &secret, matcher_main.quiet());
+        secret::print_name(matcher_copy.query(), &secret, matcher_main.quiet());
 
         let mut plaintext = crypto::context(crypto::PROTO)?
             .decrypt_file(&secret.path)

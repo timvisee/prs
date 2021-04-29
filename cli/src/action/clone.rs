@@ -7,11 +7,7 @@ use prs_lib::{crypto, Store};
 use thiserror::Error;
 
 use crate::cmd::matcher::{clone::CloneMatcher, MainMatcher, Matcher};
-use crate::util::{
-    self,
-    error::{self, ErrorHints},
-    style,
-};
+use crate::util::{self, style};
 use crate::vendor::shellexpand;
 
 /// Clone store action.
@@ -34,7 +30,7 @@ impl<'a> Clone<'a> {
         let path = matcher_clone.store();
         let path = shellexpand::full(&path).map_err(Err::ExpandPath)?;
 
-        ensure_dir_free(&Path::new(path.as_ref()))?;
+        util::fs::ensure_dir_free(&Path::new(path.as_ref()))?;
 
         // Create store dir, open it and clone
         fs::create_dir_all(path.as_ref()).map_err(Err::Init)?;
@@ -85,31 +81,6 @@ impl<'a> Clone<'a> {
 
         Ok(())
     }
-}
-
-/// Ensure the given path is a free directory.
-///
-/// Checks whether the given path is not a directory, or whehter the directory is empty.
-/// Quits on error.
-// TODO: duplicate in action/init, move to shared module
-fn ensure_dir_free(path: &Path) -> Result<()> {
-    // Fine if not a directory
-    if !path.is_dir() {
-        return Ok(());
-    }
-
-    // Fine if no paths in dir
-    if path.read_dir().map_err(Err::Init)?.count() == 0 {
-        return Ok(());
-    }
-
-    error::quit_error_msg(
-        format!(
-            "cannot clone store, directory already exists: {}",
-            path.display(),
-        ),
-        ErrorHints::default(),
-    )
 }
 
 #[derive(Debug, Error)]

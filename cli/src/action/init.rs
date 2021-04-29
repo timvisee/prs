@@ -7,11 +7,7 @@ use prs_lib::{crypto, Store};
 use thiserror::Error;
 
 use crate::cmd::matcher::{init::InitMatcher, MainMatcher, Matcher};
-use crate::util::{
-    self,
-    error::{self, ErrorHints},
-    style,
-};
+use crate::util::{self, style};
 use crate::vendor::shellexpand;
 
 /// Init store action.
@@ -35,9 +31,8 @@ impl<'a> Init<'a> {
             .map_err(Err::ExpandPath)?
             .to_string();
 
-        ensure_dir_free(&Path::new(&path))?;
-
-        // Initialize store
+        // Ensure store dir is free, then initialize
+        util::fs::ensure_dir_free(&Path::new(&path))?;
         fs::create_dir_all(&path).map_err(Err::Init)?;
 
         // Open new store
@@ -71,31 +66,6 @@ impl<'a> Init<'a> {
 
         Ok(())
     }
-}
-
-/// Ensure the given path is a free directory.
-///
-/// Checks whether the given path is not a directory, or whehter the directory is empty.
-/// Quits on error.
-// TODO: duplicate in action/init, move to shared module
-fn ensure_dir_free(path: &Path) -> Result<()> {
-    // Fine if not a directory
-    if !path.is_dir() {
-        return Ok(());
-    }
-
-    // Fine if no paths in dir
-    if path.read_dir().map_err(Err::Init)?.count() == 0 {
-        return Ok(());
-    }
-
-    error::quit_error_msg(
-        format!(
-            "cannot initialize store, directory already exists: {}",
-            path.display(),
-        ),
-        ErrorHints::default(),
-    )
 }
 
 #[derive(Debug, Error)]

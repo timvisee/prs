@@ -1,4 +1,3 @@
-use std::io::Write;
 use std::thread;
 use std::time::Duration;
 
@@ -6,12 +5,12 @@ use anyhow::Result;
 use clap::ArgMatches;
 use prs_lib::{
     crypto::{self, prelude::*},
-    Plaintext, Secret, Store,
+    Store,
 };
 use thiserror::Error;
 
 use crate::cmd::matcher::{show::ShowMatcher, MainMatcher, Matcher};
-use crate::util::select;
+use crate::util::{secret, select};
 
 /// Show secret action.
 pub struct Show<'a> {
@@ -34,7 +33,7 @@ impl<'a> Show<'a> {
         let secret =
             select::store_select_secret(&store, matcher_show.query()).ok_or(Err::NoneSelected)?;
 
-        print_secret_name(matcher_show.query(), &secret, matcher_main.quiet());
+        secret::print_name(matcher_show.query(), &secret, matcher_main.quiet());
 
         let mut plaintext = crypto::context(crypto::PROTO)?
             .decrypt_file(&secret.path)
@@ -49,7 +48,7 @@ impl<'a> Show<'a> {
 
         let lines = plaintext.unsecure_to_str().unwrap().lines().count();
 
-        print(plaintext)?;
+        secret::print(plaintext).map_err(Err::Print)?;
 
         // Clear after timeout
         if let Some(timeout) = matcher_show.timeout() {
@@ -67,40 +66,6 @@ impl<'a> Show<'a> {
         }
 
         Ok(())
-    }
-}
-
-/// Print the given plaintext to stdout.
-// TODO: move to shared module
-pub(crate) fn print(plaintext: Plaintext) -> Result<()> {
-    let mut stdout = std::io::stdout();
-
-    stdout
-        .write_all(plaintext.unsecure_ref())
-        .map_err(Err::Print)?;
-
-    // Always finish with newline
-    if let Some(&last) = plaintext.unsecure_ref().last() {
-        if last != b'\n' {
-            stdout.write_all(&[b'\n']).map_err(Err::Print)?;
-        }
-    }
-
-    let _ = stdout.flush();
-    Ok(())
-}
-
-/// Show full secret name if query was partial.
-///
-/// This notifies the user on what exact secret is selected when only part of the secret name is
-/// entered. This is useful for when a partial (short) query selects the wrong secret.
-pub(crate) fn print_secret_name(query: Option<String>, secret: &Secret, quiet: bool) {
-    if quiet {
-        return;
-    }
-
-    if query.map(|q| !secret.name.eq(&q)).unwrap_or(true) {
-        eprintln!("Secret: {}", secret.name);
     }
 }
 

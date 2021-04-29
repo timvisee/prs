@@ -3,7 +3,9 @@ pub mod cli;
 pub mod clipboard;
 pub mod edit;
 pub mod error;
+pub mod fs;
 pub mod pass;
+pub mod secret;
 pub mod select;
 #[cfg(not(unix))]
 pub mod select_fzf;

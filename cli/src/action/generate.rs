@@ -12,7 +12,7 @@ use thiserror::Error;
 use crate::cmd::matcher::{generate::GenerateMatcher, MainMatcher, Matcher};
 #[cfg(feature = "clipboard")]
 use crate::util::clipboard;
-use crate::util::{cli, edit, error, pass, stdin, sync};
+use crate::util::{cli, edit, error, pass, secret, stdin, sync};
 
 /// Generate secret action.
 pub struct Generate<'a> {
@@ -126,7 +126,7 @@ impl<'a> Generate<'a> {
 
         // Show in stdout
         if matcher_generate.show() {
-            super::show::print(plaintext)?;
+            secret::print(plaintext).map_err(Err::Print)?;
         }
 
         // Finalize store sync if we saved the secret
@@ -179,4 +179,7 @@ pub enum Err {
 
     #[error("failed to write changed secret")]
     Write(#[source] anyhow::Error),
+
+    #[error("failed to print secret to stdout")]
+    Print(#[source] std::io::Error),
 }

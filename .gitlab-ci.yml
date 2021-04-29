@@ -59,14 +59,14 @@ before_script:
     <<: *rust-build-cache
   script:
     - cargo check --verbose
-    - cd cli; cargo check --no-default-features --features $FEATURES_CLI_UNIX --verbose; cd ..
-    - cd gtk3; cargo check --no-default-features --features $FEATURES_GTK3_UNIX --verbose; cd ..
-    - cd lib; cargo check --no-default-features --features backend-gpgme --verbose; cd ..
-    - cd lib; cargo check --no-default-features --features backend-gnupg-bin --verbose; cd ..
-    - cd cli; cargo check --no-default-features --features backend-gpgme --verbose; cd ..
-    - cd cli; cargo check --no-default-features --features backend-gnupg-bin --verbose; cd ..
-    - cd gtk3; cargo check --no-default-features --features backend-gpgme --verbose; cd ..
-    - cd gtk3; cargo check --no-default-features --features backend-gnupg-bin --verbose; cd ..
+    - cd cli; cargo check --no-default-features --features $FEATURES_CLI_UNIX --locked --verbose; cd ..
+    - cd gtk3; cargo check --no-default-features --features $FEATURES_GTK3_UNIX --locked --verbose; cd ..
+    - cd lib; cargo check --no-default-features --features backend-gpgme --locked --verbose; cd ..
+    - cd lib; cargo check --no-default-features --features backend-gnupg-bin --locked --verbose; cd ..
+    - cd cli; cargo check --no-default-features --features backend-gpgme --locked --verbose; cd ..
+    - cd cli; cargo check --no-default-features --features backend-gnupg-bin --locked --verbose; cd ..
+    - cd gtk3; cargo check --no-default-features --features backend-gpgme --locked --verbose; cd ..
+    - cd gtk3; cargo check --no-default-features --features backend-gnupg-bin --locked --verbose; cd ..
 check-stable:
   <<: *check-base
 check-beta:
@@ -105,9 +105,9 @@ check-windows:
   cache: {}
   <<: *before_script-windows
   script:
-    - cd lib; cargo check --no-default-features --features $FEATURES_CLI_WINDOWS --verbose; cd ..
-    - cd lib; cargo check --no-default-features --features backend-gnupg-bin --verbose; cd ..
-    - cd cli; cargo check --no-default-features --features backend-gnupg-bin --verbose; cd ..
+    - cd lib; cargo check --no-default-features --features $FEATURES_CLI_WINDOWS --locked --verbose; cd ..
+    - cd lib; cargo check --no-default-features --features backend-gnupg-bin --locked --verbose; cd ..
+    - cd cli; cargo check --no-default-features --features backend-gnupg-bin --locked --verbose; cd ..
 
 # Build using Rust stable on Linux
 build-x86_64-linux-gnu:
@@ -116,8 +116,8 @@ build-x86_64-linux-gnu:
   cache:
     <<: *rust-build-cache
   script:
-    - cd cli; cargo build --target=$TARGET --release --no-default-features --features $FEATURES_CLI_UNIX --verbose; cd ..
-    - cd gtk3; cargo build --target=$TARGET --release --no-default-features --features $FEATURES_GTK3_UNIX --verbose; cd ..
+    - cd cli; cargo build --target=$TARGET --release --no-default-features --features $FEATURES_CLI_UNIX --locked --verbose; cd ..
+    - cd gtk3; cargo build --target=$TARGET --release --no-default-features --features $FEATURES_GTK3_UNIX --locked --verbose; cd ..
     - mv target/$TARGET/release/prs ./prs-$TARGET
     - mv target/$TARGET/release/prs-gtk3-copy ./prs-gtk3-copy-$TARGET
     - strip -g ./prs-$TARGET
@@ -152,8 +152,8 @@ build-x86_64-linux-musl:
     - ./ci/gpgme/build
 
     - rustup target add $TARGET
-    - cd cli; cargo build --target=$TARGET --release --no-default-features --features $FEATURES_CLI_UNIX --verbose; cd ..
-    - cd gtk3; cargo build --target=$TARGET --release --no-default-features --features $FEATURES_GTK3_UNIX --verbose; cd ..
+    - cd cli; cargo build --target=$TARGET --release --no-default-features --features $FEATURES_CLI_UNIX --locked --verbose; cd ..
+    - cd gtk3; cargo build --target=$TARGET --release --no-default-features --features $FEATURES_GTK3_UNIX --locked --verbose; cd ..
 
     # Prepare the release artifact, strip it
     - find . -name prs -exec ls -lah {} \;
@@ -190,8 +190,8 @@ build-macos:
     - brew upgrade
     - brew install $BREW_PACKAGES
   script:
-    - cd cli; cargo build --target=$TARGET --release --no-default-features --features $FEATURES_CLI_UNIX --verbose; cd ..
-    - cd gtk3; cargo build --target=$TARGET --release --no-default-features --features $FEATURES_GTK3_UNIX --verbose; cd ..
+    - cd cli; cargo build --target=$TARGET --release --no-default-features --features $FEATURES_CLI_UNIX --locked --verbose; cd ..
+    - cd gtk3; cargo build --target=$TARGET --release --no-default-features --features $FEATURES_GTK3_UNIX --locked --verbose; cd ..
     - mv target/$TARGET/release/prs ./prs-$TARGET
     - mv target/$TARGET/release/prs-gtk3-copy ./prs-gtk3-copy-$TARGET
   artifacts:
@@ -211,7 +211,7 @@ build-x86_64-windows:
     TARGET: x86_64-pc-windows-msvc
   <<: *before_script-windows
   script:
-    - cd cli; cargo build --target=$TARGET --release --no-default-features --features $FEATURES_CLI_WINDOWS --verbose; cd ..
+    - cd cli; cargo build --target=$TARGET --release --no-default-features --features $FEATURES_CLI_WINDOWS --locked --verbose; cd ..
     - mv target\$env:TARGET\release\prs.exe .\prs-$env:TARGET.exe
   artifacts:
     name: prs-x86_64-windows
@@ -227,7 +227,7 @@ test-cargo:
   cache:
     <<: *rust-build-cache
   script:
-    - cargo test --verbose
+    - cargo test --locked --verbose
 
 # Run basic integration test with prs
 test-integration:
@@ -401,13 +401,13 @@ release-crate:
     - echo "Creating release crate to publish on crates.io..."
     - echo $CARGO_TOKEN | cargo login
     - echo "Publishing crates to crates.io..."
-    - cd lib; cargo publish --verbose --allow-dirty --no-verify; cd ..
+    - cd lib; cargo publish --allow-dirty --no-verify --locked --verbose ; cd ..
 
     # Give package index some time to sync
     - sleep 60
 
-    - cd cli; cargo publish --verbose --allow-dirty --no-verify; cd ..
-    - cd gtk3; cargo publish --verbose --allow-dirty --no-verify; cd ..
+    - cd cli; cargo publish --allow-dirty --no-verify --locked --verbose; cd ..
+    - cd gtk3; cargo publish --allow-dirty --no-verify --locked --verbose; cd ..
 
 # Publish Docker image on repository registry
 release-docker:

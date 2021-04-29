@@ -10,6 +10,11 @@ pub fn store_select_secret(store: &Store, query: Option<String>) -> Option<Secre
     match store.find(query) {
         FindSecret::Exact(secret) => Some(secret),
         FindSecret::Many(secrets) => {
+            // Do not show selection dialog if no secret is selected
+            if secrets.is_empty() {
+                return None;
+            }
+
             #[cfg(unix)]
             {
                 super::select_skim::select_secret(&secrets).cloned()

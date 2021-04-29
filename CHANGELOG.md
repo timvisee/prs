@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.2.10 (2021-04-29)
+- Add `--no-sync` to prevent syncing and committing when making changes, this
+  keeps the store repository dirty
+- Add `--allow-dirty` to make changes to the store while the repository is still
+  dirty
+- Add `print` alias for `show`
+- Show full secret name when user query is just a partial match
+- Do not show interactive secret selection if no secret matched the user query
+- Add `--no-interact` flag to `dmenu` and `rofi` scripts
+- Set that `--verbose` flag does not take a value
+- Update dependencies
+
 ## 0.2.9 (2021-04-23)
 - Add `insert` alias for `add`
 - Fix panic when generating ZSH shell completions

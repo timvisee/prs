@@ -35,6 +35,8 @@ impl<'a> Edit<'a> {
         let secret =
             select::store_select_secret(&store, matcher_edit.query()).ok_or(Err::NoneSelected)?;
 
+        super::show::print_secret_name(matcher_edit.query(), &secret, matcher_main.quiet());
+
         let mut context = crypto::context(crypto::PROTO)?;
         let mut plaintext = context.decrypt_file(&secret.path).map_err(Err::Read)?;
 

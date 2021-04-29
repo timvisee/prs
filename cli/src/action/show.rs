@@ -6,7 +6,7 @@ use anyhow::Result;
 use clap::ArgMatches;
 use prs_lib::{
     crypto::{self, prelude::*},
-    Plaintext, Store,
+    Plaintext, Secret, Store,
 };
 use thiserror::Error;
 
@@ -33,6 +33,8 @@ impl<'a> Show<'a> {
         let store = Store::open(matcher_show.store()).map_err(Err::Store)?;
         let secret =
             select::store_select_secret(&store, matcher_show.query()).ok_or(Err::NoneSelected)?;
+
+        print_secret_name(matcher_show.query(), &secret, matcher_main.quiet());
 
         let mut plaintext = crypto::context(crypto::PROTO)?
             .decrypt_file(&secret.path)
@@ -86,6 +88,20 @@ pub(crate) fn print(plaintext: Plaintext) -> Result<()> {
 
     let _ = stdout.flush();
     Ok(())
+}
+
+/// Show full secret name if query was partial.
+///
+/// This notifies the user on what exact secret is selected when only part of the secret name is
+/// entered. This is useful for when a partial (short) query selects the wrong secret.
+pub(crate) fn print_secret_name(query: Option<String>, secret: &Secret, quiet: bool) {
+    if quiet {
+        return;
+    }
+
+    if query.map(|q| !secret.name.eq(&q)).unwrap_or(true) {
+        eprintln!("Secret: {}", secret.name);
+    }
 }
 
 #[derive(Debug, Error)]

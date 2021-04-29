@@ -2,4 +2,4 @@
 
 secret=$(prs list --list | rofi -p "secret" -dmenu -i)
 
-[[ ! -z "$secret" ]] && prs copy "$secret"
+[[ ! -z "$secret" ]] && prs copy "$secret" --no-interact

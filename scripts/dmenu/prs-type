@@ -2,4 +2,4 @@
 
 secret=$(prs list --list | dmenu -p "secret" -i)
 
-[[ ! -z "$secret" ]] && xdotool type "$(prs show "$secret" --password --quiet)"
+[[ ! -z "$secret" ]] && xdotool type "$(prs show "$secret" --password --no-interact --quiet)"

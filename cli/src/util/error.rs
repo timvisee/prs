@@ -100,8 +100,11 @@ pub struct ErrorHints {
     /// Show about the sync remote action.
     sync_remote: bool,
 
-    /// Show abuot the git action.
+    /// Show about the git action.
     git: bool,
+
+    /// Show allow dirty flag.
+    allow_dirty: bool,
 
     /// Show about the force flag.
     force: bool,
@@ -165,6 +168,12 @@ impl ErrorHints {
                 highlight(&format!("{} git", bin))
             );
         }
+        if self.allow_dirty {
+            eprintln!(
+                "To make changes while the store repository is dirty try '{}'",
+                highlight("--allow-dirty")
+            );
+        }
         if self.force {
             eprintln!("Use '{}' to force", highlight("--force"));
         }
@@ -188,6 +197,7 @@ impl Default for ErrorHints {
             sync_init: false,
             sync_remote: false,
             git: false,
+            allow_dirty: false,
             force: false,
             verbose: true,
             help: true,

@@ -14,6 +14,12 @@ pub fn ensure_ready(sync: &Sync, allow_dirty: bool) {
         }
     };
 
+    let mut error = ErrorHintsBuilder::default();
+    error.git(true);
+    if let Readyness::Dirty = readyness {
+        error.allow_dirty(true);
+    }
+
     quit_error_msg(
         match readyness {
             Readyness::Ready | Readyness::NoSync => return,
@@ -23,6 +29,6 @@ pub fn ensure_ready(sync: &Sync, allow_dirty: bool) {
                 format!("store git repository is in unfinished state: {:?}", state)
             }
         },
-        ErrorHintsBuilder::default().git(true).build().unwrap(),
+        error.build().unwrap(),
     );
 }

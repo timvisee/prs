@@ -523,7 +523,7 @@ See a list of compatible `pass` clients [here][pass-compatible-clients].
 ```
 $ prs help
 
-prs-cli 0.2.10
+prs-cli 0.2.11
 Tim Visee <3a4fb3964f@sinenomine.email>
 Secure, fast & convenient password manager CLI with GPG & git sync
 
@@ -535,8 +535,8 @@ FLAGS:
     -h, --help           Prints help information
     -I, --no-interact    Not interactive, do not prompt
     -q, --quiet          Produce output suitable for logging and automation
-    -V, --version        Prints version information
     -v, --verbose        Enable verbose information and logging
+    -V, --version        Prints version information
     -y, --yes            Assume yes for prompts
 
 SUBCOMMANDS:

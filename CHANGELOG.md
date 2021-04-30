@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.11 (2021-04-30)
+- Fix panic when generating command completion script to file
+  (https://gitlab.com/timvisee/prs/-/issues/35)
+- Update dependencies
+
 ## 0.2.10 (2021-04-29)
 - Add `--no-sync` to prevent syncing and committing when making changes, this
   keeps the store repository dirty

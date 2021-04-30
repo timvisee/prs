@@ -121,6 +121,17 @@ impl Shell {
         }
     }
 
+    /// Suggested file name for completions file of current shell.
+    pub fn file_name(self, bin_name: &str) -> String {
+        match self {
+            Shell::Bash => format!("{}.bash", bin_name),
+            Shell::Elvish => format!("{}.elv", bin_name),
+            Shell::Fish => format!("{}.fish", bin_name),
+            Shell::PowerShell => format!("_{}.ps1", bin_name),
+            Shell::Zsh => format!("_{}", bin_name),
+        }
+    }
+
     /// Generate completion script.
     pub fn generate<S>(self, app: &mut App<'_>, bin_name: S, buf: &mut dyn Write)
     where

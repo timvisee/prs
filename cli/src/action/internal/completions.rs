@@ -1,4 +1,4 @@
-use std::fs;
+use std::fs::{self, File};
 use std::io;
 
 use anyhow::Result;
@@ -46,7 +46,15 @@ impl<'a> Completions<'a> {
             if matcher_completions.stdout() {
                 shell.generate(&mut app, matcher_completions.name(), &mut std::io::stdout());
             } else {
-                shell.generate_to(&mut app, matcher_completions.name(), &dir);
+                // TODO: revert this to `generate_to` once clap v3.0.0-beta.3 is released, it fixes
+                //       an critical issue that caused a panic. See the `clap-3.0.0-beta.3` branch.
+                // shell.generate_to(&mut app, matcher_completions.name(), &dir);
+
+                // Determine path of final file, create file, write completion script to it
+                let path = dir.join(shell.file_name(&matcher_completions.name()));
+                let mut file = File::create(path).map_err(Error::Write)?;
+                shell.generate(&mut app, matcher_completions.name(), &mut file);
+                file.sync_all().map_err(Error::Write)?;
             }
             if !quiet {
                 eprintln!(" done.");
@@ -62,4 +70,8 @@ pub enum Error {
     /// An error occurred while creating the output directory.
     #[error("failed to create output directory, it doesn't exist")]
     CreateOutputDir(#[source] io::Error),
+
+    /// An error occurred while writing completion scripts to a file.
+    #[error("failed to write completion script to file")]
+    Write(#[source] io::Error),
 }

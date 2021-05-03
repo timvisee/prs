@@ -20,7 +20,7 @@ default-run = "prs"
 gitlab = { repository = "timvisee/prs", branch = "master" }
 
 [features]
-default = ["backend-gnupg-bin", "alias", "clipboard", "notify"]
+default = ["backend-gnupg-bin", "alias", "clipboard", "notify", "select-skim", "select-fzf-bin"]
 
 # Backend using GPGME for GnuPG crypto
 backend-gpgme = ["prs-lib/backend-gpgme"]
@@ -37,6 +37,12 @@ clipboard = ["copypasta-ext", "x11-clipboard", "base64"]
 
 # Notification support (clipboard notifications)
 notify = ["notify-rust"]
+
+# Interactive selection with skim (does nothing not(unix))
+select-skim = ["skim"]
+
+# Interactive selection with fzf binary
+select-fzf-bin = []
 
 [dependencies]
 ansi-escapes = "0.1"
@@ -81,7 +87,7 @@ copypasta-ext = { version = "0.3.4", optional = true, default-features = false, 
 
 # Interactive selection with skim on unix platforms
 [target.'cfg(unix)'.dependencies]
-skim = "0.9"
+skim = { version = "0.9", optional = true }
 
 [[bin]]
 name = "prs"

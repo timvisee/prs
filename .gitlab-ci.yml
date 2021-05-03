@@ -14,9 +14,9 @@ variables:
   TARGET: x86_64-unknown-linux-gnu
   APT_GTK_LIBS: libgtk-3-dev
   BREW_PACKAGES: gpg gpgme gtk+3
-  FEATURES_CLI_UNIX: backend-gpgme,alias,clipboard,notify
+  FEATURES_CLI_UNIX: backend-gpgme,alias,clipboard,notify,select-skim
   FEATURES_GTK3_UNIX: backend-gpgme
-  FEATURES_CLI_WINDOWS: backend-gnupg-bin,clipboard,notify
+  FEATURES_CLI_WINDOWS: backend-gnupg-bin,clipboard,notify,select-fzf-bin
 
 # Install compiler and OpenSSL dependencies
 before_script:

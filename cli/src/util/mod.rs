@@ -12,6 +12,8 @@ pub mod select_basic;
 pub mod select_fzf_bin;
 #[cfg(all(feature = "select-skim", unix))]
 pub mod select_skim;
+#[cfg(feature = "select-skim-bin")]
+pub mod select_skim_bin;
 pub mod stdin;
 pub mod style;
 pub mod sync;

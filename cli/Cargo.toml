@@ -41,6 +41,9 @@ notify = ["notify-rust"]
 # Interactive selection with skim (does nothing not(unix))
 select-skim = ["skim"]
 
+# Interactive selection with skim binary
+select-skim-bin = []
+
 # Interactive selection with fzf binary
 select-fzf-bin = []
 

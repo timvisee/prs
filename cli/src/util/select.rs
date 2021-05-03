@@ -20,6 +20,10 @@ pub fn store_select_secret(store: &Store, query: Option<String>) -> Option<Secre
             {
                 return super::select_skim::select_secret(&secrets).cloned();
             }
+            #[cfg(feature = "select-skim-bin")]
+            {
+                return super::select_skim_bin::select_secret(&secrets).cloned();
+            }
             #[cfg(feature = "select-fzf-bin")]
             {
                 return super::select_fzf_bin::select_secret(&secrets).cloned();
@@ -36,6 +40,10 @@ pub fn select_key(keys: &[Key]) -> Option<&Key> {
     #[cfg(all(feature = "select-skim", unix))]
     {
         return super::select_skim::select_key(keys);
+    }
+    #[cfg(feature = "select-skim-bin")]
+    {
+        return super::select_skim_bin::select_key(keys);
     }
     #[cfg(feature = "select-fzf-bin")]
     {

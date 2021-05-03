@@ -7,6 +7,7 @@ pub mod fs;
 pub mod pass;
 pub mod secret;
 pub mod select;
+pub mod select_basic;
 #[cfg(feature = "select-fzf-bin")]
 pub mod select_fzf_bin;
 #[cfg(all(feature = "select-skim", unix))]

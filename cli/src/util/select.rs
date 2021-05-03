@@ -24,6 +24,7 @@ pub fn store_select_secret(store: &Store, query: Option<String>) -> Option<Secre
             {
                 return super::select_fzf_bin::select_secret(&secrets).cloned();
             }
+            super::select_basic::select_secret(&secrets).cloned()
         }
     }
 }
@@ -40,4 +41,5 @@ pub fn select_key(keys: &[Key]) -> Option<&Key> {
     {
         return super::select_fzf_bin::select_key(keys);
     }
+    super::select_basic::select_key(keys)
 }

@@ -105,6 +105,7 @@ check-windows:
   cache: {}
   <<: *before_script-windows
   script:
+    - cargo check --locked --verbose; cd ..
     - cd lib; cargo check --no-default-features --features $FEATURES_CLI_WINDOWS --locked --verbose; cd ..
     - cd lib; cargo check --no-default-features --features backend-gnupg-bin --locked --verbose; cd ..
     - cd cli; cargo check --no-default-features --features backend-gnupg-bin --locked --verbose; cd ..

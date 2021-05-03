@@ -40,7 +40,7 @@ fn select_item<'a, S: AsRef<str>>(prompt: &'a str, items: &'a [S]) -> Option<Str
         items
             .iter()
             .enumerate()
-            .for_each(|(i, item)| eprintln!("[{}] {}", i + 1, item));
+            .for_each(|(i, item)| eprintln!("{}: {}", i + 1, item));
         eprint!("{} (number/empty): ", prompt);
 
         let mut input = String::new();
@@ -55,7 +55,7 @@ fn select_item<'a, S: AsRef<str>>(prompt: &'a str, items: &'a [S]) -> Option<Str
 
         // Try to parse number, select item, or show error and retry
         match input.trim().parse::<usize>().ok() {
-            Some(n) if n > 0 && n <= items.len() => return Some(items[n].into()),
+            Some(n) if n > 0 && n <= items.len() => return Some(items[n - 1].into()),
             _ => {
                 error::print_error_msg("invalid selection input");
                 eprintln!();

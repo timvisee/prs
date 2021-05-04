@@ -43,7 +43,7 @@ fn select_item<'a, S: AsRef<str>>(prompt: &'a str, items: &'a [S]) -> Option<Str
     items.sort_unstable();
 
     // Spawn skim
-    let child = Command::new(BIN_NAME)
+    let mut child = Command::new(BIN_NAME)
         .arg("--prompt")
         .arg(format!("{}: ", prompt))
         .arg("--height")
@@ -55,9 +55,11 @@ fn select_item<'a, S: AsRef<str>>(prompt: &'a str, items: &'a [S]) -> Option<Str
         .expect("failed to spawn skim");
 
     // Communicate list of items to skim
-    let mut stdin = child.stdin.as_ref().unwrap();
     let data = items.join("\n");
-    stdin
+    child
+        .stdin
+        .as_mut()
+        .unwrap()
         .write_all(data.as_bytes())
         .expect("failed to communicate list of items to skim");
 

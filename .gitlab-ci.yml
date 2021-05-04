@@ -219,13 +219,25 @@ build-x86_64-windows:
       - prs-$TARGET.exe
     expire_in: 1 month
 
-# Run the unit tests through Cargo
-test-cargo:
+# Run the unit tests through Cargo on Linux
+test-cargo-x86_64-linux-gnu:
   stage: test
   needs: []
   dependencies: []
   cache:
     <<: *rust-build-cache
+  script:
+    - cargo test --locked --verbose
+
+# Run the unit tests through Cargo on Windows
+test-cargo-x86_64-windows:
+  stage: test
+  tags:
+    - windows
+  needs: []
+  dependencies: []
+  cache: {}
+  <<: *before_script-windows
   script:
     - cargo test --locked --verbose
 

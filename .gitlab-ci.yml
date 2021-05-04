@@ -239,7 +239,8 @@ test-cargo-x86_64-windows:
   cache: {}
   <<: *before_script-windows
   script:
-    - cargo test --locked --verbose
+    - cd lib; cargo test --locked --verbose; cd ..
+    - cd cli; cargo test --locked --verbose; cd ..
 
 # Run basic integration test with prs
 test-integration:

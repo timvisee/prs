@@ -30,7 +30,7 @@ impl<'a> Copy<'a> {
         let secret =
             select::store_select_secret(&store, matcher_copy.query()).ok_or(Err::NoneSelected)?;
 
-        secret::print_name(matcher_copy.query(), &secret, matcher_main.quiet());
+        secret::print_name(matcher_copy.query(), &secret, &store, matcher_main.quiet());
 
         let mut plaintext = crypto::context(crypto::PROTO)?
             .decrypt_file(&secret.path)

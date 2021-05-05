@@ -33,7 +33,7 @@ impl<'a> Show<'a> {
         let secret =
             select::store_select_secret(&store, matcher_show.query()).ok_or(Err::NoneSelected)?;
 
-        secret::print_name(matcher_show.query(), &secret, matcher_main.quiet());
+        secret::print_name(matcher_show.query(), &secret, &store, matcher_main.quiet());
 
         let mut plaintext = crypto::context(crypto::PROTO)?
             .decrypt_file(&secret.path)

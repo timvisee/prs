@@ -21,14 +21,18 @@ gitlab = { repository = "timvisee/prs", branch = "master" }
 [features]
 default = ["backend-gnupg-bin", "notify"]
 
-# Backend using GPGME for GnuPG crypto
+### Regular features
+
+# Option (default): notification support (clipboard notifications)
+notify = ["notify-rust"]
+
+### Pluggable cryptography backends
+
+# Option: GnuPG cryptography backend using GPGME
 backend-gpgme = ["prs-lib/backend-gpgme"]
 
-# Backend using GnuPG binary for GnuPG crypto
+# Option (default): GnuPG cryptography backend using gpg binary
 backend-gnupg-bin = ["prs-lib/backend-gnupg-bin"]
-
-# Notification support (clipboard notifications)
-notify = ["notify-rust"]
 
 [dependencies]
 anyhow = "1.0"

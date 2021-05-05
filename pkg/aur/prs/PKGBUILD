@@ -11,19 +11,20 @@ pkgdesc="Secure, fast & convenient password manager CLI using GPG and git to syn
 arch=('any')
 url="https://gitlab.com/timvisee/prs"
 license=('GPL3')
-depends=('gpgme' 'dbus' 'libxcb')
+depends=('gpgme' 'dbus' 'libxcb', 'skim')
 makedepends=('rust' 'python')
 source=("$pkgname-$pkgver.tar.gz::$url/-/archive/v$pkgver/$pkgname-v$pkgver.tar.gz")
 sha512sums=('__SHA512SUM__')
+_prs_cli_features=alias,clipboard,notify,backend-gpgme,select-skim-bin
 
 build() {
   cd "$pkgname-v$pkgver"
-  cargo build --package prs-cli --release --locked
+  cargo build --package prs-cli --no-default-features --features $_prs_cli_features --release --locked
 }
 
 check() {
   cd "$pkgname-v$pkgver"
-  cargo test --package prs-cli --release --locked
+  cargo test --package prs-cli --no-default-features --features $_prs_cli_features --release --locked
 }
 
 package() {

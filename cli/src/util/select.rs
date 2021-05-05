@@ -7,6 +7,7 @@ use prs_lib::{store::FindSecret, Key, Secret, Store};
 /// `None` is returned if no secret was found or selected.
 pub fn store_select_secret(store: &Store, query: Option<String>) -> Option<Secret> {
     // TODO: do not use interactive selection with --no-interact mode
+    #[allow(unreachable_code)]
     match store.find(query) {
         FindSecret::Exact(secret) => Some(secret),
         FindSecret::Many(secrets) => {
@@ -15,27 +16,38 @@ pub fn store_select_secret(store: &Store, query: Option<String>) -> Option<Secre
                 return None;
             }
 
-            #[cfg(unix)]
+            #[cfg(all(feature = "select-skim", unix))]
             {
-                super::select_skim::select_secret(&secrets).cloned()
+                return super::select_skim::select_secret(&secrets).cloned();
             }
-            #[cfg(not(unix))]
+            #[cfg(feature = "select-skim-bin")]
             {
-                super::select_fzf::select_secret(&secrets).cloned()
+                return super::select_skim_bin::select_secret(&secrets).cloned();
             }
+            #[cfg(feature = "select-fzf-bin")]
+            {
+                return super::select_fzf_bin::select_secret(&secrets).cloned();
+            }
+            super::select_basic::select_secret(&secrets).cloned()
         }
     }
 }
 
 /// Select key.
+#[allow(unreachable_code)]
 pub fn select_key(keys: &[Key]) -> Option<&Key> {
     // TODO: do not use interactive selection with --no-interact mode
-    #[cfg(unix)]
+    #[cfg(all(feature = "select-skim", unix))]
     {
-        super::select_skim::select_key(keys)
+        return super::select_skim::select_key(keys);
     }
-    #[cfg(not(unix))]
+    #[cfg(feature = "select-skim-bin")]
     {
-        super::select_fzf::select_key(keys)
+        return super::select_skim_bin::select_key(keys);
     }
+    #[cfg(feature = "select-fzf-bin")]
+    {
+        return super::select_fzf_bin::select_key(keys);
+    }
+    super::select_basic::select_key(keys)
 }

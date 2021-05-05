@@ -502,7 +502,7 @@ release-aur:
 
     # Determine the version number we're releasing for
     - VERSION=$(echo $CI_COMMIT_REF_NAME | cut -c 2-)
-    - VERSION_HASH=$(git describe --long | cut -d'-' -f3)
+    - '$VERSION_GIT=$(git describe --long | git describe --long | sed "s/^v//;s/\([^-]*-g\)/r\1/;s/-/./g")'
     - 'echo "Determined version number: v$VERSION"'
 
     # Determine remote URLs and SHA checksums
@@ -514,7 +514,7 @@ release-aur:
     # Update PKGBUILDs
     - echo "Updating PKGBUILDS with release information..."
     - sed "s/__PKGVER__/$VERSION/" -i prs/PKGBUILD
-    - sed "s/__PKGVER__/$VERSION.r1.$VERSION_HASH/" -i prs-git/PKGBUILD
+    - sed "s/__PKGVER__/$VERSION_GIT/" -i prs-git/PKGBUILD
     - sed "s/__SHA512SUM__/$SHA_SOURCE/" -i prs/PKGBUILD
 
     # Prepare for make

@@ -21,13 +21,17 @@ gitlab = { repository = "timvisee/prs", branch = "master" }
 [features]
 default = ["backend-gnupg-bin"]
 
-# Backend using GPGME for GnuPG crypto
+### Pluggable cryptography backends
+
+# Option: GnuPG cryptography backend using GPGME
 backend-gpgme = ["gpgme"]
 
-# Backend using GnuPG binary for GnuPG crypto
+# Option (default): GnuPG cryptography backend using gpg binary
 backend-gnupg-bin = ["regex", "version-compare"]
 
-# Private (automatic): GnuPG (gpg) crypto support
+### Private/internal/automatic features
+
+# GnuPG (gpg) crypto support
 _crypto-gpg = []
 
 [dependencies]

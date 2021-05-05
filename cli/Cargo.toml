@@ -22,29 +22,34 @@ gitlab = { repository = "timvisee/prs", branch = "master" }
 [features]
 default = ["backend-gnupg-bin", "alias", "clipboard", "notify", "select-skim", "select-fzf-bin"]
 
-# Backend using GPGME for GnuPG crypto
-backend-gpgme = ["prs-lib/backend-gpgme"]
+### Regular features
 
-# Backend using GnuPG binary for GnuPG crypto
-backend-gnupg-bin = ["prs-lib/backend-gnupg-bin"]
-
-# Alias management (symlink) support, still follows symlinks if disables
-# Automatically enabled for Unix and Windows targets
+# Option (default): alias management (symlink) support
 alias = []
 
-# Clipboard support
+# Option (default): clipboard support (copy password to clipboard)
 clipboard = ["copypasta-ext", "x11-clipboard", "base64"]
 
-# Notification support (clipboard notifications)
+# Option (default): notification support (clipboard notifications)
 notify = ["notify-rust"]
 
-# Interactive selection with skim (does nothing not(unix))
+### Pluggable cryptography backends
+
+# Option: GnuPG cryptography backend using GPGME
+backend-gpgme = ["prs-lib/backend-gpgme"]
+
+# Option (default): GnuPG cryptography backend using gpg binary
+backend-gnupg-bin = ["prs-lib/backend-gnupg-bin"]
+
+### Pluggable interactive selection systems
+
+# Option (default): interactive selection with skim (ignored on Windows)
 select-skim = ["skim"]
 
-# Interactive selection with skim binary
+# Option: interactive selection with skim binary
 select-skim-bin = []
 
-# Interactive selection with fzf binary
+# Option: interactive selection with fzf binary
 select-fzf-bin = []
 
 [dependencies]

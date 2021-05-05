@@ -2,7 +2,7 @@
 # Maintainer: orhun <orhunparmaksiz@gmail.com>
 #
 # Based on template. Changes made here will be overwritten each release.
-# See: https://gitlab.com/timvisee/prs
+# See: https://gitlab.com/timvisee/prs/-/tree/master/pkg/aur/prs
 
 pkgname=prs
 pkgver=__PKGVER__

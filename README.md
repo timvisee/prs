@@ -325,11 +325,14 @@ of which are enabled by default:
 
 | Feature             | In                    | Enabled | Description                                                |
 | :-----------------: | :-------------------: | :-----: | :--------------------------------------------------------- |
-| `backend-gpgme`     | _all_                 |         | GPG crypto backend using GPGME (not supported on Windows)  |
-| `backend-gnupg-bin` | _all_                 | Default | GPG crypto backend using GnuPG binary                      |
 | `alias`             | `prc-cli`             | Default | Support for secret aliases (partially supported on Windows)|
 | `clipboard`         | `prs-cli`             | Default | Clipboard support: copy secret to clipboard                |
 | `notify`            | `prs-cli`, `prs-gtk3` | Default | Notification support: notify on clipboard clear            |
+| `backend-gpgme`     | _all_                 |         | GPG crypto backend using GPGME (not supported on Windows)  |
+| `backend-gnupg-bin` | _all_                 | Default | GPG crypto backend using GnuPG binary                      |
+| `select-skim`       | `prc-cli`             | Default | Interactive selection with skim (ignored on Windows)       |
+| `select-skim-bin`   | `prs-cli`             | Default | Interactive selection through external `skim` binary       |
+| `select-fzf-bin`    | `prs-cli`             | Default | Interactive selection through external `fzf` binary        |
 
 To enable features during building or installation, specify them with
 `--features <features...>` when using `cargo`.

@@ -34,6 +34,12 @@ impl<'a: 'b, 'b> ShowMatcher<'a> {
     pub fn property(&self) -> Option<&str> {
         ArgProperty::value(self.matches)
     }
+
+    /// Check whether to read from copy.
+    #[cfg(feature = "clipboard")]
+    pub fn copy(&self) -> bool {
+        self.matches.is_present("copy")
+    }
 }
 
 impl<'a> Matcher<'a> for ShowMatcher<'a> {

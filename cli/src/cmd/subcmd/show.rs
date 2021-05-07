@@ -7,7 +7,7 @@ pub struct CmdShow;
 
 impl CmdShow {
     pub fn build<'a>() -> App<'a> {
-        App::new("show")
+        let cmd = App::new("show")
             .alias("s")
             .alias("cat")
             .alias("display")
@@ -23,6 +23,19 @@ impl CmdShow {
             .arg(ArgQuery::build())
             .arg(ArgStore::build())
             .arg(ArgTimeout::build().about("Timeout after which to clear output"))
-            .arg(ArgProperty::build().conflicts_with("first"))
+            .arg(ArgProperty::build().conflicts_with("first"));
+
+        #[cfg(feature = "clipboard")]
+        let cmd = cmd
+            .arg(
+                Arg::new("copy")
+                    .long("copy")
+                    .short('c')
+                    .alias("cp")
+                    .about("Copy secret to clipboard"),
+            )
+            .arg(ArgTimeout::build().requires("copy"));
+
+        cmd
     }
 }

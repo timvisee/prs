@@ -10,6 +10,8 @@ use prs_lib::{
 use thiserror::Error;
 
 use crate::cmd::matcher::{show::ShowMatcher, MainMatcher, Matcher};
+#[cfg(feature = "clipboard")]
+use crate::util::clipboard;
 use crate::util::{secret, select};
 
 /// Show secret action.
@@ -47,6 +49,20 @@ impl<'a> Show<'a> {
         }
 
         let lines = plaintext.unsecure_to_str().unwrap().lines().count();
+
+        // Copy to clipboard
+        #[cfg(feature = "clipboard")]
+        if matcher_show.copy() {
+            clipboard::plaintext_copy(
+                plaintext.clone(),
+                true,
+                !matcher_main.force(),
+                !matcher_main.quiet(),
+                matcher_show
+                    .timeout()
+                    .unwrap_or(Ok(crate::CLIPBOARD_TIMEOUT))?,
+            )?;
+        }
 
         secret::print(plaintext).map_err(Err::Print)?;
 

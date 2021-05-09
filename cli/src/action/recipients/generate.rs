@@ -50,6 +50,14 @@ impl<'a> Generate<'a> {
             sync.prepare()?;
         }
 
+        // Generating recipient in no-interact mode is not supported
+        if matcher_main.no_interact() && !matcher_main.force() {
+            error::quit_error_msg(
+                "generating recipient with --no-interact is not supported",
+                ErrorHintsBuilder::default().force(true).build().unwrap(),
+            )
+        }
+
         // Show warning to user
         if !matcher_main.force() {
             eprintln!("This will start a key pair generation wizard through 'gpg'");

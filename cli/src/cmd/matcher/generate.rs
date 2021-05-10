@@ -19,9 +19,9 @@ pub struct GenerateMatcher<'a> {
 }
 
 impl<'a: 'b, 'b> GenerateMatcher<'a> {
-    /// Secret destination.
-    pub fn destination(&self) -> Option<&str> {
-        self.matches.value_of("DEST")
+    /// Secret name.
+    pub fn name(&self) -> Option<&str> {
+        self.matches.value_of("NAME")
     }
 
     /// Check whether to generate a passphrase.

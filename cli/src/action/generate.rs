@@ -35,7 +35,7 @@ impl<'a> Generate<'a> {
         let sync = store.sync();
 
         // Normalize destination path if we will store the secret
-        let dest: Option<(PathBuf, Secret)> = match matcher_generate.destination() {
+        let dest: Option<(PathBuf, Secret)> = match matcher_generate.name() {
             Some(dest) => {
                 let path = store
                     .normalize_secret_path(dest, None, true)

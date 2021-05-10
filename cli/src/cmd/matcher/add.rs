@@ -10,8 +10,8 @@ pub struct AddMatcher<'a> {
 
 impl<'a: 'b, 'b> AddMatcher<'a> {
     /// Secret destination.
-    pub fn destination(&self) -> &str {
-        self.matches.value_of("DEST").unwrap()
+    pub fn name(&self) -> &str {
+        self.matches.value_of("NAME").unwrap()
     }
 
     /// Check whether to create an empty secret.

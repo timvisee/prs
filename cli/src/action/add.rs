@@ -28,7 +28,7 @@ impl<'a> Add<'a> {
 
         let store = Store::open(matcher_add.store()).map_err(Err::Store)?;
         let sync = store.sync();
-        let dest = matcher_add.destination();
+        let name = matcher_add.name();
 
         // Prepare sync
         sync::ensure_ready(&sync, matcher_add.allow_dirty());
@@ -38,7 +38,7 @@ impl<'a> Add<'a> {
 
         // Normalize destination path
         let path = store
-            .normalize_secret_path(dest, None, true)
+            .normalize_secret_path(name, None, true)
             .map_err(Err::NormalizePath)?;
         let secret = Secret::from(&store, path.to_path_buf());
 

@@ -16,8 +16,8 @@ impl CmdAdd {
             .alias("ins")
             .about("Add a secret")
             .arg(
-                Arg::new("DEST")
-                    .about("Secret destination path")
+                Arg::new("NAME")
+                    .about("Secret name and path")
                     .required(true),
             )
             .arg(

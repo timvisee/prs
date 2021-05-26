@@ -282,7 +282,7 @@ To build and install `prs` yourself, make sure you meet the 'Build' [requirement
 
 _Not all features are supported on Windows. The default configuration should
 work. When changing compile time features, make sure to check for compatibility.
-See [compiler features](#compile-features-use-flags)._
+See [compiler features](#compile-features--use-flags)._
 
 ### Compile and install
 To compile and install `prs` with the default features follow these steps:
@@ -331,7 +331,7 @@ of which are enabled by default:
 | `backend-gpgme`     | _all_                 |         | GPG crypto backend using GPGME (not supported on Windows)  |
 | `backend-gnupg-bin` | _all_                 | Default | GPG crypto backend using GnuPG binary                      |
 | `select-skim`       | `prc-cli`             | Default | Interactive selection with skim (ignored on Windows)       |
-| `select-skim-bin`   | `prs-cli`             | Default | Interactive selection through external `skim` binary       |
+| `select-skim-bin`   | `prs-cli`             |         | Interactive selection through external `skim` binary       |
 | `select-fzf-bin`    | `prs-cli`             | Default | Interactive selection through external `fzf` binary        |
 
 To enable features during building or installation, specify them with

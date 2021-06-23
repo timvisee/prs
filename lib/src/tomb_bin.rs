@@ -1,6 +1,6 @@
 use std::ffi::OsStr;
 use std::path::Path;
-use std::process::{Command, ExitStatus, Output};
+use std::process::{Command, ExitStatus};
 
 use anyhow::Result;
 use thiserror::Error;
@@ -8,15 +8,15 @@ use thiserror::Error;
 /// Binary name.
 pub const BIN_NAME: &str = "tomb";
 
-/// Invoke tomb dig.
-pub fn tomb_dig(tomb_file: &Path) -> Result<()> {
-    unimplemented!();
-    // See: https://github.com/roddhjav/pass-tomb/blob/241964e227f373307354bc764c4ffab4326604ea/tomb.bash#L305-L312
-    tomb(&[
-        // TODO: "-q",
-        "dig",
-    ])
-}
+// /// Invoke tomb dig.
+// pub fn tomb_dig(tomb_file: &Path) -> Result<()> {
+//     unimplemented!();
+//     // See: https://github.com/roddhjav/pass-tomb/blob/241964e227f373307354bc764c4ffab4326604ea/tomb.bash#L305-L312
+//     tomb(&[
+//         // TODO: "-q",
+//         "dig",
+//     ])
+// }
 
 /// Invoke tomb open.
 pub fn tomb_open(tomb_file: &Path, key_file: &Path, store_dir: &Path) -> Result<()> {
@@ -48,23 +48,23 @@ pub fn tomb_close(tomb_file: &Path) -> Result<()> {
     ])
 }
 
-/// Invoke tomb resize.
-pub fn tomb_resize(tomb_file: &Path, key_file: &Path, size_mb: u32) -> Result<()> {
-    // TODO: ensure tomb file and key exist, size must be larger
+// /// Invoke tomb resize.
+// pub fn tomb_resize(tomb_file: &Path, key_file: &Path, size_mb: u32) -> Result<()> {
+//     // TODO: ensure tomb file and key exist, size must be larger
 
-    // TODO: do not set -q flag if in verbose mode?
-    tomb(&[
-        // TODO: "-q",
-        "resize",
-        tomb_file
-            .to_str()
-            .expect("tomb path contains invalid UTF-8"),
-        "-k",
-        key_file.to_str().expect("tomb path contains invalid UTF-8"),
-        "-s",
-        &format!("{}", size_mb),
-    ])
-}
+//     // TODO: do not set -q flag if in verbose mode?
+//     tomb(&[
+//         // TODO: "-q",
+//         "resize",
+//         tomb_file
+//             .to_str()
+//             .expect("tomb path contains invalid UTF-8"),
+//         "-k",
+//         key_file.to_str().expect("tomb path contains invalid UTF-8"),
+//         "-s",
+//         &format!("{}", size_mb),
+//     ])
+// }
 
 /// Get tomb name based on path.
 pub fn name(path: &Path) -> Option<&str> {

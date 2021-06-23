@@ -1,3 +1,6 @@
+// TODO: remove when implementing this command
+#![allow(unused)]
+
 use anyhow::Result;
 use clap::ArgMatches;
 use thiserror::Error;
@@ -33,6 +36,7 @@ impl<'a> Init<'a> {
 
         // TODO: ensure tomb is not already initialized
         // TODO: ensure password store is available
+        // TODO: remove allow attribute on top of this file
 
         // if sync.is_init() {
         //     error::quit_error_msg(
@@ -51,7 +55,7 @@ impl<'a> Init<'a> {
         //     }
         // }
 
-        Ok(())
+        // Ok(())
     }
 }
 
@@ -59,7 +63,6 @@ impl<'a> Init<'a> {
 pub enum Err {
     #[error("failed to access password store")]
     Store(#[source] anyhow::Error),
-
-    #[error("failed to initialize git sync")]
-    Init(#[source] anyhow::Error),
+    // #[error("failed to initialize git sync")]
+    // Init(#[source] anyhow::Error),
 }

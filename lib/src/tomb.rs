@@ -1,5 +1,6 @@
 //! Password store Tomb functionality.
 
+use std::env;
 use std::os::linux::fs::MetadataExt;
 use std::path::{Path, PathBuf};
 
@@ -244,10 +245,15 @@ fn tomb_paths(root: &Path) -> Vec<PathBuf> {
 
 /// Find tomb path for given store root.
 ///
+/// Uses `PASSWORD_STORE_TOMB_FILE` if set.
 /// This does not guarantee that the returned path is an actual tomb file.
 /// This is a best effort search.
 fn find_tomb_path(root: &Path) -> Option<PathBuf> {
-    // TODO: add support for environment variables to set this path
+    // Take path from environment variable
+    if let Ok(path) = env::var("PASSWORD_STORE_TOMB_FILE") {
+        return Some(path.into());
+    }
+
     // TODO: ensure file is large enough to be a tomb (tomb be at least 10 MB)
     tomb_paths(root).into_iter().find(|p| p.is_file())
 }
@@ -280,9 +286,15 @@ fn tomb_key_paths(root: &Path) -> Vec<PathBuf> {
 
 /// Find tomb key path for given store root.
 ///
+/// Uses `PASSWORD_STORE_TOMB_KEY` if set.
 /// This does not guarantee that the returned path is an actual tomb key file.
 /// This is a best effort search.
 fn find_tomb_key_path(root: &Path) -> Option<PathBuf> {
+    // Take path from environment variable
+    if let Ok(path) = env::var("PASSWORD_STORE_TOMB_KEY") {
+        return Some(path.into());
+    }
+
     // TODO: add support for environment variables to set this path
     tomb_key_paths(root).into_iter().find(|p| p.is_file())
 }

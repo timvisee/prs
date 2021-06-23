@@ -1,3 +1,4 @@
+use std::env;
 use std::ffi::OsStr;
 use std::path::Path;
 use std::process::{Command, ExitStatus};
@@ -88,7 +89,11 @@ where
     I: IntoIterator<Item = S>,
     S: AsRef<OsStr>,
 {
-    let mut cmd = Command::new(BIN_NAME);
+    let mut cmd = if let Ok(bin) = env::var("PASSWORD_STORE_TOMB") {
+        Command::new(bin)
+    } else {
+        Command::new(BIN_NAME)
+    };
     cmd.arg("-f");
     cmd.args(args);
     cmd

@@ -27,27 +27,39 @@ impl<'a> Open<'a> {
         let matcher_tomb = TombMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(matcher_tomb.store()).map_err(Err::Store)?;
-        let sync = store.sync();
+        let tomb = store.tomb();
 
-        // TODO: ensure tomb is available
-        // TODO: ensure tomb must be opened
+        // TODO: show warning if there already are files in tomb directory?
 
-        // if sync.is_init() {
-        //     error::quit_error_msg(
-        //         "sync is already initialized",
-        //         ErrorHintsBuilder::default().sync(true).build().unwrap(),
-        //     );
-        // }
+        // Must be a tomb
+        if !tomb.is_tomb() && !matcher_main.force() {
+            // TODO: error hint to initialize tomb
+            error::quit_error_msg(
+                "password store is not a tomb",
+                ErrorHintsBuilder::default().force(true).build().unwrap(),
+            );
+        }
 
-        // // Initialize sync
-        // sync.init().map_err(Err::Init)?;
+        // Must not be already open
+        if tomb.is_open().map_err(Err::Open)? && !matcher_main.force() {
+            error::quit_error_msg(
+                "password store tomb is already open",
+                ErrorHintsBuilder::default().force(true).build().unwrap(),
+            );
+        }
 
-        // if !matcher_main.quiet() {
-        //     eprintln!("Sync initialized");
-        //     if !sync.has_remote()? {
-        //         eprintln!("Sync remote not configured, to set use: prs sync remote <GIT_URL>");
-        //     }
-        // }
+        if !matcher_main.quiet() {
+            eprintln!("Opening Tomb...");
+        }
+
+        // Open the tomb
+        tomb.open().map_err(Err::Open)?;
+
+        if !matcher_main.quiet() {
+            eprintln!("Password store Tomb opened");
+        }
+
+        // TODO: spawn some sort of timer to automatically close it?
 
         Ok(())
     }
@@ -58,6 +70,6 @@ pub enum Err {
     #[error("failed to access password store")]
     Store(#[source] anyhow::Error),
 
-    #[error("failed to initialize git sync")]
-    Init(#[source] anyhow::Error),
+    #[error("failed to open password store tomb")]
+    Open(#[source] anyhow::Error),
 }

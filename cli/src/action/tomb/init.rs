@@ -27,7 +27,9 @@ impl<'a> Init<'a> {
         let matcher_tomb = TombMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(matcher_tomb.store()).map_err(Err::Store)?;
-        let sync = store.sync();
+        let tomb = store.tomb();
+
+        unimplemented!();
 
         // TODO: ensure tomb is not already initialized
         // TODO: ensure password store is available

@@ -27,26 +27,37 @@ impl<'a> Close<'a> {
         let matcher_tomb = TombMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(matcher_tomb.store()).map_err(Err::Store)?;
-        let sync = store.sync();
+        let tomb = store.tomb();
 
-        // TODO: ensure tomb is opened
+        // Must be a tomb
+        if !tomb.is_tomb() && !matcher_main.force() {
+            // TODO: error hint to initialize tomb
+            error::quit_error_msg(
+                "password store is not a tomb",
+                ErrorHintsBuilder::default().force(true).build().unwrap(),
+            );
+        }
 
-        // if sync.is_init() {
-        //     error::quit_error_msg(
-        //         "sync is already initialized",
-        //         ErrorHintsBuilder::default().sync(true).build().unwrap(),
-        //     );
-        // }
+        // Must be open
+        if !tomb.is_open().map_err(Err::Close)? && !matcher_main.force() {
+            error::quit_error_msg(
+                "password store tomb is not open",
+                ErrorHintsBuilder::default().force(true).build().unwrap(),
+            );
+        }
 
-        // // Initialize git
-        // sync.init().map_err(Err::Init)?;
+        if matcher_main.verbose() {
+            eprintln!("Closing Tomb...");
+        }
 
-        // if !matcher_main.quiet() {
-        //     eprintln!("Sync initialized");
-        //     if !sync.has_remote()? {
-        //         eprintln!("Sync remote not configured, to set use: prs sync remote <GIT_URL>");
-        //     }
-        // }
+        // Close the tomb
+        tomb.close().map_err(Err::Close)?;
+
+        if !matcher_main.quiet() {
+            eprintln!("Password store Tomb closed");
+        }
+
+        // TODO: show warning if there are still files in tomb directory
 
         Ok(())
     }
@@ -57,6 +68,6 @@ pub enum Err {
     #[error("failed to access password store")]
     Store(#[source] anyhow::Error),
 
-    #[error("failed to initialize git sync")]
-    Init(#[source] anyhow::Error),
+    #[error("failed to close password store tomb")]
+    Close(#[source] anyhow::Error),
 }

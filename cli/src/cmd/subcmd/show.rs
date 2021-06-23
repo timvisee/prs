@@ -26,15 +26,13 @@ impl CmdShow {
             .arg(ArgProperty::build().conflicts_with("first"));
 
         #[cfg(feature = "clipboard")]
-        let cmd = cmd
-            .arg(
-                Arg::new("copy")
-                    .long("copy")
-                    .short('c')
-                    .alias("cp")
-                    .about("Copy secret to clipboard"),
-            )
-            .arg(ArgTimeout::build().requires("copy"));
+        let cmd = cmd.arg(
+            Arg::new("copy")
+                .long("copy")
+                .short('c')
+                .alias("cp")
+                .about("Copy secret to clipboard"),
+        );
 
         cmd
     }

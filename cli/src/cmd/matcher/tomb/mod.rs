@@ -5,7 +5,7 @@ pub mod open;
 use clap::ArgMatches;
 
 use super::Matcher;
-use crate::cmd::arg::{ArgAllowDirty, ArgStore, CmdArgFlag, CmdArgOption};
+use crate::cmd::arg::{ArgStore, CmdArgOption};
 
 /// The tomb command matcher.
 pub struct TombMatcher<'a> {
@@ -32,11 +32,6 @@ impl<'a: 'b, 'b> TombMatcher<'a> {
     /// The store.
     pub fn store(&self) -> String {
         ArgStore::value(self.matches)
-    }
-
-    /// Whether to allow a dirty repository for syncing.
-    pub fn allow_dirty(&self) -> bool {
-        ArgAllowDirty::is_present(self.matches)
     }
 }
 

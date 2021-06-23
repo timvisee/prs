@@ -8,6 +8,9 @@ use thiserror::Error;
 
 use crate::{tomb_bin, Store};
 
+/// Default time after which to automatically close the password tomb.
+pub const TOMB_AUTO_CLOSE_SEC: u32 = 5 * 60;
+
 /// Common tomb file suffix.
 pub const TOMB_FILE_SUFFIX: &str = ".tomb";
 
@@ -73,13 +76,55 @@ impl<'a> Tomb<'a> {
             return Ok(());
         }
 
-        // TODO: do not print if quiet?
+        // TODO: only show if not quiet
         eprintln!("Opening password store Tomb...");
 
-        // TODO: spawn timer to automatically close password store tomb
+        // Open tomb, set up auto close timer
+        self.open().map_err(Err::Prepare)?;
+        self.create_close_timer().map_err(Err::Prepare)?;
 
-        // Open tomb
-        self.open().map_err(|err| Err::Prepare(err).into())
+        // TODO: only show in verbose mode
+        // eprintln!("Opened password store, automatically closing in 5 seconds");
+        eprintln!();
+
+        Ok(())
+    }
+
+    /// Set up a timer to automatically close password store tomb.
+    ///
+    /// TODO: add support for non-systemd systems
+    fn create_close_timer(&self) -> Result<()> {
+        // Figure out tomb path and name
+        let tomb_path = self.find_tomb_path()?;
+        let name = tomb_bin::name(&tomb_path).unwrap_or(".unwrap");
+
+        // TODO: do not create if service already running
+
+        // Spawn timer to automatically close tomb
+        // TODO: better method to find current exe path
+        // TODO: do not hardcode exe, command and store path
+        crate::systemd_bin::systemd_cmd_timer(
+            TOMB_AUTO_CLOSE_SEC,
+            "prs tomb close timer",
+            &format!("prs-tomb-close@{}.service", name),
+            &[
+                std::env::current_exe()
+                    .expect("failed to determine current exe")
+                    .to_str()
+                    .expect("current exe contains invalid UTF-8"),
+                "tomb",
+                "--store",
+                self.store
+                    .root
+                    .to_str()
+                    .expect("password store path contains invalid UTF-8"),
+                "close",
+                "--verbose",
+            ],
+        )
+        .map_err(Err::AutoCloseTimer)?;
+
+        Ok(())
     }
 
     /// Finalize the Tomb.
@@ -138,6 +183,9 @@ pub enum Err {
 
     #[error("failed to check if password store tomb is opened")]
     OpenCheck(#[source] std::io::Error),
+
+    #[error("failed to set up systemd timer to auto close password store tomb")]
+    AutoCloseTimer(#[source] anyhow::Error),
 }
 
 /// Build list of probable tomb paths for given store root.

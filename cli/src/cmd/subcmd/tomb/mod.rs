@@ -4,7 +4,7 @@ pub mod open;
 
 use clap::{App, AppSettings};
 
-use crate::cmd::arg::{ArgAllowDirty, ArgStore, CmdArg};
+use crate::cmd::arg::{ArgStore, CmdArg};
 
 /// The tomb command definition.
 pub struct CmdTomb;
@@ -18,6 +18,5 @@ impl CmdTomb {
             .subcommand(open::CmdOpen::build())
             .subcommand(close::CmdClose::build())
             .arg(ArgStore::build())
-            .arg(ArgAllowDirty::build())
     }
 }

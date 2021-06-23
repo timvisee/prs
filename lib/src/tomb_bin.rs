@@ -67,7 +67,7 @@ pub fn tomb_resize(tomb_file: &Path, key_file: &Path, size_mb: u32) -> Result<()
 }
 
 /// Get tomb name based on path.
-fn name(path: &Path) -> Option<&str> {
+pub fn name(path: &Path) -> Option<&str> {
     path.file_name()?.to_str()?.rsplitn(2, ".").last()
 }
 

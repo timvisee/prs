@@ -1,7 +1,5 @@
-use std::env::args;
 use std::sync::{Arc, Mutex};
 
-use gdk::prelude::*;
 use gio::prelude::*;
 #[cfg(all(feature = "notify", not(target_env = "musl")))]
 use glib::clone;
@@ -31,8 +29,7 @@ const APP_TITLE: &str = "prs quick copy";
 const CLIPBOARD_TIMEOUT: u32 = 20;
 
 fn main() {
-    let application =
-        gtk::Application::new(Some(APP_ID), Default::default()).expect("Initialization failed...");
+    let application = gtk::Application::new(Some(APP_ID), Default::default());
     application.connect_activate(|app| {
         build_ui(app);
     });
@@ -47,7 +44,7 @@ fn main() {
     application.add_action(&quit);
 
     // Run the application
-    application.run(&args().collect::<Vec<_>>());
+    application.run();
 }
 
 /// Wraps a store secret.
@@ -70,12 +67,11 @@ impl From<Secret> for Data {
 /// Create GTK list model for given secrets.
 fn create_list_model(secrets: Vec<Secret>) -> gtk::ListStore {
     let data: Vec<Data> = secrets.into_iter().map(|s| s.into()).collect();
-    let col_types: [glib::Type; 1] = [glib::Type::String];
+    let col_types: [glib::Type; 1] = [glib::Type::STRING];
     let store = gtk::ListStore::new(&col_types);
-    let col_indices: [u32; 1] = [0];
     for d in data.iter() {
-        let values: [&dyn ToValue; 1] = [&d.name()];
-        store.set(&store.append(), &col_indices, &values);
+        let values: [(u32, &dyn ToValue); 1] = [(0, &d.name())];
+        store.set(&store.append(), &values);
     }
     store
 }
@@ -120,7 +116,7 @@ fn build_ui(application: &gtk::Application) {
     completion.set_inline_completion(true);
     completion.set_inline_selection(true);
     completion.set_match_func(|completion, query, iter| {
-        model_item_text(&completion.get_model().unwrap(), iter)
+        model_item_text(&completion.model().unwrap(), iter)
             .map(|text| text.contains(query))
             .unwrap_or(false)
     });
@@ -146,7 +142,7 @@ fn build_ui(application: &gtk::Application) {
     input_field.connect_activate(move |entry| {
         selected_entry(
             store.clone(),
-            entry.get_text().into(),
+            entry.text().into(),
             window_ref.clone(),
             input_ref.clone(),
         );
@@ -239,7 +235,7 @@ fn selected(secret: Secret, window: gtk::ApplicationWindow, input: gtk::SearchEn
     // Hack to unfocus and move window to back
     window.set_accept_focus(false);
     window.set_focus(None::<&gtk::Widget>);
-    if let Some(window) = window.get_window() {
+    if let Some(window) = window.window() {
         window.hide();
         window.show_unraised();
         window.lower();
@@ -341,7 +337,7 @@ fn error_dialog(msg: &str, window: Option<&gtk::ApplicationWindow>) {
 
 /// Get the text for a tree model item by iterator.
 fn model_item_text(model: &gtk::TreeModel, iter: &gtk::TreeIter) -> Option<String> {
-    let item = model.get_value(iter, 0);
+    let item = model.value(iter, 0);
 
     // Get item text
     let text: Result<Option<String>, _> = item.get();

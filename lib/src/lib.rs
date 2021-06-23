@@ -2,6 +2,10 @@ pub mod crypto;
 pub(crate) mod git;
 pub mod store;
 pub mod sync;
+#[cfg(all(feature = "tomb", target_os = "linux"))]
+pub mod tomb;
+#[cfg(all(feature = "tomb", target_os = "linux"))]
+pub(crate) mod tomb_bin;
 pub mod types;
 mod vendor;
 

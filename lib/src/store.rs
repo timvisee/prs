@@ -8,6 +8,8 @@ use anyhow::{ensure, Result};
 use thiserror::Error;
 use walkdir::{DirEntry, WalkDir};
 
+#[cfg(all(feature = "tomb", target_os = "linux"))]
+use crate::tomb::Tomb;
 use crate::{
     crypto::{self, prelude::*},
     sync::Sync,
@@ -51,6 +53,12 @@ impl Store {
     /// Get a sync helper for this store.
     pub fn sync(&self) -> Sync {
         Sync::new(&self)
+    }
+
+    /// Get a tomb helper for this store.
+    #[cfg(all(feature = "tomb", target_os = "linux"))]
+    pub fn tomb(&self) -> Tomb {
+        Tomb::new(&self)
     }
 
     /// Create secret iterator for this store.

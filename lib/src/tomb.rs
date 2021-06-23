@@ -32,14 +32,14 @@ impl<'a> Tomb<'a> {
     /// Find the tomb path.
     ///
     /// Errors if it cannot be found.
-    fn find_tomb_path(&self) -> Result<PathBuf> {
+    pub fn find_tomb_path(&self) -> Result<PathBuf> {
         find_tomb_path(&self.store.root).ok_or_else(|| Err::CannotFindTomb.into())
     }
 
     /// Find the tomb key path.
     ///
     /// Errors if it cannot be found.
-    fn find_tomb_key_path(&self) -> Result<PathBuf> {
+    pub fn find_tomb_key_path(&self) -> Result<PathBuf> {
         find_tomb_key_path(&self.store.root).ok_or_else(|| Err::CannotFindTombKey.into())
     }
 
@@ -129,6 +129,16 @@ impl<'a> Tomb<'a> {
         .map_err(Err::AutoCloseTimer)?;
 
         Ok(())
+    }
+
+    /// Check whether the timer is running.
+    pub fn is_timer_running(&self) -> Result<bool> {
+        // Figure out tomb path and name
+        let tomb_path = self.find_tomb_path()?;
+        let name = tomb_bin::name(&tomb_path).unwrap_or(".unwrap");
+        let unit = format!("prs-tomb-close@{}.service", name);
+
+        systemd_bin::systemd_has_timer(&unit).map_err(|err| Err::AutoCloseTimer(err).into())
     }
 
     /// Stop automatic close timer if any is running.

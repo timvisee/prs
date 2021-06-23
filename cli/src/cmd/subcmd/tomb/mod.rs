@@ -1,6 +1,7 @@
 pub mod close;
 pub mod init;
 pub mod open;
+pub mod status;
 
 use clap::{App, AppSettings};
 
@@ -17,6 +18,7 @@ impl CmdTomb {
             .subcommand(init::CmdInit::build())
             .subcommand(open::CmdOpen::build())
             .subcommand(close::CmdClose::build())
+            .subcommand(status::CmdStatus::build())
             .arg(ArgStore::build())
     }
 }

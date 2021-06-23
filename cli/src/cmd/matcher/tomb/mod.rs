@@ -1,6 +1,7 @@
 pub mod close;
 pub mod init;
 pub mod open;
+pub mod status;
 
 use clap::ArgMatches;
 
@@ -27,6 +28,11 @@ impl<'a: 'b, 'b> TombMatcher<'a> {
     /// Get the tomb close sub command, if matched.
     pub fn cmd_close(&'a self) -> Option<close::CloseMatcher> {
         close::CloseMatcher::with(&self.root)
+    }
+
+    /// Get the tomb status sub command, if matched.
+    pub fn cmd_status(&'a self) -> Option<status::StatusMatcher> {
+        status::StatusMatcher::with(&self.root)
     }
 
     /// The store.

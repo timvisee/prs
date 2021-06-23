@@ -1,6 +1,7 @@
 pub mod close;
 pub mod init;
 pub mod open;
+pub mod status;
 
 use anyhow::Result;
 use clap::ArgMatches;
@@ -33,6 +34,10 @@ impl<'a> Tomb<'a> {
 
         if matcher_tomb.cmd_close().is_some() {
             return close::Close::new(self.cmd_matches).invoke();
+        }
+
+        if matcher_tomb.cmd_status().is_some() {
+            return status::Status::new(self.cmd_matches).invoke();
         }
 
         // Unreachable, clap will print help for missing sub command instead

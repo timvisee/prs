@@ -48,7 +48,7 @@ impl<'a> Open<'a> {
             );
         }
 
-        if !matcher_main.quiet() {
+        if matcher_main.verbose() {
             eprintln!("Opening Tomb...");
         }
 

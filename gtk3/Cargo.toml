@@ -19,7 +19,7 @@ edition = "2018"
 gitlab = { repository = "timvisee/prs", branch = "master" }
 
 [features]
-default = ["backend-gnupg-bin", "notify"]
+default = ["backend-gnupg-bin", "notify", "tomb"]
 
 ### Regular features
 

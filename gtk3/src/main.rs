@@ -77,7 +77,7 @@ fn create_list_model(secrets: Vec<Secret>) -> gtk::ListStore {
 }
 
 fn build_ui(application: &gtk::Application) {
-    // Load secrets from store
+    // Load store
     let store = match Store::open(prs_lib::STORE_DEFAULT_ROOT) {
         Ok(store) => store,
         Err(err) => {
@@ -89,6 +89,19 @@ fn build_ui(application: &gtk::Application) {
             return;
         }
     };
+    #[cfg(all(feature = "tomb", target_os = "linux"))]
+    let tomb = store.tomb();
+
+    // Prepare tomb
+    #[cfg(all(feature = "tomb", target_os = "linux"))]
+    if let Err(err) = tomb.prepare() {
+        eprintln!("{}", err);
+        error_dialog("Failed to prepare password store Tomb", None);
+        application.quit();
+        return;
+    }
+
+    // Find secrets
     let secrets = store.secrets(None);
 
     // Quit if user has no secrets
@@ -153,6 +166,8 @@ fn build_ui(application: &gtk::Application) {
     // show everything
     window.show_all();
     window.grab_focus();
+
+    // TODO: finalize store tomb somewhere
 }
 
 /// Called when we've selected a secret in the input field.

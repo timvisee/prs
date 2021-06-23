@@ -17,6 +17,8 @@ pub mod recipients;
 pub mod remove;
 pub mod show;
 pub mod sync;
+#[cfg(all(feature = "tomb", target_os = "linux"))]
+pub mod tomb;
 
 // Re-export to cmd module
 pub use self::add::CmdAdd;
@@ -38,3 +40,5 @@ pub use self::recipients::CmdRecipients;
 pub use self::remove::CmdRemove;
 pub use self::show::CmdShow;
 pub use self::sync::CmdSync;
+#[cfg(all(feature = "tomb", target_os = "linux"))]
+pub use self::tomb::CmdTomb;

@@ -113,6 +113,11 @@ fn invoke_action(handler: &Handler) -> Result<()> {
         return action::sync::Sync::new(handler.matches()).invoke();
     }
 
+    #[cfg(all(feature = "tomb", target_os = "linux"))]
+    if handler.tomb().is_some() {
+        return action::tomb::Tomb::new(handler.matches()).invoke();
+    }
+
     // Get the main matcher
     let matcher_main = MainMatcher::with(handler.matches()).unwrap();
     if !matcher_main.quiet() {

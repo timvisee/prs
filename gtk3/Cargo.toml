@@ -26,6 +26,9 @@ default = ["backend-gnupg-bin", "notify"]
 # Option (default): notification support (clipboard notifications)
 notify = ["notify-rust"]
 
+# Option (default): tomb support for password store on Linux
+tomb = ["prs-lib/tomb"]
+
 ### Pluggable cryptography backends
 
 # Option: GnuPG cryptography backend using GPGME

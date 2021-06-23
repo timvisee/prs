@@ -20,7 +20,7 @@ default-run = "prs"
 gitlab = { repository = "timvisee/prs", branch = "master" }
 
 [features]
-default = ["backend-gnupg-bin", "alias", "clipboard", "notify", "select-skim", "select-fzf-bin"]
+default = ["backend-gnupg-bin", "alias", "clipboard", "notify", "select-skim", "select-fzf-bin", "tomb"]
 
 ### Regular features
 
@@ -32,6 +32,9 @@ clipboard = ["copypasta-ext", "x11-clipboard", "base64"]
 
 # Option (default): notification support (clipboard notifications)
 notify = ["notify-rust"]
+
+# Option (default): tomb support for password store on Linux
+tomb = ["prs-lib/tomb"]
 
 ### Pluggable cryptography backends
 

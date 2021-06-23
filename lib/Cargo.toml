@@ -21,6 +21,11 @@ gitlab = { repository = "timvisee/prs", branch = "master" }
 [features]
 default = ["backend-gnupg-bin"]
 
+### Regular features
+
+# Option: tomb support for password store on Linux
+tomb = []
+
 ### Pluggable cryptography backends
 
 # Option: GnuPG cryptography backend using GPGME

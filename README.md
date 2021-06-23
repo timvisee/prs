@@ -328,6 +328,7 @@ of which are enabled by default:
 | `alias`             | `prc-cli`             | Default | Support for secret aliases (partially supported on Windows)|
 | `clipboard`         | `prs-cli`             | Default | Clipboard support: copy secret to clipboard                |
 | `notify`            | `prs-cli`, `prs-gtk3` | Default | Notification support: notify on clipboard clear            |
+| `tomb`              | _all_                 | Default | Tomb support for password store (only supported on Linux)  |
 | `backend-gpgme`     | _all_                 |         | GPG crypto backend using GPGME (not supported on Windows)  |
 | `backend-gnupg-bin` | _all_                 | Default | GPG crypto backend using GnuPG binary                      |
 | `select-skim`       | `prc-cli`             | Default | Interactive selection with skim (ignored on Windows)       |

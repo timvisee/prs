@@ -36,7 +36,7 @@ impl<'a> Init<'a> {
             );
         }
 
-        // Initialize git
+        // Initialize sync
         sync.init().map_err(Err::Init)?;
 
         // Run housekeeping

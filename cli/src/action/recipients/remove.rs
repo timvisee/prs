@@ -29,7 +29,13 @@ impl<'a> Remove<'a> {
         let matcher_remove = RemoveMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(matcher_recipients.store()).map_err(Err::Store)?;
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        let tomb = store.tomb();
         let sync = store.sync();
+
+        // Prepare tomb
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        tomb.prepare().map_err(Err::Tomb)?;
 
         // Prepare sync
         sync::ensure_ready(&sync, matcher_remove.allow_dirty());
@@ -91,6 +97,10 @@ impl<'a> Remove<'a> {
             sync.finalize(format!("Remove recipient {}", key.fingerprint(true)))?;
         }
 
+        // Finalize tomb
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        tomb.finalize().map_err(Err::Tomb)?;
+
         if !matcher_main.quiet() {
             eprintln!("Removed recipient: {}", key);
         }
@@ -103,6 +113,10 @@ impl<'a> Remove<'a> {
 pub enum Err {
     #[error("failed to access password store")]
     Store(#[source] anyhow::Error),
+
+    #[cfg(all(feature = "tomb", target_os = "linux"))]
+    #[error("failed to prepare password store tomb for usage")]
+    Tomb(#[source] anyhow::Error),
 
     #[error("no key selected")]
     NoneSelected,

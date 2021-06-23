@@ -27,7 +27,13 @@ impl<'a> Init<'a> {
         let matcher_sync = SyncMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(matcher_sync.store()).map_err(Err::Store)?;
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        let tomb = store.tomb();
         let sync = store.sync();
+
+        // Prepare tomb
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        tomb.prepare().map_err(Err::Tomb)?;
 
         if sync.is_init() {
             error::quit_error_msg(
@@ -42,6 +48,10 @@ impl<'a> Init<'a> {
         // Run housekeeping
         crate::action::housekeeping::run::housekeeping(&store, true, false)
             .map_err(Err::Housekeeping)?;
+
+        // Finalize tomb
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        tomb.finalize().map_err(Err::Tomb)?;
 
         if !matcher_main.quiet() {
             eprintln!("Sync initialized");
@@ -58,6 +68,10 @@ impl<'a> Init<'a> {
 pub enum Err {
     #[error("failed to access password store")]
     Store(#[source] anyhow::Error),
+
+    #[cfg(all(feature = "tomb", target_os = "linux"))]
+    #[error("failed to prepare password store tomb for usage")]
+    Tomb(#[source] anyhow::Error),
 
     #[error("failed to initialize git sync")]
     Init(#[source] anyhow::Error),

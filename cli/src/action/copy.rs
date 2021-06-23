@@ -27,6 +27,13 @@ impl<'a> Copy<'a> {
         let matcher_copy = CopyMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(matcher_copy.store()).map_err(Err::Store)?;
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        let tomb = store.tomb();
+
+        // Prepare tomb
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        tomb.prepare().map_err(Err::Tomb)?;
+
         let secret =
             select::store_select_secret(&store, matcher_copy.query()).ok_or(Err::NoneSelected)?;
 
@@ -49,7 +56,13 @@ impl<'a> Copy<'a> {
             !matcher_main.force(),
             !matcher_main.quiet(),
             matcher_copy.timeout()?,
-        )
+        )?;
+
+        // Finalize tomb
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        tomb.finalize().map_err(Err::Tomb)?;
+
+        Ok(())
     }
 }
 
@@ -57,6 +70,10 @@ impl<'a> Copy<'a> {
 pub enum Err {
     #[error("failed to access password store")]
     Store(#[source] anyhow::Error),
+
+    #[cfg(all(feature = "tomb", target_os = "linux"))]
+    #[error("failed to prepare password store tomb for usage")]
+    Tomb(#[source] anyhow::Error),
 
     #[error("no secret selected")]
     NoneSelected,

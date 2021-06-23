@@ -37,7 +37,13 @@ impl<'a> Export<'a> {
         let matcher_export = ExportMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(matcher_recipients.store()).map_err(Err::Store)?;
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        let tomb = store.tomb();
         let recipients = store.recipients().map_err(Err::Load)?;
+
+        // Prepare tomb
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        tomb.prepare().map_err(Err::Tomb)?;
 
         let key = select::select_key(recipients.keys())
             .ok_or(Err::NoneSelected)?
@@ -68,6 +74,10 @@ impl<'a> Export<'a> {
             std::io::stdout().write_all(&data).map_err(Err::Output)?;
         }
 
+        // Finalize tomb
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        tomb.finalize().map_err(Err::Tomb)?;
+
         Ok(())
     }
 }
@@ -76,6 +86,10 @@ impl<'a> Export<'a> {
 pub enum Err {
     #[error("failed to access password store")]
     Store(#[source] anyhow::Error),
+
+    #[cfg(all(feature = "tomb", target_os = "linux"))]
+    #[error("failed to prepare password store tomb for usage")]
+    Tomb(#[source] anyhow::Error),
 
     #[error("failed to load recipients from keychain")]
     Load(#[source] anyhow::Error),

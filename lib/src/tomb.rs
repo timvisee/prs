@@ -57,107 +57,36 @@ impl<'a> Tomb<'a> {
         tomb_bin::tomb_close(&tomb)
     }
 
-    // /// Prepare the store for new changes.
-    // ///
-    // /// - If sync is not initialized, it does nothing.
-    // /// - If sync remote is set, it pulls changes.
-    // pub fn prepare(&self) -> Result<()> {
-    //     // TODO: return error if dirty?
+    /// Prepare a Tomb store for usage.
+    ///
+    /// - If this store is a Tomb, the tomb is opened.
+    pub fn prepare(&self) -> Result<()> {
+        // TODO: return error if dirty?
 
-    //     // Skip if no sync
-    //     if !self.is_init() {
-    //         return Ok(());
-    //     }
+        // Skip if not a tomb
+        if !self.is_tomb() {
+            return Ok(());
+        }
 
-    //     // We're done if we don't have a remote
-    //     if !self.has_remote()? {
-    //         return Ok(());
-    //     }
+        // Skip if already open
+        if self.is_open()? {
+            return Ok(());
+        }
 
-    //     // We must have upstream set, otherwise try to automatically set or don't pull
-    //     let repo = self.path();
-    //     if git::git_branch_upstream(repo, "HEAD")?.is_none() {
-    //         // Get remotes, we cannot decide upstream if we don't have exactly one
-    //         let remotes = git::git_remote(repo)?;
-    //         if remotes.len() != 1 {
-    //             return Ok(());
-    //         }
+        // TODO: do not print if quiet?
+        eprintln!("Opening password store Tomb...");
 
-    //         // Fetch remote branches
-    //         let remote = &remotes[0];
-    //         git::git_fetch(repo, Some(remote))?;
+        // TODO: spawn timer to automatically close password store tomb
 
-    //         // List remote branches, stop if there are none
-    //         let remote_branches = git::git_branch_remote(repo)?;
-    //         if remote_branches.is_empty() {
-    //             return Ok(());
-    //         }
+        // Open tomb
+        self.open().map_err(|err| Err::Prepare(err).into())
+    }
 
-    //         // Determine upstream reference
-    //         let branch = git::git_current_branch(repo)?;
-    //         let upstream_ref = format!("{}/{}", remote, branch);
-
-    //         // Set upstream reference if available on remote, otherwise stop
-    //         if !remote_branches.contains(&upstream_ref) {
-    //             return Ok(());
-    //         }
-    //         git::git_branch_set_upstream(repo, None, &upstream_ref)?;
-    //     }
-
-    //     self.pull()?;
-
-    //     Ok(())
-    // }
-
-    // /// Finalize the store with new changes.
-    // ///
-    // /// - If sync is not initialized, it does nothing.
-    // /// - If sync is initialized, it commits changes.
-    // /// - If sync remote is set, it pushes changes.
-    // pub fn finalize<M: AsRef<str>>(&self, msg: M) -> Result<()> {
-    //     // Skip if no sync
-    //     if !self.is_init() {
-    //         return Ok(());
-    //     }
-
-    //     // Commit changes if dirty
-    //     if is_dirty(self.path())? {
-    //         self.commit_all(msg, false)?;
-    //     }
-
-    //     // Do not push  if no remote or not out of sync
-    //     if !self.has_remote()? || !safe_need_to_push(self.path()) {
-    //         return Ok(());
-    //     }
-
-    //     // We must have upstream set, otherwise try to automatically set or don't push
-    //     let mut set_branch = None;
-    //     let mut set_upstream = None;
-    //     let repo = self.path();
-    //     if git::git_branch_upstream(repo, "HEAD")?.is_none() {
-    //         // Get remotes, we cannot decide upstream if we don't have exactly one
-    //         let remotes = git::git_remote(repo)?;
-    //         if remotes.len() == 1 {
-    //             // Fetch and list remote branches
-    //             let remote = &remotes[0];
-    //             git::git_fetch(repo, Some(remote))?;
-    //             let remote_branches = git::git_branch_remote(repo)?;
-
-    //             // Determine upstream reference
-    //             let branch = git::git_current_branch(repo)?;
-    //             let upstream_ref = format!("{}/{}", remote, branch);
-
-    //             // Set upstream reference if not yet used on remote
-    //             if !remote_branches.contains(&upstream_ref) {
-    //                 set_branch = Some(branch);
-    //                 set_upstream = Some(remote.to_string());
-    //             }
-    //         }
-    //     }
-
-    //     self.push(set_branch.as_deref(), set_upstream.as_deref())?;
-    //     Ok(())
-    // }
+    /// Finalize the Tomb.
+    pub fn finalize(&self) -> Result<()> {
+        // This is currently just a placeholder for special closing functionality in the future
+        Ok(())
+    }
 
     // /// Initialize tomb.
     // pub fn init(&self) -> Result<()> {
@@ -203,6 +132,9 @@ pub enum Err {
 
     #[error("failed to find tomb key file to unlock password store tomb")]
     CannotFindTombKey,
+
+    #[error("failed to prepare password store tomb for usage")]
+    Prepare(#[source] anyhow::Error),
 
     #[error("failed to check if password store tomb is opened")]
     OpenCheck(#[source] std::io::Error),

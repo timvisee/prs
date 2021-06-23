@@ -40,8 +40,18 @@ impl<'a> Run<'a> {
         let matcher_run = RunMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(matcher_housekeeping.store()).map_err(Err::Store)?;
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        let tomb = store.tomb();
+
+        // Prepare tomb
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        tomb.prepare().map_err(Err::Tomb)?;
 
         housekeeping(&store, matcher_run.allow_dirty(), matcher_run.no_sync())?;
+
+        // Finalize tomb
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        tomb.finalize().map_err(Err::Tomb)?;
 
         if !matcher_main.quiet() {
             eprintln!("Housekeeping done");
@@ -161,6 +171,10 @@ fn set_git_attributes(store: &Store) -> Result<(), std::io::Error> {
 pub enum Err {
     #[error("failed to access password store")]
     Store(#[source] anyhow::Error),
+
+    #[cfg(all(feature = "tomb", target_os = "linux"))]
+    #[error("failed to prepare password store tomb for usage")]
+    Tomb(#[source] anyhow::Error),
 
     #[error("failed to set password store permissions")]
     Perms(#[source] std::io::Error),

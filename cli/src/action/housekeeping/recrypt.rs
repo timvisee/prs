@@ -34,7 +34,13 @@ impl<'a> Recrypt<'a> {
         let matcher_recrypt = RecryptMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(matcher_housekeeping.store()).map_err(Err::Store)?;
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        let tomb = store.tomb();
         let sync = store.sync();
+
+        // Prepare tomb
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        tomb.prepare().map_err(Err::Tomb)?;
 
         // Prepare sync
         sync::ensure_ready(&sync, matcher_recrypt.allow_dirty());
@@ -58,6 +64,10 @@ impl<'a> Recrypt<'a> {
         if !matcher_recrypt.no_sync() {
             sync.finalize("Re-encrypt secrets")?;
         }
+
+        // Finalize tomb
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        tomb.finalize().map_err(Err::Tomb)?;
 
         Ok(())
     }
@@ -145,6 +155,10 @@ fn recrypt_single(context: &mut Context, secret: &Secret, recipients: &Recipient
 pub enum Err {
     #[error("failed to access password store")]
     Store(#[source] anyhow::Error),
+
+    #[cfg(all(feature = "tomb", target_os = "linux"))]
+    #[error("failed to prepare password store tomb for usage")]
+    Tomb(#[source] anyhow::Error),
 
     #[error("failed to read secret")]
     Read(#[source] anyhow::Error),

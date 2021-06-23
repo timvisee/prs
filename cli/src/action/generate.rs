@@ -32,7 +32,13 @@ impl<'a> Generate<'a> {
         let matcher_generate = GenerateMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(matcher_generate.store()).map_err(Err::Store)?;
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        let tomb = store.tomb();
         let sync = store.sync();
+
+        // Prepare tomb
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        tomb.prepare().map_err(Err::Tomb)?;
 
         // Normalize destination path if we will store the secret
         let dest: Option<(PathBuf, Secret)> = match matcher_generate.name() {
@@ -138,6 +144,10 @@ impl<'a> Generate<'a> {
             }
         }
 
+        // Finalize tomb
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        tomb.finalize().map_err(Err::Tomb)?;
+
         // Determine whehter we outputted anything to stdout/stderr
         #[allow(unused_mut)]
         let mut output_any = matcher_generate.show();
@@ -171,6 +181,10 @@ fn generate_password(matcher_generate: &GenerateMatcher) -> Plaintext {
 pub enum Err {
     #[error("failed to access password store")]
     Store(#[source] anyhow::Error),
+
+    #[cfg(all(feature = "tomb", target_os = "linux"))]
+    #[error("failed to prepare password store tomb for usage")]
+    Tomb(#[source] anyhow::Error),
 
     #[error("failed to normalize destination path")]
     NormalizePath(#[source] anyhow::Error),

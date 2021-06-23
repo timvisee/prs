@@ -111,11 +111,8 @@ fn set_git_attributes(store: &Store) -> Result<(), std::io::Error> {
 
     // Append GPG entry if it doesn't exist
     if !contents.lines().any(|l| l.trim() == GPG_ENTRY) {
-        eprintln!("B");
         file.write_all("\n".as_bytes())?;
-        eprintln!("C");
         file.write_all(GPG_ENTRY.as_bytes())?;
-        eprintln!("D");
     }
 
     Ok(())

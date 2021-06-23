@@ -39,6 +39,10 @@ impl<'a> Init<'a> {
         // Initialize git
         sync.init().map_err(Err::Init)?;
 
+        // Run housekeeping
+        crate::action::housekeeping::run::housekeeping(&store, true, false)
+            .map_err(Err::Housekeeping)?;
+
         if !matcher_main.quiet() {
             eprintln!("Sync initialized");
             if !sync.has_remote()? {
@@ -57,4 +61,7 @@ pub enum Err {
 
     #[error("failed to initialize git sync")]
     Init(#[source] anyhow::Error),
+
+    #[error("failed to run housekeeping tasks")]
+    Housekeeping(#[source] anyhow::Error),
 }

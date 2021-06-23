@@ -7,6 +7,12 @@ use thiserror::Error;
 
 use prs_lib::Store;
 
+/// Platform specific line ending character.
+#[cfg(not(windows))]
+const LINE_ENDING: &'static str = "\n";
+#[cfg(windows)]
+const LINE_ENDING: &'static str = "\r\n";
+
 use crate::{
     cmd::matcher::{
         housekeeping::{run::RunMatcher, HousekeepingMatcher},
@@ -58,6 +64,7 @@ pub(crate) fn housekeeping(store: &Store, allow_dirty: bool, no_sync: bool) -> R
     set_store_permissions(&store).map_err(Err::Perms)?;
 
     if sync.is_init() {
+        set_git_ignore(&store).map_err(Err::GitAttributes)?;
         set_git_attributes(&store).map_err(Err::GitAttributes)?;
     }
 
@@ -88,7 +95,39 @@ fn set_store_permissions(_store: &Store) -> Result<(), std::io::Error> {
     Ok(())
 }
 
-/// Set git attributes file.
+/// Set up the git ignore file.
+fn set_git_ignore(store: &Store) -> Result<(), std::io::Error> {
+    const ENTRIES: [&str; 5] = [".host", ".last", ".tty", ".uid", ".timer"];
+
+    let file = store.root.join(".gitignore");
+
+    // Create file if it doesn't exist
+    if !file.is_file() {
+        fs::write(&file, ENTRIES.join(LINE_ENDING))?;
+        return Ok(());
+    }
+
+    // Open and read file
+    let mut file = OpenOptions::new()
+        .append(true)
+        .read(true)
+        .write(true)
+        .open(file)?;
+    let mut contents = String::new();
+    file.read_to_string(&mut contents)?;
+
+    // Add each entry if it doesn't exist
+    for entry in ENTRIES {
+        if !contents.lines().any(|l| l.trim() == entry) {
+            file.write_all(LINE_ENDING.as_bytes())?;
+            file.write_all(entry.as_bytes())?;
+        }
+    }
+
+    Ok(())
+}
+
+/// Set up the git attributes file.
 fn set_git_attributes(store: &Store) -> Result<(), std::io::Error> {
     const GPG_ENTRY: &str = "*.gpg diff=gpg";
 
@@ -111,7 +150,7 @@ fn set_git_attributes(store: &Store) -> Result<(), std::io::Error> {
 
     // Append GPG entry if it doesn't exist
     if !contents.lines().any(|l| l.trim() == GPG_ENTRY) {
-        file.write_all("\n".as_bytes())?;
+        file.write_all(LINE_ENDING.as_bytes())?;
         file.write_all(GPG_ENTRY.as_bytes())?;
     }
 

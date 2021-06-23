@@ -1,13 +1,10 @@
 use anyhow::Result;
+use bytesize::ByteSize;
 use clap::ArgMatches;
+use prs_lib::Store;
 use thiserror::Error;
 
-use prs_lib::Store;
-
-use crate::{
-    cmd::matcher::{tomb::TombMatcher, MainMatcher, Matcher},
-    util::error::{self, ErrorHintsBuilder},
-};
+use crate::cmd::matcher::{tomb::TombMatcher, Matcher};
 
 /// A tomb status action.
 pub struct Status<'a> {
@@ -39,11 +36,20 @@ impl<'a> Status<'a> {
         let tomb_path = tomb.find_tomb_path().unwrap();
         let tomb_key_path = tomb.find_tomb_key_path().unwrap();
 
+        let store_size = fs_extra::dir::get_size(&store.root).map_err(Err::StoreSize)?;
+        let tomb_size = tomb_path.metadata().map_err(Err::TombSize)?.len();
+
         eprintln!("Tomb: yes");
         eprintln!("Open: {}", if is_open { "yes" } else { "no" });
         eprintln!("Close timer: {}", if has_timer { "active" } else { "no" });
         eprintln!("Tomb path: {}", tomb_path.display());
         eprintln!("Tomb key path: {}", tomb_key_path.display());
+        if is_open {
+            eprintln!("Store size: {}", ByteSize(store_size));
+        } else {
+            eprintln!("Store size: ?");
+        }
+        eprintln!("Tomb size: {}", ByteSize(tomb_size));
 
         Ok(())
     }
@@ -56,4 +62,10 @@ pub enum Err {
 
     #[error("failed to query password store tomb status")]
     Status(#[source] anyhow::Error),
+
+    #[error("failed to calcualte password store size")]
+    StoreSize(#[source] fs_extra::error::Error),
+
+    #[error("failed to calcualte password store tomb size")]
+    TombSize(#[source] std::io::Error),
 }

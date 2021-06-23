@@ -1,8 +1,7 @@
 use anyhow::Result;
 use clap::ArgMatches;
-use thiserror::Error;
-
 use prs_lib::Store;
+use thiserror::Error;
 
 use crate::{
     cmd::matcher::{tomb::TombMatcher, MainMatcher, Matcher},

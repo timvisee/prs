@@ -43,7 +43,7 @@ compatible clients, extensions and migration scripts.
 - Supports multiple machines with easy recipient management
 - Easily edit secrets using your default editor
 - Supports smart aliases, property selection
-- Compatible with [`pass`][pass]
+- Compatible with [`pass`][pass][<sup>*</sup>](#is-prs-compatible-with-pass)
 - Supports Linux, macOS, Windows, FreeBSD and others, supports X11 and Wayland
 - Supports multiple cryptography backends (more backends & crypto in the future)
 - Scriptable with `-y`, `-f`, `-I` flags
@@ -517,8 +517,12 @@ Yes.
 `prs` uses the same file structure as [`pass`][pass]. Other `pass` clients
 should be able to view and edit your secrets.
 
-`prs` does add additional files and settings, some `prs` features might not work
+`prs` does add additional files and settings, some `prs` features may not work
 with other `pass` clients.
+
+While the backing file structure is compatible, the command-line interface is
+not and differs from `pass`. This is to remove ambiguity and to improve overall
+usability.
 
 See a list of compatible `pass` clients [here][pass-compatible-clients].
 

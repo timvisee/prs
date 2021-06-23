@@ -53,6 +53,11 @@ impl<'a> Close<'a> {
         // Close the tomb
         tomb.close().map_err(Err::Close)?;
 
+        // Close any running close timers
+        if let Err(err) = tomb.remove_timer_if_running() {
+            error::print_error(err.context("failed to stop auto closing systemd timer, ignoring"));
+        }
+
         if !matcher_main.quiet() {
             eprintln!("Password store Tomb closed");
         }

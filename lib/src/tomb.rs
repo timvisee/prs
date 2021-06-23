@@ -6,7 +6,7 @@ use std::path::{Path, PathBuf};
 use anyhow::Result;
 use thiserror::Error;
 
-use crate::{tomb_bin, Store};
+use crate::{systemd_bin, tomb_bin, Store};
 
 /// Default time after which to automatically close the password tomb.
 pub const TOMB_AUTO_CLOSE_SEC: u32 = 5 * 60;
@@ -97,16 +97,20 @@ impl<'a> Tomb<'a> {
         // Figure out tomb path and name
         let tomb_path = self.find_tomb_path()?;
         let name = tomb_bin::name(&tomb_path).unwrap_or(".unwrap");
+        let unit = format!("prs-tomb-close@{}.service", name);
 
-        // TODO: do not create if service already running
+        // Skip if already running
+        if systemd_bin::systemd_has_timer(&unit).map_err(Err::AutoCloseTimer)? {
+            return Ok(());
+        }
 
         // Spawn timer to automatically close tomb
         // TODO: better method to find current exe path
         // TODO: do not hardcode exe, command and store path
-        crate::systemd_bin::systemd_cmd_timer(
+        systemd_bin::systemd_cmd_timer(
             TOMB_AUTO_CLOSE_SEC,
             "prs tomb close timer",
-            &format!("prs-tomb-close@{}.service", name),
+            &unit,
             &[
                 std::env::current_exe()
                     .expect("failed to determine current exe")
@@ -124,6 +128,22 @@ impl<'a> Tomb<'a> {
         )
         .map_err(Err::AutoCloseTimer)?;
 
+        Ok(())
+    }
+
+    /// Stop automatic close timer if any is running.
+    pub fn remove_timer_if_running(&self) -> Result<()> {
+        // Figure out tomb path and name
+        let tomb_path = self.find_tomb_path()?;
+        let name = tomb_bin::name(&tomb_path).unwrap_or(".unwrap");
+        let unit = format!("prs-tomb-close@{}.service", name);
+
+        // We're done if none is running
+        if !systemd_bin::systemd_has_timer(&unit).map_err(Err::AutoCloseTimer)? {
+            return Ok(());
+        }
+
+        systemd_bin::systemd_remove_timer(&unit).map_err(Err::AutoCloseTimer)?;
         Ok(())
     }
 

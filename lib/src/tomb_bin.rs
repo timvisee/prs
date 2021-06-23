@@ -79,33 +79,7 @@ where
     I: IntoIterator<Item = S>,
     S: AsRef<OsStr>,
 {
-    cmd_assert_status(cmd_tomb(args).status().map_err(Err::System)?)
-}
-
-/// Invoke a tomb command, returns output.
-fn tomb_output<I, S>(args: I) -> Result<Output>
-where
-    I: IntoIterator<Item = S>,
-    S: AsRef<OsStr>,
-{
-    cmd_tomb(args)
-        .output()
-        .map_err(|err| Err::System(err).into())
-}
-
-/// Invoke a tomb command with the given arguments, return stdout on success.
-fn tomb_stdout_ok<I, S>(repo: &Path, args: I) -> Result<String>
-where
-    I: IntoIterator<Item = S>,
-    S: AsRef<OsStr>,
-{
-    let output = tomb_output(args)?;
-    cmd_assert_status(output.status)?;
-
-    Ok(std::str::from_utf8(&output.stdout)
-        .map_err(|err| Err::TombCli(err.into()))?
-        .trim()
-        .into())
+    cmd_assert_status(cmd_tomb(args).status().map_err(Err::Tomb)?)
 }
 
 /// Build a tomb command to run.
@@ -132,14 +106,8 @@ fn cmd_assert_status(status: ExitStatus) -> Result<()> {
 
 #[derive(Debug, Error)]
 pub enum Err {
-    #[error("failed to complete tomb operation")]
-    Other(#[source] std::io::Error),
-
-    #[error("failed to complete tomb operation")]
-    TombCli(#[source] anyhow::Error),
-
-    #[error("failed to invoke system command")]
-    System(#[source] std::io::Error),
+    #[error("failed to invoke tomb command")]
+    Tomb(#[source] std::io::Error),
 
     #[error("tomb operation exited with non-zero status code: {0}")]
     Status(std::process::ExitStatus),

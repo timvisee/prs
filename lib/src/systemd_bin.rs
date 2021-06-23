@@ -1,5 +1,5 @@
 use std::ffi::OsStr;
-use std::process::{Command, ExitStatus, Output};
+use std::process::{Command, ExitStatus, Output, Stdio};
 
 use anyhow::Result;
 use thiserror::Error;
@@ -10,9 +10,12 @@ pub const SUDO_BIN: &str = "sudo";
 /// systemd-run binary.
 pub const SYSTEMD_RUN_BIN: &str = "systemd-run";
 
+/// systemctl binary.
+pub const SYSTEMCTL_BIN: &str = "systemctl";
+
 /// Spawn systemd timer to run the given command.
 ///
-/// This spawns as root.
+/// This may ask for root privileges through sudo.
 pub fn systemd_cmd_timer(time: u32, description: &str, unit: &str, cmd: &[&str]) -> Result<()> {
     // TODO: do not set -q flag if in verbose mode?
     let time = format!("{}", time);
@@ -31,15 +34,48 @@ pub fn systemd_cmd_timer(time: u32, description: &str, unit: &str, cmd: &[&str])
     systemd_run(&systemd_cmd)
 }
 
-/// Invoke a tomb command with the given arguments.
+/// Check whether the given unit (transient timer) is running.
 ///
-/// The command will take over the user console for in/output.
+/// This may ask for root privileges through sudo.
+pub fn systemd_has_timer(unit: &str) -> Result<bool> {
+    // TODO: check whether we can optimize this, the status command may be expensive
+    let cmd = cmd_systemctl(&["--system", "--no-pager", "--quiet", "status", unit])
+        .stdout(Stdio::null())
+        .status()
+        .map_err(Err::Systemctl)?;
+
+    // Check special status codes
+    match cmd.code() {
+        Some(0 | 3) => Ok(true),
+        Some(4) => Ok(false),
+        _ => cmd_assert_status(cmd).map(|_| false),
+    }
+}
+
+/// Remove a systemd transient timer.
+///
+/// Errors if the timer is not available.
+/// This may ask for root privileges through sudo.
+pub fn systemd_remove_timer(unit: &str) -> Result<()> {
+    systemctl(&["--system", "--quiet", "stop", unit])
+}
+
+/// Invoke a systemd-run command with the given arguments.
 fn systemd_run<I, S>(args: I) -> Result<()>
 where
     I: IntoIterator<Item = S>,
     S: AsRef<OsStr>,
 {
-    cmd_assert_status(cmd_systemd_run(args).status().map_err(Err::System)?)
+    cmd_assert_status(cmd_systemd_run(args).status().map_err(Err::SystemdRun)?)
+}
+
+/// Invoke a systemctl command with the given arguments.
+fn systemctl<I, S>(args: I) -> Result<()>
+where
+    I: IntoIterator<Item = S>,
+    S: AsRef<OsStr>,
+{
+    cmd_assert_status(cmd_systemctl(args).status().map_err(Err::Systemctl)?)
 }
 
 /// Build a systemd-run command to run.
@@ -51,6 +87,19 @@ where
     let mut cmd = Command::new(SUDO_BIN);
     cmd.arg("--");
     cmd.arg(SYSTEMD_RUN_BIN);
+    cmd.args(args);
+    cmd
+}
+
+/// Build a systemctl command to run.
+fn cmd_systemctl<I, S>(args: I) -> Command
+where
+    I: IntoIterator<Item = S>,
+    S: AsRef<OsStr>,
+{
+    let mut cmd = Command::new(SUDO_BIN);
+    cmd.arg("--");
+    cmd.arg(SYSTEMCTL_BIN);
     cmd.args(args);
     cmd
 }
@@ -67,15 +116,12 @@ fn cmd_assert_status(status: ExitStatus) -> Result<()> {
 
 #[derive(Debug, Error)]
 pub enum Err {
-    #[error("failed to complete tomb operation")]
-    Other(#[source] std::io::Error),
+    #[error("failed to invoke systemd-run command")]
+    SystemdRun(#[source] std::io::Error),
 
-    #[error("failed to complete tomb operation")]
-    TombCli(#[source] anyhow::Error),
+    #[error("failed to invoke systemctl command")]
+    Systemctl(#[source] std::io::Error),
 
-    #[error("failed to invoke system command")]
-    System(#[source] std::io::Error),
-
-    #[error("tomb operation exited with non-zero status code: {0}")]
+    #[error("systemd exited with non-zero status code: {0}")]
     Status(std::process::ExitStatus),
 }

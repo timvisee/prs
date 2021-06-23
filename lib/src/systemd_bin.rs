@@ -1,5 +1,5 @@
 use std::ffi::OsStr;
-use std::process::{Command, ExitStatus, Output, Stdio};
+use std::process::{Command, ExitStatus, Stdio};
 
 use anyhow::Result;
 use thiserror::Error;
@@ -46,7 +46,7 @@ pub fn systemd_has_timer(unit: &str) -> Result<bool> {
 
     // Check special status codes
     match cmd.code() {
-        Some(0 | 3) => Ok(true),
+        Some(0) | Some(3) => Ok(true),
         Some(4) => Ok(false),
         _ => cmd_assert_status(cmd).map(|_| false),
     }

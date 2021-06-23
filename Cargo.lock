@@ -1764,6 +1764,7 @@ dependencies = [
  "notify-rust",
  "prs-lib",
  "rand",
+ "regex",
  "skim",
  "text_trees",
  "thiserror",

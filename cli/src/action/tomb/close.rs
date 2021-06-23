@@ -4,7 +4,10 @@ use prs_lib::Store;
 use thiserror::Error;
 
 use crate::{
-    cmd::matcher::{tomb::TombMatcher, MainMatcher, Matcher},
+    cmd::matcher::{
+        tomb::{close::CloseMatcher, TombMatcher},
+        MainMatcher, Matcher,
+    },
     util::error::{self, ErrorHintsBuilder},
 };
 
@@ -24,12 +27,17 @@ impl<'a> Close<'a> {
         // Create the command matchers
         let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
         let matcher_tomb = TombMatcher::with(self.cmd_matches).unwrap();
+        let matcher_close = CloseMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(matcher_tomb.store()).map_err(Err::Store)?;
         let tomb = store.tomb();
 
         // Must be a tomb
         if !tomb.is_tomb() && !matcher_main.force() {
+            if matcher_close.do_try() {
+                return Ok(());
+            }
+
             // TODO: error hint to initialize tomb
             error::quit_error_msg(
                 "password store is not a tomb",
@@ -39,6 +47,10 @@ impl<'a> Close<'a> {
 
         // Must be open
         if !tomb.is_open().map_err(Err::Close)? && !matcher_main.force() {
+            if matcher_close.do_try() {
+                return Ok(());
+            }
+
             error::quit_error_msg(
                 "password store tomb is not open",
                 ErrorHintsBuilder::default().force(true).build().unwrap(),
@@ -53,7 +65,7 @@ impl<'a> Close<'a> {
         tomb.close().map_err(Err::Close)?;
 
         // Close any running close timers
-        if let Err(err) = tomb.remove_timer_if_running() {
+        if let Err(err) = tomb.stop_timer() {
             error::print_error(err.context("failed to stop auto closing systemd timer, ignoring"));
         }
 

@@ -17,6 +17,9 @@ pub const SYSTEMCTL_BIN: &str = "systemctl";
 ///
 /// This may ask for root privileges through sudo.
 pub fn systemd_cmd_timer(time: u32, description: &str, unit: &str, cmd: &[&str]) -> Result<()> {
+    // Remove unit first if it failed before
+    let _ = systemctl_reset_failed(unit);
+
     // TODO: do not set -q flag if in verbose mode?
     let time = format!("{}", time);
     let mut systemd_cmd = vec![
@@ -24,6 +27,7 @@ pub fn systemd_cmd_timer(time: u32, description: &str, unit: &str, cmd: &[&str])
         "--system",
         "--on-active",
         &time,
+        "--timer-property=AccuracySec=1s",
         "--description",
         description,
         "--unit",
@@ -34,6 +38,17 @@ pub fn systemd_cmd_timer(time: u32, description: &str, unit: &str, cmd: &[&str])
     systemd_run(&systemd_cmd)
 }
 
+/// Reset a given failed unit.
+///
+/// This errors if the given unit is unknown, or if it didn't fail.
+fn systemctl_reset_failed(unit: &str) -> Result<()> {
+    cmd_systemctl(&["--quiet", "--system", "reset-failed", unit])
+        .stderr(Stdio::null())
+        .status()
+        .map_err(Err::Systemctl)?;
+    Ok(())
+}
+
 /// Check whether the given unit (transient timer) is running.
 ///
 /// This may ask for root privileges through sudo.
@@ -41,6 +56,7 @@ pub fn systemd_has_timer(unit: &str) -> Result<bool> {
     // TODO: check whether we can optimize this, the status command may be expensive
     let cmd = cmd_systemctl(&["--system", "--no-pager", "--quiet", "status", unit])
         .stdout(Stdio::null())
+        .stderr(Stdio::null())
         .status()
         .map_err(Err::Systemctl)?;
 

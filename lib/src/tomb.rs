@@ -81,7 +81,8 @@ impl<'a> Tomb<'a> {
 
         // Open tomb, set up auto close timer
         self.open().map_err(Err::Prepare)?;
-        self.create_close_timer().map_err(Err::Prepare)?;
+        self.start_timer(TOMB_AUTO_CLOSE_SEC, false)
+            .map_err(Err::Prepare)?;
 
         // TODO: only show in verbose mode
         // eprintln!("Opened password store, automatically closing in 5 seconds");
@@ -93,14 +94,14 @@ impl<'a> Tomb<'a> {
     /// Set up a timer to automatically close password store tomb.
     ///
     /// TODO: add support for non-systemd systems
-    fn create_close_timer(&self) -> Result<()> {
+    pub fn start_timer(&self, sec: u32, force: bool) -> Result<()> {
         // Figure out tomb path and name
         let tomb_path = self.find_tomb_path()?;
         let name = tomb_bin::name(&tomb_path).unwrap_or(".unwrap");
         let unit = format!("prs-tomb-close@{}.service", name);
 
         // Skip if already running
-        if systemd_bin::systemd_has_timer(&unit).map_err(Err::AutoCloseTimer)? {
+        if !force && systemd_bin::systemd_has_timer(&unit).map_err(Err::AutoCloseTimer)? {
             return Ok(());
         }
 
@@ -108,7 +109,7 @@ impl<'a> Tomb<'a> {
         // TODO: better method to find current exe path
         // TODO: do not hardcode exe, command and store path
         systemd_bin::systemd_cmd_timer(
-            TOMB_AUTO_CLOSE_SEC,
+            sec,
             "prs tomb close timer",
             &unit,
             &[
@@ -123,6 +124,7 @@ impl<'a> Tomb<'a> {
                     .to_str()
                     .expect("password store path contains invalid UTF-8"),
                 "close",
+                "--try",
                 "--verbose",
             ],
         )
@@ -132,7 +134,7 @@ impl<'a> Tomb<'a> {
     }
 
     /// Check whether the timer is running.
-    pub fn is_timer_running(&self) -> Result<bool> {
+    pub fn has_timer(&self) -> Result<bool> {
         // Figure out tomb path and name
         let tomb_path = self.find_tomb_path()?;
         let name = tomb_bin::name(&tomb_path).unwrap_or(".unwrap");
@@ -142,7 +144,7 @@ impl<'a> Tomb<'a> {
     }
 
     /// Stop automatic close timer if any is running.
-    pub fn remove_timer_if_running(&self) -> Result<()> {
+    pub fn stop_timer(&self) -> Result<()> {
         // Figure out tomb path and name
         let tomb_path = self.find_tomb_path()?;
         let name = tomb_bin::name(&tomb_path).unwrap_or(".unwrap");

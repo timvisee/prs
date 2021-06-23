@@ -17,6 +17,8 @@ pub mod select_skim_bin;
 pub mod stdin;
 pub mod style;
 pub mod sync;
+#[cfg(all(feature = "tomb", target_os = "linux"))]
+pub mod time;
 
 use std::env;
 use std::path::{Path, PathBuf};

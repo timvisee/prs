@@ -118,7 +118,7 @@ fn set_git_ignore(store: &Store) -> Result<(), std::io::Error> {
 
     // Add each entry if it doesn't exist
     for entry in &ENTRIES {
-        if !contents.lines().any(|l| l.trim() == entry) {
+        if !contents.lines().any(|l| &l.trim() == entry) {
             file.write_all(LINE_ENDING.as_bytes())?;
             file.write_all(entry.as_bytes())?;
         }

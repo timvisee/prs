@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use bytesize::ByteSize;
 use clap::ArgMatches;
 use prs_lib::Store;
@@ -8,6 +8,7 @@ use crate::cmd::matcher::{
     tomb::{status::StatusMatcher, TombMatcher},
     MainMatcher, Matcher,
 };
+use crate::util::error;
 
 /// A tomb status action.
 pub struct Status<'a> {
@@ -50,20 +51,48 @@ impl<'a> Status<'a> {
         let tomb_path = tomb.find_tomb_path().unwrap();
         let tomb_key_path = tomb.find_tomb_key_path().unwrap();
 
-        let store_size = fs_extra::dir::get_size(&store.root).map_err(Err::StoreSize)?;
-        let tomb_file_size = tomb_path.metadata().map_err(Err::TombSize)?.len();
+        // Calculate store and tomb file sizes
+        let store_size = if is_open {
+            fs_extra::dir::get_size(&store.root)
+                .or_else(|err| {
+                    error::print_error(
+                        anyhow!(err).context("failed to calcualte password store size, ignoring"),
+                    );
+                    Err(())
+                })
+                .ok()
+        } else {
+            None
+        };
+        let tomb_file_size = tomb_path
+            .metadata()
+            .map(|m| m.len())
+            .or_else(|err| {
+                error::print_error(
+                    anyhow!(err)
+                        .context("failed to measure password store tomb file size, ignoring"),
+                );
+                Err(())
+            })
+            .ok();
 
         println!("Tomb: yes");
         println!("Open: {}", if is_open { "yes" } else { "no" });
         println!("Close timer: {}", if has_timer { "active" } else { "no" });
         println!("Tomb path: {}", tomb_path.display());
         println!("Tomb key path: {}", tomb_key_path.display());
-        if is_open {
-            println!("Store size: {}", ByteSize(store_size));
-        } else {
-            println!("Store size: ?");
-        }
-        println!("Tomb file size: {}", ByteSize(tomb_file_size));
+        println!(
+            "Store size: {}",
+            store_size
+                .map(|s| ByteSize(s).to_string())
+                .unwrap_or_else(|| "?".into())
+        );
+        println!(
+            "Tomb file size: {}",
+            tomb_file_size
+                .map(|s| ByteSize(s).to_string())
+                .unwrap_or_else(|| "?".into())
+        );
 
         Ok(())
     }
@@ -79,10 +108,4 @@ pub enum Err {
 
     #[error("failed to open password store tomb")]
     Open(#[source] anyhow::Error),
-
-    #[error("failed to calcualte password store size")]
-    StoreSize(#[source] fs_extra::error::Error),
-
-    #[error("failed to calcualte password store tomb size")]
-    TombSize(#[source] std::io::Error),
 }

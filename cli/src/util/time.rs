@@ -60,6 +60,6 @@ pub enum ParseDurationError {
     InvalidValue(std::num::ParseIntError),
 
     /// The given duration string contained an invalid duration modifier.
-    #[error("duration part has unknown time identifier '{}'", _0)]
+    #[error("duration part has unknown time identifier '{0}'")]
     UnknownIdentifier(String),
 }

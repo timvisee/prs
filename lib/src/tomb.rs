@@ -70,8 +70,8 @@ impl<'a> Tomb<'a> {
         // Change mountpoint directory permissions to current user
         if let Err(err) = nix::unistd::chown(
             &self.store.root,
-            Some(nix::unistd::Uid::current()),
-            Some(nix::unistd::Gid::current()),
+            Some(nix::unistd::Uid::effective()),
+            Some(nix::unistd::Gid::effective()),
         )
         .map_err(Err::Chown)
         {

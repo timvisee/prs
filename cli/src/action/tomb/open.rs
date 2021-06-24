@@ -8,7 +8,11 @@ use crate::{
         tomb::{open::OpenMatcher, TombMatcher},
         MainMatcher, Matcher,
     },
-    util::error::{self, ErrorHintsBuilder},
+    util::{
+        self,
+        error::{self, ErrorHintsBuilder},
+        style,
+    },
 };
 
 /// A tomb open action.
@@ -87,7 +91,20 @@ impl<'a> Open<'a> {
         }
 
         if !matcher_main.quiet() {
-            eprintln!("Password store Tomb opened");
+            if let Some(timer) = timer {
+                eprintln!(
+                    "Password store Tomb opened, will close in {}",
+                    util::time::format_duration(timer)
+                );
+            } else {
+                eprintln!("Password store Tomb opened");
+            }
+            eprintln!("");
+            eprintln!("To close the Tomb, use:");
+            eprintln!(
+                "    {}",
+                style::highlight(&format!("{} tomb close", util::bin_name()))
+            );
         }
 
         Ok(())

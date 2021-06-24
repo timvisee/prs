@@ -48,6 +48,55 @@ pub fn parse_duration(duration: &str) -> Result<usize, ParseDurationError> {
     Ok(seconds)
 }
 
+/// Format the given duration in a human readable format.
+/// This method builds a string of time components to represent
+/// the given duration.
+///
+/// The following time units are used:
+/// - `w`: weeks
+/// - `d`: days
+/// - `h`: hours
+/// - `m`: minutes
+/// - `s`: seconds
+///
+/// Only the two most significant units are returned.
+/// If the duration is zero seconds or less `now` is returned.
+///
+/// The following time strings may be produced:
+/// - `8w6d`
+/// - `23h14m`
+/// - `9m55s`
+/// - `1s`
+/// - `now`
+pub fn format_duration(mut secs: u32) -> String {
+    // Get the total number of seconds, return immediately if zero or less
+    if secs <= 0 {
+        return "now".into();
+    }
+
+    // Build a list of time units, define a list for time components
+    let mut components = Vec::new();
+    let units = [
+        (60 * 60 * 24 * 7, "w"),
+        (60 * 60 * 24, "d"),
+        (60 * 60, "h"),
+        (60, "m"),
+        (1, "s"),
+    ];
+
+    // Fill the list of time components based on the units which fit
+    for unit in &units {
+        if secs >= unit.0 {
+            components.push(format!("{}{}", secs / unit.0, unit.1));
+            secs %= unit.0;
+        }
+    }
+
+    // Show only the two most significant components and join them in a string
+    components.truncate(2);
+    components.join("")
+}
+
 /// Represents a duration parsing error.
 #[derive(Debug, Error)]
 pub enum ParseDurationError {

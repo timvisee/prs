@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use clap::ArgMatches;
 use prs_lib::Store;
 use thiserror::Error;
@@ -57,7 +57,24 @@ impl<'a> Open<'a> {
         }
 
         // Open the tomb
-        tomb.open().map_err(Err::Open)?;
+        let errs = tomb.open().map_err(Err::Open)?;
+
+        // Report soft-fail errors to the user
+        let show_error_hints = !errs.is_empty();
+        for err in errs {
+            error::print_error(
+                anyhow!(err)
+                    .context("failed to run housekeeping task after opening tomb, ignoring"),
+            );
+        }
+        if show_error_hints {
+            error::ErrorHintsBuilder::default()
+                .force(true)
+                .verbose(true)
+                .build()
+                .unwrap()
+                .print(true);
+        }
 
         // Start timer
         if let Some(timer) = timer {

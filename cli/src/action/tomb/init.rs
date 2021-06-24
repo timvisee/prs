@@ -35,6 +35,7 @@ impl<'a> Init<'a> {
 
         // TODO: ensure tomb is not already initialized
         // TODO: ensure password store is available
+        // TODO: run housekeeping
         // TODO: remove allow attribute on top of this file
 
         // if sync.is_init() {

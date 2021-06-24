@@ -52,13 +52,35 @@ impl<'a> Tomb<'a> {
     }
 
     /// Open the tomb.
-    pub fn open(&self) -> Result<()> {
+    ///
+    /// This will keep the tomb open until it is manually closed. See `start_timer()`.
+    ///
+    /// On success this may return a list with soft-fail errors.
+    pub fn open(&self) -> Result<Vec<Err>> {
         // TODO: ensure tomb isn't already opened
-        // TODO: spawn systemd timer to automatically close?
 
+        // Open tomb
         let tomb = self.find_tomb_path()?;
         let key = self.find_tomb_key_path()?;
-        tomb_bin::tomb_open(&tomb, &key, &self.store.root, self.settings)
+        tomb_bin::tomb_open(&tomb, &key, &self.store.root, self.settings).map_err(Err::Open)?;
+
+        // Soft fail on following errors, collect them
+        let mut errs = vec![];
+
+        // Change mountpoint directory permissions to current user
+        if let Err(err) = nix::unistd::chown(
+            &self.store.root,
+            Some(nix::unistd::Uid::current()),
+            Some(nix::unistd::Gid::current()),
+        )
+        .map_err(Err::Chown)
+        {
+            errs.push(err);
+        }
+
+        // TODO: set file mode as well? See housekeeping::run
+
+        Ok(errs)
     }
 
     /// Close the tomb.
@@ -220,6 +242,12 @@ pub enum Err {
 
     #[error("failed to prepare password store tomb for usage")]
     Prepare(#[source] anyhow::Error),
+
+    #[error("failed to open password store tomb through tomb CLI")]
+    Open(#[source] anyhow::Error),
+
+    #[error("failed to change permissions to current user for tomb mountpoint")]
+    Chown(#[source] nix::Error),
 
     #[error("failed to check if password store tomb is opened")]
     OpenCheck(#[source] std::io::Error),

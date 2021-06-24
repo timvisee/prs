@@ -60,7 +60,7 @@ impl<'a> Remove<'a> {
                 .verbose(false)
                 .build()
                 .unwrap()
-                .print();
+                .print(false);
             error::quit();
         }
 

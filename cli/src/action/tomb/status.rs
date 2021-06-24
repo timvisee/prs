@@ -28,7 +28,7 @@ impl<'a> Status<'a> {
         let matcher_status = StatusMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(matcher_tomb.store()).map_err(Err::Store)?;
-        let tomb = store.tomb();
+        let tomb = store.tomb(matcher_main.quiet(), matcher_main.verbose());
 
         let is_tomb = tomb.is_tomb();
         if !is_tomb {

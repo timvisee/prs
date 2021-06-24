@@ -41,7 +41,7 @@ impl<'a> Run<'a> {
 
         let store = Store::open(matcher_housekeeping.store()).map_err(Err::Store)?;
         #[cfg(all(feature = "tomb", target_os = "linux"))]
-        let tomb = store.tomb();
+        let tomb = store.tomb(matcher_main.quiet(), matcher_main.verbose());
 
         // Prepare tomb
         #[cfg(all(feature = "tomb", target_os = "linux"))]

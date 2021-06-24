@@ -8,6 +8,7 @@ use anyhow::Result;
 use thiserror::Error;
 
 use crate::{systemd_bin, tomb_bin, Store};
+use tomb_bin::TombSettings;
 
 /// Default time after which to automatically close the password tomb.
 pub const TOMB_AUTO_CLOSE_SEC: u32 = 5 * 60;
@@ -22,12 +23,18 @@ pub const TOMB_KEY_FILE_SUFFIX: &str = ".tomb.key";
 pub struct Tomb<'a> {
     /// The store.
     store: &'a Store,
+
+    /// Tomb settings.
+    settings: TombSettings,
 }
 
 impl<'a> Tomb<'a> {
     /// Construct new Tomb helper for given store.
-    pub fn new(store: &'a Store) -> Tomb<'a> {
-        Self { store }
+    pub fn new(store: &'a Store, quiet: bool, verbose: bool) -> Tomb<'a> {
+        Self {
+            store,
+            settings: TombSettings { quiet, verbose },
+        }
     }
 
     /// Find the tomb path.
@@ -51,14 +58,14 @@ impl<'a> Tomb<'a> {
 
         let tomb = self.find_tomb_path()?;
         let key = self.find_tomb_key_path()?;
-        tomb_bin::tomb_open(&tomb, &key, &self.store.root)
+        tomb_bin::tomb_open(&tomb, &key, &self.store.root, self.settings)
     }
 
     /// Close the tomb.
     pub fn close(&self) -> Result<()> {
         // TODO: ensure tomb is currently open?
         let tomb = self.find_tomb_path()?;
-        tomb_bin::tomb_close(&tomb)
+        tomb_bin::tomb_close(&tomb, self.settings)
     }
 
     /// Prepare a Tomb store for usage.

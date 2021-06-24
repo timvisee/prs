@@ -57,8 +57,8 @@ impl Store {
 
     /// Get a tomb helper for this store.
     #[cfg(all(feature = "tomb", target_os = "linux"))]
-    pub fn tomb(&self) -> Tomb {
-        Tomb::new(&self)
+    pub fn tomb(&self, quiet: bool, verbose: bool) -> Tomb {
+        Tomb::new(&self, quiet, verbose)
     }
 
     /// Create secret iterator for this store.

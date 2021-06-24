@@ -25,7 +25,7 @@ impl<'a> List<'a> {
 
         let store = Store::open(matcher_recipients.store()).map_err(Err::Store)?;
         #[cfg(all(feature = "tomb", target_os = "linux"))]
-        let tomb = store.tomb();
+        let tomb = store.tomb(matcher_main.quiet(), matcher_main.verbose());
         let recipients = store.recipients().map_err(Err::List)?;
 
         // Prepare tomb

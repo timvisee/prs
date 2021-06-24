@@ -7,7 +7,7 @@ use thiserror::Error;
 
 use prs_lib::{store::SecretIterConfig, Secret, Store};
 
-use crate::cmd::matcher::{list::ListMatcher, Matcher};
+use crate::cmd::matcher::{list::ListMatcher, MainMatcher, Matcher};
 
 /// List secrets action.
 pub struct List<'a> {
@@ -23,11 +23,12 @@ impl<'a> List<'a> {
     /// Invoke the list action.
     pub fn invoke(&self) -> Result<()> {
         // Create the command matchers
+        let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
         let matcher_list = ListMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(matcher_list.store()).map_err(Err::Store)?;
         #[cfg(all(feature = "tomb", target_os = "linux"))]
-        let tomb = store.tomb();
+        let tomb = store.tomb(matcher_main.quiet(), matcher_main.verbose());
 
         // Prepare tomb
         #[cfg(all(feature = "tomb", target_os = "linux"))]

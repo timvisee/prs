@@ -30,7 +30,7 @@ impl<'a> Open<'a> {
         let matcher_open = OpenMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(matcher_tomb.store()).map_err(Err::Store)?;
-        let tomb = store.tomb();
+        let tomb = store.tomb(matcher_main.quiet(), matcher_main.verbose());
         let timer = matcher_open.timer();
 
         // TODO: show warning if there already are files in tomb directory?

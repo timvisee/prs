@@ -10,52 +10,53 @@ use thiserror::Error;
 pub const BIN_NAME: &str = "tomb";
 
 // /// Invoke tomb dig.
-// pub fn tomb_dig(tomb_file: &Path) -> Result<()> {
+// pub fn tomb_dig(tomb_file: &Path, settings: TombSettings) -> Result<()> {
 //     unimplemented!();
 //     // See: https://github.com/roddhjav/pass-tomb/blob/241964e227f373307354bc764c4ffab4326604ea/tomb.bash#L305-L312
 //     tomb(&[
-//         // TODO: "-q",
 //         "dig",
-//     ])
+//     ], settings)
 // }
 
 /// Invoke tomb open.
-pub fn tomb_open(tomb_file: &Path, key_file: &Path, store_dir: &Path) -> Result<()> {
+pub fn tomb_open(
+    tomb_file: &Path,
+    key_file: &Path,
+    store_dir: &Path,
+    settings: TombSettings,
+) -> Result<()> {
     // TODO: ensure tomb file, key and store dir exist
-
-    // TODO: do not set -q flag if in verbose mode?
-    tomb(&[
-        "-q",
-        "open",
-        tomb_file
-            .to_str()
-            .expect("tomb path contains invalid UTF-8"),
-        "-k",
-        key_file.to_str().expect("tomb path contains invalid UTF-8"),
-        "-g",
-        store_dir
-            .to_str()
-            .expect("password store directory path contains invalid UTF-8"),
-    ])
+    tomb(
+        &[
+            "open",
+            tomb_file
+                .to_str()
+                .expect("tomb path contains invalid UTF-8"),
+            "-k",
+            key_file.to_str().expect("tomb path contains invalid UTF-8"),
+            "-g",
+            store_dir
+                .to_str()
+                .expect("password store directory path contains invalid UTF-8"),
+        ],
+        settings,
+    )
 }
 
 /// Invoke tomb close.
-pub fn tomb_close(tomb_file: &Path) -> Result<()> {
-    // TODO: do not set -q flag if in verbose mode?
-    tomb(&[
-        "-q",
-        "close",
-        name(tomb_file).expect("failed to get tomb name"),
-    ])
+pub fn tomb_close(tomb_file: &Path, settings: TombSettings) -> Result<()> {
+    tomb(
+        &["close", name(tomb_file).expect("failed to get tomb name")],
+        settings,
+    )
 }
 
 // /// Invoke tomb resize.
-// pub fn tomb_resize(tomb_file: &Path, key_file: &Path, size_mb: u32) -> Result<()> {
+// pub fn tomb_resize(tomb_file: &Path, key_file: &Path, size_mb: u32, settings: TombSettings) -> Result<()> {
 //     // TODO: ensure tomb file and key exist, size must be larger
 
 //     // TODO: do not set -q flag if in verbose mode?
 //     tomb(&[
-//         // TODO: "-q",
 //         "resize",
 //         tomb_file
 //             .to_str()
@@ -64,7 +65,7 @@ pub fn tomb_close(tomb_file: &Path) -> Result<()> {
 //         key_file.to_str().expect("tomb path contains invalid UTF-8"),
 //         "-s",
 //         &format!("{}", size_mb),
-//     ])
+//     ], settings)
 // }
 
 /// Get tomb name based on path.
@@ -75,16 +76,16 @@ pub fn name(path: &Path) -> Option<&str> {
 /// Invoke a tomb command with the given arguments.
 ///
 /// The command will take over the user console for in/output.
-fn tomb<I, S>(args: I) -> Result<()>
+fn tomb<I, S>(args: I, settings: TombSettings) -> Result<()>
 where
     I: IntoIterator<Item = S>,
     S: AsRef<OsStr>,
 {
-    cmd_assert_status(cmd_tomb(args).status().map_err(Err::Tomb)?)
+    cmd_assert_status(cmd_tomb(args, settings).status().map_err(Err::Tomb)?)
 }
 
 /// Build a tomb command to run.
-fn cmd_tomb<I, S>(args: I) -> Command
+fn cmd_tomb<I, S>(args: I, settings: TombSettings) -> Command
 where
     I: IntoIterator<Item = S>,
     S: AsRef<OsStr>,
@@ -94,6 +95,12 @@ where
     } else {
         Command::new(BIN_NAME)
     };
+    if settings.quiet {
+        cmd.arg("-q");
+    }
+    if settings.verbose {
+        cmd.arg("-D");
+    }
     cmd.arg("-f");
     cmd.args(args);
     cmd
@@ -107,6 +114,16 @@ fn cmd_assert_status(status: ExitStatus) -> Result<()> {
         return Err(Err::Status(status).into());
     }
     Ok(())
+}
+
+/// Tomb command settings.
+#[derive(Copy, Clone)]
+pub struct TombSettings {
+    /// Run in quiet (-q) mode.
+    pub quiet: bool,
+
+    /// Run in verbose (-D) mode.
+    pub verbose: bool,
 }
 
 #[derive(Debug, Error)]

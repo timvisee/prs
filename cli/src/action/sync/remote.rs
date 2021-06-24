@@ -36,7 +36,7 @@ impl<'a> Remote<'a> {
 
         let store = Store::open(matcher_sync.store()).map_err(Err::Store)?;
         #[cfg(all(feature = "tomb", target_os = "linux"))]
-        let tomb = store.tomb(matcher_main.quiet(), matcher_main.verbose());
+        let tomb = store.tomb(!matcher_main.verbose(), matcher_main.verbose());
         let sync = store.sync();
 
         // Prepare tomb

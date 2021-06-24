@@ -28,7 +28,7 @@ impl<'a> List<'a> {
 
         let store = Store::open(matcher_list.store()).map_err(Err::Store)?;
         #[cfg(all(feature = "tomb", target_os = "linux"))]
-        let tomb = store.tomb(matcher_main.quiet(), matcher_main.verbose());
+        let tomb = store.tomb(!matcher_main.verbose(), matcher_main.verbose());
 
         // Prepare tomb
         #[cfg(all(feature = "tomb", target_os = "linux"))]

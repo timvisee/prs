@@ -30,7 +30,7 @@ impl<'a> Close<'a> {
         let matcher_close = CloseMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(matcher_tomb.store()).map_err(Err::Store)?;
-        let tomb = store.tomb(matcher_main.quiet(), matcher_main.verbose());
+        let tomb = store.tomb(!matcher_main.verbose(), matcher_main.verbose());
 
         // Must be a tomb
         if !tomb.is_tomb() && !matcher_main.force() {

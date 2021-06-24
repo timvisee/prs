@@ -29,7 +29,7 @@ impl<'a> Init<'a> {
         let matcher_tomb = TombMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(matcher_tomb.store()).map_err(Err::Store)?;
-        let tomb = store.tomb(matcher_main.quiet(), matcher_main.verbose());
+        let tomb = store.tomb(!matcher_main.verbose(), matcher_main.verbose());
 
         unimplemented!();
 

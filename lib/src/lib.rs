@@ -9,6 +9,7 @@ pub mod tomb;
 #[cfg(all(feature = "tomb", target_os = "linux"))]
 pub(crate) mod tomb_bin;
 pub mod types;
+pub mod util;
 mod vendor;
 
 #[cfg(test)]

@@ -3,6 +3,7 @@ use std::ffi::OsStr;
 use std::path::Path;
 use std::process::{Command, ExitStatus};
 
+use crate::util;
 use anyhow::Result;
 use thiserror::Error;
 
@@ -90,11 +91,21 @@ where
     I: IntoIterator<Item = S>,
     S: AsRef<OsStr>,
 {
+    // Build base command
     let mut cmd = if let Ok(bin) = env::var("PASSWORD_STORE_TOMB") {
         Command::new(bin)
     } else {
         Command::new(BIN_NAME)
     };
+
+    // Explicitly set GPG_TTY on Wayland to current stdin if not set
+    // Fixed GPG not showing pinentry prompt properly on Wayland
+    // Issue: https://github.com/timvisee/prs/issues/8#issuecomment-871090949
+    if util::env::is_wayland() && !util::env::has_gpg_tty() {
+        cmd.env("GPG_TTY", util::tty::get_tty());
+    }
+
+    // Set global flags, add arguments
     if settings.quiet {
         cmd.arg("-q");
     }
@@ -103,6 +114,7 @@ where
     }
     cmd.arg("-f");
     cmd.args(args);
+
     cmd
 }
 

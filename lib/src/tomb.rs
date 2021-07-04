@@ -7,7 +7,7 @@ use std::path::{Path, PathBuf};
 use anyhow::Result;
 use thiserror::Error;
 
-use crate::{systemd_bin, tomb_bin, Store};
+use crate::{systemd_bin, tomb_bin, Key, Store};
 use tomb_bin::TombSettings;
 
 /// Default time after which to automatically close the password tomb.
@@ -195,12 +195,25 @@ impl<'a> Tomb<'a> {
         Ok(())
     }
 
-    // /// Initialize tomb.
-    // pub fn init(&self) -> Result<()> {
-    //     git::git_init(self.path())?;
-    //     self.commit_all("Initialize sync with git", true)?;
-    //     Ok(())
-    // }
+    /// Initialize tomb.
+    ///
+    /// The given GPG key is used to encrypt the Tomb key with.
+    pub fn init(&self, key: &Key) -> Result<()> {
+        unimplemented!();
+
+        // TODO: ensure key is GPG key, must be usable to encrypt
+        // TODO: calcualte current store size
+        // TODO: create tomb
+        // TODO: create tomb key
+        // TODO: encrypt tomb key with given GPG key
+        // TODO: mount tomb to temporary directory
+        // TODO: move all store contents into it
+        // TODO: unmount
+        // TODO: remove current store files
+        // TODO: mount tomb to proper location
+
+        Ok(())
+    }
 
     /// Check whether the password store is a tomb.
     ///

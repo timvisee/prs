@@ -73,10 +73,10 @@ pub fn select_secret(secrets: &[Secret]) -> Option<&Secret> {
 }
 
 /// Select key.
-pub fn select_key(keys: &[Key]) -> Option<&Key> {
+pub fn select_key<'a>(keys: &'a [Key], prompt: Option<&'a str>) -> Option<&'a Key> {
     // Let user select secret
     let items = skim_key_items(keys);
-    let selected = skim_select(items, "Select key")?;
+    let selected = skim_select(items, prompt.unwrap_or("Select key"))?;
 
     // Pick selected item from keys list
     Some(

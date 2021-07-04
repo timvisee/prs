@@ -1,11 +1,10 @@
 use anyhow::Result;
 use clap::ArgMatches;
-use thiserror::Error;
-
 use prs_lib::{
     crypto::{self, prelude::*},
     Recipients, Store,
 };
+use thiserror::Error;
 
 use crate::cmd::matcher::{
     recipients::{add::AddMatcher, RecipientsMatcher},
@@ -59,7 +58,7 @@ impl<'a> Add<'a> {
             .map_err(Err::Load)?,
         );
         tmp.remove_all(recipients.keys());
-        let key = select::select_key(tmp.keys()).ok_or(Err::NoneSelected)?;
+        let key = select::select_key(tmp.keys(), None).ok_or(Err::NoneSelected)?;
         recipients.add(key.clone());
         recipients.save(&store)?;
 

@@ -21,10 +21,10 @@ pub fn select_secret(secrets: &[Secret]) -> Option<&Secret> {
 }
 
 /// Select key.
-pub fn select_key(keys: &[Key]) -> Option<&Key> {
+pub fn select_key<'a>(keys: &'a [Key], prompt: Option<&'a str>) -> Option<&'a Key> {
     let map: HashMap<_, _> = keys.into_iter().map(|key| (key.to_string(), key)).collect();
     let items: Vec<_> = map.keys().collect();
-    select_item("Select key", &items)
+    select_item(prompt.unwrap_or("Select key"), &items)
         .as_ref()
         .map(|item| map[item])
 }

@@ -45,7 +45,7 @@ impl<'a> Export<'a> {
         #[cfg(all(feature = "tomb", target_os = "linux"))]
         tomb.prepare().map_err(Err::Tomb)?;
 
-        let key = select::select_key(recipients.keys())
+        let key = select::select_key(recipients.keys(), None)
             .ok_or(Err::NoneSelected)?
             .clone();
 

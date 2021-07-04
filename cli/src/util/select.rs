@@ -35,19 +35,19 @@ pub fn store_select_secret(store: &Store, query: Option<String>) -> Option<Secre
 
 /// Select key.
 #[allow(unreachable_code)]
-pub fn select_key(keys: &[Key]) -> Option<&Key> {
+pub fn select_key<'a>(keys: &'a [Key], prompt: Option<&'a str>) -> Option<&'a Key> {
     // TODO: do not use interactive selection with --no-interact mode
     #[cfg(all(feature = "select-skim", unix))]
     {
-        return super::select_skim::select_key(keys);
+        return super::select_skim::select_key(keys, prompt);
     }
     #[cfg(feature = "select-skim-bin")]
     {
-        return super::select_skim_bin::select_key(keys);
+        return super::select_skim_bin::select_key(keys, prompt);
     }
     #[cfg(feature = "select-fzf-bin")]
     {
-        return super::select_fzf_bin::select_key(keys);
+        return super::select_fzf_bin::select_key(keys, prompt);
     }
-    super::select_basic::select_key(keys)
+    super::select_basic::select_key(keys, prompt)
 }

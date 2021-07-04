@@ -46,7 +46,7 @@ impl<'a> Remove<'a> {
         let mut recipients = store.recipients().map_err(Err::Load)?;
 
         // Select key to remove
-        let key = select::select_key(recipients.keys())
+        let key = select::select_key(recipients.keys(), None)
             .ok_or(Err::NoneSelected)?
             .clone();
 

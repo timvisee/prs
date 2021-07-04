@@ -2,10 +2,12 @@ use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
 use anyhow::Result;
+#[cfg(all(feature = "tomb", target_os = "linux"))]
 use fs_extra::dir::CopyOptions;
 use thiserror::Error;
 
 /// sudo binary.
+#[cfg(all(feature = "tomb", target_os = "linux"))]
 pub const SUDO_BIN: &str = crate::systemd_bin::SUDO_BIN;
 
 /// chown binary.
@@ -14,6 +16,7 @@ pub const CHOWN_BIN: &str = "chown";
 /// Copy contents of one directory to another.
 ///
 /// This will only copy directory contents recursively. This will not copy the directory itself.
+#[cfg(all(feature = "tomb", target_os = "linux"))]
 pub fn copy_dir_contents(from: &Path, to: &Path) -> Result<()> {
     let mut options = CopyOptions::new();
     options.overwrite = true;
@@ -74,6 +77,7 @@ pub(crate) fn sudo_chown_current_user(path: &Path, recursive: bool) -> Result<()
 #[derive(Debug, Error)]
 pub enum Err {
     #[error("failed to copy directory contents")]
+    #[cfg(all(feature = "tomb", target_os = "linux"))]
     CopyDirContents(#[source] fs_extra::error::Error),
 
     #[error("failed to append suffix to file path, unknown parent")]

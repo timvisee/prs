@@ -88,8 +88,8 @@ pub fn tomb_open(
         "-p",
     ];
     match &key_fp {
-        Some(fp) => args.extend(["-gr", fp]),
-        None => args.extend(["-g"]),
+        Some(fp) => args.extend(&["-gr", fp]),
+        None => args.extend(&["-g"]),
     }
     args.push(
         store_dir

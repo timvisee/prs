@@ -30,12 +30,14 @@ pub fn ensure_dir_free(path: &Path) -> Result<(), std::io::Error> {
 }
 
 /// Calcualte directory size in bytes.
+#[cfg(all(feature = "tomb", target_os = "linux"))]
 pub fn dir_size(path: &Path) -> Result<u64, Err> {
     fs_extra::dir::get_size(path).map_err(Err::DirSize)
 }
 
 #[derive(Debug, Error)]
 pub enum Err {
+    #[cfg(all(feature = "tomb", target_os = "linux"))]
     #[error("failed to measure directory size")]
     DirSize(#[source] fs_extra::error::Error),
 }

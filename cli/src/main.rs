@@ -2,6 +2,8 @@
 extern crate clap;
 #[macro_use]
 extern crate derive_builder;
+#[macro_use]
+extern crate lazy_static;
 
 mod action;
 mod cmd;

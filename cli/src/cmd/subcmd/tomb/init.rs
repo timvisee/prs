@@ -1,5 +1,12 @@
 use clap::{App, Arg};
 
+use crate::util::time;
+
+lazy_static! {
+    /// Default value for timer.
+    static ref TIMER_DEFAULT: String = time::format_duration(prs_lib::tomb::TOMB_AUTO_CLOSE_SEC);
+}
+
 /// The tomb init command definition.
 pub struct CmdInit;
 
@@ -14,8 +21,7 @@ impl CmdInit {
                     .short('t')
                     .alias("time")
                     .value_name("TIME")
-                    // TODO: get value from prs_lib::tomb::TOMB_AUTO_CLOSE_SEC
-                    .default_value("5m")
+                    .default_value(&TIMER_DEFAULT)
                     .about("Time after which to close the Tomb"),
             )
     }

@@ -1773,6 +1773,7 @@ dependencies = [
  "dirs-next",
  "edit",
  "fs_extra",
+ "lazy_static",
  "libc",
  "notify-rust",
  "prs-lib",

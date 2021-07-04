@@ -14,7 +14,7 @@ use crate::{
     util::{
         self, cli,
         error::{self, ErrorHintsBuilder},
-        select, style,
+        select, style, sync,
     },
 };
 
@@ -37,6 +37,7 @@ impl<'a> Init<'a> {
         let matcher_init = InitMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(matcher_tomb.store()).map_err(Err::Store)?;
+        let sync = store.sync();
         let tomb = store.tomb(!matcher_main.verbose(), matcher_main.verbose());
         let timer = matcher_init.timer();
 
@@ -67,6 +68,12 @@ impl<'a> Init<'a> {
         let key =
             select::select_key(tmp.keys(), Some("Select key for Tomb")).ok_or(Err::NoGpgKey)?;
 
+        // Prepare sync
+        sync::ensure_ready(&sync, matcher_init.allow_dirty());
+        if !matcher_init.no_sync() {
+            sync.prepare()?;
+        }
+
         // TODO: ask user to add selected key to recipients if not yet part of it?
         // TODO: ask user for preferred size, must be 10+ MB
 
@@ -88,7 +95,10 @@ impl<'a> Init<'a> {
         // Initialize tomb
         tomb.init(key, mbs).map_err(Err::Init)?;
 
-        // TODO: start timer to close the tomb automatically (also adjust success msg below)
+        // Finalize sync
+        if !matcher_init.no_sync() {
+            sync.finalize("Initialize Tomb")?;
+        }
 
         // Run housekeeping
         crate::action::housekeeping::run::housekeeping(

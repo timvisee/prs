@@ -8,7 +8,7 @@ use crate::cmd::matcher::{
     tomb::{status::StatusMatcher, TombMatcher},
     MainMatcher, Matcher,
 };
-use crate::util::error;
+use crate::util::{self, error};
 
 /// A tomb status action.
 pub struct Status<'a> {
@@ -53,7 +53,7 @@ impl<'a> Status<'a> {
 
         // Calculate store and tomb file sizes
         let store_size = if is_open {
-            fs_extra::dir::get_size(&store.root)
+            util::fs::dir_size(&store.root)
                 .or_else(|err| {
                     error::print_error(
                         anyhow!(err).context("failed to calcualte password store size, ignoring"),

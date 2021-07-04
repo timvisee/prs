@@ -1,7 +1,8 @@
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
 use anyhow::Result;
+use fs_extra::dir::CopyOptions;
 use thiserror::Error;
 
 /// sudo binary.
@@ -9,6 +10,30 @@ pub const SUDO_BIN: &str = crate::systemd_bin::SUDO_BIN;
 
 /// chown binary.
 pub const CHOWN_BIN: &str = "chown";
+
+/// Copy contents of one directory to another.
+///
+/// This will only copy directory contents recursively. This will not copy the directory itself.
+pub fn copy_dir_contents(from: &Path, to: &Path) -> Result<()> {
+    let mut options = CopyOptions::new();
+    options.overwrite = true;
+    options.copy_inside = true;
+    options.content_only = true;
+    Ok(fs_extra::dir::copy(from, to, &options)
+        .map(|_| ())
+        .map_err(Err::CopyDirContents)?)
+}
+
+/// Append a suffix to the filename of a path.
+///
+/// Errors if the path parent or file name could not be determined.
+pub fn append_file_name(path: &Path, suffix: &str) -> Result<PathBuf> {
+    Ok(path.parent().ok_or(Err::NoParent)?.join(format!(
+        "{}{}",
+        path.file_name().ok_or(Err::UnknownName)?.to_string_lossy(),
+        suffix,
+    )))
+}
 
 /// Chown a path to the current process' with `sudo`.
 #[cfg(all(feature = "tomb", target_os = "linux"))]

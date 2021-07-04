@@ -4,12 +4,13 @@ use std::env;
 use std::os::linux::fs::MetadataExt;
 use std::path::{Path, PathBuf};
 
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use thiserror::Error;
 
+use crate::crypto::Proto;
+use crate::tomb_bin::TombSettings;
 use crate::util;
 use crate::{systemd_bin, tomb_bin, Key, Store};
-use tomb_bin::TombSettings;
 
 /// Default time after which to automatically close the password tomb.
 pub const TOMB_AUTO_CLOSE_SEC: u32 = 5 * 60;
@@ -63,7 +64,8 @@ impl<'a> Tomb<'a> {
         // Open tomb
         let tomb = self.find_tomb_path()?;
         let key = self.find_tomb_key_path()?;
-        tomb_bin::tomb_open(&tomb, &key, &self.store.root, self.settings).map_err(Err::Open)?;
+        tomb_bin::tomb_open(&tomb, &key, &self.store.root, None, self.settings)
+            .map_err(Err::Open)?;
 
         // Soft fail on following errors, collect them
         let mut errs = vec![];
@@ -194,20 +196,57 @@ impl<'a> Tomb<'a> {
 
     /// Initialize tomb.
     ///
+    /// `mbs` is the size in megabytes.
+    ///
     /// The given GPG key is used to encrypt the Tomb key with.
-    pub fn init(&self, key: &Key) -> Result<()> {
-        unimplemented!();
+    ///
+    /// # Panics
+    ///
+    /// Panics if given key is not a GPG key.
+    pub fn init(&self, key: &Key, mbs: u32) -> Result<()> {
+        // Assert key is GPG
+        assert_eq!(key.proto(), Proto::Gpg, "key for Tomb is not a GPG key");
 
-        // TODO: ensure key is GPG key, must be usable to encrypt
-        // TODO: calcualte current store size
-        // TODO: create tomb
-        // TODO: create tomb key
-        // TODO: encrypt tomb key with given GPG key
-        // TODO: mount tomb to temporary directory
-        // TODO: move all store contents into it
-        // TODO: unmount
-        // TODO: remove current store files
-        // TODO: mount tomb to proper location
+        // TODO: map errors
+
+        // TODO: we need these paths even though tomb does not exist yet
+        let tomb_file = tomb_paths(&self.store.root).first().unwrap().to_owned();
+        let key_file = tomb_key_paths(&self.store.root).first().unwrap().to_owned();
+        let store_tmp_dir =
+            util::fs::append_file_name(&self.store.root, ".tomb-init").map_err(Err::Init)?;
+
+        // Dig tomb, forge key, lock tomb with key, open tomb
+        tomb_bin::tomb_dig(&tomb_file, mbs, self.settings).map_err(Err::Init)?;
+        tomb_bin::tomb_forge(&key_file, key, self.settings).map_err(Err::Init)?;
+        tomb_bin::tomb_lock(&tomb_file, &key_file, key, self.settings).map_err(Err::Init)?;
+        tomb_bin::tomb_open(
+            &tomb_file,
+            &key_file,
+            &store_tmp_dir,
+            Some(key),
+            self.settings,
+        )
+        .map_err(Err::Init)?;
+
+        // Change temporary mountpoint directory permissions to current user
+        util::fs::sudo_chown_current_user(&store_tmp_dir, true).map_err(Err::Chown)?;
+
+        // Copy password store contents
+        util::fs::copy_dir_contents(&self.store.root, &store_tmp_dir).map_err(Err::Init)?;
+
+        // Close tomb
+        tomb_bin::tomb_close(&tomb_file, self.settings).map_err(Err::Init)?;
+
+        // Remove both main and temporary store
+        fs_extra::dir::remove(&self.store.root).map_err(|err| Err::Init(anyhow!(err)))?;
+        fs_extra::dir::remove(&store_tmp_dir).map_err(|err| Err::Init(anyhow!(err)))?;
+
+        // Open tomb as regular
+        // TODO: do something with Ok(errors)?
+        self.open()?;
+
+        // Change mountpoint directory permissions to current user
+        util::fs::sudo_chown_current_user(&self.store.root, false).map_err(Err::Chown)?;
 
         Ok(())
     }
@@ -252,6 +291,9 @@ pub enum Err {
 
     #[error("failed to prepare password store tomb for usage")]
     Prepare(#[source] anyhow::Error),
+
+    #[error("failed to initialize new password store tomb")]
+    Init(#[source] anyhow::Error),
 
     #[error("failed to open password store tomb through tomb CLI")]
     Open(#[source] anyhow::Error),

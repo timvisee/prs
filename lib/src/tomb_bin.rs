@@ -7,41 +7,98 @@ use crate::util;
 use anyhow::Result;
 use thiserror::Error;
 
+use crate::crypto::Key;
+
 /// Binary name.
 pub const BIN_NAME: &str = "tomb";
 
-// /// Invoke tomb dig.
-// pub fn tomb_dig(tomb_file: &Path, settings: TombSettings) -> Result<()> {
-//     unimplemented!();
-//     // See: https://github.com/roddhjav/pass-tomb/blob/241964e227f373307354bc764c4ffab4326604ea/tomb.bash#L305-L312
-//     tomb(&[
-//         "dig",
-//     ], settings)
-// }
+/// Invoke tomb dig.
+///
+/// `mbs` is the size of the tomb to create in megabytes.
+pub fn tomb_dig(tomb_file: &Path, mbs: u32, settings: TombSettings) -> Result<()> {
+    tomb(
+        &[
+            "dig",
+            tomb_file
+                .to_str()
+                .expect("tomb path has invalid UTF-8 characters"),
+            "-s",
+            &format!("{}", mbs),
+        ],
+        settings,
+    )
+}
+
+/// Invoke tomb forge.
+pub fn tomb_forge(key_file: &Path, key: &Key, settings: TombSettings) -> Result<()> {
+    tomb(
+        &[
+            "forge",
+            key_file
+                .to_str()
+                .expect("tomb key path has invalid UTF-8 characters"),
+            "-gr",
+            &key.fingerprint(false),
+        ],
+        settings,
+    )
+}
+
+/// Invoke tomb lock.
+pub fn tomb_lock(
+    tomb_file: &Path,
+    key_file: &Path,
+    key: &Key,
+    settings: TombSettings,
+) -> Result<()> {
+    tomb(
+        &[
+            "lock",
+            tomb_file
+                .to_str()
+                .expect("tomb path has invalid UTF-8 characters"),
+            "-k",
+            key_file
+                .to_str()
+                .expect("tomb key path has invalid UTF-8 characters"),
+            "-gr",
+            &key.fingerprint(false),
+        ],
+        settings,
+    )
+}
 
 /// Invoke tomb open.
 pub fn tomb_open(
     tomb_file: &Path,
     key_file: &Path,
     store_dir: &Path,
+    key: Option<&Key>,
     settings: TombSettings,
 ) -> Result<()> {
+    // Build command arguments list
+    let key_fp = key.map(|key| key.fingerprint(false));
+    let mut args = vec![
+        "open",
+        tomb_file
+            .to_str()
+            .expect("tomb path contains invalid UTF-8"),
+        "-k",
+        key_file.to_str().expect("tomb path contains invalid UTF-8"),
+        "-p",
+    ];
+    match &key_fp {
+        Some(fp) => args.extend(["-gr", fp]),
+        None => args.extend(["-g"]),
+    }
+    args.push(
+        store_dir
+            .to_str()
+            .expect("password store directory path contains invalid UTF-8"),
+    );
+
     // TODO: ensure tomb file, key and store dir exist
-    tomb(
-        &[
-            "open",
-            tomb_file
-                .to_str()
-                .expect("tomb path contains invalid UTF-8"),
-            "-k",
-            key_file.to_str().expect("tomb path contains invalid UTF-8"),
-            "-g",
-            store_dir
-                .to_str()
-                .expect("password store directory path contains invalid UTF-8"),
-        ],
-        settings,
-    )
+    tomb(&args, settings)
 }
 
 /// Invoke tomb close.

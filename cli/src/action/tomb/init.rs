@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use clap::ArgMatches;
 use prs_lib::{
     crypto::{self, prelude::*},
@@ -54,9 +54,27 @@ impl<'a> Init<'a> {
             select::select_key(tmp.keys(), Some("Select key for Tomb")).ok_or(Err::NoGpgKey)?;
 
         // TODO: ask user to add selected key to recipients if not yet part of it?
+        // TODO: ask user for preferred size, must be 10+ MB
+
+        // Determine Tomb size (prefer twice size of current store in MBs)
+        let mbs = util::fs::dir_size(&store.root)
+            .map(|bytes| ((bytes * 2) / (1024 * 1024)).max(10) as u32)
+            .unwrap_or_else(|err| {
+                error::print_error(
+                    anyhow!(err).context("failed to calcualte password store size, assuming 10MB"),
+                );
+                10
+            });
+
+        if !matcher_main.quiet() {
+            eprintln!("Initializing Tomb, this may take a while...");
+            eprintln!("");
+        }
 
         // Initialize tomb
-        tomb.init(key).map_err(Err::Init)?;
+        tomb.init(key, mbs).map_err(Err::Init)?;
+
+        // TODO: start timer to close the tomb automatically (also adjust success msg below)
 
         // Run housekeeping
         crate::action::housekeeping::run::housekeeping(
@@ -67,6 +85,7 @@ impl<'a> Init<'a> {
         .map_err(Err::Housekeeping)?;
 
         if !matcher_main.quiet() {
+            eprintln!("");
             // if let Some(timer) = timer {
             //     eprintln!(
             //         "Password store Tomb opened, will close in {}",

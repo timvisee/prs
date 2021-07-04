@@ -7,6 +7,6 @@ impl CmdInit {
     pub fn build<'a>() -> App<'a> {
         App::new("init")
             .alias("initialize")
-            .about("Initialize tomb")
+            .about("Initialize tomb in-place for current password store")
     }
 }

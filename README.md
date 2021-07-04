@@ -534,13 +534,13 @@ lost your key on, remove the password store from it and see
 against metadata leakage of your password store.
 
 When using Tomb with `prs`, your password store is stored inside an encrypted
-file. When using `prs`, it automatically opens and closes your password store
-Tomb for you as needed. This makes it significantly harder for malicious
-programs to list your password store contents.
+file. `prs` automatically opens and closes your password store Tomb for you as
+needed. This makes it significantly harder for malicious programs to list your
+password store contents.
 
 This feature is inspired by
-[`pass-tomb`](https://github.com/roddhjav/pass-tomb), which extends `pass` with
-Tomb support. In `prs`, this is built-in.
+[`pass-tomb`](https://github.com/roddhjav/pass-tomb), which is a `pass`
+extension for Tomb support. In `prs` this functionality is built-in.
 
 _Note: Tomb is only supported on Linux._
 
@@ -559,18 +559,29 @@ prs tomb init
 prs tomb status
 ```
 
+To initialize a new password store in a Tomb, first initialize the password
+store then initialize the Tomb:
+
+```bash
+# Initialize new password store
+prs init
+
+# ...
+
+# Initialize tomb, this may take some time
+prs tomb init
+```
+
 If you already have a Tomb created with `pass-tomb`, no action is required.
 `prs` has seamless support for it, and it should automatically manage it for
 you. Invoke `prs tomb status` to confirm it is detected.
 
 #### How to use Tomb on multiple machines?
-A Tomb is a local thing on your machine and is not synced. To use a Tomb on
+A Tomb is local on your machine and is not synced. To use a Tomb on
 multiple machines you must initialize it on each of them.
 
-For example, when using a new machine for your password store, you should:
-
-1. [Clone your password store](#how-do-i-use-prs-on-multiple-machines-and-sync-between-them)
-2. [Initialize a Tomb](#how-to-use-tomb)
+Simply run `prs tomb init` on machines you don't use a Tomb on yet, and after
+cloning your password store on a new machine.
 
 #### Is `prs` compatible with `pass`?
 Yes.

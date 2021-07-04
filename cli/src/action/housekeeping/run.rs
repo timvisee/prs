@@ -107,7 +107,7 @@ fn set_store_permissions(_store: &Store) -> Result<(), std::io::Error> {
 
 /// Set up the git ignore file.
 fn set_git_ignore(store: &Store) -> Result<(), std::io::Error> {
-    const ENTRIES: [&str; 5] = [".host", ".last", ".tty", ".uid", ".timer"];
+    const ENTRIES: [&str; 6] = [".host", ".last", ".tty", ".uid", ".timer", "lost+found"];
 
     let file = store.root.join(".gitignore");
 

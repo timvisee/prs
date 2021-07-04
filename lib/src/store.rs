@@ -325,7 +325,7 @@ fn is_hidden_subdir(entry: &DirEntry) -> bool {
         && entry
             .file_name()
             .to_str()
-            .map(|s| s.starts_with("."))
+            .map(|s| s.starts_with(".") || s == "lost+found")
             .unwrap_or(false)
 }
 

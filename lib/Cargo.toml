@@ -24,7 +24,7 @@ default = ["backend-gnupg-bin"]
 ### Regular features
 
 # Option: tomb support for password store on Linux
-tomb = ["nix"]
+tomb = ["fs_extra", "nix"]
 
 ### Pluggable cryptography backends
 
@@ -49,6 +49,7 @@ which = "4.0"
 zeroize = "1.1"
 
 # Tomb support
+fs_extra = { version = "1.2", optional = true }
 nix = { version = "0.21", optional = true }
 
 # Crypto backend: GPGME

@@ -1805,6 +1805,7 @@ version = "0.2.11"
 dependencies = [
  "anyhow",
  "dirs-next",
+ "fs_extra",
  "git-state",
  "gpgme",
  "nix 0.21.0",

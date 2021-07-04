@@ -1,0 +1,65 @@
+use std::path::Path;
+use std::process::{Command, Stdio};
+
+use anyhow::Result;
+use thiserror::Error;
+
+/// sudo binary.
+pub const SUDO_BIN: &str = crate::systemd_bin::SUDO_BIN;
+
+/// chown binary.
+pub const CHOWN_BIN: &str = "chown";
+
+/// Chown a path to the current process' with `sudo`.
+#[cfg(all(feature = "tomb", target_os = "linux"))]
+pub(crate) fn sudo_chown(path: &Path, uid: u32, gid: u32, recursive: bool) -> Result<()> {
+    // Build command
+    let mut cmd = Command::new(SUDO_BIN);
+    cmd.stdin(Stdio::inherit());
+    cmd.stdout(Stdio::inherit());
+    cmd.stderr(Stdio::inherit());
+    cmd.arg("--");
+    cmd.arg(CHOWN_BIN);
+    if recursive {
+        cmd.arg("--recursive");
+    }
+    cmd.arg(format!("{}:{}", uid, gid));
+    cmd.arg(path);
+
+    // Invoke and handle status
+    let status = cmd.status().map_err(Err::SudoChown)?;
+    if status.success() {
+        Ok(())
+    } else {
+        Err(Err::Status(status).into())
+    }
+}
+
+/// Chown a path to the current process' UID/GID with `sudo`.
+#[cfg(all(feature = "tomb", target_os = "linux"))]
+pub(crate) fn sudo_chown_current_user(path: &Path, recursive: bool) -> Result<()> {
+    sudo_chown(
+        path,
+        nix::unistd::Uid::effective().as_raw(),
+        nix::unistd::Gid::effective().as_raw(),
+        recursive,
+    )
+}
+
+#[derive(Debug, Error)]
+pub enum Err {
+    #[error("failed to copy directory contents")]
+    CopyDirContents(#[source] fs_extra::error::Error),
+
+    #[error("failed to append suffix to file path, unknown parent")]
+    NoParent,
+
+    #[error("failed to append suffix to file path, unknown name")]
+    UnknownName,
+
+    #[error("failed to invoke 'sudo chown' on path")]
+    SudoChown(std::io::Error),
+
+    #[error("system command exited with non-zero status code: {0}")]
+    Status(std::process::ExitStatus),
+}

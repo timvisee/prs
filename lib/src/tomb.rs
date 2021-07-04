@@ -7,6 +7,7 @@ use std::path::{Path, PathBuf};
 use anyhow::Result;
 use thiserror::Error;
 
+use crate::util;
 use crate::{systemd_bin, tomb_bin, Key, Store};
 use tomb_bin::TombSettings;
 
@@ -68,12 +69,8 @@ impl<'a> Tomb<'a> {
         let mut errs = vec![];
 
         // Change mountpoint directory permissions to current user
-        if let Err(err) = nix::unistd::chown(
-            &self.store.root,
-            Some(nix::unistd::Uid::effective()),
-            Some(nix::unistd::Gid::effective()),
-        )
-        .map_err(Err::Chown)
+        if let Err(err) =
+            util::fs::sudo_chown_current_user(&self.store.root, false).map_err(Err::Chown)
         {
             errs.push(err);
         }
@@ -260,7 +257,7 @@ pub enum Err {
     Open(#[source] anyhow::Error),
 
     #[error("failed to change permissions to current user for tomb mountpoint")]
-    Chown(#[source] nix::Error),
+    Chown(#[source] anyhow::Error),
 
     #[error("failed to check if password store tomb is opened")]
     OpenCheck(#[source] std::io::Error),

@@ -1,5 +1,8 @@
 use std::path::Path;
 
+use anyhow::Result;
+use thiserror::Error;
+
 use crate::util::error::{self, ErrorHints};
 
 /// Ensure the given path is a free directory.
@@ -24,4 +27,15 @@ pub fn ensure_dir_free(path: &Path) -> Result<(), std::io::Error> {
         ),
         ErrorHints::default(),
     )
+}
+
+/// Calcualte directory size in bytes.
+pub fn dir_size(path: &Path) -> Result<u64, Err> {
+    fs_extra::dir::get_size(path).map_err(Err::DirSize)
+}
+
+#[derive(Debug, Error)]
+pub enum Err {
+    #[error("failed to measure directory size")]
+    DirSize(#[source] fs_extra::error::Error),
 }

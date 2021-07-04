@@ -12,7 +12,7 @@ use crate::{
         MainMatcher, Matcher,
     },
     util::{
-        self,
+        self, cli,
         error::{self, ErrorHintsBuilder},
         select, style,
     },
@@ -38,6 +38,7 @@ impl<'a> Init<'a> {
 
         let store = Store::open(matcher_tomb.store()).map_err(Err::Store)?;
         let tomb = store.tomb(!matcher_main.verbose(), matcher_main.verbose());
+        let timer = matcher_init.timer();
 
         // Must not be a tomb already
         if tomb.is_tomb() && !matcher_main.force() {
@@ -45,6 +46,19 @@ impl<'a> Init<'a> {
                 "password store already is a tomb",
                 ErrorHintsBuilder::default().force(true).build().unwrap(),
             );
+        }
+
+        // Ask user to confirm
+        eprintln!("This will create a new Tomb and will move your current password store into it.");
+        if !cli::prompt_yes(
+            "Are you sure you want to continue?",
+            Some(true),
+            &matcher_main,
+        ) {
+            if matcher_main.verbose() {
+                eprintln!("Tomb initialisation cancelled");
+            }
+            error::quit();
         }
 
         // Select GPG key to encrypt Tomb key
@@ -84,16 +98,26 @@ impl<'a> Init<'a> {
         )
         .map_err(Err::Housekeeping)?;
 
+        // Start timer
+        if let Some(timer) = timer {
+            if let Err(err) = tomb.stop_timer() {
+                error::print_error(err.context(
+                    "failed to stop existing timer to automatically close password store tomb, ignoring",
+                ));
+            }
+            tomb.start_timer(timer, true).map_err(Err::Timer)?;
+        }
+
         if !matcher_main.quiet() {
             eprintln!("");
-            // if let Some(timer) = timer {
-            //     eprintln!(
-            //         "Password store Tomb opened, will close in {}",
-            //         util::time::format_duration(timer)
-            //     );
-            // } else {
-            eprintln!("Password store Tomb initialized and opened");
-            // }
+            if let Some(timer) = timer {
+                eprintln!(
+                    "Password store Tomb initialized and opened, will close in {}",
+                    util::time::format_duration(timer)
+                );
+            } else {
+                eprintln!("Password store Tomb initialized and opened");
+            }
             eprintln!("");
             eprintln!("To close the Tomb, use:");
             eprintln!(
@@ -122,4 +146,7 @@ pub enum Err {
 
     #[error("no GPG key selected to create Tomb")]
     NoGpgKey,
+
+    #[error("failed to start timer to automatically close password store tomb")]
+    Timer(#[source] anyhow::Error),
 }

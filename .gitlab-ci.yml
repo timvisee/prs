@@ -502,7 +502,7 @@ release-aur:
 
     # Determine the version number we're releasing for
     - VERSION=$(echo $CI_COMMIT_REF_NAME | cut -c 2-)
-    - '$VERSION_GIT=$(git describe --long | git describe --long | sed "s/^v//;s/\([^-]*-g\)/r\1/;s/-/./g")'
+    - 'VERSION_GIT=$(git describe --long | git describe --long | sed "s/^v//;s/\([^-]*-g\)/r\1/;s/-/./g")'
     - 'echo "Determined version number: v$VERSION"'
 
     # Determine remote URLs and SHA checksums

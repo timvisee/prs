@@ -47,17 +47,6 @@ impl<'a> Resize<'a> {
             );
         }
 
-        // Must be closed
-        let tomb_open = tomb.is_open().unwrap_or(false);
-        if tomb_open && !matcher_main.force() {
-            if matcher_main.verbose() {
-                eprintln!("Closing Tomb...");
-            }
-
-            // Close the tomb
-            tomb.close().map_err(Err::Close)?;
-        }
-
         // Fetch Tomb size status
         let sizes = tomb.fetch_size_stats().map_err(Err::Size)?;
 
@@ -83,6 +72,17 @@ impl<'a> Resize<'a> {
                 size
             }
         };
+
+        // Must be closed
+        let tomb_open = tomb.is_open().unwrap_or(false);
+        if tomb_open && !matcher_main.force() {
+            if matcher_main.verbose() {
+                eprintln!("Closing Tomb...");
+            }
+
+            // Close the tomb
+            tomb.close().map_err(Err::Close)?;
+        }
 
         // New tomb size must be larger
         if let Some(tomb_file_size) = sizes.tomb_file_size_mbs() {

@@ -1,13 +1,14 @@
 use anyhow::Result;
 use clap::ArgMatches;
-use thiserror::Error;
-
 use prs_lib::{crypto::prelude::*, Store};
+use thiserror::Error;
 
 use crate::cmd::matcher::{
     recipients::{remove::RemoveMatcher, RecipientsMatcher},
     MainMatcher, Matcher,
 };
+#[cfg(all(feature = "tomb", target_os = "linux"))]
+use crate::util::tomb;
 use crate::util::{cli, error, select, sync};
 
 /// A recipients remove action.
@@ -30,12 +31,16 @@ impl<'a> Remove<'a> {
 
         let store = Store::open(matcher_recipients.store()).map_err(Err::Store)?;
         #[cfg(all(feature = "tomb", target_os = "linux"))]
-        let tomb = store.tomb(!matcher_main.verbose(), matcher_main.verbose());
+        let mut tomb = store.tomb(
+            !matcher_main.verbose(),
+            matcher_main.verbose(),
+            matcher_main.force(),
+        );
         let sync = store.sync();
 
         // Prepare tomb
         #[cfg(all(feature = "tomb", target_os = "linux"))]
-        tomb.prepare().map_err(Err::Tomb)?;
+        tomb::prepare_tomb(&mut tomb, &matcher_main).map_err(Err::Tomb)?;
 
         // Prepare sync
         sync::ensure_ready(&sync, matcher_remove.allow_dirty());

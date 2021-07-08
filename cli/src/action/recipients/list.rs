@@ -1,10 +1,11 @@
 use anyhow::Result;
 use clap::ArgMatches;
+use prs_lib::Store;
 use thiserror::Error;
 
-use prs_lib::Store;
-
 use crate::cmd::matcher::{recipients::RecipientsMatcher, MainMatcher, Matcher};
+#[cfg(all(feature = "tomb", target_os = "linux"))]
+use crate::util::tomb;
 
 /// A recipients list action.
 pub struct List<'a> {
@@ -25,12 +26,16 @@ impl<'a> List<'a> {
 
         let store = Store::open(matcher_recipients.store()).map_err(Err::Store)?;
         #[cfg(all(feature = "tomb", target_os = "linux"))]
-        let tomb = store.tomb(!matcher_main.verbose(), matcher_main.verbose());
+        let mut tomb = store.tomb(
+            !matcher_main.verbose(),
+            matcher_main.verbose(),
+            matcher_main.force(),
+        );
         let recipients = store.recipients().map_err(Err::List)?;
 
         // Prepare tomb
         #[cfg(all(feature = "tomb", target_os = "linux"))]
-        tomb.prepare().map_err(Err::Tomb)?;
+        tomb::prepare_tomb(&mut tomb, &matcher_main).map_err(Err::Tomb)?;
 
         recipients
             .keys()

@@ -12,6 +12,8 @@ use thiserror::Error;
 use crate::cmd::matcher::{generate::GenerateMatcher, MainMatcher, Matcher};
 #[cfg(feature = "clipboard")]
 use crate::util::clipboard;
+#[cfg(all(feature = "tomb", target_os = "linux"))]
+use crate::util::tomb;
 use crate::util::{cli, edit, error, pass, secret, stdin, sync};
 
 /// Generate secret action.
@@ -33,12 +35,16 @@ impl<'a> Generate<'a> {
 
         let store = Store::open(matcher_generate.store()).map_err(Err::Store)?;
         #[cfg(all(feature = "tomb", target_os = "linux"))]
-        let tomb = store.tomb(!matcher_main.verbose(), matcher_main.verbose());
+        let mut tomb = store.tomb(
+            !matcher_main.verbose(),
+            matcher_main.verbose(),
+            matcher_main.force(),
+        );
         let sync = store.sync();
 
         // Prepare tomb
         #[cfg(all(feature = "tomb", target_os = "linux"))]
-        tomb.prepare().map_err(Err::Tomb)?;
+        tomb::prepare_tomb(&mut tomb, &matcher_main).map_err(Err::Tomb)?;
 
         // Normalize destination path if we will store the secret
         let dest: Option<(PathBuf, Secret)> = match matcher_generate.name() {

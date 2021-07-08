@@ -19,6 +19,8 @@ pub mod style;
 pub mod sync;
 #[cfg(all(feature = "tomb", target_os = "linux"))]
 pub mod time;
+#[cfg(all(feature = "tomb", target_os = "linux"))]
+pub mod tomb;
 
 use std::env;
 use std::path::{Path, PathBuf};

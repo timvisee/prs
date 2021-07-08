@@ -12,6 +12,8 @@ use thiserror::Error;
 use crate::cmd::matcher::{show::ShowMatcher, MainMatcher, Matcher};
 #[cfg(feature = "clipboard")]
 use crate::util::clipboard;
+#[cfg(all(feature = "tomb", target_os = "linux"))]
+use crate::util::tomb;
 use crate::util::{secret, select};
 
 /// Show secret action.
@@ -33,11 +35,15 @@ impl<'a> Show<'a> {
 
         let store = Store::open(matcher_show.store()).map_err(Err::Store)?;
         #[cfg(all(feature = "tomb", target_os = "linux"))]
-        let tomb = store.tomb(!matcher_main.verbose(), matcher_main.verbose());
+        let mut tomb = store.tomb(
+            !matcher_main.verbose(),
+            matcher_main.verbose(),
+            matcher_main.force(),
+        );
 
         // Prepare tomb
         #[cfg(all(feature = "tomb", target_os = "linux"))]
-        tomb.prepare().map_err(Err::Tomb)?;
+        tomb::prepare_tomb(&mut tomb, &matcher_main).map_err(Err::Tomb)?;
 
         let secret =
             select::store_select_secret(&store, matcher_show.query()).ok_or(Err::NoneSelected)?;

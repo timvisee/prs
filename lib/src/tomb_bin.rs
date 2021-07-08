@@ -169,7 +169,9 @@ where
     if settings.verbose {
         cmd.arg("-D");
     }
-    cmd.arg("-f");
+    if settings.force {
+        cmd.arg("-f");
+    }
     cmd.args(args);
 
     cmd
@@ -193,6 +195,9 @@ pub struct TombSettings {
 
     /// Run in verbose (-D) mode.
     pub verbose: bool,
+
+    /// Run with force (-f).
+    pub force: bool,
 }
 
 #[derive(Debug, Error)]

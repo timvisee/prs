@@ -34,7 +34,11 @@ impl<'a> Open<'a> {
         let matcher_open = OpenMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(matcher_tomb.store()).map_err(Err::Store)?;
-        let tomb = store.tomb(!matcher_main.verbose(), matcher_main.verbose());
+        let mut tomb = store.tomb(
+            !matcher_main.verbose(),
+            matcher_main.verbose(),
+            matcher_main.force(),
+        );
         let timer = matcher_open.timer();
 
         // TODO: show warning if there already are files in tomb directory?
@@ -54,6 +58,11 @@ impl<'a> Open<'a> {
                 "password store tomb is already open",
                 ErrorHintsBuilder::default().force(true).build().unwrap(),
             );
+        }
+
+        // Prompt user to add force flag
+        if !tomb.settings.force && util::tomb::ask_to_force(&matcher_main) {
+            tomb.settings.force = true;
         }
 
         if matcher_main.verbose() {

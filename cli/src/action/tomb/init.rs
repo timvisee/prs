@@ -38,7 +38,11 @@ impl<'a> Init<'a> {
 
         let store = Store::open(matcher_tomb.store()).map_err(Err::Store)?;
         let sync = store.sync();
-        let tomb = store.tomb(!matcher_main.verbose(), matcher_main.verbose());
+        let tomb = store.tomb(
+            !matcher_main.verbose(),
+            matcher_main.verbose(),
+            matcher_main.force(),
+        );
         let timer = matcher_init.timer();
 
         // Must not be a tomb already

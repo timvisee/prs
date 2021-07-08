@@ -27,15 +27,19 @@ pub struct Tomb<'a> {
     store: &'a Store,
 
     /// Tomb settings.
-    settings: TombSettings,
+    pub settings: TombSettings,
 }
 
 impl<'a> Tomb<'a> {
     /// Construct new Tomb helper for given store.
-    pub fn new(store: &'a Store, quiet: bool, verbose: bool) -> Tomb<'a> {
+    pub fn new(store: &'a Store, quiet: bool, verbose: bool, force: bool) -> Tomb<'a> {
         Self {
             store,
-            settings: TombSettings { quiet, verbose },
+            settings: TombSettings {
+                quiet,
+                verbose,
+                force,
+            },
         }
     }
 

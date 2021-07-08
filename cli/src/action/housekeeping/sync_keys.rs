@@ -1,12 +1,13 @@
 use anyhow::Result;
 use clap::ArgMatches;
-use thiserror::Error;
-
 use prs_lib::{
     crypto::{self, store::ImportResult},
     Store,
 };
+use thiserror::Error;
 
+#[cfg(all(feature = "tomb", target_os = "linux"))]
+use crate::util::tomb;
 use crate::{
     cmd::matcher::{
         housekeeping::{sync_keys::SyncKeysMatcher, HousekeepingMatcher},
@@ -39,12 +40,16 @@ impl<'a> SyncKeys<'a> {
 
         let store = Store::open(matcher_housekeeping.store()).map_err(Err::Store)?;
         #[cfg(all(feature = "tomb", target_os = "linux"))]
-        let tomb = store.tomb(!matcher_main.verbose(), matcher_main.verbose());
+        let mut tomb = store.tomb(
+            !matcher_main.verbose(),
+            matcher_main.verbose(),
+            matcher_main.force(),
+        );
         let sync = store.sync();
 
         // Prepare tomb
         #[cfg(all(feature = "tomb", target_os = "linux"))]
-        tomb.prepare().map_err(Err::Tomb)?;
+        tomb::prepare_tomb(&mut tomb, &matcher_main).map_err(Err::Tomb)?;
 
         // Prepare sync
         sync::ensure_ready(&sync, matcher_sync_keys.allow_dirty());

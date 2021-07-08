@@ -90,7 +90,7 @@ fn build_ui(application: &gtk::Application) {
         }
     };
     #[cfg(all(feature = "tomb", target_os = "linux"))]
-    let tomb = store.tomb(false, false);
+    let tomb = store.tomb(false, false, true);
 
     // Prepare tomb
     #[cfg(all(feature = "tomb", target_os = "linux"))]

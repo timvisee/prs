@@ -3,11 +3,12 @@ use std::path::{Path, PathBuf};
 
 use anyhow::Result;
 use clap::ArgMatches;
+use prs_lib::{Secret, Store};
 use thiserror::Error;
 
-use prs_lib::{Secret, Store};
-
 use crate::cmd::matcher::{alias::AliasMatcher, MainMatcher, Matcher};
+#[cfg(all(feature = "tomb", target_os = "linux"))]
+use crate::util::tomb;
 use crate::util::{cli, error, select, sync};
 
 /// Alias secret action.
@@ -29,12 +30,16 @@ impl<'a> Alias<'a> {
 
         let store = Store::open(matcher_alias.store()).map_err(Err::Store)?;
         #[cfg(all(feature = "tomb", target_os = "linux"))]
-        let tomb = store.tomb(!matcher_main.verbose(), matcher_main.verbose());
+        let mut tomb = store.tomb(
+            !matcher_main.verbose(),
+            matcher_main.verbose(),
+            matcher_main.force(),
+        );
         let sync = store.sync();
 
         // Prepare tomb
         #[cfg(all(feature = "tomb", target_os = "linux"))]
-        tomb.prepare().map_err(Err::Tomb)?;
+        tomb::prepare_tomb(&mut tomb, &matcher_main).map_err(Err::Tomb)?;
 
         // Prepare sync
         sync::ensure_ready(&sync, matcher_alias.allow_dirty());

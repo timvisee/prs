@@ -3,12 +3,11 @@ use std::io::Write;
 
 use anyhow::Result;
 use clap::ArgMatches;
-use thiserror::Error;
-
 use prs_lib::{
     crypto::{self, prelude::*},
     Store,
 };
+use thiserror::Error;
 
 use crate::cmd::matcher::{
     recipients::{export::ExportMatcher, RecipientsMatcher},
@@ -17,6 +16,8 @@ use crate::cmd::matcher::{
 #[cfg(feature = "clipboard")]
 use crate::util::clipboard;
 use crate::util::select;
+#[cfg(all(feature = "tomb", target_os = "linux"))]
+use crate::util::tomb;
 
 /// A recipients export action.
 pub struct Export<'a> {
@@ -38,12 +39,16 @@ impl<'a> Export<'a> {
 
         let store = Store::open(matcher_recipients.store()).map_err(Err::Store)?;
         #[cfg(all(feature = "tomb", target_os = "linux"))]
-        let tomb = store.tomb(!matcher_main.verbose(), matcher_main.verbose());
+        let mut tomb = store.tomb(
+            !matcher_main.verbose(),
+            matcher_main.verbose(),
+            matcher_main.force(),
+        );
         let recipients = store.recipients().map_err(Err::Load)?;
 
         // Prepare tomb
         #[cfg(all(feature = "tomb", target_os = "linux"))]
-        tomb.prepare().map_err(Err::Tomb)?;
+        tomb::prepare_tomb(&mut tomb, &matcher_main).map_err(Err::Tomb)?;
 
         let key = select::select_key(recipients.keys(), None)
             .ok_or(Err::NoneSelected)?

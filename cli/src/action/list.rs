@@ -2,12 +2,13 @@ use std::io;
 
 use anyhow::Result;
 use clap::ArgMatches;
+use prs_lib::{store::SecretIterConfig, Secret, Store};
 use text_trees::{FormatCharacters, StringTreeNode, TreeFormatting};
 use thiserror::Error;
 
-use prs_lib::{store::SecretIterConfig, Secret, Store};
-
 use crate::cmd::matcher::{list::ListMatcher, MainMatcher, Matcher};
+#[cfg(all(feature = "tomb", target_os = "linux"))]
+use crate::util::tomb;
 
 /// List secrets action.
 pub struct List<'a> {
@@ -28,11 +29,15 @@ impl<'a> List<'a> {
 
         let store = Store::open(matcher_list.store()).map_err(Err::Store)?;
         #[cfg(all(feature = "tomb", target_os = "linux"))]
-        let tomb = store.tomb(!matcher_main.verbose(), matcher_main.verbose());
+        let mut tomb = store.tomb(
+            !matcher_main.verbose(),
+            matcher_main.verbose(),
+            matcher_main.force(),
+        );
 
         // Prepare tomb
         #[cfg(all(feature = "tomb", target_os = "linux"))]
-        tomb.prepare().map_err(Err::Tomb)?;
+        tomb::prepare_tomb(&mut tomb, &matcher_main).map_err(Err::Tomb)?;
 
         // List aliases based on filters, sort the list
         let config = SecretIterConfig {

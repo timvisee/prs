@@ -18,6 +18,8 @@ pub mod recipients;
 pub mod remove;
 pub mod show;
 pub mod sync;
+#[cfg(all(feature = "tomb", target_os = "linux"))]
+pub mod tomb;
 
 // Re-export to matcher module
 pub use self::add::AddMatcher;
@@ -40,6 +42,8 @@ pub use self::recipients::RecipientsMatcher;
 pub use self::remove::RemoveMatcher;
 pub use self::show::ShowMatcher;
 pub use self::sync::SyncMatcher;
+#[cfg(all(feature = "tomb", target_os = "linux"))]
+pub use self::tomb::TombMatcher;
 
 use clap::ArgMatches;
 

@@ -12,6 +12,8 @@ use thiserror::Error;
 use crate::cmd::matcher::{generate::GenerateMatcher, MainMatcher, Matcher};
 #[cfg(feature = "clipboard")]
 use crate::util::clipboard;
+#[cfg(all(feature = "tomb", target_os = "linux"))]
+use crate::util::tomb;
 use crate::util::{cli, edit, error, pass, secret, stdin, sync};
 
 /// Generate secret action.
@@ -32,7 +34,17 @@ impl<'a> Generate<'a> {
         let matcher_generate = GenerateMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(matcher_generate.store()).map_err(Err::Store)?;
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        let mut tomb = store.tomb(
+            !matcher_main.verbose(),
+            matcher_main.verbose(),
+            matcher_main.force(),
+        );
         let sync = store.sync();
+
+        // Prepare tomb
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        tomb::prepare_tomb(&mut tomb, &matcher_main).map_err(Err::Tomb)?;
 
         // Normalize destination path if we will store the secret
         let dest: Option<(PathBuf, Secret)> = match matcher_generate.name() {
@@ -138,6 +150,10 @@ impl<'a> Generate<'a> {
             }
         }
 
+        // Finalize tomb
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        tomb::finalize_tomb(&mut tomb, &matcher_main, true).map_err(Err::Tomb)?;
+
         // Determine whehter we outputted anything to stdout/stderr
         #[allow(unused_mut)]
         let mut output_any = matcher_generate.show();
@@ -171,6 +187,10 @@ fn generate_password(matcher_generate: &GenerateMatcher) -> Plaintext {
 pub enum Err {
     #[error("failed to access password store")]
     Store(#[source] anyhow::Error),
+
+    #[cfg(all(feature = "tomb", target_os = "linux"))]
+    #[error("failed to prepare password store tomb for usage")]
+    Tomb(#[source] anyhow::Error),
 
     #[error("failed to normalize destination path")]
     NormalizePath(#[source] anyhow::Error),

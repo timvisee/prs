@@ -1,16 +1,17 @@
 use anyhow::Result;
 use clap::ArgMatches;
-use thiserror::Error;
-
 use prs_lib::{
     crypto::{self, prelude::*},
     Recipients, Store,
 };
+use thiserror::Error;
 
 use crate::cmd::matcher::{
     recipients::{add::AddMatcher, RecipientsMatcher},
     MainMatcher, Matcher,
 };
+#[cfg(all(feature = "tomb", target_os = "linux"))]
+use crate::util::tomb;
 use crate::util::{self, error, select, style, sync};
 
 /// A recipients add action.
@@ -32,8 +33,19 @@ impl<'a> Add<'a> {
         let matcher_add = AddMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(matcher_recipients.store()).map_err(Err::Store)?;
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        let mut tomb = store.tomb(
+            !matcher_main.verbose(),
+            matcher_main.verbose(),
+            matcher_main.force(),
+        );
         let sync = store.sync();
 
+        // Prepare tomb
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        tomb::prepare_tomb(&mut tomb, &matcher_main).map_err(Err::Tomb)?;
+
+        // Prepare sync
         sync::ensure_ready(&sync, matcher_add.allow_dirty());
         if !matcher_add.no_sync() {
             sync.prepare()?;
@@ -52,7 +64,7 @@ impl<'a> Add<'a> {
             .map_err(Err::Load)?,
         );
         tmp.remove_all(recipients.keys());
-        let key = select::select_key(tmp.keys()).ok_or(Err::NoneSelected)?;
+        let key = select::select_key(tmp.keys(), None).ok_or(Err::NoneSelected)?;
         recipients.add(key.clone());
         recipients.save(&store)?;
 
@@ -73,7 +85,12 @@ impl<'a> Add<'a> {
             }
         }
 
+        // Finalize sync
         sync.finalize(format!("Add recipient {}", key.fingerprint(true)))?;
+
+        // Finalize tomb
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        tomb::finalize_tomb(&mut tomb, &matcher_main, true).map_err(Err::Tomb)?;
 
         if !matcher_main.quiet() {
             eprintln!("Added recipient: {}", key);
@@ -106,6 +123,10 @@ pub(crate) fn cannot_decrypt_show_recrypt_hints() {
 pub enum Err {
     #[error("failed to access password store")]
     Store(#[source] anyhow::Error),
+
+    #[cfg(all(feature = "tomb", target_os = "linux"))]
+    #[error("failed to prepare password store tomb for usage")]
+    Tomb(#[source] anyhow::Error),
 
     #[error("no key selected")]
     NoneSelected,

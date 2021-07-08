@@ -19,12 +19,15 @@ edition = "2018"
 gitlab = { repository = "timvisee/prs", branch = "master" }
 
 [features]
-default = ["backend-gnupg-bin", "notify"]
+default = ["backend-gnupg-bin", "notify", "tomb"]
 
 ### Regular features
 
 # Option (default): notification support (clipboard notifications)
 notify = ["notify-rust"]
+
+# Option (default): tomb support for password store on Linux
+tomb = ["prs-lib/tomb"]
 
 ### Pluggable cryptography backends
 

@@ -2,12 +2,13 @@ use std::io;
 
 use anyhow::Result;
 use clap::ArgMatches;
+use prs_lib::{store::SecretIterConfig, Secret, Store};
 use text_trees::{FormatCharacters, StringTreeNode, TreeFormatting};
 use thiserror::Error;
 
-use prs_lib::{store::SecretIterConfig, Secret, Store};
-
-use crate::cmd::matcher::{list::ListMatcher, Matcher};
+use crate::cmd::matcher::{list::ListMatcher, MainMatcher, Matcher};
+#[cfg(all(feature = "tomb", target_os = "linux"))]
+use crate::util::tomb;
 
 /// List secrets action.
 pub struct List<'a> {
@@ -23,9 +24,20 @@ impl<'a> List<'a> {
     /// Invoke the list action.
     pub fn invoke(&self) -> Result<()> {
         // Create the command matchers
+        let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
         let matcher_list = ListMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(matcher_list.store()).map_err(Err::Store)?;
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        let mut tomb = store.tomb(
+            !matcher_main.verbose(),
+            matcher_main.verbose(),
+            matcher_main.force(),
+        );
+
+        // Prepare tomb
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        tomb::prepare_tomb(&mut tomb, &matcher_main).map_err(Err::Tomb)?;
 
         // List aliases based on filters, sort the list
         let config = SecretIterConfig {
@@ -49,6 +61,10 @@ impl<'a> List<'a> {
         } else {
             display_tree(&secrets);
         }
+
+        // Finalize tomb
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        tomb::finalize_tomb(&mut tomb, &matcher_main, false).map_err(Err::Tomb)?;
 
         Ok(())
     }
@@ -130,4 +146,8 @@ fn tree_nodes(prefix: &str, mut secrets: &[&str]) -> Vec<StringTreeNode> {
 pub enum Err {
     #[error("failed to access password store")]
     Store(#[source] anyhow::Error),
+
+    #[cfg(all(feature = "tomb", target_os = "linux"))]
+    #[error("failed to prepare password store tomb for usage")]
+    Tomb(#[source] anyhow::Error),
 }

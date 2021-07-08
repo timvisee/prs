@@ -305,6 +305,6 @@ pub enum Err {
     #[error("failed to invoke system command")]
     System(#[source] std::io::Error),
 
-    #[error("system command exited with non-zero status code: {0}")]
+    #[error("git operation exited with non-zero status code: {0}")]
     Status(std::process::ExitStatus),
 }

@@ -7,6 +7,8 @@ use prs_lib::{
     Recipients, Secret, Store,
 };
 
+#[cfg(all(feature = "tomb", target_os = "linux"))]
+use crate::util::tomb;
 use crate::{
     cmd::matcher::{
         housekeeping::{recrypt::RecryptMatcher, HousekeepingMatcher},
@@ -34,7 +36,17 @@ impl<'a> Recrypt<'a> {
         let matcher_recrypt = RecryptMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(matcher_housekeeping.store()).map_err(Err::Store)?;
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        let mut tomb = store.tomb(
+            !matcher_main.verbose(),
+            matcher_main.verbose(),
+            matcher_main.force(),
+        );
         let sync = store.sync();
+
+        // Prepare tomb
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        tomb::prepare_tomb(&mut tomb, &matcher_main).map_err(Err::Tomb)?;
 
         // Prepare sync
         sync::ensure_ready(&sync, matcher_recrypt.allow_dirty());
@@ -58,6 +70,10 @@ impl<'a> Recrypt<'a> {
         if !matcher_recrypt.no_sync() {
             sync.finalize("Re-encrypt secrets")?;
         }
+
+        // Finalize tomb
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        tomb::finalize_tomb(&mut tomb, &matcher_main, true).map_err(Err::Tomb)?;
 
         Ok(())
     }
@@ -145,6 +161,10 @@ fn recrypt_single(context: &mut Context, secret: &Secret, recipients: &Recipient
 pub enum Err {
     #[error("failed to access password store")]
     Store(#[source] anyhow::Error),
+
+    #[cfg(all(feature = "tomb", target_os = "linux"))]
+    #[error("failed to prepare password store tomb for usage")]
+    Tomb(#[source] anyhow::Error),
 
     #[error("failed to read secret")]
     Read(#[source] anyhow::Error),

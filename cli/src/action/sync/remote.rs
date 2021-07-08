@@ -1,9 +1,10 @@
 use anyhow::Result;
 use clap::ArgMatches;
+use prs_lib::Store;
 use thiserror::Error;
 
-use prs_lib::Store;
-
+#[cfg(all(feature = "tomb", target_os = "linux"))]
+use crate::util::tomb;
 use crate::{
     cmd::matcher::{
         sync::{remote::RemoteMatcher, SyncMatcher},
@@ -35,7 +36,17 @@ impl<'a> Remote<'a> {
         let matcher_remote = RemoteMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(matcher_sync.store()).map_err(Err::Store)?;
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        let mut tomb = store.tomb(
+            !matcher_main.verbose(),
+            matcher_main.verbose(),
+            matcher_main.force(),
+        );
         let sync = store.sync();
+
+        // Prepare tomb
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        tomb::prepare_tomb(&mut tomb, &matcher_main).map_err(Err::Tomb)?;
 
         if !sync.is_init() {
             error::quit_error_msg(
@@ -87,6 +98,10 @@ impl<'a> Remote<'a> {
             },
         }
 
+        // Finalize tomb
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        tomb::finalize_tomb(&mut tomb, &matcher_main, false).map_err(Err::Tomb)?;
+
         Ok(())
     }
 }
@@ -95,4 +110,8 @@ impl<'a> Remote<'a> {
 pub enum Err {
     #[error("failed to access password store")]
     Store(#[source] anyhow::Error),
+
+    #[cfg(all(feature = "tomb", target_os = "linux"))]
+    #[error("failed to prepare password store tomb for usage")]
+    Tomb(#[source] anyhow::Error),
 }

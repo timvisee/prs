@@ -3,9 +3,11 @@ use std::io::{Read, Write};
 
 use anyhow::Result;
 use clap::ArgMatches;
+use prs_lib::Store;
 use thiserror::Error;
 
-use prs_lib::Store;
+#[cfg(all(feature = "tomb", target_os = "linux"))]
+use crate::util::tomb;
 
 /// Platform specific line ending character.
 #[cfg(not(windows))]
@@ -40,8 +42,22 @@ impl<'a> Run<'a> {
         let matcher_run = RunMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(matcher_housekeeping.store()).map_err(Err::Store)?;
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        let mut tomb = store.tomb(
+            !matcher_main.verbose(),
+            matcher_main.verbose(),
+            matcher_main.force(),
+        );
+
+        // Prepare tomb
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        tomb::prepare_tomb(&mut tomb, &matcher_main).map_err(Err::Tomb)?;
 
         housekeeping(&store, matcher_run.allow_dirty(), matcher_run.no_sync())?;
+
+        // Finalize tomb
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        tomb::finalize_tomb(&mut tomb, &matcher_main, true).map_err(Err::Tomb)?;
 
         if !matcher_main.quiet() {
             eprintln!("Housekeeping done");
@@ -97,7 +113,7 @@ fn set_store_permissions(_store: &Store) -> Result<(), std::io::Error> {
 
 /// Set up the git ignore file.
 fn set_git_ignore(store: &Store) -> Result<(), std::io::Error> {
-    const ENTRIES: [&str; 5] = [".host", ".last", ".tty", ".uid", ".timer"];
+    const ENTRIES: [&str; 6] = [".host", ".last", ".tty", ".uid", ".timer", "lost+found"];
 
     let file = store.root.join(".gitignore");
 
@@ -161,6 +177,10 @@ fn set_git_attributes(store: &Store) -> Result<(), std::io::Error> {
 pub enum Err {
     #[error("failed to access password store")]
     Store(#[source] anyhow::Error),
+
+    #[cfg(all(feature = "tomb", target_os = "linux"))]
+    #[error("failed to prepare password store tomb for usage")]
+    Tomb(#[source] anyhow::Error),
 
     #[error("failed to set password store permissions")]
     Perms(#[source] std::io::Error),

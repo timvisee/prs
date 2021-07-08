@@ -1,4 +1,9 @@
+#[cfg(all(feature = "tomb", target_os = "linux"))]
+use std::fs;
 use std::path::Path;
+
+use anyhow::Result;
+use thiserror::Error;
 
 use crate::util::error::{self, ErrorHints};
 
@@ -24,4 +29,23 @@ pub fn ensure_dir_free(path: &Path) -> Result<(), std::io::Error> {
         ),
         ErrorHints::default(),
     )
+}
+
+/// Check whether the system has SWAP enabled.
+#[cfg(all(feature = "tomb", target_os = "linux"))]
+pub fn has_swap() -> Result<bool, Err> {
+    Ok(fs::read_to_string("/proc/swaps")
+        .map_err(Err::HasSwap)?
+        .lines()
+        .skip(1)
+        .next()
+        .filter(|l| !l.trim().is_empty())
+        .is_some())
+}
+
+#[derive(Debug, Error)]
+pub enum Err {
+    #[cfg(all(feature = "tomb", target_os = "linux"))]
+    #[error("failed to check whether system has active SWAP")]
+    HasSwap(#[source] std::io::Error),
 }

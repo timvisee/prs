@@ -3,11 +3,12 @@ use std::path::{Path, PathBuf};
 
 use anyhow::Result;
 use clap::ArgMatches;
+use prs_lib::{Secret, Store};
 use thiserror::Error;
 
-use prs_lib::{Secret, Store};
-
 use crate::cmd::matcher::{alias::AliasMatcher, MainMatcher, Matcher};
+#[cfg(all(feature = "tomb", target_os = "linux"))]
+use crate::util::tomb;
 use crate::util::{cli, error, select, sync};
 
 /// Alias secret action.
@@ -28,7 +29,17 @@ impl<'a> Alias<'a> {
         let matcher_alias = AliasMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(matcher_alias.store()).map_err(Err::Store)?;
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        let mut tomb = store.tomb(
+            !matcher_main.verbose(),
+            matcher_main.verbose(),
+            matcher_main.force(),
+        );
         let sync = store.sync();
+
+        // Prepare tomb
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        tomb::prepare_tomb(&mut tomb, &matcher_main).map_err(Err::Tomb)?;
 
         // Prepare sync
         sync::ensure_ready(&sync, matcher_alias.allow_dirty());
@@ -72,6 +83,10 @@ impl<'a> Alias<'a> {
                 secret.name, link_secret.name
             ))?;
         }
+
+        // Finalize tomb
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        tomb::finalize_tomb(&mut tomb, &matcher_main, true).map_err(Err::Tomb)?;
 
         if !matcher_main.quiet() {
             eprintln!("Secret aliased");
@@ -156,6 +171,10 @@ fn path_depth(store: &Store, mut path: &Path) -> Result<u16, Err> {
 pub enum Err {
     #[error("failed to access password store")]
     Store(#[source] anyhow::Error),
+
+    #[cfg(all(feature = "tomb", target_os = "linux"))]
+    #[error("failed to prepare password store tomb for usage")]
+    Tomb(#[source] anyhow::Error),
 
     #[error("no secret selected")]
     NoneSelected,

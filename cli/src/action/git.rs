@@ -5,6 +5,8 @@ use thiserror::Error;
 
 use crate::cmd::matcher::{git::GitMatcher, MainMatcher, Matcher};
 use crate::util;
+#[cfg(all(feature = "tomb", target_os = "linux"))]
+use crate::util::tomb;
 
 /// Binary name.
 #[cfg(not(windows))]
@@ -30,8 +32,24 @@ impl<'a> Git<'a> {
         let matcher_git = GitMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(matcher_git.store()).map_err(Err::Store)?;
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        let mut tomb = store.tomb(
+            !matcher_main.verbose(),
+            matcher_main.verbose(),
+            matcher_main.force(),
+        );
 
-        git(&store, matcher_git.command(), matcher_main.verbose())
+        // Prepare tomb
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        tomb::prepare_tomb(&mut tomb, &matcher_main).map_err(Err::Tomb)?;
+
+        let result = git(&store, matcher_git.command(), matcher_main.verbose());
+
+        // Finalize tomb
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        tomb::finalize_tomb(&mut tomb, &matcher_main, false).map_err(Err::Tomb)?;
+
+        result
     }
 }
 
@@ -50,6 +68,10 @@ pub fn git(store: &Store, cmd: String, verbose: bool) -> Result<()> {
 pub enum Err {
     #[error("failed to access password store")]
     Store(#[source] anyhow::Error),
+
+    #[cfg(all(feature = "tomb", target_os = "linux"))]
+    #[error("failed to prepare password store tomb for usage")]
+    Tomb(#[source] anyhow::Error),
 
     #[error("failed to invoke git command")]
     Invoke(#[source] std::io::Error),

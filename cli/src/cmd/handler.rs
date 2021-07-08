@@ -81,6 +81,9 @@ impl<'a> Handler {
         #[cfg(feature = "clipboard")]
         let app = app.subcommand(subcmd::CmdCopy::build());
 
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        let app = app.subcommand(subcmd::CmdTomb::build());
+
         // Disable color usage if compiled without color support
         // TODO: do not use feature, pull from env var instead
         #[cfg(feature = "no-color")]
@@ -186,5 +189,11 @@ impl<'a> Handler {
     /// Get the sync sub command, if matched.
     pub fn sync(&'a self) -> Option<matcher::SyncMatcher> {
         matcher::SyncMatcher::with(&self.matches)
+    }
+
+    /// Get the tomb sub command, if matched.
+    #[cfg(all(feature = "tomb", target_os = "linux"))]
+    pub fn tomb(&'a self) -> Option<matcher::TombMatcher> {
+        matcher::TombMatcher::with(&self.matches)
     }
 }

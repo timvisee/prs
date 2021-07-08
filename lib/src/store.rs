@@ -8,6 +8,8 @@ use anyhow::{ensure, Result};
 use thiserror::Error;
 use walkdir::{DirEntry, WalkDir};
 
+#[cfg(all(feature = "tomb", target_os = "linux"))]
+use crate::tomb::Tomb;
 use crate::{
     crypto::{self, prelude::*},
     sync::Sync,
@@ -38,7 +40,7 @@ impl Store {
         // Make sure store directory exists
         ensure!(root.is_dir(), Err::NoRootDir(root));
 
-        // TODO: check if .gpg-ids exists?
+        // TODO: check if .gpg-ids exists? this does not work if this is a tomb
 
         Ok(Self { root })
     }
@@ -51,6 +53,12 @@ impl Store {
     /// Get a sync helper for this store.
     pub fn sync(&self) -> Sync {
         Sync::new(&self)
+    }
+
+    /// Get a tomb helper for this store.
+    #[cfg(all(feature = "tomb", target_os = "linux"))]
+    pub fn tomb(&self, quiet: bool, verbose: bool, force: bool) -> Tomb {
+        Tomb::new(&self, quiet, verbose, force)
     }
 
     /// Create secret iterator for this store.
@@ -317,7 +325,7 @@ fn is_hidden_subdir(entry: &DirEntry) -> bool {
         && entry
             .file_name()
             .to_str()
-            .map(|s| s.starts_with("."))
+            .map(|s| s.starts_with(".") || s == "lost+found")
             .unwrap_or(false)
 }
 

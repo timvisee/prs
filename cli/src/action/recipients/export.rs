@@ -3,12 +3,11 @@ use std::io::Write;
 
 use anyhow::Result;
 use clap::ArgMatches;
-use thiserror::Error;
-
 use prs_lib::{
     crypto::{self, prelude::*},
     Store,
 };
+use thiserror::Error;
 
 use crate::cmd::matcher::{
     recipients::{export::ExportMatcher, RecipientsMatcher},
@@ -17,6 +16,8 @@ use crate::cmd::matcher::{
 #[cfg(feature = "clipboard")]
 use crate::util::clipboard;
 use crate::util::select;
+#[cfg(all(feature = "tomb", target_os = "linux"))]
+use crate::util::tomb;
 
 /// A recipients export action.
 pub struct Export<'a> {
@@ -37,9 +38,19 @@ impl<'a> Export<'a> {
         let matcher_export = ExportMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(matcher_recipients.store()).map_err(Err::Store)?;
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        let mut tomb = store.tomb(
+            !matcher_main.verbose(),
+            matcher_main.verbose(),
+            matcher_main.force(),
+        );
         let recipients = store.recipients().map_err(Err::Load)?;
 
-        let key = select::select_key(recipients.keys())
+        // Prepare tomb
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        tomb::prepare_tomb(&mut tomb, &matcher_main).map_err(Err::Tomb)?;
+
+        let key = select::select_key(recipients.keys(), None)
             .ok_or(Err::NoneSelected)?
             .clone();
 
@@ -68,6 +79,10 @@ impl<'a> Export<'a> {
             std::io::stdout().write_all(&data).map_err(Err::Output)?;
         }
 
+        // Finalize tomb
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        tomb::finalize_tomb(&mut tomb, &matcher_main, false).map_err(Err::Tomb)?;
+
         Ok(())
     }
 }
@@ -76,6 +91,10 @@ impl<'a> Export<'a> {
 pub enum Err {
     #[error("failed to access password store")]
     Store(#[source] anyhow::Error),
+
+    #[cfg(all(feature = "tomb", target_os = "linux"))]
+    #[error("failed to prepare password store tomb for usage")]
+    Tomb(#[source] anyhow::Error),
 
     #[error("failed to load recipients from keychain")]
     Load(#[source] anyhow::Error),

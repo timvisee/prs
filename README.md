@@ -16,7 +16,7 @@
 It features [GPG][gpg] to securely store your secrets and integrates
 [`git`][git] for automatic synchronization between multiple machines. It also
 features a built-in password generator, recipient management, history tracking,
-rollbacks, housekeeping utilities and more.
+rollbacks, housekeeping utilities, Tomb support and more.
 
 [![prs usage demo][usage-demo-svg]][usage-demo-asciinema]  
 _No demo visible here? View it on [asciinema][usage-demo-asciinema]._
@@ -43,9 +43,10 @@ compatible clients, extensions and migration scripts.
 - Supports multiple machines with easy recipient management
 - Easily edit secrets using your default editor
 - Supports smart aliases, property selection
-- Compatible with [`pass`][pass][<sup>*</sup>](#is-prs-compatible-with-pass)
+- Compatible with [`pass`][pass][*](#is-prs-compatible-with-pass)
 - Supports Linux, macOS, Windows, FreeBSD and others, supports X11 and Wayland
 - Supports multiple cryptography backends (more backends & crypto in the future)
+- Seamless [Tomb][tomb] support to prevent metadata leakage[*](#what-is-tomb)
 - Scriptable with `-y`, `-f`, `-I` flags
 - Accurate & useful error reporting
 
@@ -54,6 +55,7 @@ compatible clients, extensions and migration scripts.
 - Greatly improved synchronisation speed through `git` with connection reuse
 - Super fast interactive secret/recipient selection through [`skim`][skim]
 - Prevents messing with your clipboard, no unexpected overwrites or clipboard loss
+- When using Tomb, it is automatically opened, closed and resized for you
 - Commands have short and conventional aliases for faster and more convenient usage
 - Uses security best practices (secrets: zeroed, `mlock`, `madvice`, no format, [etc](#security))
 
@@ -110,16 +112,16 @@ prs help
 
 #### Recommended
 - Run: _`git`, `gnupg`, `gpgme`_
-  - Ubuntu, Debian and derivatives: `apt install git gpg libgpgme11`
+  - Ubuntu, Debian and derivatives: `apt install git gpg libgpgme11 tomb`
   - CentOS/Red Hat/openSUSE/Fedora: `yum install git gnupg gpgme`
-  - Arch: `pacman -S git gnupg gpgme`
+  - Arch: `pacman -S git gnupg gpgme tomb`
   - Alpine: `apk add git gnupg gpgme`
   - macOS: `brew install gnupg gpgme`
   - Windows: `scoop install git gpg fzf`
 - Build: _`git`, `gnupg`, `gpgme` dev packages and dev utilities_
-  - Ubuntu, Debian and derivatives: `apt install git gpg build-essential pkg-config python3 xorg-dev libx11-xcb-dev libdbus-1-dev libgpgme-dev`
+  - Ubuntu, Debian and derivatives: `apt install git gpg build-essential pkg-config python3 xorg-dev libx11-xcb-dev libdbus-1-dev libgpgme-dev tomb`
   - CentOS/Red Hat/openSUSE/Fedora: `yum install git gnupg gpgme-devel pkgconfig python3 xorg-x11-devel libxcb-devel`
-  - Arch: `pacman -S git gnupg gpgme pkgconf python3 xorg-server libxcb`
+  - Arch: `pacman -S git gnupg gpgme pkgconf python3 xorg-server libxcb tomb`
   - Alpine: `apk add git gnupg gpgme-dev pkgconfig`
   - macOS: `brew install gnupg gpgme`
   - Windows: `scoop install git gpg fzf`
@@ -206,6 +208,20 @@ to be an error, please feel free to contribute.
     - Alpine: `apk add dbus`
     - macOS: _none_
     - Windows: _none_
+</details>
+
+<details>
+  <summary>Feature: Tomb</summary>
+
+  _`--feature=tomb`_
+
+  - Run: `tomb`
+    - Ubuntu, Debian and derivatives: `apt install tomb`
+    - CentOS/Red Hat/openSUSE/Fedora: [installation][tomb-install]
+    - Arch: `pacman -S tomb`
+    - Alpine: [installation][tomb-install]
+    - macOS: _not supported_
+    - Windows: _not supported_
 </details>
 
 <details>
@@ -328,6 +344,7 @@ of which are enabled by default:
 | `alias`             | `prc-cli`             | Default | Support for secret aliases (partially supported on Windows)|
 | `clipboard`         | `prs-cli`             | Default | Clipboard support: copy secret to clipboard                |
 | `notify`            | `prs-cli`, `prs-gtk3` | Default | Notification support: notify on clipboard clear            |
+| `tomb`              | _all_                 | Default | Tomb support for password store (only supported on Linux)  |
 | `backend-gpgme`     | _all_                 |         | GPG crypto backend using GPGME (not supported on Windows)  |
 | `backend-gnupg-bin` | _all_                 | Default | GPG crypto backend using GnuPG binary                      |
 | `select-skim`       | `prc-cli`             | Default | Interactive selection with skim (ignored on Windows)       |
@@ -369,7 +386,8 @@ The content of secrets is encrypted and secured. Secrets are stored as encrypted
 GPG files. Some metadata is visible without decryption however.
 The name of a secret (file name), modification time (file modification time) and
 encrypted size (file size) are visible when you have access to the password
-store directory.
+store directory. To protect against this metadata leakage you may use a
+[Tomb][tomb-faq].
 
 Security best practices are used in `prs` to prevent accidentally leaking
 any secret data. Sensitive data such as plaintext, ciphertext and others are
@@ -511,6 +529,60 @@ can still read the secrets on your other machines. To re-add the machine you
 lost your key on, remove the password store from it and see
 [this](#how-do-i-use-prs-on-multiple-machines-and-sync-between-them) section.
 
+#### What is Tomb?
+[Tomb][tomb] is a file encryption system. It can be used with `prs` to protect
+against metadata leakage of your password store.
+
+When using Tomb with `prs`, your password store is stored inside an encrypted
+file. `prs` automatically opens and closes your password store Tomb for you as
+needed. This makes it significantly harder for malicious programs to list your
+password store contents.
+
+This feature is inspired by
+[`pass-tomb`](https://github.com/roddhjav/pass-tomb), which is a `pass`
+extension for Tomb support. In `prs` this functionality is built-in.
+
+_Note: Tomb is only supported on Linux._
+
+#### How to use Tomb?
+`prs` has built-in support for [Tomb][tomb] on Linux systems. Please make sure
+`prs` is compiled with the `tomb` [feature](#compile-features--use-flags), and
+that Tomb is installed.
+
+To initialize a Tomb for your current password store, simply invoke:
+
+```bash
+# Initialize tomb, this may take some time
+prs tomb init
+
+# Read tomb status
+prs tomb status
+```
+
+To initialize a new password store in a Tomb, first initialize the password
+store then initialize the Tomb:
+
+```bash
+# Initialize new password store
+prs init
+
+# ...
+
+# Initialize tomb, this may take some time
+prs tomb init
+```
+
+If you already have a Tomb created with `pass-tomb`, no action is required.
+`prs` has seamless support for it, and it should automatically manage it for
+you. Invoke `prs tomb status` to confirm it is detected.
+
+#### How to use Tomb on multiple machines?
+A Tomb is local on your machine and is not synced. To use a Tomb on
+multiple machines you must initialize it on each of them.
+
+Simply run `prs tomb init` on machines you don't use a Tomb on yet, and after
+cloning your password store on a new machine.
+
 #### Is `prs` compatible with `pass`?
 Yes.
 
@@ -564,6 +636,7 @@ SUBCOMMANDS:
     remove          Remove a secret
     show            Display a secret
     sync            Sync password store
+    tomb            Manage password store Tomb
 ```
 
 ## License
@@ -582,6 +655,9 @@ Check out the [lib/LICENSE](lib/LICENSE) file for more information.
 [pass-compatible-clients]: https://www.passwordstore.org#other
 [pass]: https://www.passwordstore.org/
 [skim]: https://github.com/lotabout/skim
+[tomb-install]: https://github.com/dyne/Tomb/blob/master/INSTALL.md
+[tomb]: https://www.dyne.org/software/tomb/
 [usage-demo-asciinema]: https://asciinema.org/a/368611
 [usage-demo-svg]: ./res/demo.svg
 [xkcd538]: https://xkcd.com/538/
+[tomb-faq]: #what-is-tomb

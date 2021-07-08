@@ -7,6 +7,8 @@ use prs_lib::{
 use thiserror::Error;
 
 use crate::cmd::matcher::{copy::CopyMatcher, MainMatcher, Matcher};
+#[cfg(all(feature = "tomb", target_os = "linux"))]
+use crate::util::tomb;
 use crate::util::{clipboard, secret, select};
 
 /// Copy secret to clipboard action.
@@ -27,6 +29,17 @@ impl<'a> Copy<'a> {
         let matcher_copy = CopyMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(matcher_copy.store()).map_err(Err::Store)?;
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        let mut tomb = store.tomb(
+            !matcher_main.verbose(),
+            matcher_main.verbose(),
+            matcher_main.force(),
+        );
+
+        // Prepare tomb
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        tomb::prepare_tomb(&mut tomb, &matcher_main).map_err(Err::Tomb)?;
+
         let secret =
             select::store_select_secret(&store, matcher_copy.query()).ok_or(Err::NoneSelected)?;
 
@@ -49,7 +62,13 @@ impl<'a> Copy<'a> {
             !matcher_main.force(),
             !matcher_main.quiet(),
             matcher_copy.timeout()?,
-        )
+        )?;
+
+        // Finalize tomb
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        tomb::finalize_tomb(&mut tomb, &matcher_main, false).map_err(Err::Tomb)?;
+
+        Ok(())
     }
 }
 
@@ -57,6 +76,10 @@ impl<'a> Copy<'a> {
 pub enum Err {
     #[error("failed to access password store")]
     Store(#[source] anyhow::Error),
+
+    #[cfg(all(feature = "tomb", target_os = "linux"))]
+    #[error("failed to prepare password store tomb for usage")]
+    Tomb(#[source] anyhow::Error),
 
     #[error("no secret selected")]
     NoneSelected,

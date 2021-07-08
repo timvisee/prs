@@ -69,7 +69,7 @@ pub fn quit_error(err: anyhow::Error, hints: impl Borrow<ErrorHints>) -> ! {
     print_error(err);
 
     // Print error hints
-    hints.borrow().print();
+    hints.borrow().print(false);
 
     // Quit
     exit(1);
@@ -129,7 +129,7 @@ impl ErrorHints {
     }
 
     /// Print the error hints.
-    pub fn print(&self) {
+    pub fn print(&self, end_newline: bool) {
         // Print info messages
         for msg in &self.info {
             eprintln!("{} {}", highlight_info("info:"), msg);
@@ -182,10 +182,15 @@ impl ErrorHints {
             eprintln!("Use '{}' to force", highlight("--force"));
         }
         if self.verbose {
-            eprintln!("For detailed errors add '{}'", highlight("--verbose"));
+            eprintln!("For a detailed log add '{}'", highlight("--verbose"));
         }
         if self.help {
             eprintln!("For more information add '{}'", highlight("--help"));
+        }
+
+        // End with additional newline
+        if end_newline {
+            eprintln!();
         }
 
         // Flush

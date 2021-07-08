@@ -1,13 +1,14 @@
 use anyhow::Result;
 use clap::ArgMatches;
-use thiserror::Error;
-
 use prs_lib::{crypto::prelude::*, Store};
+use thiserror::Error;
 
 use crate::cmd::matcher::{
     recipients::{remove::RemoveMatcher, RecipientsMatcher},
     MainMatcher, Matcher,
 };
+#[cfg(all(feature = "tomb", target_os = "linux"))]
+use crate::util::tomb;
 use crate::util::{cli, error, select, sync};
 
 /// A recipients remove action.
@@ -29,7 +30,17 @@ impl<'a> Remove<'a> {
         let matcher_remove = RemoveMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(matcher_recipients.store()).map_err(Err::Store)?;
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        let mut tomb = store.tomb(
+            !matcher_main.verbose(),
+            matcher_main.verbose(),
+            matcher_main.force(),
+        );
         let sync = store.sync();
+
+        // Prepare tomb
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        tomb::prepare_tomb(&mut tomb, &matcher_main).map_err(Err::Tomb)?;
 
         // Prepare sync
         sync::ensure_ready(&sync, matcher_remove.allow_dirty());
@@ -40,7 +51,7 @@ impl<'a> Remove<'a> {
         let mut recipients = store.recipients().map_err(Err::Load)?;
 
         // Select key to remove
-        let key = select::select_key(recipients.keys())
+        let key = select::select_key(recipients.keys(), None)
             .ok_or(Err::NoneSelected)?
             .clone();
 
@@ -54,7 +65,7 @@ impl<'a> Remove<'a> {
                 .verbose(false)
                 .build()
                 .unwrap()
-                .print();
+                .print(false);
             error::quit();
         }
 
@@ -91,6 +102,10 @@ impl<'a> Remove<'a> {
             sync.finalize(format!("Remove recipient {}", key.fingerprint(true)))?;
         }
 
+        // Finalize tomb
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        tomb::finalize_tomb(&mut tomb, &matcher_main, true).map_err(Err::Tomb)?;
+
         if !matcher_main.quiet() {
             eprintln!("Removed recipient: {}", key);
         }
@@ -103,6 +118,10 @@ impl<'a> Remove<'a> {
 pub enum Err {
     #[error("failed to access password store")]
     Store(#[source] anyhow::Error),
+
+    #[cfg(all(feature = "tomb", target_os = "linux"))]
+    #[error("failed to prepare password store tomb for usage")]
+    Tomb(#[source] anyhow::Error),
 
     #[error("no key selected")]
     NoneSelected,

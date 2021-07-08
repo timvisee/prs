@@ -4,14 +4,15 @@ use std::path::{Path, PathBuf};
 
 use anyhow::{anyhow, Result};
 use clap::ArgMatches;
-use thiserror::Error;
-use walkdir::WalkDir;
-
 #[cfg(feature = "alias")]
 use prs_lib::store::SecretIterConfig;
 use prs_lib::{Secret, Store};
+use thiserror::Error;
+use walkdir::WalkDir;
 
 use crate::cmd::matcher::{remove::RemoveMatcher, MainMatcher, Matcher};
+#[cfg(all(feature = "tomb", target_os = "linux"))]
+use crate::util::tomb;
 use crate::util::{cli, error, select, sync};
 
 /// Remove secret action.
@@ -32,7 +33,17 @@ impl<'a> Remove<'a> {
         let matcher_remove = RemoveMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(matcher_remove.store()).map_err(Err::Store)?;
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        let mut tomb = store.tomb(
+            !matcher_main.verbose(),
+            matcher_main.verbose(),
+            matcher_main.force(),
+        );
         let sync = store.sync();
+
+        // Prepare tomb
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        tomb::prepare_tomb(&mut tomb, &matcher_main).map_err(Err::Tomb)?;
 
         // Prepare sync
         sync::ensure_ready(&sync, matcher_remove.allow_dirty());
@@ -54,6 +65,10 @@ impl<'a> Remove<'a> {
         if !matcher_remove.no_sync() {
             sync.finalize(format!("Remove secret {}", secret.name))?;
         }
+
+        // Finalize tomb
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        tomb::finalize_tomb(&mut tomb, &matcher_main, true).map_err(Err::Tomb)?;
 
         if !matcher_main.quiet() {
             eprintln!("Secret removed");
@@ -217,6 +232,10 @@ fn remove_empty_dir(path: &Path, remove_empty_parents: bool) -> Result<(), io::E
 pub enum Err {
     #[error("failed to access password store")]
     Store(#[source] anyhow::Error),
+
+    #[cfg(all(feature = "tomb", target_os = "linux"))]
+    #[error("failed to prepare password store tomb for usage")]
+    Tomb(#[source] anyhow::Error),
 
     #[error("no secret selected")]
     NoneSelected,

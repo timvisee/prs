@@ -57,7 +57,7 @@ impl<'a> Run<'a> {
 
         // Finalize tomb
         #[cfg(all(feature = "tomb", target_os = "linux"))]
-        tomb.finalize().map_err(Err::Tomb)?;
+        tomb::finalize_tomb(&mut tomb, &matcher_main, true).map_err(Err::Tomb)?;
 
         if !matcher_main.quiet() {
             eprintln!("Housekeeping done");

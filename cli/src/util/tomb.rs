@@ -2,7 +2,7 @@ use anyhow::Result;
 use prs_lib::tomb::Tomb;
 
 use crate::cmd::matcher::MainMatcher;
-use crate::util;
+use crate::util::{self, error, style};
 
 /// Prepare Tomb.
 pub fn prepare_tomb(tomb: &mut Tomb, matcher_main: &MainMatcher) -> Result<()> {
@@ -18,6 +18,29 @@ pub fn prepare_tomb(tomb: &mut Tomb, matcher_main: &MainMatcher) -> Result<()> {
 
     // Prepare as normal
     tomb.prepare()
+}
+
+/// Finalize Tomb.
+pub fn finalize_tomb(tomb: &mut Tomb, matcher_main: &MainMatcher, changed: bool) -> Result<()> {
+    // Ask to enlarge Tomb if it gets too small when contents changed
+    if changed && !matcher_main.quiet() && tomb.is_tomb() && tomb.is_open().unwrap_or(false) {
+        if let Ok(sizes) = tomb.fetch_size_stats() {
+            if sizes.should_resize() {
+                let bin = crate::util::bin_name();
+                eprintln!();
+                error::print_warning(
+                    "your Tomb may not have enough space left for new password store changes.",
+                );
+                error::print_warning(format!(
+                    "use '{}' to make your Tomb larger",
+                    style::highlight(&format!("{} tomb resize", bin))
+                ));
+            }
+        }
+    }
+
+    // Finalize as normal
+    tomb.finalize()
 }
 
 /// Ask user to force Tomb command.

@@ -1,4 +1,4 @@
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use clap::ArgMatches;
 use prs_lib::{
     crypto::{self, prelude::*},

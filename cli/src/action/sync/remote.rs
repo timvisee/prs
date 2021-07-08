@@ -100,7 +100,7 @@ impl<'a> Remote<'a> {
 
         // Finalize tomb
         #[cfg(all(feature = "tomb", target_os = "linux"))]
-        tomb.finalize().map_err(Err::Tomb)?;
+        tomb::finalize_tomb(&mut tomb, &matcher_main, false).map_err(Err::Tomb)?;
 
         Ok(())
     }

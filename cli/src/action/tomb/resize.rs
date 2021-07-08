@@ -1,5 +1,4 @@
-use anyhow::{anyhow, Result};
-use bytesize::ByteSize;
+use anyhow::Result;
 use clap::ArgMatches;
 use prs_lib::Store;
 use thiserror::Error;
@@ -9,7 +8,7 @@ use crate::cmd::matcher::{
     MainMatcher, Matcher,
 };
 use crate::util::{
-    self, error,
+    error,
     error::{ErrorHints, ErrorHintsBuilder},
     style,
 };

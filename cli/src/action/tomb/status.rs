@@ -1,4 +1,4 @@
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use bytesize::ByteSize;
 use clap::ArgMatches;
 use prs_lib::Store;
@@ -8,7 +8,6 @@ use crate::cmd::matcher::{
     tomb::{status::StatusMatcher, TombMatcher},
     MainMatcher, Matcher,
 };
-use crate::util::{self, error};
 
 /// A tomb status action.
 pub struct Status<'a> {

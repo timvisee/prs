@@ -15,7 +15,6 @@ impl CmdResize {
                     .long("size")
                     .short('S')
                     .value_name("MEGABYTE")
-                    .required(true)
                     .about("Resize tomb to megabytes"),
             )
     }

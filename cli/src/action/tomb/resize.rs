@@ -11,6 +11,7 @@ use crate::cmd::matcher::{
 use crate::util::{
     self, error,
     error::{ErrorHints, ErrorHintsBuilder},
+    style,
 };
 
 /// A tomb resize action.
@@ -58,11 +59,31 @@ impl<'a> Resize<'a> {
             tomb.close().map_err(Err::Close)?;
         }
 
-        // Get selected size and tomb size stats
-        let size = matcher_resize.size().unwrap();
+        // Fetch Tomb size status
         let sizes = tomb.fetch_size_stats().map_err(Err::Size)?;
 
-        // TODO: implement automatic resize based on current
+        // Get size, automatically select if not given
+        let size = match matcher_resize.size() {
+            Some(size) => size,
+            None => {
+                // Get desired size
+                let size = sizes.desired_tomb_size();
+
+                // Quit if Tomb is already this big
+                if let Some(tomb_size) = sizes.tomb_file_size_mbs() {
+                    if tomb_size >= size {
+                        eprintln!("Tomb is large enough, not resizing ({}MB)", tomb_size);
+                        eprintln!(
+                            "Use '{}' flag to specify a size",
+                            style::highlight("--size MEGABYTE")
+                        );
+                        error::quit();
+                    }
+                }
+
+                size
+            }
+        };
 
         // New tomb size must be larger
         if let Some(tomb_file_size) = sizes.tomb_file_size_mbs() {
@@ -79,7 +100,7 @@ impl<'a> Resize<'a> {
 
         // Resize tomb
         if !matcher_main.quiet() {
-            eprintln!("Resizing Tomb...");
+            eprintln!("Resizing Tomb to {}MB...", size);
         }
         tomb.resize(size).map_err(Err::Resize)?;
 

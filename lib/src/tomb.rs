@@ -333,14 +333,17 @@ impl TombSize {
     /// Currently twice the password store size, defaults to minimum of 10.
     pub fn desired_tomb_size(&self) -> u32 {
         self.store
-            .map(|bytes| ((bytes * 2) / 1024 / 1024).max(10) as u32)
+            .map(|bytes| ((bytes * 3) / 1024 / 1024).max(10) as u32)
             .unwrap_or(10)
     }
 
     /// Determine whether the password store should be resized.
     pub fn should_resize(&self) -> bool {
-        // TODO: implement
-        false
+        // TODO: determine this based on 'tomb list' output
+        self.store
+            .zip(self.tomb_file)
+            .map(|(store, tomb_file)| store * 2 > tomb_file)
+            .unwrap_or(false)
     }
 }
 

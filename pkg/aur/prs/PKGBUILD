@@ -15,7 +15,7 @@ depends=('gpgme' 'dbus' 'libxcb', 'skim', 'tomb')
 makedepends=('rust' 'python')
 source=("$pkgname-$pkgver.tar.gz::$url/-/archive/v$pkgver/$pkgname-v$pkgver.tar.gz")
 sha512sums=('__SHA512SUM__')
-_prs_cli_features=alias,clipboard,notify,backend-gpgme,select-skim-bin
+_prs_cli_features=alias,clipboard,notify,backend-gpgme,select-skim-bin,tomb
 
 build() {
   cd "$pkgname-v$pkgver"

@@ -17,7 +17,7 @@ conflicts=("${pkgname%-git}")
 provides=("${pkgname%-git}")
 source=("git+${url}")
 sha512sums=('SKIP')
-_prs_cli_features=alias,clipboard,notify,backend-gpgme,select-skim-bin
+_prs_cli_features=alias,clipboard,notify,backend-gpgme,select-skim-bin,tomb
 
 pkgver() {
   cd "${pkgname%-git}"

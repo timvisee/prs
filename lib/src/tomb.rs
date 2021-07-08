@@ -63,8 +63,6 @@ impl<'a> Tomb<'a> {
     ///
     /// On success this may return a list with soft-fail errors.
     pub fn open(&self) -> Result<Vec<Err>> {
-        // TODO: ensure tomb isn't already opened
-
         // Open tomb
         let tomb = self.find_tomb_path()?;
         let key = self.find_tomb_key_path()?;
@@ -81,8 +79,6 @@ impl<'a> Tomb<'a> {
             errs.push(err);
         }
 
-        // TODO: set file mode as well? See housekeeping::run
-
         Ok(errs)
     }
 
@@ -98,7 +94,6 @@ impl<'a> Tomb<'a> {
 
     /// Close the tomb.
     pub fn close(&self) -> Result<()> {
-        // TODO: ensure tomb is currently open?
         let tomb = self.find_tomb_path()?;
         tomb_bin::tomb_close(&tomb, self.settings)
     }
@@ -119,17 +114,19 @@ impl<'a> Tomb<'a> {
             return Ok(());
         }
 
-        // TODO: only show if not quiet
-        eprintln!("Opening password store Tomb...");
+        if !self.settings.quiet {
+            eprintln!("Opening password store Tomb...");
+        }
 
         // Open tomb, set up auto close timer
         self.open().map_err(Err::Prepare)?;
         self.start_timer(TOMB_AUTO_CLOSE_SEC, false)
             .map_err(Err::Prepare)?;
 
-        // TODO: only show in verbose mode
-        // eprintln!("Opened password store, automatically closing in 5 seconds");
         eprintln!();
+        if self.settings.verbose {
+            eprintln!("Opened password store, automatically closing in 5 seconds");
+        }
 
         Ok(())
     }
@@ -451,6 +448,5 @@ fn find_tomb_key_path(root: &Path) -> Option<PathBuf> {
         return Some(path.into());
     }
 
-    // TODO: add support for environment variables to set this path
     tomb_key_paths(root).into_iter().find(|p| p.is_file())
 }

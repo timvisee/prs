@@ -86,6 +86,16 @@ impl<'a> Tomb<'a> {
         Ok(errs)
     }
 
+    /// Resize the tomb.
+    ///
+    /// The Tomb must not be mounted and the size must be larger than the current.
+    pub fn resize(&self, mbs: u32) -> Result<()> {
+        let tomb = self.find_tomb_path()?;
+        let key = self.find_tomb_key_path()?;
+        tomb_bin::tomb_resize(&tomb, &key, mbs, self.settings).map_err(Err::Resize)?;
+        Ok(())
+    }
+
     /// Close the tomb.
     pub fn close(&self) -> Result<()> {
         // TODO: ensure tomb is currently open?
@@ -283,6 +293,55 @@ impl<'a> Tomb<'a> {
 
         Ok(false)
     }
+
+    /// Fetch Tomb size statistics.
+    ///
+    /// This is expensive.
+    pub fn fetch_size_stats(&self) -> Result<TombSize> {
+        let tomb_path = self.find_tomb_path()?;
+
+        // Get sizes
+        let store = if self.is_open().unwrap_or(false) {
+            util::fs::dir_size(&self.store.root).ok()
+        } else {
+            None
+        };
+        let tomb_file = tomb_path.metadata().map(|m| m.len()).ok();
+
+        Ok(TombSize { store, tomb_file })
+    }
+}
+
+/// Holds information for password store Tomb sizes.
+#[derive(Debug, Copy, Clone)]
+pub struct TombSize {
+    /// Store directory.
+    pub store: Option<u64>,
+
+    /// Tomb file size.
+    pub tomb_file: Option<u64>,
+}
+
+impl TombSize {
+    /// Get Tomb file size in MBs.
+    pub fn tomb_file_size_mbs(&self) -> Option<u32> {
+        self.tomb_file.map(|s| (s / 1024 / 1024) as u32)
+    }
+
+    /// Get the desired Tomb size in megabytes based on the current state.
+    ///
+    /// Currently twice the password store size, defaults to minimum of 10.
+    pub fn desired_tomb_size(&self) -> u32 {
+        self.store
+            .map(|bytes| ((bytes * 2) / 1024 / 1024).max(10) as u32)
+            .unwrap_or(10)
+    }
+
+    /// Determine whether the password store should be resized.
+    pub fn should_resize(&self) -> bool {
+        // TODO: implement
+        false
+    }
 }
 
 #[derive(Debug, Error)]
@@ -301,6 +360,9 @@ pub enum Err {
 
     #[error("failed to open password store tomb through tomb CLI")]
     Open(#[source] anyhow::Error),
+
+    #[error("failed to resize password store tomb through tomb CLI")]
+    Resize(#[source] anyhow::Error),
 
     #[error("failed to change permissions to current user for tomb mountpoint")]
     Chown(#[source] anyhow::Error),

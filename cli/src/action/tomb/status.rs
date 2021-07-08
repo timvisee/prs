@@ -54,31 +54,7 @@ impl<'a> Status<'a> {
         let has_timer = tomb.has_timer().map_err(Err::Status)?;
         let tomb_path = tomb.find_tomb_path().unwrap();
         let tomb_key_path = tomb.find_tomb_key_path().unwrap();
-
-        // Calculate store and tomb file sizes
-        let store_size = if is_open {
-            util::fs::dir_size(&store.root)
-                .or_else(|err| {
-                    error::print_error(
-                        anyhow!(err).context("failed to calcualte password store size, ignoring"),
-                    );
-                    Err(())
-                })
-                .ok()
-        } else {
-            None
-        };
-        let tomb_file_size = tomb_path
-            .metadata()
-            .map(|m| m.len())
-            .or_else(|err| {
-                error::print_error(
-                    anyhow!(err)
-                        .context("failed to measure password store tomb file size, ignoring"),
-                );
-                Err(())
-            })
-            .ok();
+        let sizes = tomb.fetch_size_stats().map_err(Err::Size)?;
 
         println!("Tomb: yes");
         println!("Open: {}", if is_open { "yes" } else { "no" });
@@ -87,13 +63,15 @@ impl<'a> Status<'a> {
         println!("Tomb key path: {}", tomb_key_path.display());
         println!(
             "Store size: {}",
-            store_size
+            sizes
+                .store
                 .map(|s| ByteSize(s).to_string())
                 .unwrap_or_else(|| "?".into())
         );
         println!(
             "Tomb file size: {}",
-            tomb_file_size
+            sizes
+                .tomb_file
                 .map(|s| ByteSize(s).to_string())
                 .unwrap_or_else(|| "?".into())
         );
@@ -112,4 +90,7 @@ pub enum Err {
 
     #[error("failed to open password store tomb")]
     Open(#[source] anyhow::Error),
+
+    #[error("failed to fetch password store size status")]
+    Size(#[source] anyhow::Error),
 }

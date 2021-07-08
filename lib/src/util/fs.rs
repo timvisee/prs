@@ -13,6 +13,12 @@ pub const SUDO_BIN: &str = crate::systemd_bin::SUDO_BIN;
 /// chown binary.
 pub const CHOWN_BIN: &str = "chown";
 
+/// Calcualte directory size in bytes.
+#[cfg(all(feature = "tomb", target_os = "linux"))]
+pub fn dir_size(path: &Path) -> Result<u64, Err> {
+    fs_extra::dir::get_size(path).map_err(Err::DirSize)
+}
+
 /// Copy contents of one directory to another.
 ///
 /// This will only copy directory contents recursively. This will not copy the directory itself.
@@ -76,6 +82,10 @@ pub(crate) fn sudo_chown_current_user(path: &Path, recursive: bool) -> Result<()
 
 #[derive(Debug, Error)]
 pub enum Err {
+    #[cfg(all(feature = "tomb", target_os = "linux"))]
+    #[error("failed to measure directory size")]
+    DirSize(#[source] fs_extra::error::Error),
+
     #[error("failed to copy directory contents")]
     #[cfg(all(feature = "tomb", target_os = "linux"))]
     CopyDirContents(#[source] fs_extra::error::Error),

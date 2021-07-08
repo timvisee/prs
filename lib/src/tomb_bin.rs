@@ -84,7 +84,9 @@ pub fn tomb_open(
             .to_str()
             .expect("tomb path contains invalid UTF-8"),
         "-k",
-        key_file.to_str().expect("tomb path contains invalid UTF-8"),
+        key_file
+            .to_str()
+            .expect("tomb key path contains invalid UTF-8"),
         "-p",
     ];
     match &key_fp {
@@ -109,22 +111,31 @@ pub fn tomb_close(tomb_file: &Path, settings: TombSettings) -> Result<()> {
     )
 }
 
-// /// Invoke tomb resize.
-// pub fn tomb_resize(tomb_file: &Path, key_file: &Path, size_mb: u32, settings: TombSettings) -> Result<()> {
-//     // TODO: ensure tomb file and key exist, size must be larger
+/// Invoke tomb resize.
+pub fn tomb_resize(
+    tomb_file: &Path,
 
-//     // TODO: do not set -q flag if in verbose mode?
-//     tomb(&[
-//         "resize",
-//         tomb_file
-//             .to_str()
-//             .expect("tomb path contains invalid UTF-8"),
-//         "-k",
-//         key_file.to_str().expect("tomb path contains invalid UTF-8"),
-//         "-s",
-//         &format!("{}", size_mb),
-//     ], settings)
-// }
+    key_file: &Path,
+    size_mb: u32,
+    settings: TombSettings,
+) -> Result<()> {
+    tomb(
+        &[
+            "resize",
+            tomb_file
+                .to_str()
+                .expect("tomb path contains invalid UTF-8"),
+            "-k",
+            key_file
+                .to_str()
+                .expect("tomb key path contains invalid UTF-8"),
+            "-g",
+            "-s",
+            &format!("{}", size_mb),
+        ],
+        settings,
+    )
+}
 
 /// Get tomb name based on path.
 pub fn name(path: &Path) -> Option<&str> {

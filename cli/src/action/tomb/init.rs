@@ -79,17 +79,12 @@ impl<'a> Init<'a> {
         }
 
         // TODO: ask user to add selected key to recipients if not yet part of it?
-        // TODO: ask user for preferred size, must be 10+ MB
 
-        // Determine Tomb size (prefer twice size of current store in MBs)
-        let mbs = util::fs::dir_size(&store.root)
-            .map(|bytes| ((bytes * 2) / (1024 * 1024)).max(10) as u32)
-            .unwrap_or_else(|err| {
-                error::print_error(
-                    anyhow!(err).context("failed to calcualte password store size, assuming 10MB"),
-                );
-                10
-            });
+        // Select Tomb size to use
+        let mbs = tomb
+            .fetch_size_stats()
+            .map(|sizes| sizes.desired_tomb_size())
+            .unwrap_or(10);
 
         if !matcher_main.quiet() {
             eprintln!("Initializing Tomb, this may take a while...");

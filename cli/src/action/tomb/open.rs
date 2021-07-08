@@ -1,5 +1,6 @@
 use anyhow::{anyhow, Result};
 use clap::ArgMatches;
+use prs_lib::tomb::Tomb;
 use prs_lib::Store;
 use thiserror::Error;
 
@@ -60,34 +61,8 @@ impl<'a> Open<'a> {
             );
         }
 
-        // Prompt user to add force flag
-        if !tomb.settings.force && util::tomb::ask_to_force(&matcher_main) {
-            tomb.settings.force = true;
-        }
-
-        if matcher_main.verbose() {
-            eprintln!("Opening Tomb...");
-        }
-
         // Open the tomb
-        let errs = tomb.open().map_err(Err::Open)?;
-
-        // Report soft-fail errors to the user
-        let show_error_hints = !errs.is_empty();
-        for err in errs {
-            error::print_error(
-                anyhow!(err)
-                    .context("failed to run housekeeping task after opening tomb, ignoring"),
-            );
-        }
-        if show_error_hints {
-            error::ErrorHintsBuilder::default()
-                .force(true)
-                .verbose(true)
-                .build()
-                .unwrap()
-                .print(true);
-        }
+        open(&mut tomb, &matcher_main)?;
 
         // Start timer
         if let Some(timer) = timer {
@@ -118,6 +93,39 @@ impl<'a> Open<'a> {
 
         Ok(())
     }
+}
+
+/// Open the tomb.
+pub(crate) fn open(tomb: &mut Tomb, matcher_main: &MainMatcher) -> Result<(), Err> {
+    // Prompt user to add force flag
+    if !tomb.settings.force && util::tomb::ask_to_force(&matcher_main) {
+        tomb.settings.force = true;
+    }
+
+    if matcher_main.verbose() {
+        eprintln!("Opening Tomb...");
+    }
+
+    // Open the tomb
+    let errs = tomb.open().map_err(Err::Open)?;
+
+    // Report soft-fail errors to the user
+    let show_error_hints = !errs.is_empty();
+    for err in errs {
+        error::print_error(
+            anyhow!(err).context("failed to run housekeeping task after opening tomb, ignoring"),
+        );
+    }
+    if show_error_hints {
+        error::ErrorHintsBuilder::default()
+            .force(true)
+            .verbose(true)
+            .build()
+            .unwrap()
+            .print(true);
+    }
+
+    Ok(())
 }
 
 #[derive(Debug, Error)]

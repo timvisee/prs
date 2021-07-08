@@ -1,6 +1,7 @@
 pub mod close;
 pub mod init;
 pub mod open;
+pub mod resize;
 pub mod status;
 
 use clap::ArgMatches;
@@ -33,6 +34,11 @@ impl<'a: 'b, 'b> TombMatcher<'a> {
     /// Get the tomb status sub command, if matched.
     pub fn cmd_status(&'a self) -> Option<status::StatusMatcher> {
         status::StatusMatcher::with(&self.root)
+    }
+
+    /// Get the tomb resize sub command, if matched.
+    pub fn cmd_resize(&'a self) -> Option<resize::ResizeMatcher> {
+        resize::ResizeMatcher::with(&self.root)
     }
 
     /// The store.

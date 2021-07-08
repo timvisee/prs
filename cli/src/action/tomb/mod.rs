@@ -1,6 +1,7 @@
 pub mod close;
 pub mod init;
 pub mod open;
+pub mod resize;
 pub mod status;
 
 use anyhow::Result;
@@ -38,6 +39,10 @@ impl<'a> Tomb<'a> {
 
         if matcher_tomb.cmd_status().is_some() {
             return status::Status::new(self.cmd_matches).invoke();
+        }
+
+        if matcher_tomb.cmd_resize().is_some() {
+            return resize::Resize::new(self.cmd_matches).invoke();
         }
 
         // Unreachable, clap will print help for missing sub command instead

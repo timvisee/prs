@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.13 (2021-07-09)
+- Fix incorrect Tomb size when resizing because it was closed first
+- Fix AUR package release
+
 ## 0.2.12 (2021-07-08)
 - Add [Tomb](https://www.dyne.org/software/tomb/) support on Linux
   ([info](https://github.com/timvisee/prs#what-is-tomb))

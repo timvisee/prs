@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.2.12 (2021-07-08)
+- Add [Tomb](https://www.dyne.org/software/tomb/) support on Linux
+  ([info](https://github.com/timvisee/prs#what-is-tomb))
+  (https://gitlab.com/timvisee/prs/-/issues/36)
+- Add `--copy` flag to show command
+- Show error if user tries to generate recipient with `--no-interact`
+- Rename secret argument from `DEST` to `NAME` for `add` and `generate` commands
+- Do not scan `lost+found` directory for secrets, add to `.gitignore`
+- Add compile time feature flag to handle interactive selection with `skim` or
+  `fzf` binary
+- Update dependencies
+
 ## 0.2.11 (2021-04-30)
 - Fix panic when generating command completion script to file
   (https://gitlab.com/timvisee/prs/-/issues/35)

@@ -6,15 +6,47 @@ set -xe
 # Change to script directory
 cd "$(dirname "$(realpath "$0")")";
 
+# Run command as sudo super user
+function _s() {
+    sudo -u super -- $@
+}
+
+# Refuse to run in non-CI
+if [[ "$CI" != "true" ]]; then
+    echo "Error: not runnin in CI, refusing to run"
+    exit 1
+fi
+
 # Ensure required variables are set
 if [[ -z ${CI_COMMIT_REF_NAME} ]]; then
     echo "Error: variable CI_COMMIT_REF_NAME is not set"
     exit 1
 fi
+if [[ -z ${AUR_SSH_PRIVATE} ]]; then
+    echo "Error: variable AUR_SSH_PRIVATE is not set"
+    exit 1
+fi
 
-# Install dependencies
+# Add sudo user
+pacman -S --noconfirm sudo
+useradd --create-home super || true
+usermod --append --groups wheel super
+passwd --delete super
+echo "%wheel ALL=(ALL) ALL" >> /etc/sudoers
+
+# Install yay
+if [[ ! -d ./yay ]]; then
+    pacman -S --noconfirm --needed git base-devel
+    _s git clone https://aur.archlinux.org/yay.git
+    cd yay
+    _s makepkg -si --noconfirm
+    cd ..
+fi
+
+# Preinstall AUR dependencies, required to make prs AUR package
 echo "Installing required build packages..."
 pacman -Syu --noconfirm sudo base-devel binutils openssh rust cargo cmake git openssl python libxcb
+_s yay -S --noprovides --noconfirm --asdeps libxkbcommon skim tomb-git
 
 # Determine the version number we're releasing for
 VERSION=$(echo $CI_COMMIT_REF_NAME | cut -c 2-)
@@ -40,15 +72,15 @@ chmod -R 777 /.cargo
 # Make prs package
 cd prs/
 echo "Making prs package..."
-sudo -u nobody makepkg -c
-sudo -u nobody makepkg --printsrcinfo > .SRCINFO
+_s makepkg -c
+_s makepkg --printsrcinfo > .SRCINFO
 cd ..
 
 # Make prs-git package
 cd prs-git/
 echo "Making prs-git package..."
-sudo -u nobody makepkg -c
-sudo -u nobody makepkg --printsrcinfo > .SRCINFO
+_s makepkg -c
+_s makepkg --printsrcinfo > .SRCINFO
 cd ..
 
 # Set up SSH for publishing

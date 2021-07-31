@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.14 (2021-07-31)
+- Lib: operations on `Plaintext` now borrow instead of move
+  (https://github.com/timvisee/prs/pull/9)
+- Fix AUR package release
+- Bump MSRV to 1.53
+- Update dependencies
+
 ## 0.2.13 (2021-07-09)
 - Fix incorrect Tomb size when resizing because it was closed first
 - Fix AUR package release

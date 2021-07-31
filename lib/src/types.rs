@@ -91,7 +91,7 @@ impl Plaintext {
     /// Get the first line of this secret as plaintext.
     ///
     /// Returns empty plaintext if there are no lines.
-    pub fn first_line(self) -> Result<Plaintext> {
+    pub fn first_line(&self) -> Result<Plaintext> {
         Ok(self
             .unsecure_to_str()
             .map_err(Err::Utf8)?
@@ -105,7 +105,7 @@ impl Plaintext {
     /// Get all lines execpt the first one.
     ///
     /// Returns empty plaintext if there are no lines.
-    pub fn except_first_line(self) -> Result<Plaintext> {
+    pub fn except_first_line(&self) -> Result<Plaintext> {
         Ok(self
             .unsecure_to_str()
             .map_err(Err::Utf8)?
@@ -123,7 +123,7 @@ impl Plaintext {
     /// value is returned. Returns an error if the property does not exist.
     ///
     /// This will never return the first line being the password.
-    pub fn property(self, property: &str) -> Result<Plaintext> {
+    pub fn property(&self, property: &str) -> Result<Plaintext> {
         let property = property.trim().to_uppercase();
         self.unsecure_to_str()
             .map_err(Err::Utf8)?

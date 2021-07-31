@@ -22,13 +22,15 @@ if [[ -z ${CI_COMMIT_REF_NAME} ]]; then
     echo "Error: variable CI_COMMIT_REF_NAME is not set"
     exit 1
 fi
+set +x
 if [[ -z ${AUR_SSH_PRIVATE} ]]; then
     echo "Error: variable AUR_SSH_PRIVATE is not set"
     exit 1
 fi
+set -x
 
 # Add sudo user
-pacman -S --noconfirm sudo
+pacman -Sy --noconfirm sudo
 useradd --create-home super || true
 usermod --append --groups wheel super
 passwd --delete super
@@ -36,7 +38,8 @@ echo "%wheel ALL=(ALL) ALL" >> /etc/sudoers
 
 # Install yay
 if [[ ! -d ./yay ]]; then
-    pacman -S --noconfirm --needed git base-devel
+    pacman -Sy --noconfirm --needed git base-devel
+    _s chmod -R 777 .
     _s git clone https://aur.archlinux.org/yay.git
     cd yay
     _s makepkg -si --noconfirm
@@ -45,7 +48,7 @@ fi
 
 # Preinstall AUR dependencies, required to make prs AUR package
 echo "Installing required build packages..."
-pacman -Syu --noconfirm sudo base-devel binutils openssh rust cargo cmake git openssl python libxcb
+pacman -Syu --noconfirm base-devel binutils openssh rust cargo cmake git openssl python libxcb
 _s yay -S --noprovides --noconfirm --asdeps libxkbcommon skim tomb-git
 
 # Determine the version number we're releasing for
@@ -86,7 +89,9 @@ cd ..
 # Set up SSH for publishing
 mkdir -p /root/.ssh
 cp ./aur.pub /root/.ssh/id_rsa.pub
+set +x
 echo "$AUR_SSH_PRIVATE" > /root/.ssh/id_rsa
+set -x
 echo "Host aur.archlinux.org" >> /root/.ssh/config
 echo "  IdentityFile /root/.ssh/aur" >> /root/.ssh/config
 echo "  User aur" >> /root/.ssh/config

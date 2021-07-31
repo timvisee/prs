@@ -39,7 +39,7 @@ echo "%wheel ALL=(ALL) ALL" >> /etc/sudoers
 # Install yay
 if [[ ! -d ./yay ]]; then
     pacman -Sy --noconfirm --needed git base-devel
-    _s chmod -R 777 .
+    chmod -R 777 .
     _s git clone https://aur.archlinux.org/yay.git
     cd yay
     _s makepkg -si --noconfirm

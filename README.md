@@ -294,11 +294,15 @@ mv ./prs /usr/local/bin/prs
 ```
 
 ## Build
-To build and install `prs` yourself, make sure you meet the 'Build' [requirements](#requirements).
 
-_Not all features are supported on Windows. The default configuration should
-work. When changing compile time features, make sure to check for compatibility.
-See [compiler features](#compile-features--use-flags)._
+To build and install `prs` yourself, you need the following:
+
+- Rust 1.53 or newer
+- The 'Build' [requirements](#requirements).
+
+_Not all features are supported on macOS or Windows. The default configuration
+should work. When changing compile time features, make sure to check for
+compatibility. See [compiler features](#compile-features--use-flags)._
 
 ### Compile and install
 To compile and install `prs` with the default features follow these steps:

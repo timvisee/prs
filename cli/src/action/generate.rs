@@ -14,7 +14,7 @@ use crate::cmd::matcher::{generate::GenerateMatcher, MainMatcher, Matcher};
 use crate::util::clipboard;
 #[cfg(all(feature = "tomb", target_os = "linux"))]
 use crate::util::tomb;
-use crate::util::{cli, edit, error, pass, secret, stdin, sync};
+use crate::util::{cli, edit, error, pass, secret, select, stdin, sync};
 
 /// Generate secret action.
 pub struct Generate<'a> {
@@ -46,34 +46,47 @@ impl<'a> Generate<'a> {
         #[cfg(all(feature = "tomb", target_os = "linux"))]
         tomb::prepare_tomb(&mut tomb, &matcher_main).map_err(Err::Tomb)?;
 
-        // Normalize destination path if we will store the secret
-        let dest: Option<(PathBuf, Secret)> = match matcher_generate.name() {
-            Some(dest) => {
-                let path = store
-                    .normalize_secret_path(dest, None, true)
-                    .map_err(Err::NormalizePath)?;
-                let secret = Secret::from(&store, path.to_path_buf());
-
-                Some((path, secret))
-            }
-            None => None,
-        };
-
-        // Prepare store sync if we will store the secret
-        if dest.is_some() {
+        // Select existing secret if merging, select based on path normally
+        let dest: Option<(PathBuf, Secret)> = if matcher_generate.merge() {
+            // Prepare store sync
             sync::ensure_ready(&sync, matcher_generate.allow_dirty());
             if !matcher_generate.no_sync() {
                 sync.prepare()?;
             }
-        }
+
+            // Select secret
+            let secret =
+                select::store_select_secret(&store, matcher_generate.name().map(|s| s.to_owned()))
+                    .ok_or(Err::NoneSelected)?;
+
+            Some((secret.path.clone(), secret))
+        } else {
+            match matcher_generate.name() {
+                Some(dest) => {
+                    let path = store
+                        .normalize_secret_path(dest, None, true)
+                        .map_err(Err::NormalizePath)?;
+                    let secret = Secret::from(&store, path.to_path_buf());
+
+                    // Prepare store sync
+                    sync::ensure_ready(&sync, matcher_generate.allow_dirty());
+                    if !matcher_generate.no_sync() {
+                        sync.prepare()?;
+                    }
+
+                    Some((path, secret))
+                }
+                None => None,
+            }
+        };
 
         // Generate secure password/passphrase plaintext
         let mut context = crypto::context(crypto::PROTO)?;
         let mut plaintext = generate_password(&matcher_generate);
 
-        // Check if destination already exists, if we will stor ethe secret, ask to merge if so
+        // Check if destination already exists, if we will store the secret, ask to merge if so
         if let Some(dest) = &dest {
-            if !matcher_main.force() && dest.0.is_file() {
+            if !matcher_main.force() && !matcher_generate.merge() && dest.0.is_file() {
                 eprintln!("A secret at '{}' already exists", dest.0.display(),);
                 if !cli::prompt_yes("Merge?", Some(true), &matcher_main) {
                     if !matcher_main.quiet() {
@@ -81,15 +94,15 @@ impl<'a> Generate<'a> {
                     }
                     error::quit();
                 }
+            }
 
-                // Append existing secret exept first line to new secret
-                let existing = context
-                    .decrypt_file(&dest.0)
-                    .and_then(|p| p.except_first_line())
-                    .map_err(Err::Read)?;
-                if !existing.is_empty() {
-                    plaintext.append(existing, true);
-                }
+            // Append existing secret except first line to new secret
+            let existing = context
+                .decrypt_file(&dest.0)
+                .and_then(|p| p.except_first_line())
+                .map_err(Err::Read)?;
+            if !existing.is_empty() {
+                plaintext.append(existing, true);
             }
         }
 
@@ -163,7 +176,7 @@ impl<'a> Generate<'a> {
         }
 
         if matcher_main.verbose() || (!output_any && !matcher_main.quiet()) {
-            eprintln!("Secret created");
+            eprintln!("Secret generated");
         }
 
         Ok(())
@@ -206,4 +219,7 @@ pub enum Err {
 
     #[error("failed to print secret to stdout")]
     Print(#[source] std::io::Error),
+
+    #[error("no secret selected")]
+    NoneSelected,
 }

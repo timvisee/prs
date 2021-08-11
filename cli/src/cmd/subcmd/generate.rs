@@ -37,6 +37,12 @@ impl CmdGenerate {
                     ),
             )
             .arg(
+                Arg::new("merge")
+                    .long("merge")
+                    .short('m')
+                    .about("Merge into existing secret, don't create new secret"),
+            )
+            .arg(
                 Arg::new("edit")
                     .long("edit")
                     .short('e')

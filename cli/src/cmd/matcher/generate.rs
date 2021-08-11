@@ -43,6 +43,11 @@ impl<'a: 'b, 'b> GenerateMatcher<'a> {
             })
     }
 
+    /// Check whether to merge the secret.
+    pub fn merge(&self) -> bool {
+        self.matches.is_present("merge")
+    }
+
     /// Check whether to edit the secret.
     pub fn edit(&self) -> bool {
         self.matches.is_present("edit")

@@ -38,7 +38,7 @@ impl<'a> Init<'a> {
 
         let store = Store::open(matcher_tomb.store()).map_err(Err::Store)?;
         let sync = store.sync();
-        let tomb = store.tomb(
+        let mut tomb = store.tomb(
             !matcher_main.verbose(),
             matcher_main.verbose(),
             matcher_main.force(),
@@ -64,6 +64,11 @@ impl<'a> Init<'a> {
                 eprintln!("Tomb initialisation cancelled");
             }
             error::quit();
+        }
+
+        // Prompt user to add force flag
+        if !tomb.settings.force && util::tomb::ask_to_force(&matcher_main) {
+            tomb.settings.force = true;
         }
 
         // Select GPG key to encrypt Tomb key

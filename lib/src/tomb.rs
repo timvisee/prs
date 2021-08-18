@@ -293,19 +293,28 @@ impl<'a> Tomb<'a> {
 
     /// Fetch Tomb size statistics.
     ///
+    /// This attempts to gather password store and tomb size statistics, whether this store is a
+    /// tomb or not.
+    ///
     /// This is expensive.
     pub fn fetch_size_stats(&self) -> Result<TombSize> {
-        let tomb_path = self.find_tomb_path()?;
+        // Get sizes depending on whether this store uses a tomb
+        match self.find_tomb_path() {
+            Ok(tomb_path) => {
+                let store = if self.is_open().unwrap_or(false) {
+                    util::fs::dir_size(&self.store.root).ok()
+                } else {
+                    None
+                };
+                let tomb_file = tomb_path.metadata().map(|m| m.len()).ok();
 
-        // Get sizes
-        let store = if self.is_open().unwrap_or(false) {
-            util::fs::dir_size(&self.store.root).ok()
-        } else {
-            None
-        };
-        let tomb_file = tomb_path.metadata().map(|m| m.len()).ok();
-
-        Ok(TombSize { store, tomb_file })
+                Ok(TombSize { store, tomb_file })
+            }
+            Err(_) => Ok(TombSize {
+                store: util::fs::dir_size(&self.store.root).ok(),
+                tomb_file: None,
+            }),
+        }
     }
 }
 

@@ -84,9 +84,11 @@ impl<'a> Generate<'a> {
         let mut context = crypto::context(crypto::PROTO)?;
         let mut plaintext = generate_password(&matcher_generate);
 
-        // Check if destination already exists, if we will store the secret, ask to merge if so
+        // If destination already exists, merge
         if let Some(dest) = &dest {
-            if !matcher_main.force() && !matcher_generate.merge() && dest.0.is_file() {
+            // Ask whether to merge
+            let exists = dest.0.is_file();
+            if !matcher_main.force() && !matcher_generate.merge() && exists {
                 eprintln!("A secret at '{}' already exists", dest.0.display(),);
                 if !cli::prompt_yes("Merge?", Some(true), &matcher_main) {
                     if !matcher_main.quiet() {
@@ -97,12 +99,14 @@ impl<'a> Generate<'a> {
             }
 
             // Append existing secret except first line to new secret
-            let existing = context
-                .decrypt_file(&dest.0)
-                .and_then(|p| p.except_first_line())
-                .map_err(Err::Read)?;
-            if !existing.is_empty() {
-                plaintext.append(existing, true);
+            if exists {
+                let existing = context
+                    .decrypt_file(&dest.0)
+                    .and_then(|p| p.except_first_line())
+                    .map_err(Err::Read)?;
+                if !existing.is_empty() {
+                    plaintext.append(existing, true);
+                }
             }
         }
 

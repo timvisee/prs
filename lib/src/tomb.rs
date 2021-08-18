@@ -247,6 +247,7 @@ impl<'a> Tomb<'a> {
 
         // Close tomb
         tomb_bin::tomb_close(&tomb_file, self.settings).map_err(Err::Init)?;
+        util::fs::sudo_chown_current_user(&store_tmp_dir, true).map_err(Err::Chown)?;
 
         // Remove both main and temporary store
         fs_extra::dir::remove(&self.store.root).map_err(|err| Err::Init(anyhow!(err)))?;
@@ -255,9 +256,6 @@ impl<'a> Tomb<'a> {
         // Open tomb as regular
         // TODO: do something with Ok(errors)?
         self.open()?;
-
-        // Change mountpoint directory permissions to current user
-        util::fs::sudo_chown_current_user(&self.store.root, false).map_err(Err::Chown)?;
 
         Ok(())
     }

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.15 (2021-08-18)
+- Add `--merge` to `generate` command, to prevent creating a new secret
+- Fix error on secret generation to new file
+- Fix `tomb init` error when user has a large password store
+- Fix AUR package release
+- Update dependencies
+
 ## 0.2.14 (2021-07-31)
 - Lib: operations on `Plaintext` now borrow instead of move
   (https://github.com/timvisee/prs/pull/9)

@@ -52,7 +52,7 @@ compatible clients, extensions and migration scripts.
 
 `prs` includes some awesome tweaks and optimizations:
 
-- Greatly improved synchronisation speed through `git` with connection reuse
+- Greatly improved synchronisation speed through `git` with connection reuse[*](./docs/connection-reuse.md)
 - Super fast interactive secret/recipient selection through [`skim`][skim]
 - Prevents messing with your clipboard, no unexpected overwrites or clipboard loss
 - When using Tomb, it is automatically opened, closed and resized for you

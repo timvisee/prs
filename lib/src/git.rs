@@ -6,6 +6,8 @@ use std::time::SystemTime;
 use anyhow::Result;
 use thiserror::Error;
 
+use crate::util;
+
 // Re-exports
 pub use git_state::{git_state, RepositoryState};
 
@@ -18,23 +20,9 @@ pub const BIN_NAME: &str = "git.exe";
 /// The git FETCH_HEAD file.
 const GIT_FETCH_HEAD_FILE: &str = ".git/FETCH_HEAD";
 
-// Disabled until SSH connection reuse is better implemented
-// See: https://github.com/timvisee/prs/issues/5#issuecomment-803940880
-///// Environment variable git uses to modify the ssh command.
-//#[cfg(unix)]
-//const GIT_ENV_SSH: &str = "GIT_SSH_COMMAND";
-
-///// Custom ssh command for git.
-/////
-///// With this custom SSH command we enable SSH session reuse, to make remote git operations much
-///// quicker for repositories using an SSH URL. This greatly improves prs sync speeds.
-//// TODO: make configurable, add current user ID to path
-//#[cfg(unix)]
-//const GIT_ENV_SSH_CMD: &str = "ssh -o 'ControlMaster auto' -o 'ControlPath /tmp/.prs-session--%r@%h:%p' -o 'ControlPersist 1h'";
-
 /// Invoke git init.
 pub fn git_init(repo: &Path) -> Result<()> {
-    git(repo, &["init", "-q"])
+    git(repo, &["init", "-q"], false)
 }
 
 /// Invoke git clone.
@@ -46,12 +34,12 @@ pub fn git_clone(repo: &Path, url: &str, path: &str, quiet: bool) -> Result<()> 
         args.push("--progress");
     }
     args.extend_from_slice(&[url, path]);
-    git(repo, &args)
+    git(repo, &args, true)
 }
 
 /// Git stage all files and changes.
 pub fn git_add_all(repo: &Path) -> Result<()> {
-    git(repo, &["add", "."])
+    git(repo, &["add", "."], false)
 }
 
 /// Invoke git commit.
@@ -65,7 +53,7 @@ pub fn git_commit(repo: &Path, msg: &str, commit_empty: bool) -> Result<()> {
     if commit_empty {
         args.push("--allow-empty");
     }
-    git(repo, &args)
+    git(repo, &args, false)
 }
 
 /// Invoke git push.
@@ -78,13 +66,13 @@ pub fn git_push(repo: &Path, set_branch: Option<&str>, set_upstream: Option<&str
     if let Some(branch) = set_branch {
         args.push(branch);
     }
-    git(repo, &args)
+    git(repo, &args, true)
 }
 
 /// Invoke git pull.
 pub fn git_pull(repo: &Path) -> Result<()> {
     // TODO: do not set -q flag if in verbose mode?
-    git(repo, &["pull", "-q"])
+    git(repo, &["pull", "-q"], true)
 }
 
 /// Invoke git fetch.
@@ -94,22 +82,22 @@ pub fn git_fetch(repo: &Path, reference: Option<&str>) -> Result<()> {
     if let Some(reference) = reference {
         args.push(reference);
     }
-    git(repo, &args)
+    git(repo, &args, true)
 }
 
 /// Check if repository has (staged/unstaged) changes.
 pub fn git_has_changes(repo: &Path) -> Result<bool> {
-    Ok(!git_stdout_ok(repo, &["status", "-s"])?.is_empty())
+    Ok(!git_stdout_ok(repo, &["status", "-s"], false)?.is_empty())
 }
 
 /// Check if repository has remote configured.
 pub fn git_has_remote(repo: &Path) -> Result<bool> {
-    Ok(!git_stdout_ok(repo, &["remote"])?.is_empty())
+    Ok(!git_stdout_ok(repo, &["remote"], false)?.is_empty())
 }
 
 /// Git get remote list.
 pub fn git_remote(repo: &Path) -> Result<Vec<String>> {
-    Ok(git_stdout_ok(repo, &["remote"])?
+    Ok(git_stdout_ok(repo, &["remote"], false)?
         .lines()
         .map(|r| r.into())
         .collect())
@@ -117,22 +105,22 @@ pub fn git_remote(repo: &Path) -> Result<Vec<String>> {
 
 /// Get get remote URL.
 pub fn git_remote_get_url(repo: &Path, remote: &str) -> Result<String> {
-    Ok(git_stdout_ok(repo, &["remote", "get-url", remote])?)
+    Ok(git_stdout_ok(repo, &["remote", "get-url", remote], false)?)
 }
 
 /// Get add remote URL.
 pub fn git_remote_add(repo: &Path, remote: &str, url: &str) -> Result<()> {
-    Ok(git(repo, &["remote", "add", remote, url])?)
+    Ok(git(repo, &["remote", "add", remote, url], false)?)
 }
 
 /// Get remove remote URL.
 pub fn git_remote_remove(repo: &Path, remote: &str) -> Result<()> {
-    Ok(git(repo, &["remote", "remove", remote])?)
+    Ok(git(repo, &["remote", "remove", remote], false)?)
 }
 
 /// Get the current git branch name.
 pub fn git_current_branch(repo: &Path) -> Result<String> {
-    let branch = git_stdout_ok(repo, &["rev-parse", "--abbrev-ref", "HEAD"])?;
+    let branch = git_stdout_ok(repo, &["rev-parse", "--abbrev-ref", "HEAD"], false)?;
     assert!(!branch.is_empty(), "git returned empty branch name");
     assert!(!branch.contains("\n"), "git returned multiple branches");
     Ok(branch.into())
@@ -140,7 +128,7 @@ pub fn git_current_branch(repo: &Path) -> Result<String> {
 
 /// List remote git branches.
 pub fn git_branch_remote(repo: &Path) -> Result<Vec<String>> {
-    Ok(git_stdout_ok(repo, &["branch", "-r", "--no-color"])?
+    Ok(git_stdout_ok(repo, &["branch", "-r", "--no-color"], false)?
         .lines()
         .map(|r| {
             match r.strip_prefix("* ") {
@@ -164,6 +152,7 @@ pub fn git_branch_upstream<S: AsRef<str>>(repo: &Path, reference: S) -> Result<O
             "--abbrev-ref",
             &format!("{}@{{upstream}}", reference.as_ref()),
         ],
+        false,
     )?;
 
     // Scan stderr for 'no upstream' messages
@@ -197,12 +186,12 @@ pub fn git_branch_set_upstream(repo: &Path, reference: Option<&str>, upstream: &
     if let Some(reference) = reference {
         args.push(reference);
     }
-    git(repo, &args)
+    git(repo, &args, false)
 }
 
 /// Get the hash of a reference.
 pub fn git_ref_hash<S: AsRef<str>>(repo: &Path, reference: S) -> Result<String> {
-    let hash = git_stdout_ok(repo, &["rev-parse", reference.as_ref()])?;
+    let hash = git_stdout_ok(repo, &["rev-parse", reference.as_ref()], false)?;
     assert_eq!(hash.len(), 40, "git returned invalid hash");
     Ok(hash.into())
 }
@@ -220,32 +209,36 @@ pub fn git_last_pull_time(repo: &Path) -> Result<SystemTime> {
 /// Invoke a git command with the given arguments.
 ///
 /// The command will take over the user console for in/output.
-fn git<I, S>(repo: &Path, args: I) -> Result<()>
+fn git<I, S>(repo: &Path, args: I, connects_remote: bool) -> Result<()>
 where
     I: IntoIterator<Item = S>,
     S: AsRef<OsStr>,
 {
-    cmd_assert_status(cmd_git(args, Some(repo)).status().map_err(Err::System)?)
+    cmd_assert_status(
+        cmd_git(args, repo, connects_remote)
+            .status()
+            .map_err(Err::System)?,
+    )
 }
 
 /// Invoke a git command, returns output.
-fn git_output<I, S>(repo: &Path, args: I) -> Result<Output>
+fn git_output<I, S>(repo: &Path, args: I, connects_remote: bool) -> Result<Output>
 where
     I: IntoIterator<Item = S>,
     S: AsRef<OsStr>,
 {
-    cmd_git(args, Some(repo))
+    cmd_git(args, repo, connects_remote)
         .output()
         .map_err(|err| Err::System(err).into())
 }
 
 /// Invoke a git command with the given arguments, return stdout on success.
-fn git_stdout_ok<I, S>(repo: &Path, args: I) -> Result<String>
+fn git_stdout_ok<I, S>(repo: &Path, args: I, connects_remote: bool) -> Result<String>
 where
     I: IntoIterator<Item = S>,
     S: AsRef<OsStr>,
 {
-    let output = git_output(repo, args)?;
+    let output = git_output(repo, args, connects_remote)?;
     cmd_assert_status(output.status)?;
 
     Ok(std::str::from_utf8(&output.stdout)
@@ -255,26 +248,22 @@ where
 }
 
 /// Build a git command to run.
-fn cmd_git<I, S>(args: I, dir: Option<&Path>) -> Command
+fn cmd_git<I, S>(args: I, dir: &Path, connects_remote: bool) -> Command
 where
     I: IntoIterator<Item = S>,
     S: AsRef<OsStr>,
 {
     let mut cmd = Command::new(BIN_NAME);
+    cmd.arg("-C");
+    cmd.arg(dir);
+    cmd.current_dir(dir);
 
-    if let Some(dir) = dir {
-        cmd.arg("-C");
-        cmd.arg(dir);
-        cmd.current_dir(dir);
+    // Configure session reuse if connecting to a remote and supported
+    if connects_remote {
+        if util::git::guess_ssh_persist_support(dir) {
+            util::git::configure_ssh_persist(&mut cmd);
+        }
     }
-
-    // Disabled until SSH connection reuse is better implemented
-    // See: https://github.com/timvisee/prs/issues/5#issuecomment-803940880
-    // // Set custom git ssh command to speed up remote operations
-    // #[cfg(unix)]
-    // if env::var_os(GIT_ENV_SSH).is_none() {
-    //     cmd.env(GIT_ENV_SSH, GIT_ENV_SSH_CMD);
-    // }
 
     cmd.args(args);
 

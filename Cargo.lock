@@ -1779,6 +1779,7 @@ dependencies = [
  "fs_extra",
  "git-state",
  "gpgme",
+ "lazy_static",
  "nix 0.22.1",
  "quickcheck",
  "quickcheck_macros",

@@ -1,6 +1,8 @@
+use std::collections::HashMap;
 use std::env;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process::Command;
+use std::sync::Mutex;
 
 use crate::git;
 
@@ -20,6 +22,11 @@ const SSH_PERSIST_CMD: &str = "ssh -o 'ControlMaster auto' -o 'ControlPath /tmp/
 /// A whitelist of SSH hosts that support connection persisting.
 const SSH_PERSIST_HOST_WHITELIST: [&str; 2] = ["github.com", "gitlab.com"];
 
+lazy_static! {
+    /// Cache for SSH connection persistence support guess.
+    static ref SSH_PERSIST_GUESS_CACHE: Mutex<HashMap<PathBuf, bool>> = Mutex::new(HashMap::new());
+}
+
 /// Configure given git command to use SSH connection persisting.
 ///
 /// `guess_ssh_connection_persist_support` should be used to guess whether this is supported.
@@ -30,7 +37,8 @@ pub fn configure_ssh_persist(cmd: &mut Command) {
 /// Guess whether SSH connection persistence is supported.
 ///
 /// This does a best effort to determine whether SSH connection persistence is supported. This is
-/// used to enable connection reuse.
+/// used to enable connection reuse. This internally caches the guess in the current process by
+/// repository path.
 ///
 /// - Disabled on non-Unix
 /// - Disabled if user set `GIT_SSH_COMMAND`
@@ -50,6 +58,13 @@ pub fn guess_ssh_persist_support(repo: &Path) -> bool {
         return false;
     }
 
+    // Get cached result
+    if let Ok(guard) = (*SSH_PERSIST_GUESS_CACHE).lock() {
+        if let Some(supported) = guard.get(repo) {
+            return *supported;
+        }
+    }
+
     // Gather git remotes, assume not supported if no remote or error
     let remotes = match git::git_remote(repo) {
         Ok(remotes) if remotes.is_empty() => return false,
@@ -65,13 +80,17 @@ pub fn guess_ssh_persist_support(repo: &Path) -> bool {
         .collect();
 
     // Ensure all SSH URI hosts are part of whitelist, assume incompatible on error
-    ssh_uris.iter().all(|uri| match ssh_uri_host(&uri) {
-        Some(host) => {
-            dbg!(host);
-            SSH_PERSIST_HOST_WHITELIST.contains(&host.to_lowercase().as_str())
-        }
+    let supported = ssh_uris.iter().all(|uri| match ssh_uri_host(&uri) {
+        Some(host) => SSH_PERSIST_HOST_WHITELIST.contains(&host.to_lowercase().as_str()),
         None => false,
-    })
+    });
+
+    // Cache result
+    if let Ok(mut guard) = (*SSH_PERSIST_GUESS_CACHE).lock() {
+        guard.insert(repo.to_path_buf(), supported);
+    }
+
+    supported
 }
 
 /// Check if given git remote URI is using HTTP(S) rather than SSH.

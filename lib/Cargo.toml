@@ -42,6 +42,7 @@ _crypto-gpg = []
 [dependencies]
 anyhow = "1.0"
 git-state = "0.1"
+lazy_static = "1.4"
 secstr = "0.4"
 thiserror = "1.0"
 walkdir = "2.0"

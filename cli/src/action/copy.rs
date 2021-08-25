@@ -45,7 +45,7 @@ impl<'a> Copy<'a> {
 
         secret::print_name(matcher_copy.query(), &secret, &store, matcher_main.quiet());
 
-        let mut plaintext = crypto::context(crypto::PROTO)?
+        let mut plaintext = crypto::context(&crypto::CONFIG)?
             .decrypt_file(&secret.path)
             .map_err(Err::Read)?;
 

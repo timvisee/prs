@@ -375,7 +375,7 @@ pub fn can_decrypt(store: &Store) -> bool {
         .secret_iter()
         .next()
         .map(|secret| {
-            crypto::context(crypto::PROTO)
+            crypto::context(&crypto::CONFIG)
                 .map(|mut context| context.can_decrypt_file(&secret.path).unwrap_or(true))
                 .unwrap_or(false)
         })

@@ -72,7 +72,7 @@ impl<'a> Init<'a> {
         }
 
         // Select GPG key to encrypt Tomb key
-        let mut context = crypto::context(crypto::PROTO)?;
+        let mut context = crypto::context(&crypto::CONFIG)?;
         let tmp = Recipients::from(context.keys_private().map_err(Err::Load)?);
         let key =
             select::select_key(tmp.keys(), Some("Select key for Tomb")).ok_or(Err::NoGpgKey)?;

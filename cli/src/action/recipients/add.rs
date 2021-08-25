@@ -51,7 +51,7 @@ impl<'a> Add<'a> {
             sync.prepare()?;
         }
 
-        let mut context = crypto::context(crypto::PROTO)?;
+        let mut context = crypto::context(&crypto::CONFIG)?;
         let mut recipients = store.recipients().map_err(Err::Load)?;
 
         // Find unused keys, select one and add to recipients

@@ -81,7 +81,7 @@ impl<'a> Generate<'a> {
         };
 
         // Generate secure password/passphrase plaintext
-        let mut context = crypto::context(crypto::PROTO)?;
+        let mut context = crypto::context(&crypto::CONFIG)?;
         let mut plaintext = generate_password(&matcher_generate);
 
         // If destination already exists, merge

@@ -161,7 +161,7 @@ pub fn print_main_info() -> ! {
             .and_then(|recip| crypto::recipients::contains_own_secret_key(&recip))
             .unwrap_or(false);
         if !we_own_any_recipient {
-            let system_has_secret = crypto::util::has_private_key(crypto::PROTO).unwrap_or(true);
+            let system_has_secret = crypto::util::has_private_key(&crypto::CONFIG).unwrap_or(true);
             if system_has_secret {
                 eprintln!("Add your own key as recipient or generate a new one:");
             } else {

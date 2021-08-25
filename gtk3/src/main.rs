@@ -215,7 +215,7 @@ fn selected_entry(
 /// Copies to clipboard with revert timeout.
 fn selected(secret: Secret, window: gtk::ApplicationWindow, input: gtk::SearchEntry) {
     // Decrypt first line of plaintext
-    let plaintext = match crypto::context(crypto::PROTO)
+    let plaintext = match crypto::context(&crypto::CONFIG)
         .map_err(|err| err.into())
         .and_then(|mut context| context.decrypt_file(&secret.path))
         .and_then(|plaintext| plaintext.first_line())

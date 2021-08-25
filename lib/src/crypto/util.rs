@@ -2,7 +2,7 @@
 
 use anyhow::Result;
 
-use super::{prelude::*, Key, Proto};
+use super::{prelude::*, Config, Key};
 
 /// Format fingerprint in consistent format.
 ///
@@ -24,6 +24,6 @@ pub fn keys_contain_fingerprint<S: AsRef<str>>(keys: &[Key], fingerprint: S) -> 
 }
 
 /// Check whether the user has any private/secret key in their keychain.
-pub fn has_private_key(proto: Proto) -> Result<bool> {
-    Ok(!super::context(proto)?.keys_private()?.is_empty())
+pub fn has_private_key(config: &Config) -> Result<bool> {
+    Ok(!super::context(config)?.keys_private()?.is_empty())
 }

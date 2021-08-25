@@ -1,4 +1,5 @@
 use std::path::{Path, PathBuf};
+#[cfg(all(feature = "tomb", target_os = "linux"))]
 use std::process::{Command, Stdio};
 
 use anyhow::Result;

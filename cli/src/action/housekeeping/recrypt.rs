@@ -86,7 +86,7 @@ pub fn recrypt_all(store: &Store, quiet: bool, verbose: bool) -> Result<()> {
 
 /// Re-encrypt all given secrets.
 pub fn recrypt(store: &Store, secrets: &[Secret], quiet: bool, verbose: bool) -> Result<()> {
-    let mut context = crypto::context(crypto::PROTO)?;
+    let mut context = crypto::context(&crypto::CONFIG)?;
     let recipients = store.recipients().map_err(Err::Store)?;
     let len = secrets.len();
 

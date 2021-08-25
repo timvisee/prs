@@ -45,7 +45,7 @@ impl<'a> Init<'a> {
         // Hint user to add our recipient key
         if !matcher_main.quiet() {
             let bin = util::bin_name();
-            let system_has_secret = crypto::util::has_private_key(crypto::PROTO).unwrap_or(true);
+            let system_has_secret = crypto::util::has_private_key(&crypto::CONFIG).unwrap_or(true);
 
             if system_has_secret {
                 eprintln!("Now add your own key as recipient or generate a new one:");

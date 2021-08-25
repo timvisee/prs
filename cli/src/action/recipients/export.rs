@@ -55,7 +55,7 @@ impl<'a> Export<'a> {
             .clone();
 
         // Export public key
-        let data = crypto::context(crypto::PROTO)?.export_key(key)?;
+        let data = crypto::context(&crypto::CONFIG)?.export_key(key)?;
 
         let mut stdout = true;
 

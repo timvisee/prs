@@ -52,7 +52,7 @@ impl<'a> Edit<'a> {
 
         secret::print_name(matcher_edit.query(), &secret, &store, matcher_main.quiet());
 
-        let mut context = crypto::context(crypto::PROTO)?;
+        let mut context = crypto::context(&crypto::CONFIG)?;
         let mut plaintext = context.decrypt_file(&secret.path).map_err(Err::Read)?;
 
         if matcher_edit.stdin() {

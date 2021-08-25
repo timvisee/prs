@@ -154,7 +154,7 @@ impl<'a> Generate<'a> {
 /// Return new keys as recipients.
 pub fn gpg_generate(quiet: bool, verbose: bool) -> Result<Recipients> {
     // List recipients before
-    let mut context = crypto::context(crypto::PROTO)?;
+    let mut context = crypto::context(&crypto::CONFIG)?;
     let before = Recipients::from(context.keys_private()?);
 
     // Generate key through GPG

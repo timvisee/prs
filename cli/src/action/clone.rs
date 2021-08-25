@@ -57,7 +57,7 @@ impl<'a> Clone<'a> {
             if !store_has_our_secret {
                 let bin = util::bin_name();
                 let system_has_secret =
-                    crypto::util::has_private_key(crypto::PROTO).unwrap_or(true);
+                    crypto::util::has_private_key(&crypto::CONFIG).unwrap_or(true);
 
                 if system_has_secret {
                     println!("Now add your own key as recipient or generate a new one:");

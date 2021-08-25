@@ -606,7 +606,7 @@ See a list of compatible `pass` clients [here][pass-compatible-clients].
 ```
 $ prs help
 
-prs-cli 0.2.15
+prs-cli 0.3.0
 Tim Visee <3a4fb3964f@sinenomine.email>
 Secure, fast & convenient password manager CLI with GPG & git sync
 
@@ -615,6 +615,7 @@ USAGE:
 
 FLAGS:
     -f, --force          Force the action, ignore warnings
+        --gpg-tty        Instruct GPG to ask passphrase in TTY rather than pinentry
     -h, --help           Prints help information
     -I, --no-interact    Not interactive, do not prompt
     -q, --quiet          Produce output suitable for logging and automation

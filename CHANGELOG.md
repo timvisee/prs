@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.0 (2021-08-25)
+- Add `--gpg-tty` flag to instruct GPG to ask passphrases in the TTY
+- Partially re-enable SSH connection reuse on whitelisted hosts to speed up
+  syncing (https://gitlab.com/timvisee/prs/-/issues/31)
+- Fix tomb initialisation when not forcing, ask user to force
+- Fix permission error when initializing Tomb through temporary store
+- Add crypto/GPG config for more internal configurability
+- Update dependencies
+
 ## 0.2.15 (2021-08-18)
 - Add `--merge` to `generate` command, to prevent creating a new secret
 - Fix error on secret generation to new file

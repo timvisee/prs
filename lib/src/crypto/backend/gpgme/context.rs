@@ -5,14 +5,14 @@ use gpgme::{Context as GpgmeContext, Protocol};
 use thiserror::Error;
 
 use super::raw;
-use crate::crypto::{proto, IsContext, Key, Proto};
+use crate::crypto::{proto, Config, IsContext, Key, Proto};
 use crate::{Ciphertext, Plaintext, Recipients};
 
 /// Protocol to use.
 const PROTO: Protocol = Protocol::OpenPgp;
 
 /// Create GPGME crypto context.
-pub fn context() -> Result<Context, Err> {
+pub fn context(_config: &Config) -> Result<Context, Err> {
     Ok(Context::from(
         gpgme::Context::from_protocol(PROTO).map_err(|err| Err::Context(err).into())?,
     ))

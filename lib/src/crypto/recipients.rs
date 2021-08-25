@@ -68,7 +68,7 @@ impl Recipients {
 /// Check whether the given recipients contain any key that we have a secret key in our keychain
 /// for.
 pub fn contains_own_secret_key(recipients: &Recipients) -> Result<bool> {
-    let secrets = Recipients::from(crypto::context(&crypto::CONFIG)?.keys_private()?);
+    let secrets = Recipients::from(crypto::context(&crate::CONFIG)?.keys_private()?);
     Ok(recipients
         .keys()
         .iter()

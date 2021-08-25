@@ -59,12 +59,7 @@ impl<'a> Recrypt<'a> {
 
         let secrets = store.secrets(matcher_recrypt.query());
 
-        recrypt(
-            &store,
-            &secrets,
-            matcher_main.quiet(),
-            matcher_main.verbose(),
-        )?;
+        recrypt(&store, &secrets, &matcher_main)?;
 
         // Finalize sync
         if !matcher_recrypt.no_sync() {
@@ -80,27 +75,27 @@ impl<'a> Recrypt<'a> {
 }
 
 /// Re-encrypt all secrets in the given store.
-pub fn recrypt_all(store: &Store, quiet: bool, verbose: bool) -> Result<()> {
-    recrypt(store, &store.secrets(None), quiet, verbose)
+pub fn recrypt_all(store: &Store, matcher_main: &MainMatcher) -> Result<()> {
+    recrypt(store, &store.secrets(None), matcher_main)
 }
 
 /// Re-encrypt all given secrets.
-pub fn recrypt(store: &Store, secrets: &[Secret], quiet: bool, verbose: bool) -> Result<()> {
-    let mut context = crypto::context(&crypto::CONFIG)?;
+pub fn recrypt(store: &Store, secrets: &[Secret], matcher_main: &MainMatcher) -> Result<()> {
+    let mut context = crate::crypto::context(&matcher_main)?;
     let recipients = store.recipients().map_err(Err::Store)?;
     let len = secrets.len();
 
     let mut failed = Vec::new();
 
     for (i, secret) in secrets.into_iter().enumerate() {
-        if verbose {
+        if matcher_main.verbose() {
             eprintln!("[{}/{}] Re-encrypting: {}", i + 1, len, secret.name);
         }
 
         // Recrypt secret, show status, remember errors
         match recrypt_single(&mut context, secret, &recipients) {
             Ok(_) => {
-                if !quiet {
+                if !matcher_main.quiet() {
                     eprintln!("[{}/{}] Re-encrypted: {}", i + 1, len, secret.name);
                 }
             }
@@ -123,7 +118,7 @@ pub fn recrypt(store: &Store, secrets: &[Secret], quiet: bool, verbose: bool) ->
             secrets.len()
         ));
 
-        if !quiet {
+        if !matcher_main.quiet() {
             eprintln!(
                 "Use '{}' to try again",
                 style::highlight(&format!(

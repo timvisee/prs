@@ -1,9 +1,6 @@
 use anyhow::Result;
 use clap::ArgMatches;
-use prs_lib::{
-    crypto::{self, prelude::*},
-    Recipients, Store,
-};
+use prs_lib::{crypto::prelude::*, Recipients, Store};
 use thiserror::Error;
 
 use crate::cmd::matcher::{
@@ -81,7 +78,7 @@ impl<'a> Generate<'a> {
         }
 
         // Generate new key through GPG
-        let new = gpg_generate(matcher_main.quiet(), matcher_main.verbose())?;
+        let new = gpg_generate(&matcher_main)?;
         let new_keys = new.keys();
 
         if !matcher_generate.no_add() {
@@ -109,12 +106,8 @@ impl<'a> Generate<'a> {
                 // Recrypt secrets
                 // TODO: do not quit on error, finish sync, ask to revert instead?
                 if !matcher_generate.no_recrypt() {
-                    crate::action::housekeeping::recrypt::recrypt_all(
-                        &store,
-                        matcher_main.quiet(),
-                        matcher_main.verbose(),
-                    )
-                    .map_err(Err::Recrypt)?;
+                    crate::action::housekeeping::recrypt::recrypt_all(&store, &matcher_main)
+                        .map_err(Err::Recrypt)?;
                 };
             } else {
                 if !matcher_main.quiet() {
@@ -152,18 +145,22 @@ impl<'a> Generate<'a> {
 /// Invoke GPG generate command.
 ///
 /// Return new keys as recipients.
-pub fn gpg_generate(quiet: bool, verbose: bool) -> Result<Recipients> {
+pub fn gpg_generate(matcher_main: &MainMatcher) -> Result<Recipients> {
     // List recipients before
-    let mut context = crypto::context(&crypto::CONFIG)?;
+    let mut context = crate::crypto::context(&matcher_main)?;
     let before = Recipients::from(context.keys_private()?);
 
     // Generate key through GPG
-    if !quiet {
+    if !matcher_main.quiet() {
         eprintln!("===== GPG START =====");
     }
-    util::invoke_cmd(format!("{} --full-generate-key", BIN_NAME), None, verbose)
-        .map_err(Err::Invoke)?;
-    if !quiet {
+    util::invoke_cmd(
+        format!("{} --full-generate-key", BIN_NAME),
+        None,
+        matcher_main.verbose(),
+    )
+    .map_err(Err::Invoke)?;
+    if !matcher_main.quiet() {
         eprintln!("===== GPG END =====");
     }
 

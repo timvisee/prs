@@ -83,7 +83,7 @@ pub fn store_load_keys(store: &Store) -> Result<Vec<Key>> {
     let fingerprints = store_read_gpg_fingerprints(store)?;
 
     if !fingerprints.is_empty() {
-        let mut context = super::context(&super::CONFIG)?;
+        let mut context = super::context(&crate::CONFIG)?;
         let fingerprints: Vec<_> = fingerprints.iter().map(|fp| fp.as_str()).collect();
         keys.extend(context.find_public_keys(&fingerprints)?);
     }
@@ -198,7 +198,7 @@ pub fn import_missing_keys_from_store(store: &Store) -> Result<Vec<ImportResult>
     // Check for missing GPG keys based on fingerprint, import them
     let gpg_fingerprints = store_read_gpg_fingerprints(store)?;
     for fingerprint in gpg_fingerprints {
-        let context = contexts.get_mut(&super::CONFIG)?;
+        let context = contexts.get_mut(&crate::CONFIG)?;
         if let Err(_) = context.get_public_key(&fingerprint) {
             let path = &store_public_keys_dir(store).join(&fingerprint);
             if path.is_file() {

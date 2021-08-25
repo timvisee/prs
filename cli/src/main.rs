@@ -7,11 +7,12 @@ extern crate lazy_static;
 
 mod action;
 mod cmd;
+mod crypto;
 mod util;
 mod vendor;
 
 use anyhow::Result;
-use prs_lib::{crypto, Store};
+use prs_lib::Store;
 
 use crate::{
     cmd::matcher::{MainMatcher, Matcher},
@@ -123,14 +124,14 @@ fn invoke_action(handler: &Handler) -> Result<()> {
     // Get the main matcher
     let matcher_main = MainMatcher::with(handler.matches()).unwrap();
     if !matcher_main.quiet() {
-        print_main_info();
+        print_main_info(&matcher_main);
     }
 
     Ok(())
 }
 
 /// Print the main info, shown when no subcommands were supplied.
-pub fn print_main_info() -> ! {
+pub fn print_main_info(matcher_main: &MainMatcher) -> ! {
     // Get the name of the used executable
     let bin = util::bin_name();
 
@@ -158,10 +159,11 @@ pub fn print_main_info() -> ! {
         // Hint user to add ourselves as recipient if it doesn't have recipient we own
         let we_own_any_recipient = store
             .recipients()
-            .and_then(|recip| crypto::recipients::contains_own_secret_key(&recip))
+            .and_then(|recip| prs_lib::crypto::recipients::contains_own_secret_key(&recip))
             .unwrap_or(false);
         if !we_own_any_recipient {
-            let system_has_secret = crypto::util::has_private_key(&crypto::CONFIG).unwrap_or(true);
+            let config = crate::crypto::config(matcher_main);
+            let system_has_secret = prs_lib::crypto::util::has_private_key(&config).unwrap_or(true);
             if system_has_secret {
                 eprintln!("Add your own key as recipient or generate a new one:");
             } else {

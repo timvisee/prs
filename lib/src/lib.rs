@@ -23,8 +23,17 @@ pub use crypto::{recipients::Recipients, Key};
 pub use store::{Secret, Store};
 pub use types::{Ciphertext, Plaintext};
 
+use crate::crypto::{Config, Proto};
+
 /// Default password store directory.
 #[cfg(not(windows))]
 pub const STORE_DEFAULT_ROOT: &str = "~/.password-store";
 #[cfg(windows)]
 pub const STORE_DEFAULT_ROOT: &str = "~\\.password-store";
+
+/// Default proto config.
+// TODO: remove when multiple protocols are supported.
+const CONFIG: Config = Config {
+    proto: Proto::Gpg,
+    gpg_tty: false,
+};

@@ -21,15 +21,6 @@ use thiserror::Error;
 
 use crate::{Ciphertext, Plaintext, Recipients};
 
-/// Default proto.
-///
-/// May be removed later when multiple protocols are supported.
-// TODO: remove this, library shouldn't select a default protocol
-pub const CONFIG: Config = Config {
-    proto: Proto::Gpg,
-    gpg_tty: false,
-};
-
 /// Crypto protocol.
 ///
 /// This list contains all protocols supported by the prs project. This does not mean that all
@@ -63,7 +54,7 @@ pub struct Config {
 
 impl Config {
     /// Construct config with given protocol.
-    fn from(proto: Proto) -> Self {
+    pub fn from(proto: Proto) -> Self {
         Self {
             proto,
             gpg_tty: false,
@@ -134,7 +125,7 @@ pub fn context(config: &Config) -> Result<Context, Err> {
         Proto::Gpg => {
             #[cfg(feature = "backend-gpgme")]
             return Ok(Context::from(Box::new(
-                backend::gpgme::context::context().map_err(|err| Err::Context(err.into()))?,
+                backend::gpgme::context::context(config).map_err(|err| Err::Context(err.into()))?,
             )));
             #[cfg(feature = "backend-gnupg-bin")]
             return Ok(Context::from(Box::new(

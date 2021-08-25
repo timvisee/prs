@@ -1,9 +1,6 @@
 use anyhow::Result;
 use clap::ArgMatches;
-use prs_lib::{
-    crypto::{self, prelude::*},
-    Recipients, Store,
-};
+use prs_lib::{crypto::prelude::*, Recipients, Store};
 use thiserror::Error;
 
 use crate::cmd::matcher::{
@@ -51,7 +48,7 @@ impl<'a> Add<'a> {
             sync.prepare()?;
         }
 
-        let mut context = crypto::context(crypto::PROTO)?;
+        let mut context = crate::crypto::context(&matcher_main)?;
         let mut recipients = store.recipients().map_err(Err::Load)?;
 
         // Find unused keys, select one and add to recipients
@@ -72,12 +69,8 @@ impl<'a> Add<'a> {
             // Recrypt secrets
             // TODO: do not quit on error, finish sync, ask to revert instead?
             if !matcher_add.no_recrypt() {
-                crate::action::housekeeping::recrypt::recrypt_all(
-                    &store,
-                    matcher_main.quiet(),
-                    matcher_main.verbose(),
-                )
-                .map_err(Err::Recrypt)?;
+                crate::action::housekeeping::recrypt::recrypt_all(&store, &matcher_main)
+                    .map_err(Err::Recrypt)?;
             }
         } else {
             if !matcher_main.quiet() {

@@ -10,7 +10,7 @@ use notify_rust::Hint;
 use notify_rust::Notification;
 
 use prs_lib::{
-    crypto::{self, prelude::*},
+    crypto::{self, prelude::*, Config, Proto},
     store::FindSecret,
     Secret, Store,
 };
@@ -24,6 +24,9 @@ const APP_NAME: &str = "prs";
 
 /// Application window title.
 const APP_TITLE: &str = "prs quick copy";
+
+/// Default cryptography protocol.
+const PROTO: Proto = Proto::Gpg;
 
 /// Clipboard timeout in seconds.
 const CLIPBOARD_TIMEOUT: u32 = 20;
@@ -215,7 +218,8 @@ fn selected_entry(
 /// Copies to clipboard with revert timeout.
 fn selected(secret: Secret, window: gtk::ApplicationWindow, input: gtk::SearchEntry) {
     // Decrypt first line of plaintext
-    let plaintext = match crypto::context(crypto::PROTO)
+    let config = Config::from(PROTO);
+    let plaintext = match crypto::context(&config)
         .map_err(|err| err.into())
         .and_then(|mut context| context.decrypt_file(&secret.path))
         .and_then(|plaintext| plaintext.first_line())

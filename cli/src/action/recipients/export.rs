@@ -3,10 +3,7 @@ use std::io::Write;
 
 use anyhow::Result;
 use clap::ArgMatches;
-use prs_lib::{
-    crypto::{self, prelude::*},
-    Store,
-};
+use prs_lib::{crypto::prelude::*, Store};
 use thiserror::Error;
 
 use crate::cmd::matcher::{
@@ -55,7 +52,7 @@ impl<'a> Export<'a> {
             .clone();
 
         // Export public key
-        let data = crypto::context(crypto::PROTO)?.export_key(key)?;
+        let data = crate::crypto::context(&matcher_main)?.export_key(key)?;
 
         let mut stdout = true;
 

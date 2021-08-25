@@ -3,13 +3,13 @@
 //! This provides the most basic and bare functions to interface with a GnuPG backend binary.
 
 use std::collections::VecDeque;
-use std::path::Path;
 
 use anyhow::Result;
 use regex::Regex;
 use thiserror::Error;
 
 use super::raw_cmd::{gpg_stdin_output, gpg_stdin_stdout_ok_bin, gpg_stdout_ok, gpg_stdout_ok_bin};
+use super::Config;
 use crate::crypto::util;
 use crate::{Ciphertext, Plaintext};
 
@@ -18,14 +18,14 @@ const GPG_OUTPUT_ERR_NO_SECKEY: &str = "decryption failed: No secret key";
 
 /// Encrypt plaintext for the given recipients.
 ///
-/// - `bin`: path to `gpg` binary
+/// - `config`: GPG config
 /// - `recipients`: list of recipient fingerprints to encrypt for
 /// - `plaintext`: plaintext to encrypt
 ///
 /// # Panics
 ///
 /// Panics if list of recipients is empty.
-pub fn encrypt(bin: &Path, recipients: &[&str], plaintext: Plaintext) -> Result<Ciphertext> {
+pub fn encrypt(config: &Config, recipients: &[&str], plaintext: Plaintext) -> Result<Ciphertext> {
     assert!(
         !recipients.is_empty(),
         "attempting to encrypt secret for empty list of recipients"
@@ -40,19 +40,19 @@ pub fn encrypt(bin: &Path, recipients: &[&str], plaintext: Plaintext) -> Result<
     args.push("--encrypt");
 
     Ok(Ciphertext::from(
-        gpg_stdin_stdout_ok_bin(bin, args.as_slice(), plaintext.unsecure_ref())
+        gpg_stdin_stdout_ok_bin(config, args.as_slice(), plaintext.unsecure_ref())
             .map_err(|err| Err::Decrypt(err))?,
     ))
 }
 
 /// Decrypt ciphertext.
 ///
-/// - `bin`: path to `gpg` binary
+/// - `config`: GPG config
 /// - `ciphertext`: ciphertext to decrypt
-pub fn decrypt(bin: &Path, ciphertext: Ciphertext) -> Result<Plaintext> {
+pub fn decrypt(config: &Config, ciphertext: Ciphertext) -> Result<Plaintext> {
     // TODO: ensure ciphertext ends with PGP footer
     Ok(Plaintext::from(
-        gpg_stdin_stdout_ok_bin(bin, &["--quiet", "--decrypt"], ciphertext.unsecure_ref())
+        gpg_stdin_stdout_ok_bin(config, &["--quiet", "--decrypt"], ciphertext.unsecure_ref())
             .map_err(|err| Err::Decrypt(err))?,
     ))
 }
@@ -61,14 +61,14 @@ pub fn decrypt(bin: &Path, ciphertext: Ciphertext) -> Result<Plaintext> {
 ///
 /// This checks whether whether we own the secret key to decrypt the given ciphertext.
 ///
-/// - `bin`: path to `gpg` binary
+/// - `config`: GPG config
 /// - `ciphertext`: ciphertext to check
 // To check this, actual decryption is attempted, see this if this can be improved:
 // https://stackoverflow.com/q/64633736/1000145
-pub fn can_decrypt(bin: &Path, ciphertext: Ciphertext) -> Result<bool> {
+pub fn can_decrypt(config: &Config, ciphertext: Ciphertext) -> Result<bool> {
     // TODO: ensure ciphertext ends with PGP footer
 
-    let output = gpg_stdin_output(bin, &["--quiet", "--decrypt"], ciphertext.unsecure_ref())
+    let output = gpg_stdin_output(config, &["--quiet", "--decrypt"], ciphertext.unsecure_ref())
         .map_err(|err| Err::Decrypt(err))?;
 
     match output.status.code() {
@@ -80,29 +80,30 @@ pub fn can_decrypt(bin: &Path, ciphertext: Ciphertext) -> Result<bool> {
 
 /// Get all public keys from keychain.
 ///
-/// - `bin`: path to `gpg` binary
-pub fn public_keys(bin: &Path) -> Result<Vec<KeyId>> {
-    let list = gpg_stdout_ok(bin, &["--list-keys", "--keyid-format", "LONG"]).map_err(Err::Keys)?;
+/// - `config`: GPG config
+pub fn public_keys(config: &Config) -> Result<Vec<KeyId>> {
+    let list =
+        gpg_stdout_ok(config, &["--list-keys", "--keyid-format", "LONG"]).map_err(Err::Keys)?;
     parse_key_list(list).ok_or_else(|| Err::UnexpectedOutput.into())
 }
 
 /// Get all private/secret keys from keychain.
 ///
-/// - `bin`: path to `gpg` binary
-pub fn private_keys(bin: &Path) -> Result<Vec<KeyId>> {
-    let list =
-        gpg_stdout_ok(bin, &["--list-secret-keys", "--keyid-format", "LONG"]).map_err(Err::Keys)?;
+/// - `config`: GPG config
+pub fn private_keys(config: &Config) -> Result<Vec<KeyId>> {
+    let list = gpg_stdout_ok(config, &["--list-secret-keys", "--keyid-format", "LONG"])
+        .map_err(Err::Keys)?;
     parse_key_list(list).ok_or_else(|| Err::UnexpectedOutput.into())
 }
 
 /// Import given key from bytes into keychain.
 ///
-/// - `bin`: path to `gpg` binary
+/// - `config`: GPG config
 ///
 /// # Panics
 ///
 /// Panics if the provides key does not look like a public key.
-pub fn import_key(bin: &Path, key: &[u8]) -> Result<()> {
+pub fn import_key(config: &Config, key: &[u8]) -> Result<()> {
     // Assert we're importing a public key
     let key_str = std::str::from_utf8(&key).expect("exported key is invalid UTF-8");
     assert!(
@@ -115,7 +116,7 @@ pub fn import_key(bin: &Path, key: &[u8]) -> Result<()> {
     );
 
     // Import key with gpg command
-    gpg_stdin_stdout_ok_bin(bin, &["--quiet", "--import"], key)
+    gpg_stdin_stdout_ok_bin(config, &["--quiet", "--import"], key)
         .map(|_| ())
         .map_err(|err| Err::Import(err).into())
 }
@@ -126,9 +127,9 @@ pub fn import_key(bin: &Path, key: &[u8]) -> Result<()> {
 ///
 /// Panics if the received key does not look like a public key. This should never happen unless the
 /// gpg binary backend is broken.
-pub fn export_key(bin: &Path, fingerprint: &str) -> Result<Vec<u8>> {
+pub fn export_key(config: &Config, fingerprint: &str) -> Result<Vec<u8>> {
     // Export key with gpg command
-    let data = gpg_stdout_ok_bin(bin, &["--quiet", "--armor", "--export", fingerprint])
+    let data = gpg_stdout_ok_bin(config, &["--quiet", "--armor", "--export", fingerprint])
         .map_err(|err| Err::Export(err))?;
 
     // Assert we're exporting a public key

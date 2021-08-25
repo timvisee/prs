@@ -89,12 +89,8 @@ impl<'a> Remove<'a> {
 
         // Recrypt secrets
         if matcher_remove.recrypt() {
-            crate::action::housekeeping::recrypt::recrypt_all(
-                &store,
-                matcher_main.quiet(),
-                matcher_main.verbose(),
-            )
-            .map_err(Err::Recrypt)?;
+            crate::action::housekeeping::recrypt::recrypt_all(&store, &matcher_main)
+                .map_err(Err::Recrypt)?;
         }
 
         // Finalize sync

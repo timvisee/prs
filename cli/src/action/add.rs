@@ -1,9 +1,6 @@
 use anyhow::Result;
 use clap::ArgMatches;
-use prs_lib::{
-    crypto::{self, prelude::*},
-    Plaintext, Secret, Store,
-};
+use prs_lib::{crypto::prelude::*, Plaintext, Secret, Store};
 use thiserror::Error;
 
 use crate::cmd::matcher::{add::AddMatcher, MainMatcher, Matcher};
@@ -85,7 +82,7 @@ impl<'a> Add<'a> {
         // Encrypt and write changed plaintext
         // TODO: select proper recipients (use from current file?)
         let recipients = store.recipients()?;
-        crypto::context(crypto::PROTO)?
+        crate::crypto::context(&matcher_main)?
             .encrypt_file(&recipients, plaintext, &path)
             .map_err(Err::Write)?;
 

@@ -2,11 +2,12 @@
 
 use std::ffi::OsStr;
 use std::io::Write;
-use std::path::Path;
 use std::process::{Command, ExitStatus, Output, Stdio};
 
 use anyhow::Result;
 use thiserror::Error;
+
+use super::Config;
 
 // /// Invoke a gpg command with the given arguments.
 // ///
@@ -20,23 +21,23 @@ use thiserror::Error;
 // }
 
 /// Invoke a gpg command, returns output.
-pub(super) fn gpg_output<I, S>(bin: &Path, args: I) -> Result<Output>
+pub(super) fn gpg_output<I, S>(config: &Config, args: I) -> Result<Output>
 where
     I: IntoIterator<Item = S>,
     S: AsRef<OsStr>,
 {
-    cmd_gpg(bin, args)
+    cmd_gpg(config, args)
         .output()
         .map_err(|err| Err::System(err).into())
 }
 
 /// Invoke a gpg command, returns output.
-pub(super) fn gpg_stdin_output<I, S>(bin: &Path, args: I, stdin: &[u8]) -> Result<Output>
+pub(super) fn gpg_stdin_output<I, S>(config: &Config, args: I, stdin: &[u8]) -> Result<Output>
 where
     I: IntoIterator<Item = S>,
     S: AsRef<OsStr>,
 {
-    let mut cmd = cmd_gpg(bin, args);
+    let mut cmd = cmd_gpg(config, args);
 
     // Pass stdin to child process
     let mut child = cmd.spawn().unwrap();
@@ -50,41 +51,45 @@ where
 }
 
 /// Invoke a gpg command with the given arguments, return stdout on success.
-pub(super) fn gpg_stdout_ok_bin<I, S>(bin: &Path, args: I) -> Result<Vec<u8>>
+pub(super) fn gpg_stdout_ok_bin<I, S>(config: &Config, args: I) -> Result<Vec<u8>>
 where
     I: IntoIterator<Item = S>,
     S: AsRef<OsStr>,
 {
-    let output = gpg_output(bin, args)?;
+    let output = gpg_output(config, args)?;
     cmd_assert_status(output.status)?;
     Ok(output.stdout)
 }
 
 /// Invoke a gpg command with the given arguments, return stdout on success.
-pub(super) fn gpg_stdout_ok<I, S>(bin: &Path, args: I) -> Result<String>
+pub(super) fn gpg_stdout_ok<I, S>(config: &Config, args: I) -> Result<String>
 where
     I: IntoIterator<Item = S>,
     S: AsRef<OsStr>,
 {
-    Ok(parse_output(&gpg_stdout_ok_bin(bin, args)?)
+    Ok(parse_output(&gpg_stdout_ok_bin(config, args)?)
         .map_err(|err| Err::GpgCli(err.into()))?
         .trim()
         .into())
 }
 
 /// Invoke a gpg command with the given arguments, return stdout on success.
-pub(super) fn gpg_stdin_stdout_ok_bin<I, S>(bin: &Path, args: I, stdin: &[u8]) -> Result<Vec<u8>>
+pub(super) fn gpg_stdin_stdout_ok_bin<I, S>(
+    config: &Config,
+    args: I,
+    stdin: &[u8],
+) -> Result<Vec<u8>>
 where
     I: IntoIterator<Item = S>,
     S: AsRef<OsStr>,
 {
-    let output = gpg_stdin_output(bin, args, stdin)?;
+    let output = gpg_stdin_output(config, args, stdin)?;
     cmd_assert_status(output.status)?;
     Ok(output.stdout)
 }
 
 /// Build a gpg command to run.
-fn cmd_gpg<I, S>(bin: &Path, args: I) -> Command
+fn cmd_gpg<I, S>(config: &Config, args: I) -> Command
 where
     I: IntoIterator<Item = S>,
     S: AsRef<OsStr>,
@@ -92,13 +97,14 @@ where
     // TODO: select proper locale here, must be available on system
     // TODO: see: https://linuxconfig.org/how-to-list-all-available-locales-on-rhel7-linux
 
-    let mut cmd = Command::new(bin);
+    let mut cmd = Command::new(&config.bin);
     cmd.stdin(Stdio::piped())
         .env("LANG", "en_US.UTF-8")
-        .env("LANGUAGE", "en_US.UTF-8")
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .args(args);
+        .env("LANGUAGE", "en_US.UTF-8");
+    if config.gpg_tty {
+        cmd.arg("--pinentry-mode").arg("loopback");
+    }
+    cmd.stdout(Stdio::piped()).stderr(Stdio::piped()).args(args);
     cmd
 }
 

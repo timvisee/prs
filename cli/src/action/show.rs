@@ -3,10 +3,7 @@ use std::time::Duration;
 
 use anyhow::Result;
 use clap::ArgMatches;
-use prs_lib::{
-    crypto::{self, prelude::*},
-    Store,
-};
+use prs_lib::{crypto::prelude::*, Store};
 use thiserror::Error;
 
 use crate::cmd::matcher::{show::ShowMatcher, MainMatcher, Matcher};
@@ -50,7 +47,7 @@ impl<'a> Show<'a> {
 
         secret::print_name(matcher_show.query(), &secret, &store, matcher_main.quiet());
 
-        let mut plaintext = crypto::context(crypto::PROTO)?
+        let mut plaintext = crate::crypto::context(&matcher_main)?
             .decrypt_file(&secret.path)
             .map_err(Err::Read)?;
 

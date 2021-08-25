@@ -1,9 +1,6 @@
 use anyhow::Result;
 use clap::ArgMatches;
-use prs_lib::{
-    crypto::{self, prelude::*},
-    Recipients, Store,
-};
+use prs_lib::{crypto::prelude::*, Recipients, Store};
 use thiserror::Error;
 
 use crate::{
@@ -72,7 +69,7 @@ impl<'a> Init<'a> {
         }
 
         // Select GPG key to encrypt Tomb key
-        let mut context = crypto::context(crypto::PROTO)?;
+        let mut context = crate::crypto::context(&matcher_main)?;
         let tmp = Recipients::from(context.keys_private().map_err(Err::Load)?);
         let key =
             select::select_key(tmp.keys(), Some("Select key for Tomb")).ok_or(Err::NoGpgKey)?;

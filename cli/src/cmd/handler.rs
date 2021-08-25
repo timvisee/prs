@@ -59,6 +59,12 @@ impl<'a> Handler {
                     .takes_value(false)
                     .about("Enable verbose information and logging"),
             )
+            .arg(
+                Arg::new("gpg-tty")
+                    .long("gpg-tty")
+                    .global(true)
+                    .about("Instruct GPG to ask passphrase in TTY rather than pinentry"),
+            )
             .subcommand(subcmd::CmdAdd::build())
             .subcommand(subcmd::CmdClone::build())
             .subcommand(subcmd::CmdDuplicate::build())

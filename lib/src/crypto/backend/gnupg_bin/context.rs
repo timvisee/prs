@@ -1,14 +1,12 @@
 //! Provides GnuPG binary context adapter.
 
-use std::path::{Path, PathBuf};
-
 use anyhow::Result;
 use thiserror::Error;
 use version_compare::Version;
 
-use super::raw;
 use super::raw_cmd::gpg_stdout_ok;
-use crate::crypto::{proto, IsContext, Key, Proto};
+use super::{raw, Config};
+use crate::crypto::{proto, Config as CryptoConfig, IsContext, Key, Proto};
 use crate::{Ciphertext, Plaintext, Recipients};
 
 /// Binary name.
@@ -21,20 +19,22 @@ const BIN_NAME: &str = "gpg.exe";
 const VERSION_MIN: &str = "2.0.0";
 
 /// Create GnuPG binary context.
-pub fn context() -> Result<Context, Err> {
-    Ok(Context::from(find_gpg_bin().map_err(Err::Context)?))
+pub fn context(config: &CryptoConfig) -> Result<Context, Err> {
+    let mut gpg_config = find_gpg_bin().map_err(Err::Context)?;
+    gpg_config.gpg_tty = config.gpg_tty;
+    Ok(Context::from(gpg_config))
 }
 
 /// GnuPG binary context.
 pub struct Context {
-    /// Binary path.
-    bin: PathBuf,
+    /// GPG config.
+    config: Config,
 }
 
 impl Context {
-    /// Construct context from binary path.
-    fn from(path: PathBuf) -> Self {
-        Self { bin: path }
+    /// Construct context from GPG config.
+    fn from(config: Config) -> Self {
+        Self { config }
     }
 }
 
@@ -46,19 +46,19 @@ impl IsContext for Context {
             .map(|key| key.fingerprint(false))
             .collect();
         let fingerprints: Vec<&str> = fingerprints.iter().map(|fp| fp.as_str()).collect();
-        raw::encrypt(&self.bin, &fingerprints, plaintext)
+        raw::encrypt(&self.config, &fingerprints, plaintext)
     }
 
     fn decrypt(&mut self, ciphertext: Ciphertext) -> Result<Plaintext> {
-        raw::decrypt(&self.bin, ciphertext)
+        raw::decrypt(&self.config, ciphertext)
     }
 
     fn can_decrypt(&mut self, ciphertext: Ciphertext) -> Result<bool> {
-        raw::can_decrypt(&self.bin, ciphertext)
+        raw::can_decrypt(&self.config, ciphertext)
     }
 
     fn keys_public(&mut self) -> Result<Vec<Key>> {
-        Ok(raw::public_keys(&self.bin)?
+        Ok(raw::public_keys(&self.config)?
             .into_iter()
             .map(|key| {
                 Key::Gpg(proto::gpg::Key {
@@ -70,7 +70,7 @@ impl IsContext for Context {
     }
 
     fn keys_private(&mut self) -> Result<Vec<Key>> {
-        Ok(raw::private_keys(&self.bin)?
+        Ok(raw::private_keys(&self.config)?
             .into_iter()
             .map(|key| {
                 Key::Gpg(proto::gpg::Key {
@@ -82,11 +82,11 @@ impl IsContext for Context {
     }
 
     fn import_key(&mut self, key: &[u8]) -> Result<()> {
-        raw::import_key(&self.bin, key)
+        raw::import_key(&self.config, key)
     }
 
     fn export_key(&mut self, key: Key) -> Result<Vec<u8>> {
-        raw::export_key(&self.bin, &key.fingerprint(false))
+        raw::export_key(&self.config, &key.fingerprint(false))
     }
 
     fn supports_proto(&self, proto: Proto) -> bool {
@@ -94,18 +94,19 @@ impl IsContext for Context {
     }
 }
 
-/// Find the gpg binary.
+/// Find the `gpg` binary, make GPG config.
 // TODO: also try default path at /usr/bin/gpg
-fn find_gpg_bin() -> Result<PathBuf> {
+fn find_gpg_bin() -> Result<Config> {
     let path = which::which(BIN_NAME).map_err(Err::Unavailable)?;
-    test_gpg_compat(&path)?;
-    Ok(path)
+    let config = Config::from(path);
+    test_gpg_compat(&config)?;
+    Ok(config)
 }
 
 /// Test gpg binary compatibility.
-fn test_gpg_compat(path: &Path) -> Result<()> {
+fn test_gpg_compat(config: &Config) -> Result<()> {
     // Strip stdout to just the version number
-    let stdout = gpg_stdout_ok(path, &["--version"])?;
+    let stdout = gpg_stdout_ok(config, &["--version"])?;
     let stdout = stdout
         .trim_start()
         .lines()

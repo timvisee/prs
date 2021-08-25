@@ -1,9 +1,6 @@
 use anyhow::Result;
 use clap::ArgMatches;
-use prs_lib::{
-    crypto::{self, prelude::*},
-    Store,
-};
+use prs_lib::{crypto::prelude::*, Store};
 use thiserror::Error;
 
 use crate::cmd::matcher::{edit::EditMatcher, MainMatcher, Matcher};
@@ -52,7 +49,7 @@ impl<'a> Edit<'a> {
 
         secret::print_name(matcher_edit.query(), &secret, &store, matcher_main.quiet());
 
-        let mut context = crypto::context(crypto::PROTO)?;
+        let mut context = crate::crypto::context(&matcher_main)?;
         let mut plaintext = context.decrypt_file(&secret.path).map_err(Err::Read)?;
 
         if matcher_edit.stdin() {

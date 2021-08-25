@@ -21,11 +21,6 @@ use thiserror::Error;
 
 use crate::{Ciphertext, Plaintext, Recipients};
 
-/// Default proto.
-///
-/// May be removed later when multiple protocols are supported.
-pub const PROTO: Proto = Proto::Gpg;
-
 /// Crypto protocol.
 ///
 /// This list contains all protocols supported by the prs project. This does not mean that all
@@ -42,6 +37,27 @@ impl Proto {
     pub fn name(&self) -> &str {
         match self {
             Self::Gpg => "GPG",
+        }
+    }
+}
+
+/// Crypto configuration.
+///
+/// Allows configuring extra properties for contexts globally.
+pub struct Config {
+    /// Protocol used.
+    pub proto: Proto,
+
+    /// Use TTY for password input with GPG.
+    pub gpg_tty: bool,
+}
+
+impl Config {
+    /// Construct config with given protocol.
+    pub fn from(proto: Proto) -> Self {
+        Self {
+            proto,
+            gpg_tty: false,
         }
     }
 }
@@ -103,23 +119,24 @@ impl fmt::Display for Key {
 ///
 /// Errors if no compatible crypto context is available for the selected protocol because no
 /// backend is providing it. Also errors if creating the context fails.
-#[allow(unreachable_code)]
-pub fn context(proto: Proto) -> Result<Context, Err> {
+pub fn context(config: &Config) -> Result<Context, Err> {
     // Select proper crypto backend
-    match proto {
+    match config.proto {
         Proto::Gpg => {
             #[cfg(feature = "backend-gpgme")]
             return Ok(Context::from(Box::new(
-                backend::gpgme::context::context().map_err(|err| Err::Context(err.into()))?,
+                backend::gpgme::context::context(config).map_err(|err| Err::Context(err.into()))?,
             )));
             #[cfg(feature = "backend-gnupg-bin")]
             return Ok(Context::from(Box::new(
-                backend::gnupg_bin::context::context().map_err(|err| Err::Context(err.into()))?,
+                backend::gnupg_bin::context::context(config)
+                    .map_err(|err| Err::Context(err.into()))?,
             )));
         }
     }
 
-    Err(Err::Unsupported(proto))
+    #[allow(unreachable_code)]
+    Err(Err::Unsupported(config.proto))
 }
 
 /// Generic context.
@@ -273,8 +290,11 @@ impl ContextPool {
     ///
     /// This will initialize the context if no context is loaded for the given proto yet. This
     /// may error..
-    pub fn get_mut<'a>(&'a mut self, proto: Proto) -> Result<&'a mut Context> {
-        Ok(self.contexts.entry(proto).or_insert(context(proto)?))
+    pub fn get_mut<'a>(&'a mut self, config: &'a Config) -> Result<&'a mut Context> {
+        Ok(self
+            .contexts
+            .entry(config.proto)
+            .or_insert(context(config)?))
     }
 }
 

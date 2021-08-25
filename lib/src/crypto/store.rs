@@ -6,7 +6,7 @@ use std::path::{Path, PathBuf};
 use anyhow::Result;
 use thiserror::Error;
 
-use super::{prelude::*, recipients::Recipients, util, ContextPool, Key, Proto};
+use super::{prelude::*, recipients::Recipients, util, Config, ContextPool, Key, Proto};
 use crate::Store;
 
 /// Password store GPG IDs file.
@@ -83,7 +83,7 @@ pub fn store_load_keys(store: &Store) -> Result<Vec<Key>> {
     let fingerprints = store_read_gpg_fingerprints(store)?;
 
     if !fingerprints.is_empty() {
-        let mut context = super::context(Proto::Gpg)?;
+        let mut context = super::context(&crate::CONFIG)?;
         let fingerprints: Vec<_> = fingerprints.iter().map(|fp| fp.as_str()).collect();
         keys.extend(context.find_public_keys(&fingerprints)?);
     }
@@ -170,7 +170,8 @@ pub fn store_sync_public_key_files(store: &Store, keys: &[Key]) -> Result<()> {
     {
         // Lazy load compatible context
         let proto = key.proto();
-        let context = contexts.get_mut(proto)?;
+        let config = Config::from(proto);
+        let context = contexts.get_mut(&config)?;
 
         // Export public key to disk
         let path = dir.join(&fp);
@@ -197,7 +198,7 @@ pub fn import_missing_keys_from_store(store: &Store) -> Result<Vec<ImportResult>
     // Check for missing GPG keys based on fingerprint, import them
     let gpg_fingerprints = store_read_gpg_fingerprints(store)?;
     for fingerprint in gpg_fingerprints {
-        let context = contexts.get_mut(Proto::Gpg)?;
+        let context = contexts.get_mut(&crate::CONFIG)?;
         if let Err(_) = context.get_public_key(&fingerprint) {
             let path = &store_public_keys_dir(store).join(&fingerprint);
             if path.is_file() {

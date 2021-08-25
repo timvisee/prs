@@ -1,21 +1,26 @@
 //! Provides GPGME binary context adapter.
 
 use anyhow::Result;
-use gpgme::{Context as GpgmeContext, Protocol};
+use gpgme::{Context as GpgmeContext, PinentryMode, Protocol};
 use thiserror::Error;
 
 use super::raw;
-use crate::crypto::{proto, IsContext, Key, Proto};
+use crate::crypto::{proto, Config, IsContext, Key, Proto};
 use crate::{Ciphertext, Plaintext, Recipients};
 
 /// Protocol to use.
 const PROTO: Protocol = Protocol::OpenPgp;
 
 /// Create GPGME crypto context.
-pub fn context() -> Result<Context, Err> {
-    Ok(Context::from(
-        gpgme::Context::from_protocol(PROTO).map_err(|err| Err::Context(err).into())?,
-    ))
+pub fn context(config: &Config) -> Result<Context, Err> {
+    let mut context = gpgme::Context::from_protocol(PROTO).map_err(Err::Context)?;
+    if config.gpg_tty {
+        context
+            .set_pinentry_mode(PinentryMode::Loopback)
+            .map_err(Err::Context)?;
+    }
+
+    Ok(Context::from(context))
 }
 
 /// GPGME crypto context.

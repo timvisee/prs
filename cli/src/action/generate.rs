@@ -3,10 +3,7 @@ use std::path::PathBuf;
 use anyhow::Result;
 use chbs::{config::BasicConfig, prelude::*};
 use clap::ArgMatches;
-use prs_lib::{
-    crypto::{self, prelude::*},
-    Plaintext, Secret, Store,
-};
+use prs_lib::{crypto::prelude::*, Plaintext, Secret, Store};
 use thiserror::Error;
 
 use crate::cmd::matcher::{generate::GenerateMatcher, MainMatcher, Matcher};
@@ -81,7 +78,7 @@ impl<'a> Generate<'a> {
         };
 
         // Generate secure password/passphrase plaintext
-        let mut context = crypto::context(crypto::PROTO)?;
+        let mut context = crate::crypto::context(&matcher_main)?;
         let mut plaintext = generate_password(&matcher_generate);
 
         // If destination already exists, merge

@@ -215,7 +215,7 @@ where
     S: AsRef<OsStr>,
 {
     cmd_assert_status(
-        cmd_git(args, Some(repo), connects_remote)
+        cmd_git(args, repo, connects_remote)
             .status()
             .map_err(Err::System)?,
     )
@@ -227,7 +227,7 @@ where
     I: IntoIterator<Item = S>,
     S: AsRef<OsStr>,
 {
-    cmd_git(args, Some(repo), connects_remote)
+    cmd_git(args, repo, connects_remote)
         .output()
         .map_err(|err| Err::System(err).into())
 }
@@ -248,25 +248,20 @@ where
 }
 
 /// Build a git command to run.
-fn cmd_git<I, S>(args: I, dir: Option<&Path>, connects_remote: bool) -> Command
+fn cmd_git<I, S>(args: I, dir: &Path, connects_remote: bool) -> Command
 where
     I: IntoIterator<Item = S>,
     S: AsRef<OsStr>,
 {
     let mut cmd = Command::new(BIN_NAME);
+    cmd.arg("-C");
+    cmd.arg(dir);
+    cmd.current_dir(dir);
 
-    if let Some(dir) = dir {
-        cmd.arg("-C");
-        cmd.arg(dir);
-        cmd.current_dir(dir);
-    }
-
-    // Configure session reuse if supported
+    // Configure session reuse if connecting to a remote and supported
     if connects_remote {
-        if let Some(dir) = dir {
-            if util::git::guess_ssh_persist_support(dir) {
-                util::git::configure_ssh_persist(&mut cmd);
-            }
+        if util::git::guess_ssh_persist_support(dir) {
+            util::git::configure_ssh_persist(&mut cmd);
         }
     }
 

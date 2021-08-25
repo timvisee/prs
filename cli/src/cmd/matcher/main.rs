@@ -32,6 +32,11 @@ impl<'a: 'b, 'b> MainMatcher<'a> {
     pub fn verbose(&self) -> bool {
         self.matches.is_present("verbose")
     }
+
+    /// Check whether to use GPG in TTY mode.
+    pub fn gpg_tty(&self) -> bool {
+        self.matches.is_present("gpg-tty")
+    }
 }
 
 impl<'a> Matcher<'a> for MainMatcher<'a> {

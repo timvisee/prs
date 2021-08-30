@@ -3,11 +3,11 @@ use std::ffi::OsStr;
 use std::path::Path;
 use std::process::{Command, ExitStatus};
 
-use crate::util;
 use anyhow::Result;
 use thiserror::Error;
 
 use crate::crypto::Key;
+use crate::util;
 
 /// Binary name.
 pub const BIN_NAME: &str = "tomb";

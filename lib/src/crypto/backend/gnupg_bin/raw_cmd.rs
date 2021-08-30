@@ -8,6 +8,7 @@ use anyhow::Result;
 use thiserror::Error;
 
 use super::Config;
+use crate::util;
 
 // /// Invoke a gpg command with the given arguments.
 // ///
@@ -103,6 +104,9 @@ where
         .env("LANGUAGE", "en_US.UTF-8");
     if config.gpg_tty {
         cmd.arg("--pinentry-mode").arg("loopback");
+        if !util::env::has_gpg_tty() {
+            cmd.env("GPG_TTY", util::tty::get_tty());
+        }
     }
     cmd.stdout(Stdio::piped()).stderr(Stdio::piped()).args(args);
     cmd

@@ -1,6 +1,7 @@
 use std::env;
 
 /// Check whether we're in a Wayland environment
+#[cfg(all(feature = "tomb", target_os = "linux"))]
 pub fn is_wayland() -> bool {
     has_non_empty_env("WAYLAND_DISPLAY")
 }

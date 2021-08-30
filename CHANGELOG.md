@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.1 (2021-08-30)
+- Fix `--gpg-tty` not prompting in tty if `GPG_TTY` was not set
+- Update dependencies
+
 ## 0.3.0 (2021-08-25)
 - Add `--gpg-tty` flag to instruct GPG to ask passphrases in the TTY
 - Partially re-enable SSH connection reuse on whitelisted hosts to speed up

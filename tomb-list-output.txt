@@ -1,5 +1,0 @@
-tomb  .  [.password-store] open on /home/timvisee/.password-store using (rw,nodev,noatime)
-tomb  .  [.password-store] open since do 08 jul 2021 21:57:48 CEST
-tomb  .  [.password-store] open by timvisee from /dev/pts/7 on axiom
-tomb  .  [.password-store] size 16M of which 14M (94%) is used: 912K free
-tomb [W] [.password-store] warning: your tomb is almost full!

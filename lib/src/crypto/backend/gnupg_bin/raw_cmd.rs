@@ -105,7 +105,9 @@ where
     if config.gpg_tty {
         cmd.arg("--pinentry-mode").arg("loopback");
         if !util::env::has_gpg_tty() {
-            cmd.env("GPG_TTY", util::tty::get_tty());
+            if let Some(tty) = util::tty::get_tty() {
+                cmd.env("GPG_TTY", tty);
+            }
         }
     }
     cmd.stdout(Stdio::piped()).stderr(Stdio::piped()).args(args);

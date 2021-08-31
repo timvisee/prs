@@ -17,7 +17,9 @@ const PROTO: Protocol = Protocol::OpenPgp;
 pub fn context(config: &Config) -> Result<Context, Err> {
     // Set environment when using GPG TTY
     if config.gpg_tty && !util::env::has_gpg_tty() {
-        env::set_var("GPG_TTY", util::tty::get_tty());
+        if let Some(tty) = util::tty::get_tty() {
+            env::set_var("GPG_TTY", tty);
+        }
     }
 
     let mut context = gpgme::Context::from_protocol(PROTO).map_err(Err::Context)?;

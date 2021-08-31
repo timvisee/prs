@@ -2,6 +2,7 @@
 extern crate clap;
 #[macro_use]
 extern crate derive_builder;
+#[allow(unused_imports)]
 #[macro_use]
 extern crate lazy_static;
 

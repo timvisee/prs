@@ -1,19 +1,28 @@
 //! Provides GPGME binary context adapter.
 
+use std::env;
+
 use anyhow::Result;
 use gpgme::{Context as GpgmeContext, PinentryMode, Protocol};
 use thiserror::Error;
 
 use super::raw;
 use crate::crypto::{proto, Config, IsContext, Key, Proto};
-use crate::{Ciphertext, Plaintext, Recipients};
+use crate::{util, Ciphertext, Plaintext, Recipients};
 
 /// Protocol to use.
 const PROTO: Protocol = Protocol::OpenPgp;
 
 /// Create GPGME crypto context.
 pub fn context(config: &Config) -> Result<Context, Err> {
+    // Set environment when using GPG TTY
+    if config.gpg_tty && !util::env::has_gpg_tty() {
+        env::set_var("GPG_TTY", util::tty::get_tty());
+    }
+
     let mut context = gpgme::Context::from_protocol(PROTO).map_err(Err::Context)?;
+
+    // Set pinentry mode when using GPG TTY
     if config.gpg_tty {
         context
             .set_pinentry_mode(PinentryMode::Loopback)

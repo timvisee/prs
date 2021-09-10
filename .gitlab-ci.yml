@@ -21,7 +21,7 @@ variables:
 # Install compiler and OpenSSL dependencies
 before_script:
   - apt-get update
-  - apt-get install -y --no-install-recommends libgpgme-dev build-essential pkg-config xorg-dev python3 libx11-xcb-dev libdbus-1-dev libgl1-mesa-dev $APT_GTK_LIBS $APT_PACKAGES
+  - apt-get install -y --no-install-recommends libgpgme-dev build-essential pkg-config xorg-dev libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev python3 libx11-xcb-dev libdbus-1-dev libgl1-mesa-dev $APT_GTK_LIBS $APT_PACKAGES
   - apt-get install -y $APT_PACKAGES_RECOMMENDS
   - |
     rustup install $RUST_VERSION

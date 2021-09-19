@@ -253,6 +253,7 @@ Make sure you meet and install the 'Run' [requirements](#requirements).
 
 See the operating system/distribution specific instructions below:
 - [Linux: Arch](#linux-arch-aur-packages)
+- [Windows](#windows)
 - [Other](#other) _(other Linux's, macOS)_
 
 #### Linux: Arch AUR packages
@@ -269,6 +270,39 @@ sudo pacman -S prs
 
 prs --help
 ```
+
+### Windows
+Using the [`scoop` package](#windows-scoop-package) is recommended.  
+Alternatively you may install it manually using the
+[prebuilt binaries](#windows-prebuilt-binaries).
+
+If you're using the [Windows Subsystem for Linux][wsl], it's highly recommended
+to install the [prebuilt Linux binary](#prebuilt-binaries-for-linux) instead.
+
+Only 64-bit (`x86_64`) binaries are provided.
+For other architectures and configurations you may [compile from source](#build).
+
+#### Windows: scoop package
+Make sure you've [`scoop`][scoop-install] installed, and run:
+
+```bash
+scoop install prs
+prs
+```
+
+#### Windows: Prebuilt binaries
+Check out the [latest release][github-latest-release] assets for Windows binaries.
+Use the `prs-v*-windows` binary.
+If it isn't available yet, you may use an artifact from a
+[previous version][github-releases] instead, until it is available.
+
+You can use `prs` from the command line in the same directory:
+```cmd
+.\prs.exe
+```
+
+To make it globally invokable as `prs`, you must make the binary available in
+your systems `PATH`.
 
 #### Other
 
@@ -652,17 +686,21 @@ The library portion of this project is licensed under the GNU LGPL-3.0 license.
 Check out the [lib/LICENSE](lib/LICENSE) file for more information.
 
 [git]: https://git-scm.com/
+[github-latest-release]: https://github.com/timvisee/prs/releases/latest
 [github-release-latest]: https://github.com/timvisee/prs/releases/latest
+[github-releases]: https://github.com/timvisee/prs/releases
 [gitlab-packages]: https://gitlab.com/timvisee/prs/-/packages
 [gitlab-releases]: https://gitlab.com/timvisee/prs/-/releases
 [gpg]: https://gnupg.org/
 [linux-notifications]: https://wiki.archlinux.org/index.php/Desktop_notifications
 [pass-compatible-clients]: https://www.passwordstore.org#other
 [pass]: https://www.passwordstore.org/
+[scoop-install]: https://scoop.sh/#installs-in-seconds
 [skim]: https://github.com/lotabout/skim
+[tomb-faq]: #what-is-tomb
 [tomb-install]: https://github.com/dyne/Tomb/blob/master/INSTALL.md
 [tomb]: https://www.dyne.org/software/tomb/
 [usage-demo-asciinema]: https://asciinema.org/a/368611
 [usage-demo-svg]: ./res/demo.svg
+[wsl]: https://docs.microsoft.com/en-us/windows/wsl/install-win10
 [xkcd538]: https://xkcd.com/538/
-[tomb-faq]: #what-is-tomb

@@ -252,9 +252,19 @@ available right now. Feel free to contribute.
 Make sure you meet and install the 'Run' [requirements](#requirements).
 
 See the operating system/distribution specific instructions below:
-- [Linux: Arch](#linux-arch-aur-packages)
+- [Linux](#linux-all-distributions)
 - [Windows](#windows)
 - [Other](#other) _(other Linux's, macOS)_
+
+### Linux (all distributions)
+Limited installation options are currently available. See the list below.
+Alternatively you may install it manually using the
+[prebuilt binaries](#linux-prebuilt-binaries).
+
+Only 64-bit (`x86_64`) packages and binaries are provided.
+For other architectures and configurations you may [compile from source](#build).
+
+More packages options will be coming soon.
 
 #### Linux: Arch AUR packages
 
@@ -269,6 +279,31 @@ sudo pacman -S prs
 # or using any other AUR helper
 
 prs --help
+```
+
+#### Linux: Prebuilt binaries
+Check out the [latest release][github-latest-release] assets for Linux binaries.  
+Use the `prs-v*-linux-x64-static` binary, to minimize the chance for issues.
+If it isn't available yet, you may use an artifact from a
+[previous version][github-releases] instead, until it is available.
+
+Make sure you meet and install the [requirements](#requirements) before you
+continue.
+
+You must make the binary executable, and may want to move it into
+`/usr/local/bin` to make it easily executable:
+
+```bash
+# Rename binary to prs
+mv ./prs-* ./prs
+
+# Mark binary as executable
+chmod a+x ./prs
+
+# Move binary into path, to make it easily usable
+sudo mv ./prs /usr/local/bin/
+
+prs
 ```
 
 ### Windows

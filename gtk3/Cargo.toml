@@ -15,9 +15,6 @@ categories = [
 ]
 edition = "2018"
 
-[badges]
-gitlab = { repository = "timvisee/prs", branch = "master" }
-
 [features]
 default = ["backend-gnupg-bin", "notify", "tomb"]
 

@@ -16,9 +16,6 @@ categories = [
 edition = "2018"
 default-run = "prs"
 
-[badges]
-gitlab = { repository = "timvisee/prs", branch = "master" }
-
 [features]
 default = ["backend-gnupg-bin", "alias", "clipboard", "notify", "select-skim", "select-fzf-bin", "tomb"]
 

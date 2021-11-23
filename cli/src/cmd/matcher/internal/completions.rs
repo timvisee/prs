@@ -138,13 +138,13 @@ impl Shell {
         S: Into<String>,
     {
         match self {
-            Shell::Bash => clap_generate::generate::<generators::Bash, _>(app, bin_name, buf),
-            Shell::Elvish => clap_generate::generate::<generators::Elvish, _>(app, bin_name, buf),
-            Shell::Fish => clap_generate::generate::<generators::Fish, _>(app, bin_name, buf),
+            Shell::Bash => clap_generate::generate(generators::Bash, app, bin_name, buf),
+            Shell::Elvish => clap_generate::generate(generators::Elvish, app, bin_name, buf),
+            Shell::Fish => clap_generate::generate(generators::Fish, app, bin_name, buf),
             Shell::PowerShell => {
-                clap_generate::generate::<generators::PowerShell, _>(app, bin_name, buf)
+                clap_generate::generate(generators::PowerShell, app, bin_name, buf)
             }
-            Shell::Zsh => clap_generate::generate::<generators::Zsh, _>(app, bin_name, buf),
+            Shell::Zsh => clap_generate::generate(generators::Zsh, app, bin_name, buf),
         }
     }
 

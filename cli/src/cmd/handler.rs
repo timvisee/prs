@@ -1,4 +1,4 @@
-use clap::{App, AppSettings, Arg, ArgMatches};
+use clap::{App, Arg, ArgMatches};
 
 use super::matcher::{self, Matcher};
 use super::subcmd;
@@ -17,8 +17,6 @@ impl<'a> Handler {
             .version(crate_version!())
             .author(crate_authors!())
             .about(crate_description!())
-            .global_setting(AppSettings::GlobalVersion)
-            .global_setting(AppSettings::VersionlessSubcommands)
             .arg(
                 Arg::new("force")
                     .long("force")
@@ -54,7 +52,7 @@ impl<'a> Handler {
                 Arg::new("verbose")
                     .long("verbose")
                     .short('v')
-                    .multiple(true)
+                    .multiple_occurrences(true)
                     .global(true)
                     .takes_value(false)
                     .about("Enable verbose information and logging"),

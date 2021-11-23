@@ -12,7 +12,7 @@ impl CmdGit {
             .arg(
                 Arg::new("COMMAND")
                     .about("Git command to invoke")
-                    .multiple(true),
+                    .multiple_values(true),
             )
             .arg(ArgStore::build())
             .setting(AppSettings::TrailingVarArg)

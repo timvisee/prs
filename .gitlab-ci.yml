@@ -18,6 +18,12 @@ variables:
   FEATURES_GTK3_UNIX: backend-gpgme
   FEATURES_CLI_WINDOWS: backend-gnupg-bin,clipboard,notify,select-fzf-bin
 
+# Rust build cache configuration
+.rust-build-cache: &rust-build-cache
+  key: "$CI_PIPELINE_ID-$RUST_VERSION"
+  paths:
+    - target/
+
 # Install compiler and OpenSSL dependencies
 before_script:
   - apt-get update
@@ -30,13 +36,7 @@ before_script:
     rustc --version
     cargo --version
 
-# Rust build cache configuration
-.rust-build-cache: &rust-build-cache
-  key: "$CI_PIPELINE_ID-$RUST_VERSION"
-  paths:
-    - target/
-
-# Rust build cache configuration
+# Windows before script
 .before_script-windows: &before_script-windows
   before_script:
     # Install scoop

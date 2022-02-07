@@ -57,7 +57,7 @@ ansi-escapes = "0.1"
 anyhow = "1.0"
 chbs = "0.1.0"
 clap = { version = "3.0", default-features = false, features = ["std", "suggestions", "color", "cargo", "env"] }
-clap_generate = "3.0.0-beta.5"
+clap_complete = "3.0"
 colored = "2.0"
 derive_builder = "0.10"
 edit = "0.1"

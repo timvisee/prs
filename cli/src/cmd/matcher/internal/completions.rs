@@ -3,7 +3,7 @@ use std::io::Write;
 use std::path::PathBuf;
 
 use clap::{App, ArgMatches};
-use clap_generate::generators;
+use clap_complete::shells;
 
 use super::Matcher;
 use crate::util;
@@ -138,13 +138,11 @@ impl Shell {
         S: Into<String>,
     {
         match self {
-            Shell::Bash => clap_generate::generate(generators::Bash, app, bin_name, buf),
-            Shell::Elvish => clap_generate::generate(generators::Elvish, app, bin_name, buf),
-            Shell::Fish => clap_generate::generate(generators::Fish, app, bin_name, buf),
-            Shell::PowerShell => {
-                clap_generate::generate(generators::PowerShell, app, bin_name, buf)
-            }
-            Shell::Zsh => clap_generate::generate(generators::Zsh, app, bin_name, buf),
+            Shell::Bash => clap_complete::generate(shells::Bash, app, bin_name, buf),
+            Shell::Elvish => clap_complete::generate(shells::Elvish, app, bin_name, buf),
+            Shell::Fish => clap_complete::generate(shells::Fish, app, bin_name, buf),
+            Shell::PowerShell => clap_complete::generate(shells::PowerShell, app, bin_name, buf),
+            Shell::Zsh => clap_complete::generate(shells::Zsh, app, bin_name, buf),
         }
     }
 
@@ -156,19 +154,19 @@ impl Shell {
     // {
     //     match self {
     //         Shell::Bash => {
-    //             clap_generate::generate_to::<generators::Bash, _, _>(app, bin_name, out_dir)
+    //             clap_complete::generate_to::<shells::Bash, _, _>(app, bin_name, out_dir)
     //         }
     //         Shell::Elvish => {
-    //             clap_generate::generate_to::<generators::Elvish, _, _>(app, bin_name, out_dir)
+    //             clap_complete::generate_to::<shells::Elvish, _, _>(app, bin_name, out_dir)
     //         }
     //         Shell::Fish => {
-    //             clap_generate::generate_to::<generators::Fish, _, _>(app, bin_name, out_dir)
+    //             clap_complete::generate_to::<shells::Fish, _, _>(app, bin_name, out_dir)
     //         }
     //         Shell::PowerShell => {
-    //             clap_generate::generate_to::<generators::PowerShell, _, _>(app, bin_name, out_dir)
+    //             clap_complete::generate_to::<shells::PowerShell, _, _>(app, bin_name, out_dir)
     //         }
     //         Shell::Zsh => {
-    //             clap_generate::generate_to::<generators::Zsh, _, _>(app, bin_name, out_dir)
+    //             clap_complete::generate_to::<shells::Zsh, _, _>(app, bin_name, out_dir)
     //         }
     //     }
     // }

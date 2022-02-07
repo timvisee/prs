@@ -388,16 +388,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "clap_generate"
-version = "3.0.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8e1b28c4a802ac3628604fd267cac62aaea74dc61af3410db6b1c44c03b42599"
-dependencies = [
- "clap 3.0.14",
- "clap_complete",
-]
-
-[[package]]
 name = "clipboard-win"
 version = "3.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1761,7 +1751,7 @@ dependencies = [
  "bytesize",
  "chbs",
  "clap 3.0.14",
- "clap_generate",
+ "clap_complete",
  "colored",
  "copypasta-ext",
  "derive_builder 0.10.2",

@@ -21,7 +21,7 @@ impl CmdCompletions {
                     .takes_value(true)
                     .possible_value("all")
                     .possible_values(shell_variants)
-                    .case_insensitive(true),
+                    .ignore_case(true),
             )
             .arg(
                 Arg::new("output")

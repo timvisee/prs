@@ -49,6 +49,9 @@ before_script:
     - rustc --version
     - cargo --version
 
+    # Install missing Rust target
+    - rustup target add x86_64-pc-windows-msvc
+
     # Install GPGME
     - scoop install gpg
 

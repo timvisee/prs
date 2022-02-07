@@ -11,7 +11,7 @@ impl CmdClone {
             .about("Clone existing password store")
             .arg(
                 Arg::new("GIT_URL")
-                    .about("Remote git URL to clone from")
+                    .help("Remote git URL to clone from")
                     .required(true),
             )
             .arg(ArgStore::build())

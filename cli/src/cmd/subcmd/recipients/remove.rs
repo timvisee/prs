@@ -16,7 +16,7 @@ impl CmdRemove {
                 Arg::new("recrypt")
                     .long("recrypt")
                     .alias("reencrypt")
-                    .about("Re-encrypting all secrets"),
+                    .help("Re-encrypting all secrets"),
             )
             .arg(ArgAllowDirty::build())
             .arg(ArgNoSync::build())

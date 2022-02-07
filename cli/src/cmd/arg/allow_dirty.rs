@@ -18,7 +18,7 @@ impl CmdArg for ArgAllowDirty {
             .alias("sync-allow-dirty")
             .alias("sync-dirty")
             .global(true)
-            .about("Allow commit and sync on dirty store repository")
+            .help("Allow commit and sync on dirty store repository")
     }
 }
 

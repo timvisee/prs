@@ -18,7 +18,7 @@ impl CmdCopy {
                 Arg::new("all")
                     .long("all")
                     .short('a')
-                    .about("Copy whole secret, not just first line"),
+                    .help("Copy whole secret, not just first line"),
             )
             .arg(ArgQuery::build())
             .arg(ArgTimeout::build())

@@ -15,7 +15,7 @@ impl CmdGenerate {
                 Arg::new("no-add")
                     .long("no-add")
                     .alias("skip-add")
-                    .about("Skip adding key pair to store"),
+                    .help("Skip adding key pair to store"),
             )
             .arg(
                 Arg::new("no-recrypt")
@@ -23,7 +23,7 @@ impl CmdGenerate {
                     .alias("no-reencrypt")
                     .alias("skip-recrypt")
                     .alias("skip-reencrypt")
-                    .about("Skip re-encrypting all secrets")
+                    .help("Skip re-encrypting all secrets")
                     .conflicts_with("no-add"),
             )
             .arg(ArgAllowDirty::build())

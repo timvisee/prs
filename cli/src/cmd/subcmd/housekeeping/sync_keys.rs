@@ -14,7 +14,7 @@ impl CmdSyncKeys {
                 Arg::new("no-import")
                     .long("no-import")
                     .alias("skip-import")
-                    .about("Skip importing missing keys to keychain"),
+                    .help("Skip importing missing keys to keychain"),
             )
             .arg(ArgAllowDirty::build())
             .arg(ArgNoSync::build())

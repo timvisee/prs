@@ -18,7 +18,7 @@ impl CmdList {
                     .long("list")
                     .short('l')
                     .alias("no-tree")
-                    .about("Show as list, not as tree"),
+                    .help("Show as list, not as tree"),
             )
             .arg(
                 Arg::new("aliases")
@@ -27,7 +27,7 @@ impl CmdList {
                     .alias("symlinks")
                     .alias("only-aliases")
                     .alias("only-symlinks")
-                    .about("Show only alises"),
+                    .help("Show only alises"),
             )
             .arg(
                 Arg::new("non-aliases")
@@ -38,7 +38,7 @@ impl CmdList {
                     .alias("no-symlinks")
                     .alias("only-non-aliases")
                     .alias("only-non-symlinks")
-                    .about("Show only non-alises")
+                    .help("Show only non-alises")
                     .conflicts_with("aliases"),
             )
     }

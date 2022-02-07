@@ -16,14 +16,14 @@ impl CmdGenerate {
             .about("Generate a secure secret")
             .arg(
                 Arg::new("NAME")
-                    .about("Secret name and path")
+                    .help("Secret name and path")
                     .required_unless_present_any(&["show", "copy"]),
             )
             .arg(
                 Arg::new("passphrase")
                     .long("passphrase")
                     .short('P')
-                    .about("Generate passhprase instead of random string"),
+                    .help("Generate passhprase instead of random string"),
             )
             .arg(
                 Arg::new("length")
@@ -31,8 +31,8 @@ impl CmdGenerate {
                     .long("length")
                     .short('l')
                     .alias("len")
-                    .about("Generated password length in characters")
-                    .long_about(
+                    .help("Generated password length in characters")
+                    .long_help(
                         "Generated password length in characters. Passphrase length in words.",
                     ),
             )
@@ -40,20 +40,20 @@ impl CmdGenerate {
                 Arg::new("merge")
                     .long("merge")
                     .short('m')
-                    .about("Merge into existing secret, don't create new secret"),
+                    .help("Merge into existing secret, don't create new secret"),
             )
             .arg(
                 Arg::new("edit")
                     .long("edit")
                     .short('e')
-                    .about("Edit secret after generation"),
+                    .help("Edit secret after generation"),
             )
             .arg(
                 Arg::new("stdin")
                     .long("stdin")
                     .short('S')
                     .alias("from-stdin")
-                    .about("Append to generated secret from stdin")
+                    .help("Append to generated secret from stdin")
                     .conflicts_with("edit"),
             )
             .arg(
@@ -61,7 +61,7 @@ impl CmdGenerate {
                     .long("show")
                     .alias("cat")
                     .alias("display")
-                    .about("Display secret after generation"),
+                    .help("Display secret after generation"),
             )
             .arg(ArgStore::build())
             .arg(ArgAllowDirty::build())
@@ -74,7 +74,7 @@ impl CmdGenerate {
                     .long("copy")
                     .short('c')
                     .alias("cp")
-                    .about("Copy secret to clipboard"),
+                    .help("Copy secret to clipboard"),
             )
             .arg(ArgTimeout::build().requires("copy"));
 

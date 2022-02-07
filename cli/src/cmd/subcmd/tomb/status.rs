@@ -9,7 +9,7 @@ impl CmdStatus {
             Arg::new("open")
                 .long("open")
                 .alias("o")
-                .about("Open tomb is it is closed"),
+                .help("Open tomb is it is closed"),
         )
     }
 }

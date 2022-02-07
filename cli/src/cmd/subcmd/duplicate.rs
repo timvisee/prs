@@ -14,7 +14,7 @@ impl CmdDuplicate {
             .arg(ArgQuery::build().required(true))
             .arg(
                 Arg::new("DEST")
-                    .about("Secret destination path")
+                    .help("Secret destination path")
                     .required(true),
             )
             .arg(ArgStore::build())

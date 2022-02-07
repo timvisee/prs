@@ -12,7 +12,7 @@ impl CmdClose {
             .arg(
                 Arg::new("try")
                     .long("try")
-                    .about("Try to close, don't fail if already closed"),
+                    .help("Try to close, don't fail if already closed"),
             )
     }
 }

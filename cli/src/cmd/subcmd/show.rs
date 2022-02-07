@@ -18,11 +18,11 @@ impl CmdShow {
                     .long("first")
                     .alias("password")
                     .alias("pass")
-                    .about("Show only the first line of the secret"),
+                    .help("Show only the first line of the secret"),
             )
             .arg(ArgQuery::build())
             .arg(ArgStore::build())
-            .arg(ArgTimeout::build().about("Timeout after which to clear output"))
+            .arg(ArgTimeout::build().help("Timeout after which to clear output"))
             .arg(ArgProperty::build().conflicts_with("first"));
 
         #[cfg(feature = "clipboard")]
@@ -31,7 +31,7 @@ impl CmdShow {
                 .long("copy")
                 .short('c')
                 .alias("cp")
-                .about("Copy secret to clipboard"),
+                .help("Copy secret to clipboard"),
         );
 
         cmd

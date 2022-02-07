@@ -16,7 +16,7 @@ impl CmdEdit {
                     .long("stdin")
                     .short('S')
                     .alias("from-stdin")
-                    .about("Read secret from stdin, do not open editor"),
+                    .help("Read secret from stdin, do not open editor"),
             )
             .arg(ArgStore::build())
             .arg(ArgAllowDirty::build())

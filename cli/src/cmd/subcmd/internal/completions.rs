@@ -15,7 +15,7 @@ impl CmdCompletions {
             .alias("complete")
             .arg(
                 Arg::new("SHELL")
-                    .about("Shell type to generate completions for")
+                    .help("Shell type to generate completions for")
                     .required(true)
                     .multiple_values(true)
                     .takes_value(true)
@@ -31,14 +31,14 @@ impl CmdCompletions {
                     .alias("out")
                     .alias("dir")
                     .value_name("DIR")
-                    .about("Shell completion files output directory"),
+                    .help("Shell completion files output directory"),
             )
             .arg(
                 Arg::new("stdout")
                     .long("stdout")
                     .short('s')
                     .alias("print")
-                    .about("Output completion files to stdout instead")
+                    .help("Output completion files to stdout instead")
                     .conflicts_with("output"),
             )
             .arg(
@@ -50,7 +50,7 @@ impl CmdCompletions {
                     .alias("bin-name")
                     .alias("binary-name")
                     .value_name("NAME")
-                    .about("Name of binary to generate completions for"),
+                    .help("Name of binary to generate completions for"),
             )
     }
 }

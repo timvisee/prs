@@ -12,7 +12,7 @@ impl CmdClipRevert {
             .arg(
                 Arg::new("previous-base64-stdin")
                     .long("previous-base64-stdin")
-                    .about("Read previous contents from stdin as base64 line"),
+                    .help("Read previous contents from stdin as base64 line"),
             )
             .arg(ArgTimeout::build())
     }

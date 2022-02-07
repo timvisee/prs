@@ -17,7 +17,7 @@ impl CmdArg for ArgStore {
             .value_name("PATH")
             .env("PASSWORD_STORE_DIR")
             .global(true)
-            .about("Password store to use")
+            .help("Password store to use")
     }
 }
 

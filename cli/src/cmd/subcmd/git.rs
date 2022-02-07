@@ -11,7 +11,7 @@ impl CmdGit {
             .about("Invoke git command in password store")
             .arg(
                 Arg::new("COMMAND")
-                    .about("Git command to invoke")
+                    .help("Git command to invoke")
                     .multiple_values(true),
             )
             .arg(ArgStore::build())

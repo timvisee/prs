@@ -22,7 +22,7 @@ impl CmdInit {
                     .alias("time")
                     .value_name("TIME")
                     .default_value(&TIMER_DEFAULT)
-                    .about("Time after which to close the Tomb"),
+                    .help("Time after which to close the Tomb"),
             )
     }
 }

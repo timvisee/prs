@@ -22,7 +22,7 @@ impl<'a> Handler {
                     .long("force")
                     .short('f')
                     .global(true)
-                    .about("Force the action, ignore warnings"),
+                    .help("Force the action, ignore warnings"),
             )
             .arg(
                 Arg::new("no-interact")
@@ -31,7 +31,7 @@ impl<'a> Handler {
                     .alias("no-interactive")
                     .alias("non-interactive")
                     .global(true)
-                    .about("Not interactive, do not prompt"),
+                    .help("Not interactive, do not prompt"),
             )
             .arg(
                 Arg::new("yes")
@@ -39,14 +39,14 @@ impl<'a> Handler {
                     .short('y')
                     .alias("assume-yes")
                     .global(true)
-                    .about("Assume yes for prompts"),
+                    .help("Assume yes for prompts"),
             )
             .arg(
                 Arg::new("quiet")
                     .long("quiet")
                     .short('q')
                     .global(true)
-                    .about("Produce output suitable for logging and automation"),
+                    .help("Produce output suitable for logging and automation"),
             )
             .arg(
                 Arg::new("verbose")
@@ -55,13 +55,13 @@ impl<'a> Handler {
                     .multiple_occurrences(true)
                     .global(true)
                     .takes_value(false)
-                    .about("Enable verbose information and logging"),
+                    .help("Enable verbose information and logging"),
             )
             .arg(
                 Arg::new("gpg-tty")
                     .long("gpg-tty")
                     .global(true)
-                    .about("Instruct GPG to ask passphrase in TTY rather than pinentry"),
+                    .help("Instruct GPG to ask passphrase in TTY rather than pinentry"),
             )
             .subcommand(subcmd::CmdAdd::build())
             .subcommand(subcmd::CmdClone::build())

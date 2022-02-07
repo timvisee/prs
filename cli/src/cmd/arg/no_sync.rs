@@ -19,7 +19,7 @@ impl CmdArg for ArgNoSync {
             .alias("sync-keep-dirty")
             .global(true)
             // This prevents: sync before action, committing changes, sync after action
-            .about("Do not commit and sync changes, keep store dirty")
+            .help("Do not commit and sync changes, keep store dirty")
     }
 }
 

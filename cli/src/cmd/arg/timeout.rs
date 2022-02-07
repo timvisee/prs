@@ -28,7 +28,7 @@ impl CmdArg for ArgTimeout {
             .alias("second")
             .value_name("SECONDS")
             .global(true)
-            .about("Timeout after which to clear clipboard")
+            .help("Timeout after which to clear clipboard")
     }
 }
 

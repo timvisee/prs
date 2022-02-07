@@ -17,7 +17,7 @@ impl CmdArg for ArgProperty {
             .alias("prop")
             .value_name("NAME")
             .global(true)
-            .about("Select a specific property")
+            .help("Select a specific property")
     }
 }
 

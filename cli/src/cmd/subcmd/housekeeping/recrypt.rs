@@ -14,7 +14,7 @@ impl CmdRecrypt {
                 Arg::new("all")
                     .long("all")
                     .short('a')
-                    .about("Re-encrypt all secrets")
+                    .help("Re-encrypt all secrets")
                     .conflicts_with("QUERY"),
             )
             .arg(ArgQuery::build().required_unless_present("all"))

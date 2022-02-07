@@ -14,7 +14,7 @@ impl CmdAdd {
                 Arg::new("secret")
                     .long("secret")
                     .alias("private")
-                    .about("Add public key we have private key for"),
+                    .help("Add public key we have private key for"),
             )
             .arg(
                 Arg::new("no-recrypt")
@@ -22,7 +22,7 @@ impl CmdAdd {
                     .alias("no-reencrypt")
                     .alias("skip-recrypt")
                     .alias("skip-reencrypt")
-                    .about("Skip re-encrypting all secrets"),
+                    .help("Skip re-encrypting all secrets"),
             )
             .arg(ArgAllowDirty::build())
             .arg(ArgNoSync::build())

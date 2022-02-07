@@ -15,7 +15,7 @@ impl CmdOpen {
                     .short('t')
                     .alias("time")
                     .value_name("TIME")
-                    .about("Time after which to close the Tomb"),
+                    .help("Time after which to close the Tomb"),
             )
     }
 }

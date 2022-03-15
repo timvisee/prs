@@ -408,13 +408,15 @@ where
     type Item = Secret;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.filter.is_none() {
-            return self.inner.next();
-        }
+        // Return all with no filter, or lowercase filter text
+        let filter = match &self.filter {
+            None => return self.inner.next(),
+            Some(filter) => filter.to_lowercase(),
+        };
 
-        let filter = self.filter.as_ref().unwrap();
-        while let Some(secret) = self.inner.next() {
-            if secret.name.contains(filter) {
+        // Return each secret matching the filter
+        for secret in self.inner.by_ref() {
+            if secret.name.to_lowercase().contains(&filter) {
                 return Some(secret);
             }
         }

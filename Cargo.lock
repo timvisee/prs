@@ -2027,9 +2027,9 @@ checksum = "d29ab0c6d3fc0ee92fe66e2d99f700eab17a8d57d1c1d3b748380fb20baa78cd"
 
 [[package]]
 name = "secstr"
-version = "0.4.0"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cce2c726741c320e5b8f1edd9a21b3c2c292ae94514afd001d41d81ba143dafc"
+checksum = "49fa8c1d89e7dc5e2776fbf507d8b088ff61bbaf83bf4da1cc9ed1c061358104"
 dependencies = [
  "libc",
 ]

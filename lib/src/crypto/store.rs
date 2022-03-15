@@ -60,7 +60,7 @@ fn write_fingerprints<P: AsRef<Path>, S: AsRef<str>>(path: P, fingerprints: &[S]
     fs::write(
         path,
         fingerprints
-            .into_iter()
+            .iter()
             .map(|k| k.as_ref())
             .collect::<Vec<_>>()
             .join("\n"),
@@ -164,7 +164,7 @@ pub fn store_sync_public_key_files(store: &Store, keys: &[Key]) -> Result<()> {
     // Add missing keys
     let mut contexts = ContextPool::empty();
     for (key, fp) in keys
-        .into_iter()
+        .iter()
         .map(|k| (k, k.fingerprint(false)))
         .filter(|(_, fp)| !files.iter().any(|(_, other)| fp == other))
     {
@@ -199,7 +199,7 @@ pub fn import_missing_keys_from_store(store: &Store) -> Result<Vec<ImportResult>
     let gpg_fingerprints = store_read_gpg_fingerprints(store)?;
     for fingerprint in gpg_fingerprints {
         let context = contexts.get_mut(&crate::CONFIG)?;
-        if let Err(_) = context.get_public_key(&fingerprint) {
+        if context.get_public_key(&fingerprint).is_err() {
             let path = &store_public_keys_dir(store).join(&fingerprint);
             if path.is_file() {
                 context.import_key_file(path)?;

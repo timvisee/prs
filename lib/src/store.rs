@@ -47,18 +47,18 @@ impl Store {
 
     /// Get the recipient keys for this store.
     pub fn recipients(&self) -> Result<Recipients> {
-        Recipients::load(&self)
+        Recipients::load(self)
     }
 
     /// Get a sync helper for this store.
     pub fn sync(&self) -> Sync {
-        Sync::new(&self)
+        Sync::new(self)
     }
 
     /// Get a tomb helper for this store.
     #[cfg(all(feature = "tomb", target_os = "linux"))]
     pub fn tomb(&self, quiet: bool, verbose: bool, force: bool) -> Tomb {
-        Tomb::new(&self, quiet, verbose, force)
+        Tomb::new(self, quiet, verbose, force)
     }
 
     /// Create secret iterator for this store.
@@ -85,13 +85,13 @@ impl Store {
         // Try path with secret file suffix
         let with_suffix = PathBuf::from(format!("{}{}", path, SECRET_SUFFIX));
         if with_suffix.is_file() {
-            return Some(Secret::from(&self, with_suffix));
+            return Some(Secret::from(self, with_suffix));
         }
 
         // Try path without secret file suffix
         let without_suffix = Path::new(path);
         if without_suffix.is_file() {
-            return Some(Secret::from(&self, without_suffix.to_path_buf()));
+            return Some(Secret::from(self, without_suffix.to_path_buf()));
         }
 
         None
@@ -104,7 +104,7 @@ impl Store {
     pub fn find(&self, query: Option<String>) -> FindSecret {
         // Try to find exact secret match
         if let Some(query) = &query {
-            if let Some(secret) = self.find_at(&query) {
+            if let Some(secret) = self.find_at(query) {
                 return FindSecret::Exact(secret);
             }
         }
@@ -142,7 +142,7 @@ impl Store {
                 .as_ref()
                 .to_str()
                 .and_then(|s| s.chars().last())
-                .map(|s| path::is_separator(s))
+                .map(path::is_separator)
                 .unwrap_or(false);
 
         // Strip store prefix
@@ -164,7 +164,7 @@ impl Store {
         }
 
         // Add secret extension if non existent
-        let ext: OsString = SECRET_SUFFIX.trim_start_matches(".").into();
+        let ext: OsString = SECRET_SUFFIX.trim_start_matches('.').into();
         if path.extension() != Some(&ext) {
             let mut tmp = path.as_os_str().to_owned();
             tmp.push(SECRET_SUFFIX);
@@ -247,7 +247,7 @@ impl Secret {
 /// Get relative path in given root.
 pub fn relative_path<'a>(
     root: &'a Path,
-    path: &'a PathBuf,
+    path: &'a Path,
 ) -> Result<&'a Path, std::path::StripPrefixError> {
     path.strip_prefix(&root)
 }
@@ -325,7 +325,7 @@ fn is_hidden_subdir(entry: &DirEntry) -> bool {
         && entry
             .file_name()
             .to_str()
-            .map(|s| s.starts_with(".") || s == "lost+found")
+            .map(|s| s.starts_with('.') || s == "lost+found")
             .unwrap_or(false)
 }
 

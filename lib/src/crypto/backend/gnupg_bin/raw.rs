@@ -41,7 +41,7 @@ pub fn encrypt(config: &Config, recipients: &[&str], plaintext: Plaintext) -> Re
 
     Ok(Ciphertext::from(
         gpg_stdin_stdout_ok_bin(config, args.as_slice(), plaintext.unsecure_ref())
-            .map_err(|err| Err::Decrypt(err))?,
+            .map_err(Err::Decrypt)?,
     ))
 }
 
@@ -53,7 +53,7 @@ pub fn decrypt(config: &Config, ciphertext: Ciphertext) -> Result<Plaintext> {
     // TODO: ensure ciphertext ends with PGP footer
     Ok(Plaintext::from(
         gpg_stdin_stdout_ok_bin(config, &["--quiet", "--decrypt"], ciphertext.unsecure_ref())
-            .map_err(|err| Err::Decrypt(err))?,
+            .map_err(Err::Decrypt)?,
     ))
 }
 
@@ -69,7 +69,7 @@ pub fn can_decrypt(config: &Config, ciphertext: Ciphertext) -> Result<bool> {
     // TODO: ensure ciphertext ends with PGP footer
 
     let output = gpg_stdin_output(config, &["--quiet", "--decrypt"], ciphertext.unsecure_ref())
-        .map_err(|err| Err::Decrypt(err))?;
+        .map_err(Err::Decrypt)?;
 
     match output.status.code() {
         Some(0) | None => Ok(true),
@@ -105,7 +105,7 @@ pub fn private_keys(config: &Config) -> Result<Vec<KeyId>> {
 /// Panics if the provides key does not look like a public key.
 pub fn import_key(config: &Config, key: &[u8]) -> Result<()> {
     // Assert we're importing a public key
-    let key_str = std::str::from_utf8(&key).expect("exported key is invalid UTF-8");
+    let key_str = std::str::from_utf8(key).expect("exported key is invalid UTF-8");
     assert!(
         !key_str.contains("PRIVATE KEY"),
         "imported key contains PRIVATE KEY, blocked to prevent accidentally leaked secret key"
@@ -130,7 +130,7 @@ pub fn import_key(config: &Config, key: &[u8]) -> Result<()> {
 pub fn export_key(config: &Config, fingerprint: &str) -> Result<Vec<u8>> {
     // Export key with gpg command
     let data = gpg_stdout_ok_bin(config, &["--quiet", "--armor", "--export", fingerprint])
-        .map_err(|err| Err::Export(err))?;
+        .map_err(Err::Export)?;
 
     // Assert we're exporting a public key
     let data_str = std::str::from_utf8(&data).expect("exported key is invalid UTF-8");

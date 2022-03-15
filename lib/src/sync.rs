@@ -256,10 +256,7 @@ pub enum Readyness {
 impl Readyness {
     /// Check if ready.
     pub fn is_ready(&self) -> bool {
-        match self {
-            Self::Ready => true,
-            _ => false,
-        }
+        matches!(self, Self::Ready)
     }
 }
 

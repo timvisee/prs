@@ -105,25 +105,25 @@ pub fn git_remote(repo: &Path) -> Result<Vec<String>> {
 
 /// Get get remote URL.
 pub fn git_remote_get_url(repo: &Path, remote: &str) -> Result<String> {
-    Ok(git_stdout_ok(repo, &["remote", "get-url", remote], false)?)
+    git_stdout_ok(repo, &["remote", "get-url", remote], false)
 }
 
 /// Get add remote URL.
 pub fn git_remote_add(repo: &Path, remote: &str, url: &str) -> Result<()> {
-    Ok(git(repo, &["remote", "add", remote, url], false)?)
+    git(repo, &["remote", "add", remote, url], false)
 }
 
 /// Get remove remote URL.
 pub fn git_remote_remove(repo: &Path, remote: &str) -> Result<()> {
-    Ok(git(repo, &["remote", "remove", remote], false)?)
+    git(repo, &["remote", "remove", remote], false)
 }
 
 /// Get the current git branch name.
 pub fn git_current_branch(repo: &Path) -> Result<String> {
     let branch = git_stdout_ok(repo, &["rev-parse", "--abbrev-ref", "HEAD"], false)?;
     assert!(!branch.is_empty(), "git returned empty branch name");
-    assert!(!branch.contains("\n"), "git returned multiple branches");
-    Ok(branch.into())
+    assert!(!branch.contains('\n'), "git returned multiple branches");
+    Ok(branch)
 }
 
 /// List remote git branches.
@@ -174,7 +174,7 @@ pub fn git_branch_upstream<S: AsRef<str>>(repo: &Path, reference: S) -> Result<O
         return Ok(None);
     }
     assert!(
-        upstream.contains("/"),
+        upstream.contains('/'),
         "git returned invalid upstream branch name"
     );
     Ok(Some(upstream.into()))
@@ -182,7 +182,7 @@ pub fn git_branch_upstream<S: AsRef<str>>(repo: &Path, reference: S) -> Result<O
 
 /// Set upstream branch for the given branch.
 pub fn git_branch_set_upstream(repo: &Path, reference: Option<&str>, upstream: &str) -> Result<()> {
-    let mut args = vec!["branch", "--set-upstream-to", &upstream];
+    let mut args = vec!["branch", "--set-upstream-to", upstream];
     if let Some(reference) = reference {
         args.push(reference);
     }
@@ -193,7 +193,7 @@ pub fn git_branch_set_upstream(repo: &Path, reference: Option<&str>, upstream: &
 pub fn git_ref_hash<S: AsRef<str>>(repo: &Path, reference: S) -> Result<String> {
     let hash = git_stdout_ok(repo, &["rev-parse", reference.as_ref()], false)?;
     assert_eq!(hash.len(), 40, "git returned invalid hash");
-    Ok(hash.into())
+    Ok(hash)
 }
 
 /// Get system time the repository was last pulled.
@@ -259,10 +259,8 @@ where
     cmd.current_dir(dir);
 
     // Configure session reuse if connecting to a remote and supported
-    if connects_remote {
-        if util::git::guess_ssh_persist_support(dir) {
-            util::git::configure_ssh_persist(&mut cmd);
-        }
+    if connects_remote && util::git::guess_ssh_persist_support(dir) {
+        util::git::configure_ssh_persist(&mut cmd);
     }
 
     cmd.args(args);

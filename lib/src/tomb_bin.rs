@@ -139,7 +139,7 @@ pub fn tomb_resize(
 
 /// Get tomb name based on path.
 pub fn name(path: &Path) -> Option<&str> {
-    path.file_name()?.to_str()?.rsplitn(2, ".").last()
+    path.file_name()?.to_str()?.rsplitn(2, '.').last()
 }
 
 /// Invoke a tomb command with the given arguments.

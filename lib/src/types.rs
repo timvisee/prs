@@ -98,7 +98,7 @@ impl Plaintext {
             .lines()
             .next()
             .map(|l| l.as_bytes().into())
-            .unwrap_or_else(|| vec![])
+            .unwrap_or_else(Vec::new)
             .into())
     }
 

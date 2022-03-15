@@ -396,7 +396,7 @@ fn tomb_paths(root: &Path) -> Vec<PathBuf> {
 
     // Path from pass-tomb in store parent and in home
     if let Some(parent) = parent {
-        paths.push(parent.join(format!(".password{}", TOMB_FILE_SUFFIX)).into());
+        paths.push(parent.join(format!(".password{}", TOMB_FILE_SUFFIX)));
     }
     paths.push(format!("~/.password{}", TOMB_FILE_SUFFIX).into());
 
@@ -433,11 +433,7 @@ fn tomb_key_paths(root: &Path) -> Vec<PathBuf> {
 
     // Path from pass-tomb in store parent and in home
     if let Some(parent) = parent {
-        paths.push(
-            parent
-                .join(format!(".password{}", TOMB_KEY_FILE_SUFFIX))
-                .into(),
-        );
+        paths.push(parent.join(format!(".password{}", TOMB_KEY_FILE_SUFFIX)));
     }
     paths.push(format!("~/.password{}", TOMB_KEY_FILE_SUFFIX).into());
 

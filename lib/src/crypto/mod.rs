@@ -240,7 +240,7 @@ pub trait IsContext {
     fn find_public_keys(&mut self, fingerprints: &[&str]) -> Result<Vec<Key>> {
         let keys = self.keys_public()?;
         Ok(fingerprints
-            .into_iter()
+            .iter()
             .filter_map(|fingerprint| {
                 keys.iter()
                     .find(|key| util::fingerprints_equal(key.fingerprint(false), fingerprint))

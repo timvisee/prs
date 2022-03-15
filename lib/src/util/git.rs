@@ -80,7 +80,7 @@ pub fn guess_ssh_persist_support(repo: &Path) -> bool {
         .collect();
 
     // Ensure all SSH URI hosts are part of whitelist, assume incompatible on error
-    let supported = ssh_uris.iter().all(|uri| match ssh_uri_host(&uri) {
+    let supported = ssh_uris.iter().all(|uri| match ssh_uri_host(uri) {
         Some(host) => SSH_PERSIST_HOST_WHITELIST.contains(&host.to_lowercase().as_str()),
         None => false,
     });

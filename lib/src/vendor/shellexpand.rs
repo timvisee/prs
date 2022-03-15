@@ -192,12 +192,10 @@ where
             if !input.as_ref().starts_with("~") && s.starts_with("~") {
                 // return as is
                 s.into()
+            } else if let Cow::Owned(s) = tilde_with_context(&s, home_dir) {
+                s.into()
             } else {
-                if let Cow::Owned(s) = tilde_with_context(&s, home_dir) {
-                    s.into()
-                } else {
-                    s.into()
-                }
+                s.into()
             }
         }
     })

@@ -70,7 +70,7 @@ pub fn parse_duration(duration: &str) -> Result<usize, ParseDurationError> {
 /// - `now`
 pub fn format_duration(mut secs: u32) -> String {
     // Get the total number of seconds, return immediately if zero or less
-    if secs <= 0 {
+    if secs == 0 {
         return "now".into();
     }
 

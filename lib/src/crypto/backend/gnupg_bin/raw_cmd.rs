@@ -42,7 +42,7 @@ where
 
     // Pass stdin to child process
     let mut child = cmd.spawn().unwrap();
-    if let Err(err) = child.stdin.as_mut().unwrap().write_all(&stdin) {
+    if let Err(err) = child.stdin.as_mut().unwrap().write_all(stdin) {
         return Err(Err::System(err).into());
     }
 
@@ -152,7 +152,7 @@ fn u8_as_utf16(bytes: &[u8]) -> Option<String> {
 
     // Transmute to u16 slice, try to parse
     let bytes: &[u16] =
-        unsafe { &std::slice::from_raw_parts(bytes.as_ptr() as *const u16, bytes.len() / 2) };
+        unsafe { std::slice::from_raw_parts(bytes.as_ptr() as *const u16, bytes.len() / 2) };
     String::from_utf16(bytes).ok()
 }
 

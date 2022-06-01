@@ -122,6 +122,7 @@ impl fmt::Display for Key {
 pub fn context(config: &Config) -> Result<Context, Err> {
     // Select proper crypto backend
     match config.proto {
+        #[allow(unreachable_code)]
         Proto::Gpg => {
             #[cfg(feature = "backend-gpgme")]
             return Ok(Context::from(Box::new(

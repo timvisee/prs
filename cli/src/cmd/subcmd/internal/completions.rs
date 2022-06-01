@@ -1,4 +1,4 @@
-use clap::{App, Arg};
+use clap::{Arg, Command};
 
 use crate::cmd::matcher::internal::completions::Shell;
 
@@ -6,10 +6,10 @@ use crate::cmd::matcher::internal::completions::Shell;
 pub struct CmdCompletions;
 
 impl CmdCompletions {
-    pub fn build<'a>() -> App<'a> {
-        let shell_variants: Vec<_> = Shell::variants().into_iter().map(|v| v.name()).collect();
+    pub fn build<'a>() -> Command<'a> {
+        let shell_variants: Vec<_> = Shell::variants().iter().map(|v| v.name()).collect();
 
-        App::new("completions")
+        Command::new("completions")
             .about("Shell completions")
             .alias("completion")
             .alias("complete")

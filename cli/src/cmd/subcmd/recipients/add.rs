@@ -1,4 +1,4 @@
-use clap::{App, Arg};
+use clap::{Arg, Command};
 
 use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, CmdArg};
 
@@ -6,8 +6,8 @@ use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, CmdArg};
 pub struct CmdAdd;
 
 impl CmdAdd {
-    pub fn build<'a>() -> App<'a> {
-        App::new("add")
+    pub fn build<'a>() -> Command<'a> {
+        Command::new("add")
             .alias("a")
             .about("Add store recipient")
             .arg(

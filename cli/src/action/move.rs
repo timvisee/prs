@@ -59,7 +59,7 @@ impl<'a> Move<'a> {
         let path = store
             .normalize_secret_path(dest, secret.path.file_name().and_then(|p| p.to_str()), true)
             .map_err(Err::NormalizePath)?;
-        let new_secret = Secret::from(&store, path.to_path_buf());
+        let new_secret = Secret::from(&store, path.clone());
 
         // Check if destination already exists if not forcing
         if !matcher_main.force() && path.is_file() {
@@ -137,10 +137,10 @@ fn update_secret_alias_target(
         .join(target)
         .canonicalize()
         .map_err(Err::UpdateAlias)?;
-    let target = Secret::from(&store, target);
+    let target = Secret::from(store, target);
 
     // Update alias to point to same target when moved
-    update_alias(&store, &target, &secret.path, &future_secret.path)?;
+    update_alias(store, &target, &secret.path, &future_secret.path)?;
 
     Ok(true)
 }
@@ -153,8 +153,8 @@ fn update_secret_alias_target(
 /// Aliases targetting `secret` will be updated to point to `new_secret`.
 #[cfg(feature = "alias")]
 fn update_alias_for_secret_to(store: &Store, secret: &Secret, new_secret: &Secret) {
-    for secret in super::remove::find_symlinks_to(&store, &secret) {
-        if let Err(err) = update_alias(&store, &new_secret, &secret.path, &secret.path) {
+    for secret in super::remove::find_symlinks_to(store, secret) {
+        if let Err(err) = update_alias(store, new_secret, &secret.path, &secret.path) {
             error::print_error(
                 err.context("failed to update path of alias that points to moved secret, ignoring"),
             );

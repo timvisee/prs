@@ -49,7 +49,7 @@ impl<'a> Add<'a> {
         let path = store
             .normalize_secret_path(name, None, true)
             .map_err(Err::NormalizePath)?;
-        let secret = Secret::from(&store, path.to_path_buf());
+        let secret = Secret::from(&store, path.clone());
 
         let mut plaintext = Plaintext::empty();
 
@@ -73,10 +73,12 @@ impl<'a> Add<'a> {
         }
 
         // Confirm if empty secret should be stored
-        if !matcher_main.force() && !matcher_add.empty() && plaintext.is_empty() {
-            if !cli::prompt_yes("Secret is empty. Add?", Some(true), &matcher_main) {
-                error::quit();
-            }
+        if !matcher_main.force()
+            && !matcher_add.empty()
+            && plaintext.is_empty()
+            && !cli::prompt_yes("Secret is empty. Add?", Some(true), &matcher_main)
+        {
+            error::quit();
         }
 
         // Encrypt and write changed plaintext

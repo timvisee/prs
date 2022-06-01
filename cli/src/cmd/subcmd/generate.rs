@@ -1,4 +1,4 @@
-use clap::{App, Arg};
+use clap::{Arg, Command};
 
 #[cfg(feature = "clipboard")]
 use crate::cmd::arg::ArgTimeout;
@@ -8,8 +8,8 @@ use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, ArgStore, CmdArg};
 pub struct CmdGenerate;
 
 impl CmdGenerate {
-    pub fn build<'a>() -> App<'a> {
-        let cmd = App::new("generate")
+    pub fn build<'a>() -> Command<'a> {
+        let cmd = Command::new("generate")
             .alias("gen")
             .alias("g")
             .alias("random")

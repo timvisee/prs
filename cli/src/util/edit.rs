@@ -69,7 +69,7 @@ fn dir() -> PathBuf {
 
     // Default to temporary dir
     #[allow(unused_mut)]
-    let mut dir = env::temp_dir().into();
+    let mut dir = env::temp_dir();
 
     // Prefer shared memory tmpfs if available so data won't leak to persistent disk
     #[cfg(unix)]

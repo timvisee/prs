@@ -1,11 +1,11 @@
-use clap::{App, Arg};
+use clap::{Arg, Command};
 
 /// The tomb open command definition.
 pub struct CmdOpen;
 
 impl CmdOpen {
-    pub fn build<'a>() -> App<'a> {
-        App::new("open")
+    pub fn build<'a>() -> Command<'a> {
+        Command::new("open")
             .alias("o")
             .alias("lock")
             .about("Open tomb")

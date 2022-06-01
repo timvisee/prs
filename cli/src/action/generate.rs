@@ -63,7 +63,7 @@ impl<'a> Generate<'a> {
                     let path = store
                         .normalize_secret_path(dest, None, true)
                         .map_err(Err::NormalizePath)?;
-                    let secret = Secret::from(&store, path.to_path_buf());
+                    let secret = Secret::from(&store, path.clone());
 
                     // Prepare store sync
                     sync::ensure_ready(&sync, matcher_generate.allow_dirty());
@@ -121,14 +121,15 @@ impl<'a> Generate<'a> {
         }
 
         // Confirm if empty secret should be stored
-        if !matcher_main.force() && plaintext.is_empty() {
-            if !cli::prompt_yes(
+        if !matcher_main.force()
+            && plaintext.is_empty()
+            && !cli::prompt_yes(
                 "Generated secret is empty. Save?",
                 Some(true),
                 &matcher_main,
-            ) {
-                error::quit();
-            }
+            )
+        {
+            error::quit();
         }
 
         // Encrypt and write changed plaintext if we need to store
@@ -189,8 +190,10 @@ impl<'a> Generate<'a> {
 /// This generates a secure random password/passphrase based on user configuration.
 fn generate_password(matcher_generate: &GenerateMatcher) -> Plaintext {
     if matcher_generate.passphrase() {
-        let mut config = BasicConfig::default();
-        config.words = matcher_generate.length() as usize;
+        let config = BasicConfig {
+            words: matcher_generate.length() as usize,
+            ..Default::default()
+        };
         config.to_scheme().generate().into()
     } else {
         pass::generate_password(matcher_generate.length())

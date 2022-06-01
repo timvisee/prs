@@ -53,7 +53,7 @@ pub fn invoke_cmd(cmd: String, dir: Option<&Path>, verbose: bool) -> Result<(), 
         quit_error_msg(
             format!(
                 "{} exited with status code {}",
-                cmd.trim_start().split(" ").next().unwrap_or("command"),
+                cmd.trim_start().split(' ').next().unwrap_or("command"),
                 status.code().unwrap_or(-1)
             ),
             ErrorHints::default(),

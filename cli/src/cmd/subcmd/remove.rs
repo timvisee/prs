@@ -1,4 +1,4 @@
-use clap::App;
+use clap::Command;
 
 use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, ArgQuery, ArgStore, CmdArg};
 
@@ -6,8 +6,8 @@ use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, ArgQuery, ArgStore, CmdArg};
 pub struct CmdRemove;
 
 impl CmdRemove {
-    pub fn build<'a>() -> App<'a> {
-        App::new("remove")
+    pub fn build<'a>() -> Command<'a> {
+        Command::new("remove")
             .alias("rm")
             .alias("delete")
             .alias("del")

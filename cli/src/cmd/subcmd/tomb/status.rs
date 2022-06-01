@@ -1,11 +1,11 @@
-use clap::{App, Arg};
+use clap::{Arg, Command};
 
 /// The tomb status command definition.
 pub struct CmdStatus;
 
 impl CmdStatus {
-    pub fn build<'a>() -> App<'a> {
-        App::new("status").about("Query tomb status").arg(
+    pub fn build<'a>() -> Command<'a> {
+        Command::new("status").about("Query tomb status").arg(
             Arg::new("open")
                 .long("open")
                 .alias("o")

@@ -11,9 +11,9 @@ use crate::util::tomb;
 
 /// Platform specific line ending character.
 #[cfg(not(windows))]
-const LINE_ENDING: &'static str = "\n";
+const LINE_ENDING: &str = "\n";
 #[cfg(windows)]
-const LINE_ENDING: &'static str = "\r\n";
+const LINE_ENDING: &str = "\r\n";
 
 use crate::{
     cmd::matcher::{
@@ -77,11 +77,11 @@ pub(crate) fn housekeeping(store: &Store, allow_dirty: bool, no_sync: bool) -> R
         sync.prepare()?;
     }
 
-    set_store_permissions(&store).map_err(Err::Perms)?;
+    set_store_permissions(store).map_err(Err::Perms)?;
 
     if sync.is_init() {
-        set_git_ignore(&store).map_err(Err::GitAttributes)?;
-        set_git_attributes(&store).map_err(Err::GitAttributes)?;
+        set_git_ignore(store).map_err(Err::GitAttributes)?;
+        set_git_attributes(store).map_err(Err::GitAttributes)?;
     }
 
     // Finalize sync

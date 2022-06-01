@@ -1,4 +1,4 @@
-use clap::{App, Arg};
+use clap::{Arg, Command};
 
 use crate::cmd::arg::{ArgStore, CmdArg};
 
@@ -6,8 +6,8 @@ use crate::cmd::arg::{ArgStore, CmdArg};
 pub struct CmdClone;
 
 impl CmdClone {
-    pub fn build<'a>() -> App<'a> {
-        App::new("clone")
+    pub fn build<'a>() -> Command<'a> {
+        Command::new("clone")
             .about("Clone existing password store")
             .arg(
                 Arg::new("GIT_URL")

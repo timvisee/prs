@@ -2,18 +2,18 @@
 pub mod clip_revert;
 pub mod completions;
 
-use clap::{App, AppSettings};
+use clap::Command;
 
 /// The internal command definition.
 pub struct CmdInternal;
 
 impl CmdInternal {
-    pub fn build<'a>() -> App<'a> {
+    pub fn build<'a>() -> Command<'a> {
         #[allow(unused_mut)]
-        let mut cmd = App::new("internal")
+        let mut cmd = Command::new("internal")
             .about("Commands used by prs internally")
-            .setting(AppSettings::Hidden)
-            .setting(AppSettings::SubcommandRequiredElseHelp)
+            .hide(true)
+            .arg_required_else_help(true)
             .subcommand(completions::CmdCompletions::build());
 
         #[cfg(feature = "clipboard")]

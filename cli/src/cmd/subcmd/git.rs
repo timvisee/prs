@@ -1,4 +1,4 @@
-use clap::{App, AppSettings, Arg};
+use clap::{Arg, Command};
 
 use crate::cmd::arg::{ArgStore, CmdArg};
 
@@ -6,8 +6,8 @@ use crate::cmd::arg::{ArgStore, CmdArg};
 pub struct CmdGit;
 
 impl CmdGit {
-    pub fn build<'a>() -> App<'a> {
-        App::new("git")
+    pub fn build<'a>() -> Command<'a> {
+        Command::new("git")
             .about("Invoke git command in password store")
             .arg(
                 Arg::new("COMMAND")
@@ -15,6 +15,6 @@ impl CmdGit {
                     .multiple_values(true),
             )
             .arg(ArgStore::build())
-            .setting(AppSettings::TrailingVarArg)
+            .trailing_var_arg(true)
     }
 }

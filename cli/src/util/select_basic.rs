@@ -11,7 +11,7 @@ pub fn select_secret(secrets: &[Secret]) -> Option<&Secret> {
     }
 
     let map: HashMap<_, _> = secrets
-        .into_iter()
+        .iter()
         .map(|secret| (secret.name.clone(), secret))
         .collect();
     let items: Vec<_> = map.keys().collect();
@@ -22,7 +22,7 @@ pub fn select_secret(secrets: &[Secret]) -> Option<&Secret> {
 
 /// Select key.
 pub fn select_key<'a>(keys: &'a [Key], prompt: Option<&'a str>) -> Option<&'a Key> {
-    let map: HashMap<_, _> = keys.into_iter().map(|key| (key.to_string(), key)).collect();
+    let map: HashMap<_, _> = keys.iter().map(|key| (key.to_string(), key)).collect();
     let items: Vec<_> = map.keys().collect();
     select_item(prompt.unwrap_or("Select key"), &items)
         .as_ref()
@@ -32,7 +32,7 @@ pub fn select_key<'a>(keys: &'a [Key], prompt: Option<&'a str>) -> Option<&'a Ke
 /// Interactively select one of the given items.
 fn select_item<'a, S: AsRef<str>>(prompt: &'a str, items: &'a [S]) -> Option<String> {
     // Build sorted list of string references as items
-    let mut items = items.into_iter().map(|i| i.as_ref()).collect::<Vec<_>>();
+    let mut items = items.iter().map(|i| i.as_ref()).collect::<Vec<_>>();
     items.sort_unstable();
 
     loop {

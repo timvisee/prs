@@ -1,4 +1,4 @@
-use clap::{App, Arg};
+use clap::{Arg, Command};
 
 use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, ArgQuery, ArgStore, CmdArg};
 
@@ -6,8 +6,8 @@ use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, ArgQuery, ArgStore, CmdArg};
 pub struct CmdDuplicate;
 
 impl CmdDuplicate {
-    pub fn build<'a>() -> App<'a> {
-        App::new("duplicate")
+    pub fn build<'a>() -> Command<'a> {
+        Command::new("duplicate")
             .alias("dup")
             .about("Duplicate a secret")
             .long_about("Duplicate the contents of a secret to a new file")

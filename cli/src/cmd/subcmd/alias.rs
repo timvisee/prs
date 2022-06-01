@@ -1,4 +1,4 @@
-use clap::{App, Arg};
+use clap::{Arg, Command};
 
 use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, ArgQuery, ArgStore, CmdArg};
 
@@ -6,8 +6,8 @@ use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, ArgQuery, ArgStore, CmdArg};
 pub struct CmdAlias;
 
 impl CmdAlias {
-    pub fn build<'a>() -> App<'a> {
-        App::new("alias")
+    pub fn build<'a>() -> Command<'a> {
+        Command::new("alias")
             .alias("ln")
             .alias("link")
             .alias("symlink")

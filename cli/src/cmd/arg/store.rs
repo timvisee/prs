@@ -24,7 +24,7 @@ impl CmdArg for ArgStore {
 impl<'a> CmdArgOption<'a> for ArgStore {
     type Value = String;
 
-    fn value<'b: 'a>(matches: &'a ArgMatches) -> Self::Value {
+    fn value(matches: &'a ArgMatches) -> Self::Value {
         Self::value_raw(matches)
             .filter(|p| !p.trim().is_empty())
             .unwrap_or(prs_lib::STORE_DEFAULT_ROOT)

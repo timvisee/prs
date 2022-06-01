@@ -17,17 +17,17 @@ pub struct HousekeepingMatcher<'a> {
 impl<'a: 'b, 'b> HousekeepingMatcher<'a> {
     /// Get the housekepeing recrypt sub command, if matched.
     pub fn recrypt(&'a self) -> Option<recrypt::RecryptMatcher> {
-        recrypt::RecryptMatcher::with(&self.root)
+        recrypt::RecryptMatcher::with(self.root)
     }
 
     /// Get the housekepeing run sub command, if matched.
     pub fn run(&'a self) -> Option<run::RunMatcher> {
-        run::RunMatcher::with(&self.root)
+        run::RunMatcher::with(self.root)
     }
 
     /// Get the housekepeing sync-keys sub command, if matched.
     pub fn sync_keys(&'a self) -> Option<sync_keys::SyncKeysMatcher> {
-        sync_keys::SyncKeysMatcher::with(&self.root)
+        sync_keys::SyncKeysMatcher::with(self.root)
     }
 
     /// The store.

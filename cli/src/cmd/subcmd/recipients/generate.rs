@@ -1,4 +1,4 @@
-use clap::{App, Arg};
+use clap::{Arg, Command};
 
 use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, CmdArg};
 
@@ -6,8 +6,8 @@ use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, CmdArg};
 pub struct CmdGenerate;
 
 impl CmdGenerate {
-    pub fn build<'a>() -> App<'a> {
-        App::new("generate")
+    pub fn build<'a>() -> Command<'a> {
+        Command::new("generate")
             .alias("gen")
             .alias("g")
             .about("Generate new key pair, add it to the store")

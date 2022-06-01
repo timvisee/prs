@@ -4,7 +4,7 @@ pub mod open;
 pub mod resize;
 pub mod status;
 
-use clap::{App, AppSettings};
+use clap::Command;
 
 use crate::cmd::arg::{ArgStore, CmdArg};
 
@@ -12,10 +12,10 @@ use crate::cmd::arg::{ArgStore, CmdArg};
 pub struct CmdTomb;
 
 impl CmdTomb {
-    pub fn build<'a>() -> App<'a> {
-        App::new("tomb")
+    pub fn build<'a>() -> Command<'a> {
+        Command::new("tomb")
             .about("Manage password store Tomb")
-            .setting(AppSettings::SubcommandRequiredElseHelp)
+            .arg_required_else_help(true)
             .subcommand(init::CmdInit::build())
             .subcommand(open::CmdOpen::build())
             .subcommand(close::CmdClose::build())

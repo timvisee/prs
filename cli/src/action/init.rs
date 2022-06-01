@@ -32,7 +32,7 @@ impl<'a> Init<'a> {
             .to_string();
 
         // Ensure store dir is free, then initialize
-        util::fs::ensure_dir_free(&Path::new(&path))?;
+        util::fs::ensure_dir_free(Path::new(&path))?;
         fs::create_dir_all(&path).map_err(Err::Init)?;
 
         // Open new store

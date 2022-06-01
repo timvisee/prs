@@ -83,7 +83,7 @@ impl<'a> Open<'a> {
             } else {
                 eprintln!("Password store Tomb opened");
             }
-            eprintln!("");
+            eprintln!();
             eprintln!("To close the Tomb, use:");
             eprintln!(
                 "    {}",
@@ -98,7 +98,7 @@ impl<'a> Open<'a> {
 /// Open the tomb.
 pub(crate) fn open(tomb: &mut Tomb, matcher_main: &MainMatcher) -> Result<(), Err> {
     // Prompt user to add force flag
-    if !tomb.settings.force && util::tomb::ask_to_force(&matcher_main) {
+    if !tomb.settings.force && util::tomb::ask_to_force(matcher_main) {
         tomb.settings.force = true;
     }
 

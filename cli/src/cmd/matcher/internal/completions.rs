@@ -2,7 +2,7 @@ use std::fmt;
 use std::io::Write;
 use std::path::PathBuf;
 
-use clap::{App, ArgMatches};
+use clap::{ArgMatches, Command};
 use clap_complete::shells;
 
 use super::Matcher;
@@ -26,14 +26,13 @@ impl<'a: 'b, 'b> CompletionsMatcher<'a> {
         let mut shells: Vec<_> = raw
             .into_iter()
             .map(|name| name.trim().to_lowercase())
-            .map(|name| {
+            .flat_map(|name| {
                 if name == "all" {
                     Shell::variants().iter().map(|s| s.name().into()).collect()
                 } else {
                     vec![name]
                 }
             })
-            .flatten()
             .collect();
         shells.sort_unstable();
         shells.dedup();
@@ -63,7 +62,7 @@ impl<'a: 'b, 'b> CompletionsMatcher<'a> {
         self.matches
             .value_of("name")
             .map(|n| n.into())
-            .unwrap_or(util::bin_name())
+            .unwrap_or_else(util::bin_name)
     }
 }
 
@@ -133,7 +132,7 @@ impl Shell {
     }
 
     /// Generate completion script.
-    pub fn generate<S>(self, app: &mut App<'_>, bin_name: S, buf: &mut dyn Write)
+    pub fn generate<S>(self, app: &mut Command<'_>, bin_name: S, buf: &mut dyn Write)
     where
         S: Into<String>,
     {
@@ -147,7 +146,7 @@ impl Shell {
     }
 
     // /// Generate completion script.
-    // pub fn generate_to<S, T>(self, app: &mut App<'_>, bin_name: S, out_dir: T)
+    // pub fn generate_to<S, T>(self, app: &mut Command<'_>, bin_name: S, out_dir: T)
     // where
     //     S: Into<String>,
     //     T: Into<std::ffi::OsString>,

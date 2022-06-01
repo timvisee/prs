@@ -30,7 +30,7 @@ impl<'a> Clone<'a> {
         let path = matcher_clone.store();
         let path = shellexpand::full(&path).map_err(Err::ExpandPath)?;
 
-        util::fs::ensure_dir_free(&Path::new(path.as_ref()))?;
+        util::fs::ensure_dir_free(Path::new(path.as_ref()))?;
 
         // Create store dir, open it and clone
         fs::create_dir_all(path.as_ref()).map_err(Err::Init)?;

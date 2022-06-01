@@ -7,7 +7,7 @@
 // See the original source and license here:
 // https://github.com/netvl/shellexpand
 
-#![allow(dead_code)]
+#![allow(warnings)]
 
 //! Provides functions for performing shell-like expansions in strings.
 //!

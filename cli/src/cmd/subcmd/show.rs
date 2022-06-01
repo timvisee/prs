@@ -1,4 +1,4 @@
-use clap::{App, Arg};
+use clap::{Arg, Command};
 
 use crate::cmd::arg::{ArgProperty, ArgQuery, ArgStore, ArgTimeout, CmdArg};
 
@@ -6,8 +6,8 @@ use crate::cmd::arg::{ArgProperty, ArgQuery, ArgStore, ArgTimeout, CmdArg};
 pub struct CmdShow;
 
 impl CmdShow {
-    pub fn build<'a>() -> App<'a> {
-        let cmd = App::new("show")
+    pub fn build<'a>() -> Command<'a> {
+        let cmd = Command::new("show")
             .alias("s")
             .alias("cat")
             .alias("display")

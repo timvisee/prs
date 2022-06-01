@@ -67,13 +67,14 @@ impl<'a> Edit<'a> {
         }
 
         // Confirm if empty secret should be stored
-        if !matcher_main.force() && plaintext.is_empty() {
-            if !cli::prompt_yes("Edited secret is empty. Save?", Some(true), &matcher_main) {
-                if matcher_main.verbose() {
-                    eprintln!("Secret is unchanged");
-                }
-                error::quit();
+        if !matcher_main.force()
+            && plaintext.is_empty()
+            && !cli::prompt_yes("Edited secret is empty. Save?", Some(true), &matcher_main)
+        {
+            if matcher_main.verbose() {
+                eprintln!("Secret is unchanged");
             }
+            error::quit();
         }
 
         // Encrypt and write changed plaintext

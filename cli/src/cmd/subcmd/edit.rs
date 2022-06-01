@@ -1,4 +1,4 @@
-use clap::{App, Arg};
+use clap::{Arg, Command};
 
 use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, ArgQuery, ArgStore, CmdArg};
 
@@ -6,8 +6,8 @@ use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, ArgQuery, ArgStore, CmdArg};
 pub struct CmdEdit;
 
 impl CmdEdit {
-    pub fn build<'a>() -> App<'a> {
-        App::new("edit")
+    pub fn build<'a>() -> Command<'a> {
+        Command::new("edit")
             .alias("e")
             .about("Edit a secret")
             .arg(ArgQuery::build())

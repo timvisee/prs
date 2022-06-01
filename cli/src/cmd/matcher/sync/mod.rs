@@ -15,12 +15,12 @@ pub struct SyncMatcher<'a> {
 impl<'a: 'b, 'b> SyncMatcher<'a> {
     /// Get the sync init sub command, if matched.
     pub fn cmd_init(&'a self) -> Option<init::InitMatcher> {
-        init::InitMatcher::with(&self.root)
+        init::InitMatcher::with(self.root)
     }
 
     /// Get the sync remote sub command, if matched.
     pub fn cmd_remote(&'a self) -> Option<remote::RemoteMatcher> {
-        remote::RemoteMatcher::with(&self.root)
+        remote::RemoteMatcher::with(self.root)
     }
 
     /// The store.

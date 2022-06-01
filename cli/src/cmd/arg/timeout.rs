@@ -9,7 +9,7 @@ pub struct ArgTimeout {}
 
 impl ArgTimeout {
     #[cfg(feature = "clipboard")]
-    pub fn value_or_default<'a, 'b: 'a>(matches: &'a ArgMatches) -> Result<u64> {
+    pub fn value_or_default(matches: &ArgMatches) -> Result<u64> {
         Self::value(matches).unwrap_or(Ok(crate::CLIPBOARD_TIMEOUT))
     }
 }
@@ -35,7 +35,7 @@ impl CmdArg for ArgTimeout {
 impl<'a> CmdArgOption<'a> for ArgTimeout {
     type Value = Option<Result<u64>>;
 
-    fn value<'b: 'a>(matches: &'a ArgMatches) -> Self::Value {
+    fn value(matches: &'a ArgMatches) -> Self::Value {
         Self::value_raw(matches).map(|t| t.parse().map_err(|err| Err::Parse(err).into()))
     }
 }

@@ -1,4 +1,4 @@
-use clap::{App, Arg};
+use clap::{Arg, Command};
 
 use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, ArgQuery, CmdArg};
 
@@ -6,8 +6,8 @@ use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, ArgQuery, CmdArg};
 pub struct CmdRecrypt;
 
 impl CmdRecrypt {
-    pub fn build<'a>() -> App<'a> {
-        App::new("recrypt")
+    pub fn build<'a>() -> Command<'a> {
+        Command::new("recrypt")
             .alias("reencrypt")
             .about("Re-encrypt secrets")
             .arg(

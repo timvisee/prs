@@ -1,4 +1,4 @@
-use clap::App;
+use clap::Command;
 
 use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, CmdArg};
 
@@ -6,8 +6,8 @@ use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, CmdArg};
 pub struct CmdRun;
 
 impl CmdRun {
-    pub fn build<'a>() -> App<'a> {
-        App::new("run")
+    pub fn build<'a>() -> Command<'a> {
+        Command::new("run")
             .about("Run housekeeping tasks")
             .arg(ArgAllowDirty::build())
             .arg(ArgNoSync::build())

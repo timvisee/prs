@@ -26,11 +26,7 @@ fn skim_select(items: SkimItemReceiver, prompt: &str) -> Option<String> {
     }
 
     // Get the first selected, and return
-    output
-        .selected_items
-        .iter()
-        .next()
-        .map(|i| i.output().to_string())
+    output.selected_items.get(0).map(|i| i.output().to_string())
 }
 
 /// Wrapped store secret item for skim.

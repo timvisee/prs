@@ -1,4 +1,4 @@
-use clap::App;
+use clap::Command;
 
 use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, ArgStore, CmdArg};
 
@@ -6,8 +6,8 @@ use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, ArgStore, CmdArg};
 pub struct CmdInit;
 
 impl CmdInit {
-    pub fn build<'a>() -> App<'a> {
-        App::new("init")
+    pub fn build<'a>() -> Command<'a> {
+        Command::new("init")
             .alias("initialize")
             .about("Initialize new password store")
             .arg(ArgStore::build())

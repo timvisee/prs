@@ -146,17 +146,7 @@ pub fn print_main_info(matcher_main: &MainMatcher) -> ! {
     eprintln!(crate_description!());
     eprintln!();
 
-    if store.is_none() {
-        eprintln!("Initialize a new password store or clone an existing one:");
-        eprintln!("    {}", style::highlight(&format!("{} init", bin)));
-        eprintln!(
-            "    {}",
-            style::highlight(&format!("{} clone <GIT_URL>", bin))
-        );
-        eprintln!();
-    } else {
-        let store = store.unwrap();
-
+    if let Some(store) = store {
         // Hint user to add ourselves as recipient if it doesn't have recipient we own
         let we_own_any_recipient = store
             .recipients()
@@ -222,6 +212,14 @@ pub fn print_main_info(matcher_main: &MainMatcher) -> ! {
             eprintln!("    {}", style::highlight(&format!("{} sync init", bin)));
             eprintln!();
         }
+    } else {
+        eprintln!("Initialize a new password store or clone an existing one:");
+        eprintln!("    {}", style::highlight(&format!("{} init", bin)));
+        eprintln!(
+            "    {}",
+            style::highlight(&format!("{} clone <GIT_URL>", bin))
+        );
+        eprintln!();
     }
 
     eprintln!("Show all subcommands, features and other help:");

@@ -1,4 +1,4 @@
-use clap::{App, Arg};
+use clap::{Arg, Command};
 
 use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, CmdArg};
 
@@ -6,8 +6,8 @@ use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, CmdArg};
 pub struct CmdSyncKeys;
 
 impl CmdSyncKeys {
-    pub fn build<'a>() -> App<'a> {
-        App::new("sync-keys")
+    pub fn build<'a>() -> Command<'a> {
+        Command::new("sync-keys")
             .alias("sync-recipients")
             .about("Sync public keys in store, import missing keys")
             .arg(

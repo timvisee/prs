@@ -109,16 +109,18 @@ fn copy_timeout_x11(data: &[u8], timeout: u64, report: bool) -> Result<()> {
         0 => {
             // Obtain new X11 clipboard context, set clipboard contents
             let clip = X11Clipboard::new()
-                .expect(&format!("{}: failed to obtain X11 clipboard context", bin,));
+                .unwrap_or_else(|_| panic!("{}: failed to obtain X11 clipboard context", bin));
             clip.store(
                 Clipboard::atom(&clip.setter.atoms),
                 clip.setter.atoms.utf8_string,
                 data,
             )
-            .expect(&format!(
-                "{}: failed to set clipboard contents through forked process",
-                bin,
-            ));
+            .unwrap_or_else(|_| {
+                panic!(
+                    "{}: failed to set clipboard contents through forked process",
+                    bin,
+                )
+            });
 
             // Wait for clipboard to change, then kill fork
             clip.load_wait(
@@ -126,10 +128,12 @@ fn copy_timeout_x11(data: &[u8], timeout: u64, report: bool) -> Result<()> {
                 clip.getter.atoms.utf8_string,
                 clip.getter.atoms.property,
             )
-            .expect(&format!(
-                "{}: failed to wait on new clipboard value in forked process",
-                bin,
-            ));
+            .unwrap_or_else(|_| {
+                panic!(
+                    "{}: failed to wait on new clipboard value in forked process",
+                    bin,
+                )
+            });
 
             // Update cleared state, show notification
             let _ = notify_cleared();
@@ -156,11 +160,13 @@ fn copy_timeout_x11(data: &[u8], timeout: u64, report: bool) -> Result<()> {
             // Revert to previous clipboard contents if not yet cleared
             if !cleared {
                 let mut ctx = ClipboardContext::new()
-                    .expect(&format!("{}: failed to obtain X11 clipboard context", bin,));
-                ctx.set_contents(previous).expect(&format!(
-                    "{}: failed to revert clipboard contents through forked process",
-                    bin,
-                ));
+                    .unwrap_or_else(|_| panic!("{}: failed to obtain X11 clipboard context", bin,));
+                ctx.set_contents(previous).unwrap_or_else(|_| {
+                    panic!(
+                        "{}: failed to revert clipboard contents through forked process",
+                        bin,
+                    )
+                });
             }
 
             error::quit();
@@ -210,21 +216,23 @@ fn copy_timeout_wayland_bin(data: &[u8], timeout: u64, report: bool) -> Result<(
             thread::sleep(Duration::from_secs(timeout));
 
             // Obtain new clipboard context, get current contents
-            let mut ctx = ClipboardContext::new().expect(&format!(
-                "{}: failed to obtain Wayland clipboard context",
-                bin,
-            ));
-            let now = ctx.get_contents().expect(&format!(
-                "{}: failed to get clipboard contents through forked process",
-                bin,
-            ));
+            let mut ctx = ClipboardContext::new()
+                .unwrap_or_else(|_| panic!("{}: failed to obtain Wayland clipboard context", bin,));
+            let now = ctx.get_contents().unwrap_or_else(|_| {
+                panic!(
+                    "{}: failed to get clipboard contents through forked process",
+                    bin,
+                )
+            });
 
             // If clipboard contents didn't change, revert back to previous
             if data == now {
-                ctx.set_contents(previous).expect(&format!(
-                    "{}: failed to revert clipboard contents through forked process",
-                    bin,
-                ));
+                ctx.set_contents(previous).unwrap_or_else(|_| {
+                    panic!(
+                        "{}: failed to revert clipboard contents through forked process",
+                        bin,
+                    )
+                });
 
                 // Update cleared state, show notification
                 let _ = notify_cleared();
@@ -351,7 +359,7 @@ fn copy_timeout_process(data: &[u8], timeout: u64, report: bool) -> Result<()> {
 
     // Set clipboard, remember previous contents
     let previous = get().unwrap_or_else(|_| "".into());
-    set(&data)?;
+    set(data)?;
 
     // Spawn & disown background process to revert clipboard, send previous contents to it
     let process = Command::new(current_exe)

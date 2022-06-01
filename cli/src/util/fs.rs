@@ -37,8 +37,7 @@ pub fn has_swap() -> Result<bool, Err> {
     Ok(fs::read_to_string("/proc/swaps")
         .map_err(Err::HasSwap)?
         .lines()
-        .skip(1)
-        .next()
+        .nth(1)
         .filter(|l| !l.trim().is_empty())
         .is_some())
 }

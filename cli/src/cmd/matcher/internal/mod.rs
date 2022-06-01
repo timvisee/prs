@@ -16,12 +16,12 @@ impl<'a: 'b, 'b> InternalMatcher<'a> {
     /// Get the internal clipboard revert sub command, if matched.
     #[cfg(feature = "clipboard")]
     pub fn clip_revert(&'a self) -> Option<clip_revert::ClipRevertMatcher> {
-        clip_revert::ClipRevertMatcher::with(&self.root)
+        clip_revert::ClipRevertMatcher::with(self.root)
     }
 
     /// Get the internal completions generator sub command, if matched.
     pub fn completions(&'a self) -> Option<completions::CompletionsMatcher> {
-        completions::CompletionsMatcher::with(&self.root)
+        completions::CompletionsMatcher::with(self.root)
     }
 }
 

@@ -104,6 +104,7 @@ fn remote_is_http(mut url: &str) -> bool {
 /// This will do a best effort to grap the host bit of an SSH URI. If an HTTP(S) URL is given, or
 /// if the host bit could not be determined, `None` is returned. Note that this may not be very
 /// reliable.
+#[allow(clippy::manual_split_once, clippy::needless_splitn)]
 fn ssh_uri_host(mut uri: &str) -> Option<&str> {
     // Must not be a HTTP(S) URL
     if remote_is_http(uri) {

@@ -1,4 +1,4 @@
-use clap::{App, Arg, ArgMatches};
+use clap::{Arg, ArgMatches, Command};
 
 use super::matcher::{self, Matcher};
 use super::subcmd;
@@ -11,9 +11,9 @@ pub struct Handler {
 
 impl<'a> Handler {
     /// Build the application CLI definition.
-    pub fn build() -> App<'a> {
+    pub fn build() -> Command<'a> {
         // Build the CLI application definition
-        let app = App::new(crate_name!())
+        let app = Command::new(crate_name!())
             .version(crate_version!())
             .author(crate_authors!())
             .about(crate_description!())

@@ -90,7 +90,7 @@ impl<'a> Init<'a> {
 
         if !matcher_main.quiet() {
             eprintln!("Initializing Tomb, this may take a while...");
-            eprintln!("");
+            eprintln!();
         }
 
         // Initialize tomb
@@ -120,7 +120,7 @@ impl<'a> Init<'a> {
         }
 
         if !matcher_main.quiet() {
-            eprintln!("");
+            eprintln!();
             if let Some(timer) = timer {
                 eprintln!(
                     "Password store Tomb initialized and opened, will close in {}",
@@ -129,7 +129,7 @@ impl<'a> Init<'a> {
             } else {
                 eprintln!("Password store Tomb initialized and opened");
             }
-            eprintln!("");
+            eprintln!();
             eprintln!("To close the Tomb, use:");
             eprintln!(
                 "    {}",

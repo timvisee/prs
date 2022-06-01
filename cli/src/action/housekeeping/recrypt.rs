@@ -81,13 +81,13 @@ pub fn recrypt_all(store: &Store, matcher_main: &MainMatcher) -> Result<()> {
 
 /// Re-encrypt all given secrets.
 pub fn recrypt(store: &Store, secrets: &[Secret], matcher_main: &MainMatcher) -> Result<()> {
-    let mut context = crate::crypto::context(&matcher_main)?;
+    let mut context = crate::crypto::context(matcher_main)?;
     let recipients = store.recipients().map_err(Err::Store)?;
     let len = secrets.len();
 
     let mut failed = Vec::new();
 
-    for (i, secret) in secrets.into_iter().enumerate() {
+    for (i, secret) in secrets.iter().enumerate() {
         if matcher_main.verbose() {
             eprintln!("[{}/{}] Re-encrypting: {}", i + 1, len, secret.name);
         }

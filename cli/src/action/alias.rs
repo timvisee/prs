@@ -57,7 +57,7 @@ impl<'a> Alias<'a> {
         let path = store
             .normalize_secret_path(dest, secret.path.file_name().and_then(|p| p.to_str()), true)
             .map_err(Err::NormalizePath)?;
-        let link_secret = Secret::from(&store, path.to_path_buf());
+        let link_secret = Secret::from(&store, path.clone());
 
         // Check if destination already exists if not forcing
         if !matcher_main.force() && path.is_file() {
@@ -104,7 +104,7 @@ impl<'a> Alias<'a> {
 /// This may be different to use the correct relative symlink path for a secret at `place_at` that
 /// will be moved to `dst` in the future.
 pub fn create_alias(store: &Store, src: &Secret, dst: &Path, place_at: &Path) -> Result<(), Err> {
-    create_symlink(secret_link_path(&store, &src, &dst)?, place_at)
+    create_symlink(secret_link_path(store, src, dst)?, place_at)
 }
 
 /// Create a symlink.
@@ -140,7 +140,7 @@ fn secret_link_path(store: &Store, src: &Secret, dst: &Path) -> Result<PathBuf, 
     for _ in 0..depth {
         path = path.join("..");
     }
-    Ok(path.join(target.to_path_buf()))
+    Ok(path.join(target))
 }
 
 /// Find path depth in the given store.

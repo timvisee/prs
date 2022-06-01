@@ -1,4 +1,4 @@
-use clap::{App, Arg};
+use clap::{Arg, Command};
 
 use crate::cmd::arg::{ArgTimeout, CmdArg};
 
@@ -6,8 +6,8 @@ use crate::cmd::arg::{ArgTimeout, CmdArg};
 pub struct CmdClipRevert;
 
 impl CmdClipRevert {
-    pub fn build<'a>() -> App<'a> {
-        App::new("clip-revert")
+    pub fn build<'a>() -> Command<'a> {
+        Command::new("clip-revert")
             .about("Revert clipboard after timeout")
             .arg(
                 Arg::new("previous-base64-stdin")

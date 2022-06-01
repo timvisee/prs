@@ -91,7 +91,7 @@ fn import_missing_keys(store: &Store, quiet: bool, verbose: bool) -> Result<()> 
     }
 
     // Import keys, report results
-    for result in crypto::store::import_missing_keys_from_store(&store)? {
+    for result in crypto::store::import_missing_keys_from_store(store)? {
         match result {
             ImportResult::Imported(fingerprint) => {
                 if !quiet {

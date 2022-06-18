@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.3 (2022-06-19)
+- Set `GPG_TTY` environment variable in GPGME backend with `--gpg-tty` on supported platforms
+- Update Arch AUR packages to latest standards, make tomb an optional dependency
+- Resolve dependency vulnerabilities (CVE-2020-36205, CVE-2021-45707)
+- Bump MSRV to 1.58.1
+- Update dependencies
+
 ## 0.3.2 (2021-08-30)
 - Fix build error when `tomb` feature is not set
 

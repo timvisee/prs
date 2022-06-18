@@ -59,7 +59,7 @@ chbs = "0.1.0"
 clap = { version = "3.0", default-features = false, features = ["std", "suggestions", "color", "cargo", "env"] }
 clap_complete = "3.0"
 colored = "2.0"
-derive_builder = "0.10"
+derive_builder = "0.11"
 edit = "0.1"
 lazy_static = "1.4"
 libc = "0.2"

@@ -105,7 +105,6 @@ check-windows:
   stage: check
   tags:
     - windows
-  allow_failure: true
   cache: {}
   <<: *before_script-windows
   script:
@@ -211,7 +210,6 @@ build-x86_64-windows:
   stage: build
   tags:
     - windows
-  allow_failure: true
   needs: []
   variables:
     TARGET: x86_64-pc-windows-msvc
@@ -240,7 +238,6 @@ test-cargo-x86_64-windows:
   stage: test
   tags:
     - windows
-  allow_failure: true
   needs: []
   dependencies: []
   cache: {}

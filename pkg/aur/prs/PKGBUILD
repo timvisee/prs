@@ -19,7 +19,7 @@ sha512sums=('__SHA512SUM__')
 _prs_cli_features=alias,clipboard,notify,backend-gpgme,select-skim-bin,tomb
 
 prepare() {
-    cd "ffsend-v$pkgver"
+    cd "prs-v$pkgver"
 
     cargo fetch --locked --target "$CARCH-unknown-linux-gnu"
 }

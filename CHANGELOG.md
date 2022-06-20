@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.4 (2022-06-20)
+- Fix Windows release issue
+- Update dependencies
+
 ## 0.3.3 (2022-06-19)
 - Set `GPG_TTY` environment variable in GPGME backend with `--gpg-tty` on supported platforms
 - Update Arch AUR packages to latest standards, make tomb an optional dependency

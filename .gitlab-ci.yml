@@ -248,6 +248,7 @@ test-cargo-x86_64-windows:
 
 # Run basic integration test with prs
 test-integration:
+  image: alpine
   stage: test
   needs:
     - build-x86_64-linux-musl
@@ -255,10 +256,7 @@ test-integration:
     - build-x86_64-linux-musl
   variables:
     TARGET: x86_64-unknown-linux-musl
-  before_script:
-    - apt-get update
-    - apt-get install -y --no-install-recommends libgpgme-dev build-essential pkg-config xorg-dev libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev python3 libx11-xcb-dev libdbus-1-dev libgl1-mesa-dev $APT_GTK_LIBS $APT_PACKAGES
-    - apt-get install -y $APT_PACKAGES_RECOMMENDS
+  before_script: []
   script:
     - apk add git gnupg gpgme
     - mv ./prs-$TARGET ./prs

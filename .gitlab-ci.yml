@@ -250,6 +250,7 @@ test-cargo-x86_64-windows:
 test-integration:
   image: alpine
   stage: test
+  allow_failure: true
   needs:
     - build-x86_64-linux-musl
   dependencies:

@@ -83,7 +83,7 @@ check-nightly:
 check-old:
   <<: *check-base
   variables:
-    RUST_VERSION: "1.58.1"
+    RUST_VERSION: "1.60.0"
 check-macos-stable:
   tags:
     - macos

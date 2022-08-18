@@ -137,7 +137,18 @@ impl Shell {
         S: Into<String>,
     {
         match self {
-            Shell::Bash => clap_complete::generate(shells::Bash, app, bin_name, buf),
+            Shell::Bash => {
+                let mut inner_buf = Vec::new();
+                clap_complete::generate(shells::Bash, app, bin_name, &mut inner_buf);
+
+                let inner_buf = String::from_utf8(inner_buf)
+                    .expect("clap_complete::generate should always return valid utf-8");
+
+                let inner_buf = inner_buf.replace("<QUERY>", "$(prs list --list)");
+
+                buf.write_fmt(format_args!("{}", inner_buf))
+                    .expect("Failed to write to generated file"); // Same panic that clap_complete would trigger
+            }
             Shell::Elvish => clap_complete::generate(shells::Elvish, app, bin_name, buf),
             Shell::Fish => clap_complete::generate(shells::Fish, app, bin_name, buf),
             Shell::PowerShell => clap_complete::generate(shells::PowerShell, app, bin_name, buf),

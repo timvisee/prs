@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.5 (2022-08-18)
+- Add secret autocompletion for bash
+- Update MSRV to 1.60
+- Fix AUR release
+- Update dependencies
+
 ## 0.3.4 (2022-06-20)
 - Fix Windows release issue
 - Update dependencies

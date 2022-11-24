@@ -13,6 +13,7 @@ impl CmdInternal {
         let mut cmd = Command::new("internal")
             .about("Commands used by prs internally")
             .hide(true)
+            .arg_required_else_help(true)
             .subcommand_required(true)
             .subcommand_value_name("ACTION")
             .subcommand(completions::CmdCompletions::build());

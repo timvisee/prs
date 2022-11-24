@@ -20,6 +20,7 @@ impl CmdRecipients {
             .alias("rec")
             .alias("keys")
             .alias("kes")
+            .arg_required_else_help(true)
             .subcommand_required(true)
             .subcommand_value_name("CMD")
             .subcommand(add::CmdAdd::build())

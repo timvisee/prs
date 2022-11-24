@@ -21,6 +21,7 @@ fn skim_select(items: SkimItemReceiver, prompt: &str) -> Option<String> {
 
     // Run skim, get output, abort on close
     let output = Skim::run_with(&options, Some(items))?;
+    eprintln!();
     if output.is_abort {
         return None;
     }

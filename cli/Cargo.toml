@@ -93,7 +93,7 @@ copypasta-ext = { version = "0.3.9", optional = true, default-features = false, 
 # Clipboard support for X11/Wayland
 [target.'cfg(all(unix, not(any(target_os="macos", target_os="android", target_os="emscripten")), not(target_env = "musl")))'.dependencies]
 copypasta-ext = { version = "0.3.9", optional = true, default-features = false, features = ["x11-fork", "wayland-bin"] }
-x11-clipboard = { version = "0.6.1", optional = true }
+x11-clipboard = { version = "0.7", optional = true }
 
 # Clipboard support for X11/Wayland musl
 [target.'cfg(all(unix, not(any(target_os="macos", target_os="android", target_os="emscripten")), target_env = "musl"))'.dependencies]

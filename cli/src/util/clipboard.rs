@@ -91,10 +91,7 @@ pub fn copy_timeout(data: &[u8], timeout: u64, report: bool) -> Result<()> {
     not(target_env = "musl")
 ))]
 fn copy_timeout_x11(data: &[u8], timeout: u64, report: bool) -> Result<()> {
-    use copypasta_ext::{
-        copypasta::x11_clipboard::{Clipboard, Selection},
-        x11_fork::{ClipboardContext, Error},
-    };
+    use copypasta_ext::x11_fork::{ClipboardContext, Error};
     use x11_clipboard::Clipboard as X11Clipboard;
 
     // Remember previous clipboard contents
@@ -111,7 +108,7 @@ fn copy_timeout_x11(data: &[u8], timeout: u64, report: bool) -> Result<()> {
             let clip = X11Clipboard::new()
                 .unwrap_or_else(|_| panic!("{}: failed to obtain X11 clipboard context", bin));
             clip.store(
-                Clipboard::atom(&clip.setter.atoms),
+                clip.setter.atoms.clipboard,
                 clip.setter.atoms.utf8_string,
                 data,
             )
@@ -124,7 +121,7 @@ fn copy_timeout_x11(data: &[u8], timeout: u64, report: bool) -> Result<()> {
 
             // Wait for clipboard to change, then kill fork
             clip.load_wait(
-                Clipboard::atom(&clip.getter.atoms),
+                clip.getter.atoms.clipboard,
                 clip.getter.atoms.utf8_string,
                 clip.getter.atoms.property,
             )

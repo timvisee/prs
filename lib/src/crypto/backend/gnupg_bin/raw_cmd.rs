@@ -1,5 +1,6 @@
 //! Command helpers for raw interface.
 
+use std::char::decode_utf16;
 use std::ffi::OsStr;
 use std::io::Write;
 use std::process::{Command, ExitStatus, Output, Stdio};
@@ -150,10 +151,9 @@ fn u8_as_utf16(bytes: &[u8]) -> Option<String> {
         return None;
     }
 
-    // Transmute to u16 slice, try to parse
-    let bytes: &[u16] =
-        unsafe { std::slice::from_raw_parts(bytes.as_ptr() as *const u16, bytes.len() / 2) };
-    String::from_utf16(bytes).ok()
+    // Decode UTF-16 chars one by one and build a string
+    let iter = (0..bytes.len() / 2).map(|i| u16::from_be_bytes([bytes[2 * i], bytes[2 * i + 1]]));
+    decode_utf16(iter).collect::<Result<_, _>>().ok()
 }
 
 #[derive(Debug, Error)]

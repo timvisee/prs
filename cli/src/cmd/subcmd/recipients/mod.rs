@@ -12,7 +12,7 @@ use crate::cmd::arg::{ArgStore, CmdArg};
 pub struct CmdRecipients;
 
 impl CmdRecipients {
-    pub fn build<'a>() -> Command<'a> {
+    pub fn build() -> Command {
         Command::new("recipients")
             .about("Manage store recipients")
             .alias("recipient")
@@ -20,7 +20,8 @@ impl CmdRecipients {
             .alias("rec")
             .alias("keys")
             .alias("kes")
-            .arg_required_else_help(true)
+            .subcommand_required(true)
+            .subcommand_value_name("CMD")
             .subcommand(add::CmdAdd::build())
             .subcommand(export::CmdExport::build())
             .subcommand(generate::CmdGenerate::build())

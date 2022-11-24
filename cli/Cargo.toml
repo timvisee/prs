@@ -56,8 +56,8 @@ select-fzf-bin = []
 ansi-escapes = "0.1"
 anyhow = "1.0"
 chbs = "0.1.0"
-clap = { version = "3.0", default-features = false, features = ["std", "suggestions", "color", "cargo", "env"] }
-clap_complete = "3.0"
+clap = { version = "4.0", features = ["std", "help", "suggestions", "color", "cargo", "env"] }
+clap_complete = "4.0"
 colored = "2.0"
 derive_builder = "0.11"
 edit = "0.1"

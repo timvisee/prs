@@ -9,8 +9,8 @@ pub struct RemoteMatcher<'a> {
 
 impl<'a: 'b, 'b> RemoteMatcher<'a> {
     /// Get the git URL to set.
-    pub fn git_url(&self) -> Option<&str> {
-        self.matches.value_of("GIT_URL")
+    pub fn git_url(&self) -> Option<&String> {
+        self.matches.get_one("GIT_URL")
     }
 }
 

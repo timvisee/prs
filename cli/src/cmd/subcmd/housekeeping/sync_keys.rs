@@ -6,7 +6,7 @@ use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, CmdArg};
 pub struct CmdSyncKeys;
 
 impl CmdSyncKeys {
-    pub fn build<'a>() -> Command<'a> {
+    pub fn build() -> Command {
         Command::new("sync-keys")
             .alias("sync-recipients")
             .about("Sync public keys in store, import missing keys")
@@ -14,6 +14,7 @@ impl CmdSyncKeys {
                 Arg::new("no-import")
                     .long("no-import")
                     .alias("skip-import")
+                    .num_args(0)
                     .help("Skip importing missing keys to keychain"),
             )
             .arg(ArgAllowDirty::build())

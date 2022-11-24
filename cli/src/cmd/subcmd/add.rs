@@ -6,7 +6,7 @@ use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, ArgStore, CmdArg};
 pub struct CmdAdd;
 
 impl CmdAdd {
-    pub fn build<'a>() -> Command<'a> {
+    pub fn build() -> Command {
         Command::new("add")
             .alias("a")
             .alias("new")
@@ -20,6 +20,7 @@ impl CmdAdd {
                 Arg::new("empty")
                     .long("empty")
                     .short('e')
+                    .num_args(0)
                     .help("Add empty secret, do not edit"),
             )
             .arg(
@@ -27,6 +28,7 @@ impl CmdAdd {
                     .long("stdin")
                     .short('S')
                     .alias("from-stdin")
+                    .num_args(0)
                     .help("Read secret from stdin, do not open editor")
                     .conflicts_with("empty"),
             )

@@ -6,7 +6,7 @@ use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, ArgQuery, ArgStore, CmdArg};
 pub struct CmdEdit;
 
 impl CmdEdit {
-    pub fn build<'a>() -> Command<'a> {
+    pub fn build() -> Command {
         Command::new("edit")
             .alias("e")
             .about("Edit a secret")
@@ -16,6 +16,7 @@ impl CmdEdit {
                     .long("stdin")
                     .short('S')
                     .alias("from-stdin")
+                    .num_args(0)
                     .help("Read secret from stdin, do not open editor"),
             )
             .arg(ArgStore::build())

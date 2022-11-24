@@ -11,12 +11,12 @@ pub struct GenerateMatcher<'a> {
 impl<'a: 'b, 'b> GenerateMatcher<'a> {
     /// Check whether to skip adding key to store.
     pub fn no_add(&self) -> bool {
-        self.matches.is_present("no-add")
+        self.matches.get_flag("no-add")
     }
 
     /// Check whether to skip re-encrypting secrets.
     pub fn no_recrypt(&self) -> bool {
-        self.matches.is_present("no-recrypt")
+        self.matches.get_flag("no-recrypt")
     }
 
     /// Whether to allow a dirty repository for syncing.

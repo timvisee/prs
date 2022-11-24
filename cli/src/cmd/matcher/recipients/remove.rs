@@ -11,7 +11,7 @@ pub struct RemoveMatcher<'a> {
 impl<'a: 'b, 'b> RemoveMatcher<'a> {
     /// Check whether to re-encrypt secrets.
     pub fn recrypt(&self) -> bool {
-        self.matches.is_present("recrypt")
+        self.matches.get_flag("recrypt")
     }
 
     /// Whether to allow a dirty repository for syncing.

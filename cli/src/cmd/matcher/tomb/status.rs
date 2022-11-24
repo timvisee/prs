@@ -10,7 +10,7 @@ pub struct StatusMatcher<'a> {
 impl<'a: 'b, 'b> StatusMatcher<'a> {
     /// Check whether to open the tomb.
     pub fn open(&self) -> bool {
-        self.matches.is_present("open")
+        self.matches.get_flag("open")
     }
 }
 

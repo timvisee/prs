@@ -6,7 +6,7 @@ use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, ArgQuery, CmdArg};
 pub struct CmdRecrypt;
 
 impl CmdRecrypt {
-    pub fn build<'a>() -> Command<'a> {
+    pub fn build() -> Command {
         Command::new("recrypt")
             .alias("reencrypt")
             .about("Re-encrypt secrets")
@@ -14,6 +14,7 @@ impl CmdRecrypt {
                 Arg::new("all")
                     .long("all")
                     .short('a')
+                    .num_args(0)
                     .help("Re-encrypt all secrets")
                     .conflicts_with("QUERY"),
             )

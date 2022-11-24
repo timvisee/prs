@@ -6,7 +6,7 @@ use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, ArgQuery, ArgStore, CmdArg};
 pub struct CmdDuplicate;
 
 impl CmdDuplicate {
-    pub fn build<'a>() -> Command<'a> {
+    pub fn build() -> Command {
         Command::new("duplicate")
             .alias("dup")
             .about("Duplicate a secret")

@@ -6,7 +6,7 @@ use crate::cmd::arg::{ArgQuery, ArgStore, CmdArg};
 pub struct CmdList;
 
 impl CmdList {
-    pub fn build<'a>() -> Command<'a> {
+    pub fn build() -> Command {
         Command::new("list")
             .alias("ls")
             .alias("l")
@@ -18,6 +18,7 @@ impl CmdList {
                     .long("list")
                     .short('l')
                     .alias("no-tree")
+                    .num_args(0)
                     .help("Show as list, not as tree"),
             )
             .arg(
@@ -27,6 +28,7 @@ impl CmdList {
                     .alias("symlinks")
                     .alias("only-aliases")
                     .alias("only-symlinks")
+                    .num_args(0)
                     .help("Show only alises"),
             )
             .arg(
@@ -38,6 +40,7 @@ impl CmdList {
                     .alias("no-symlinks")
                     .alias("only-non-aliases")
                     .alias("only-non-symlinks")
+                    .num_args(0)
                     .help("Show only non-alises")
                     .conflicts_with("aliases"),
             )

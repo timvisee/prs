@@ -19,13 +19,13 @@ impl<'a: 'b, 'b> CompletionsMatcher<'a> {
         // Get the raw list of shells
         let raw = self
             .matches
-            .values_of("SHELL")
+            .get_many("SHELL")
             .expect("no shells were given");
 
         // Parse the list of shell names, deduplicate
         let mut shells: Vec<_> = raw
             .into_iter()
-            .map(|name| name.trim().to_lowercase())
+            .map(|name: &String| name.trim().to_lowercase())
             .flat_map(|name| {
                 if name == "all" {
                     Shell::variants().iter().map(|s| s.name().into()).collect()
@@ -47,21 +47,21 @@ impl<'a: 'b, 'b> CompletionsMatcher<'a> {
     /// The target directory to output the shell completion files to.
     pub fn output(&'a self) -> PathBuf {
         self.matches
-            .value_of("output")
-            .map(PathBuf::from)
+            .get_one("output")
+            .map(|v: &String| PathBuf::from(v))
             .unwrap_or_else(|| PathBuf::from("./"))
     }
 
     /// Whether to print completion scripts to stdout.
     pub fn stdout(&'a self) -> bool {
-        self.matches.is_present("stdout")
+        self.matches.get_flag("stdout")
     }
 
     /// Name of binary to generate completions for.
     pub fn name(&'a self) -> String {
         self.matches
-            .value_of("name")
-            .map(|n| n.into())
+            .get_one("name")
+            .map(String::clone)
             .unwrap_or_else(util::bin_name)
     }
 }
@@ -132,7 +132,7 @@ impl Shell {
     }
 
     /// Generate completion script.
-    pub fn generate<S>(self, app: &mut Command<'_>, bin_name: S, buf: &mut dyn Write)
+    pub fn generate<S>(self, app: &mut Command, bin_name: S, buf: &mut dyn Write)
     where
         S: Into<String>,
     {

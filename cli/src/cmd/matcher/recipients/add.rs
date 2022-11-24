@@ -11,12 +11,12 @@ pub struct AddMatcher<'a> {
 impl<'a: 'b, 'b> AddMatcher<'a> {
     /// Check whether to skip re-encrypting secrets.
     pub fn no_recrypt(&self) -> bool {
-        self.matches.is_present("no-recrypt")
+        self.matches.get_flag("no-recrypt")
     }
 
     /// Check whether to add a secret key.
     pub fn secret(&self) -> bool {
-        self.matches.is_present("secret")
+        self.matches.get_flag("secret")
     }
 
     /// Whether to allow a dirty repository for syncing.

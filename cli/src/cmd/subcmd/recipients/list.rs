@@ -4,7 +4,7 @@ use clap::Command;
 pub struct CmdList;
 
 impl CmdList {
-    pub fn build<'a>() -> Command<'a> {
+    pub fn build() -> Command {
         Command::new("list")
             .alias("ls")
             .alias("l")

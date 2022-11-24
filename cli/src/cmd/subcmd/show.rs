@@ -6,7 +6,7 @@ use crate::cmd::arg::{ArgProperty, ArgQuery, ArgStore, ArgTimeout, CmdArg};
 pub struct CmdShow;
 
 impl CmdShow {
-    pub fn build<'a>() -> Command<'a> {
+    pub fn build() -> Command {
         let cmd = Command::new("show")
             .alias("s")
             .alias("cat")
@@ -18,6 +18,7 @@ impl CmdShow {
                     .long("first")
                     .alias("password")
                     .alias("pass")
+                    .num_args(0)
                     .help("Show only the first line of the secret"),
             )
             .arg(ArgQuery::build())
@@ -31,6 +32,7 @@ impl CmdShow {
                 .long("copy")
                 .short('c')
                 .alias("cp")
+                .num_args(0)
                 .help("Copy secret to clipboard"),
         );
 

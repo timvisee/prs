@@ -20,20 +20,20 @@ pub struct GenerateMatcher<'a> {
 
 impl<'a: 'b, 'b> GenerateMatcher<'a> {
     /// Secret name.
-    pub fn name(&self) -> Option<&str> {
-        self.matches.value_of("NAME")
+    pub fn name(&self) -> Option<&String> {
+        self.matches.get_one("NAME")
     }
 
     /// Check whether to generate a passphrase.
     pub fn passphrase(&self) -> bool {
-        self.matches.is_present("passphrase")
+        self.matches.get_flag("passphrase")
     }
 
     /// What length to use.
     pub fn length(&self) -> u16 {
         self.matches
-            .value_of("length")
-            .map(|l| l.parse().expect("invalid length"))
+            .get_one("length")
+            .map(|l: &String| l.parse().expect("invalid length"))
             .unwrap_or_else(|| {
                 if self.passphrase() {
                     PASSPHRASE_LENGTH
@@ -45,23 +45,23 @@ impl<'a: 'b, 'b> GenerateMatcher<'a> {
 
     /// Check whether to merge the secret.
     pub fn merge(&self) -> bool {
-        self.matches.is_present("merge")
+        self.matches.get_flag("merge")
     }
 
     /// Check whether to edit the secret.
     pub fn edit(&self) -> bool {
-        self.matches.is_present("edit")
+        self.matches.get_flag("edit")
     }
 
     /// Check whether to read from stdin.
     pub fn stdin(&self) -> bool {
-        self.matches.is_present("stdin")
+        self.matches.get_flag("stdin")
     }
 
     /// Check whether to read from copy.
     #[cfg(feature = "clipboard")]
     pub fn copy(&self) -> bool {
-        self.matches.is_present("copy")
+        self.matches.get_flag("copy")
     }
 
     /// Clipboard timeout in seconds.
@@ -72,7 +72,7 @@ impl<'a: 'b, 'b> GenerateMatcher<'a> {
 
     /// Check whether to read from show.
     pub fn show(&self) -> bool {
-        self.matches.is_present("show")
+        self.matches.get_flag("show")
     }
 
     /// The store.

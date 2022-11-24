@@ -12,7 +12,7 @@ pub struct ShowMatcher<'a> {
 impl<'a: 'b, 'b> ShowMatcher<'a> {
     /// Check whether to just show the first line of the secret.
     pub fn first_line(&self) -> bool {
-        self.matches.is_present("first")
+        self.matches.get_flag("first")
     }
 
     /// The secret query.
@@ -31,14 +31,14 @@ impl<'a: 'b, 'b> ShowMatcher<'a> {
     }
 
     /// The selected property.
-    pub fn property(&self) -> Option<&str> {
+    pub fn property(&self) -> Option<&String> {
         ArgProperty::value(self.matches)
     }
 
     /// Check whether to read from copy.
     #[cfg(feature = "clipboard")]
     pub fn copy(&self) -> bool {
-        self.matches.is_present("copy")
+        self.matches.get_flag("copy")
     }
 }
 

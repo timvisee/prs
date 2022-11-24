@@ -15,8 +15,8 @@ impl<'a: 'b, 'b> MoveMatcher<'a> {
     }
 
     /// Secret destination.
-    pub fn destination(&self) -> &str {
-        self.matches.value_of("DEST").unwrap()
+    pub fn destination(&self) -> &String {
+        self.matches.get_one("DEST").unwrap()
     }
 
     /// The store.

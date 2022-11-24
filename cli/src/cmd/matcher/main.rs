@@ -10,32 +10,32 @@ pub struct MainMatcher<'a> {
 impl<'a: 'b, 'b> MainMatcher<'a> {
     /// Check whether to force.
     pub fn force(&self) -> bool {
-        self.matches.is_present("force")
+        self.matches.get_flag("force")
     }
 
     /// Check whether to use no-interact mode.
     pub fn no_interact(&self) -> bool {
-        self.matches.is_present("no-interact")
+        self.matches.get_flag("no-interact")
     }
 
     /// Check whether to assume yes.
     pub fn assume_yes(&self) -> bool {
-        self.matches.is_present("yes")
+        self.matches.get_flag("yes")
     }
 
     /// Check whether quiet mode is used.
     pub fn quiet(&self) -> bool {
-        !self.verbose() && self.matches.is_present("quiet")
+        !self.verbose() && self.matches.get_flag("quiet")
     }
 
     /// Check whether verbose mode is used.
     pub fn verbose(&self) -> bool {
-        self.matches.is_present("verbose")
+        self.matches.get_count("verbose") > 0
     }
 
     /// Check whether to use GPG in TTY mode.
     pub fn gpg_tty(&self) -> bool {
-        self.matches.is_present("gpg-tty")
+        self.matches.get_flag("gpg-tty")
     }
 }
 

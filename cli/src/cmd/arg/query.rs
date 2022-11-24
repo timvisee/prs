@@ -10,7 +10,7 @@ impl CmdArg for ArgQuery {
         "QUERY"
     }
 
-    fn build<'b>() -> Arg<'b> {
+    fn build() -> Arg {
         Arg::new("QUERY").help("Secret query")
     }
 }

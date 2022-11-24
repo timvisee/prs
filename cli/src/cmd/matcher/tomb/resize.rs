@@ -12,7 +12,7 @@ pub struct ResizeMatcher<'a> {
 impl<'a: 'b, 'b> ResizeMatcher<'a> {
     /// The size in megabytes.
     pub fn size(&self) -> Option<u32> {
-        let size = self.matches.value_of("size")?;
+        let size: &String = self.matches.get_one("size")?;
         let size = match size.parse::<u32>() {
             Ok(size) => size,
             Err(err) => quit_error(

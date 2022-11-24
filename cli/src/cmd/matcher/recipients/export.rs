@@ -9,14 +9,14 @@ pub struct ExportMatcher<'a> {
 
 impl<'a: 'b, 'b> ExportMatcher<'a> {
     /// File to output to.
-    pub fn output_file(&self) -> Option<&str> {
-        self.matches.value_of("output-file")
+    pub fn output_file(&self) -> Option<&String> {
+        self.matches.get_one("output-file")
     }
 
     /// Check whether to copy the key.
     #[cfg(feature = "clipboard")]
     pub fn copy(&self) -> bool {
-        self.matches.is_present("copy")
+        self.matches.get_flag("copy")
     }
 }
 

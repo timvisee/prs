@@ -4,7 +4,7 @@ use clap::{Arg, Command};
 pub struct CmdClose;
 
 impl CmdClose {
-    pub fn build<'a>() -> Command<'a> {
+    pub fn build() -> Command {
         Command::new("close")
             .alias("c")
             .alias("stop")
@@ -12,6 +12,7 @@ impl CmdClose {
             .arg(
                 Arg::new("try")
                     .long("try")
+                    .num_args(0)
                     .help("Try to close, don't fail if already closed"),
             )
     }

@@ -10,13 +10,14 @@ impl CmdArg for ArgAllowDirty {
         "allow-dirty"
     }
 
-    fn build<'b>() -> Arg<'b> {
+    fn build() -> Arg {
         Arg::new("allow-dirty")
             .long("allow-dirty")
             .short('d')
             .alias("dirty")
             .alias("sync-allow-dirty")
             .alias("sync-dirty")
+            .num_args(0)
             .global(true)
             .help("Allow commit and sync on dirty store repository")
     }

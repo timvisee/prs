@@ -6,7 +6,7 @@ use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, CmdArg};
 pub struct CmdRun;
 
 impl CmdRun {
-    pub fn build<'a>() -> Command<'a> {
+    pub fn build() -> Command {
         Command::new("run")
             .about("Run housekeeping tasks")
             .arg(ArgAllowDirty::build())

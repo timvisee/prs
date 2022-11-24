@@ -10,19 +10,20 @@ impl CmdArg for ArgProperty {
         "property"
     }
 
-    fn build<'b>() -> Arg<'b> {
+    fn build() -> Arg {
         Arg::new("property")
             .long("property")
             .short('p')
             .alias("prop")
             .value_name("NAME")
+            .num_args(1)
             .global(true)
             .help("Select a specific property")
     }
 }
 
 impl<'a> CmdArgOption<'a> for ArgProperty {
-    type Value = Option<&'a str>;
+    type Value = Option<&'a String>;
 
     fn value(matches: &'a ArgMatches) -> Self::Value {
         Self::value_raw(matches)

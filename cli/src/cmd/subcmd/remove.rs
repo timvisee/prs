@@ -6,7 +6,7 @@ use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, ArgQuery, ArgStore, CmdArg};
 pub struct CmdRemove;
 
 impl CmdRemove {
-    pub fn build<'a>() -> Command<'a> {
+    pub fn build() -> Command {
         Command::new("remove")
             .alias("rm")
             .alias("delete")

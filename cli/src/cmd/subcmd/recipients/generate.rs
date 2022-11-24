@@ -6,7 +6,7 @@ use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, CmdArg};
 pub struct CmdGenerate;
 
 impl CmdGenerate {
-    pub fn build<'a>() -> Command<'a> {
+    pub fn build() -> Command {
         Command::new("generate")
             .alias("gen")
             .alias("g")
@@ -15,6 +15,7 @@ impl CmdGenerate {
                 Arg::new("no-add")
                     .long("no-add")
                     .alias("skip-add")
+                    .num_args(0)
                     .help("Skip adding key pair to store"),
             )
             .arg(
@@ -23,6 +24,7 @@ impl CmdGenerate {
                     .alias("no-reencrypt")
                     .alias("skip-recrypt")
                     .alias("skip-reencrypt")
+                    .num_args(0)
                     .help("Skip re-encrypting all secrets")
                     .conflicts_with("no-add"),
             )

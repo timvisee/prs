@@ -12,7 +12,7 @@ pub struct CopyMatcher<'a> {
 impl<'a: 'b, 'b> CopyMatcher<'a> {
     /// Check whether to copy all of the secret.
     pub fn all(&self) -> bool {
-        self.matches.is_present("all")
+        self.matches.get_flag("all")
     }
 
     /// The secret query.
@@ -31,7 +31,7 @@ impl<'a: 'b, 'b> CopyMatcher<'a> {
     }
 
     /// The selected property.
-    pub fn property(&self) -> Option<&str> {
+    pub fn property(&self) -> Option<&String> {
         ArgProperty::value(self.matches)
     }
 }

@@ -11,7 +11,7 @@ pub struct OpenMatcher<'a> {
 impl<'a: 'b, 'b> OpenMatcher<'a> {
     /// The time to automatically close.
     pub fn timer(&self) -> Option<u32> {
-        let time = self.matches.value_of("timer").unwrap_or("0");
+        let time: &String = self.matches.get_one("timer")?;
         match crate::util::time::parse_duration(time) {
             Ok(0) => None,
             Ok(time) => Some(time as u32),

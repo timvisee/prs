@@ -1,4 +1,4 @@
-use clap::{Arg, ArgMatches, Command};
+use clap::{Arg, ArgAction, ArgMatches, Command};
 
 use super::matcher::{self, Matcher};
 use super::subcmd;
@@ -11,7 +11,7 @@ pub struct Handler {
 
 impl<'a> Handler {
     /// Build the application CLI definition.
-    pub fn build() -> Command<'a> {
+    pub fn build() -> Command {
         // Build the CLI application definition
         let app = Command::new(crate_name!())
             .version(crate_version!())
@@ -21,6 +21,7 @@ impl<'a> Handler {
                 Arg::new("force")
                     .long("force")
                     .short('f')
+                    .num_args(0)
                     .global(true)
                     .help("Force the action, ignore warnings"),
             )
@@ -30,6 +31,7 @@ impl<'a> Handler {
                     .short('I')
                     .alias("no-interactive")
                     .alias("non-interactive")
+                    .num_args(0)
                     .global(true)
                     .help("Not interactive, do not prompt"),
             )
@@ -38,6 +40,7 @@ impl<'a> Handler {
                     .long("yes")
                     .short('y')
                     .alias("assume-yes")
+                    .num_args(0)
                     .global(true)
                     .help("Assume yes for prompts"),
             )
@@ -45,6 +48,7 @@ impl<'a> Handler {
                 Arg::new("quiet")
                     .long("quiet")
                     .short('q')
+                    .num_args(0)
                     .global(true)
                     .help("Produce output suitable for logging and automation"),
             )
@@ -52,14 +56,15 @@ impl<'a> Handler {
                 Arg::new("verbose")
                     .long("verbose")
                     .short('v')
-                    .multiple_occurrences(true)
+                    .action(ArgAction::Count)
+                    .num_args(0)
                     .global(true)
-                    .takes_value(false)
                     .help("Enable verbose information and logging"),
             )
             .arg(
                 Arg::new("gpg-tty")
                     .long("gpg-tty")
+                    .num_args(0)
                     .global(true)
                     .help("Instruct GPG to ask passphrase in TTY rather than pinentry"),
             )

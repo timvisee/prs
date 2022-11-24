@@ -11,7 +11,7 @@ lazy_static! {
 pub struct CmdInit;
 
 impl CmdInit {
-    pub fn build<'a>() -> Command<'a> {
+    pub fn build() -> Command {
         Command::new("init")
             .alias("initialize")
             .about("Initialize tomb in-place for current password store")
@@ -21,7 +21,8 @@ impl CmdInit {
                     .short('t')
                     .alias("time")
                     .value_name("TIME")
-                    .default_value(&TIMER_DEFAULT)
+                    .default_value(TIMER_DEFAULT.as_str())
+                    .num_args(1)
                     .help("Time after which to close the Tomb"),
             )
     }

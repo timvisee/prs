@@ -6,13 +6,13 @@ use crate::cmd::arg::{ArgStore, CmdArg};
 pub struct CmdGit;
 
 impl CmdGit {
-    pub fn build<'a>() -> Command<'a> {
+    pub fn build() -> Command {
         Command::new("git")
             .about("Invoke git command in password store")
             .arg(
                 Arg::new("COMMAND")
                     .help("Git command to invoke")
-                    .multiple_values(true),
+                    .num_args(..),
             )
             .arg(ArgStore::build())
             .trailing_var_arg(true)

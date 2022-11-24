@@ -10,7 +10,7 @@ pub struct CloseMatcher<'a> {
 impl<'a: 'b, 'b> CloseMatcher<'a> {
     /// Whether to try to close.
     pub fn do_try(&self) -> bool {
-        self.matches.is_present("try")
+        self.matches.get_flag("try")
     }
 }
 

@@ -11,7 +11,7 @@ pub struct SyncKeysMatcher<'a> {
 impl<'a: 'b, 'b> SyncKeysMatcher<'a> {
     /// Check whether to not import missing keys.
     pub fn no_import(&self) -> bool {
-        self.matches.is_present("no-import")
+        self.matches.get_flag("no-import")
     }
 
     /// Whether to allow a dirty repository for syncing.

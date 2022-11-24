@@ -4,7 +4,7 @@ use clap::{Arg, Command};
 pub struct CmdResize;
 
 impl CmdResize {
-    pub fn build<'a>() -> Command<'a> {
+    pub fn build() -> Command {
         Command::new("resize")
             .alias("r")
             .alias("size")
@@ -15,6 +15,7 @@ impl CmdResize {
                     .long("size")
                     .short('S')
                     .value_name("MEGABYTE")
+                    .num_args(1)
                     .help("Resize tomb to megabytes"),
             )
     }

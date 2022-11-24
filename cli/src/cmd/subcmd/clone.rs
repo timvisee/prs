@@ -6,7 +6,7 @@ use crate::cmd::arg::{ArgStore, CmdArg};
 pub struct CmdClone;
 
 impl CmdClone {
-    pub fn build<'a>() -> Command<'a> {
+    pub fn build() -> Command {
         Command::new("clone")
             .about("Clone existing password store")
             .arg(

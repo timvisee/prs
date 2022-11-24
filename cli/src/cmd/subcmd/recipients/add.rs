@@ -6,7 +6,7 @@ use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, CmdArg};
 pub struct CmdAdd;
 
 impl CmdAdd {
-    pub fn build<'a>() -> Command<'a> {
+    pub fn build() -> Command {
         Command::new("add")
             .alias("a")
             .about("Add store recipient")
@@ -14,6 +14,7 @@ impl CmdAdd {
                 Arg::new("secret")
                     .long("secret")
                     .alias("private")
+                    .num_args(0)
                     .help("Add public key we have private key for"),
             )
             .arg(
@@ -22,6 +23,7 @@ impl CmdAdd {
                     .alias("no-reencrypt")
                     .alias("skip-recrypt")
                     .alias("skip-reencrypt")
+                    .num_args(0)
                     .help("Skip re-encrypting all secrets"),
             )
             .arg(ArgAllowDirty::build())

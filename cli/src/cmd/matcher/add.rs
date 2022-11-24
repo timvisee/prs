@@ -10,18 +10,18 @@ pub struct AddMatcher<'a> {
 
 impl<'a: 'b, 'b> AddMatcher<'a> {
     /// Secret destination.
-    pub fn name(&self) -> &str {
-        self.matches.value_of("NAME").unwrap()
+    pub fn name(&self) -> &String {
+        self.matches.get_one("NAME").unwrap()
     }
 
     /// Check whether to create an empty secret.
     pub fn empty(&self) -> bool {
-        self.matches.is_present("empty")
+        self.matches.get_flag("empty")
     }
 
     /// Check whether to read from stdin.
     pub fn stdin(&self) -> bool {
-        self.matches.is_present("stdin")
+        self.matches.get_flag("stdin")
     }
 
     /// The store.

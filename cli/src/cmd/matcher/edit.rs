@@ -16,7 +16,7 @@ impl<'a: 'b, 'b> EditMatcher<'a> {
 
     /// Check whether to read from stdin.
     pub fn stdin(&self) -> bool {
-        self.matches.is_present("stdin")
+        self.matches.get_flag("stdin")
     }
 
     /// The store.

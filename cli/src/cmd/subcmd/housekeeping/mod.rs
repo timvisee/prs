@@ -10,12 +10,13 @@ use crate::cmd::arg::{ArgStore, CmdArg};
 pub struct CmdHousekeeping;
 
 impl CmdHousekeeping {
-    pub fn build<'a>() -> Command<'a> {
+    pub fn build() -> Command {
         Command::new("housekeeping")
             .about("Housekeeping utilities")
             .alias("housekeep")
             .alias("hk")
-            .arg_required_else_help(true)
+            .subcommand_required(true)
+            .subcommand_value_name("ACTION")
             .subcommand(recrypt::CmdRecrypt::build())
             .subcommand(run::CmdRun::build())
             .subcommand(sync_keys::CmdSyncKeys::build())

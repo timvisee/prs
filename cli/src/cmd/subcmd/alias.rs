@@ -6,7 +6,7 @@ use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, ArgQuery, ArgStore, CmdArg};
 pub struct CmdAlias;
 
 impl CmdAlias {
-    pub fn build<'a>() -> Command<'a> {
+    pub fn build() -> Command {
         Command::new("alias")
             .alias("ln")
             .alias("link")

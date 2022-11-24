@@ -6,7 +6,7 @@ use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, CmdArg};
 pub struct CmdRemove;
 
 impl CmdRemove {
-    pub fn build<'a>() -> Command<'a> {
+    pub fn build() -> Command {
         Command::new("remove")
             .alias("rm")
             .alias("delete")
@@ -16,6 +16,7 @@ impl CmdRemove {
                 Arg::new("recrypt")
                     .long("recrypt")
                     .alias("reencrypt")
+                    .num_args(0)
                     .help("Re-encrypting all secrets"),
             )
             .arg(ArgAllowDirty::build())

@@ -5,7 +5,7 @@ pub mod query;
 pub mod store;
 pub mod timeout;
 
-use clap::{Arg, ArgMatches};
+use clap::{parser::ValuesRef, Arg, ArgMatches};
 
 // Re-export to arg module
 pub use self::allow_dirty::ArgAllowDirty;
@@ -23,7 +23,7 @@ pub trait CmdArg {
     fn name() -> &'static str;
 
     /// Build the argument.
-    fn build<'a>() -> Arg<'a>;
+    fn build() -> Arg;
 }
 
 /// This `CmdArg` specification defines that this argument may be tested as
@@ -32,7 +32,7 @@ pub trait CmdArg {
 pub trait CmdArgFlag: CmdArg {
     /// Check whether the argument is present in the given matches.
     fn is_present(matches: &ArgMatches) -> bool {
-        matches.is_present(Self::name())
+        matches.get_flag(Self::name())
     }
 }
 
@@ -46,12 +46,12 @@ pub trait CmdArgOption<'a>: CmdArg {
     fn value(matches: &'a ArgMatches) -> Self::Value;
 
     /// Get the raw argument value, as a string reference.
-    fn value_raw(matches: &'a ArgMatches) -> Option<&'a str> {
-        matches.value_of(Self::name())
+    fn value_raw(matches: &'a ArgMatches) -> Option<&String> {
+        matches.get_one(Self::name())
     }
 
     /// Get the raw argument values, as a string reference.
-    fn values_raw(matches: &'a ArgMatches) -> Option<clap::Values<'a>> {
-        matches.values_of(Self::name())
+    fn values_raw(matches: &'a ArgMatches) -> Option<ValuesRef<'a, String>> {
+        matches.get_many(Self::name())
     }
 }

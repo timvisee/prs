@@ -1,4 +1,4 @@
-use clap::ArgMatches;
+use clap::{parser::ValuesRef, ArgMatches};
 
 use super::Matcher;
 use crate::cmd::arg::{ArgStore, CmdArgOption};
@@ -12,9 +12,9 @@ impl<'a: 'b, 'b> GitMatcher<'a> {
     /// Get the git command to invoke.
     pub fn command(&self) -> String {
         self.matches
-            .values_of("COMMAND")
-            .map(|c| c.collect::<Vec<_>>().join(" "))
-            .unwrap_or_else(|| "".into())
+            .get_many("COMMAND")
+            .map(|c: ValuesRef<String>| c.map(|s| s.as_str()).collect::<Vec<_>>().join(" "))
+            .unwrap_or_else(String::default)
     }
 
     /// The store.

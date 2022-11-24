@@ -6,7 +6,7 @@ use crate::cmd::arg::{ArgProperty, ArgQuery, ArgStore, ArgTimeout, CmdArg};
 pub struct CmdCopy;
 
 impl CmdCopy {
-    pub fn build<'a>() -> Command<'a> {
+    pub fn build() -> Command {
         Command::new("copy")
             .alias("cp")
             .alias("c")
@@ -18,6 +18,7 @@ impl CmdCopy {
                 Arg::new("all")
                     .long("all")
                     .short('a')
+                    .num_args(0)
                     .help("Copy whole secret, not just first line"),
             )
             .arg(ArgQuery::build())

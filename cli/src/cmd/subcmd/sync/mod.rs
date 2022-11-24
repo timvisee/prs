@@ -9,9 +9,8 @@ use crate::cmd::arg::{ArgAllowDirty, ArgStore, CmdArg};
 pub struct CmdSync;
 
 impl CmdSync {
-    pub fn build<'a>() -> Command<'a> {
+    pub fn build() -> Command {
         Command::new("sync")
-            .alias("s")
             .about("Sync password store")
             .subcommand(init::CmdInit::build())
             .subcommand(remote::CmdRemote::build())

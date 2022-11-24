@@ -19,7 +19,7 @@ impl CmdArg for ArgTimeout {
         "timeout"
     }
 
-    fn build<'b>() -> Arg<'b> {
+    fn build() -> Arg {
         Arg::new("timeout")
             .long("timeout")
             .short('t')
@@ -27,6 +27,7 @@ impl CmdArg for ArgTimeout {
             .alias("seconds")
             .alias("second")
             .value_name("SECONDS")
+            .num_args(1)
             .global(true)
             .help("Timeout after which to clear clipboard")
     }

@@ -19,6 +19,8 @@ pub mod show;
 pub mod sync;
 #[cfg(all(feature = "tomb", target_os = "linux"))]
 pub mod tomb;
+#[cfg(feature = "totp")]
+pub mod totp;
 
 // Re-export to cmd module
 pub use self::add::CmdAdd;
@@ -42,3 +44,5 @@ pub use self::show::CmdShow;
 pub use self::sync::CmdSync;
 #[cfg(all(feature = "tomb", target_os = "linux"))]
 pub use self::tomb::CmdTomb;
+#[cfg(feature = "totp")]
+pub use self::totp::CmdTotp;

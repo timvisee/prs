@@ -88,8 +88,12 @@ impl<'a> Handler {
             .subcommand(subcmd::CmdList::build())
             .subcommand(subcmd::CmdInit::build())
             .subcommand(subcmd::CmdClone::build())
-            .subcommand(subcmd::CmdSync::build())
-            .subcommand(subcmd::CmdRecipients::build())
+            .subcommand(subcmd::CmdSync::build());
+
+        #[cfg(feature = "totp")]
+        let app = app.subcommand(subcmd::CmdTotp::build());
+
+        let app = app.subcommand(subcmd::CmdRecipients::build())
             .subcommand(subcmd::CmdGit::build());
 
         #[cfg(all(feature = "tomb", target_os = "linux"))]
@@ -210,5 +214,11 @@ impl<'a> Handler {
     #[cfg(all(feature = "tomb", target_os = "linux"))]
     pub fn tomb(&'a self) -> Option<matcher::TombMatcher> {
         matcher::TombMatcher::with(&self.matches)
+    }
+
+    /// Get the TOTP sub command, if matched.
+    #[cfg(feature = "totp")]
+    pub fn totp(&'a self) -> Option<matcher::TotpMatcher> {
+        matcher::TotpMatcher::with(&self.matches)
     }
 }

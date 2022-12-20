@@ -19,3 +19,5 @@ pub mod show;
 pub mod sync;
 #[cfg(all(feature = "tomb", target_os = "linux"))]
 pub mod tomb;
+#[cfg(feature = "totp")]
+pub mod totp;

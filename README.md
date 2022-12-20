@@ -47,6 +47,7 @@ compatible clients, extensions and migration scripts.
 - Supports Linux, macOS, Windows, FreeBSD and others, supports X11 and Wayland
 - Supports multiple cryptography backends (more backends & crypto in the future)
 - Seamless [Tomb][tomb] support to prevent metadata leakage[*](#what-is-tomb)
+- Support for TOTP tokens for two-factor authentication
 - Scriptable with `-y`, `-f`, `-I` flags
 - Accurate & useful error reporting
 
@@ -422,6 +423,7 @@ of which are enabled by default:
 | `clipboard`         | `prs-cli`             | Default | Clipboard support: copy secret to clipboard                |
 | `notify`            | `prs-cli`, `prs-gtk3` | Default | Notification support: notify on clipboard clear            |
 | `tomb`              | _all_                 | Default | Tomb support for password store (only supported on Linux)  |
+| `totp`              |`prs-cli`              | Default | TOTP token support for 2FA                                 |
 | `backend-gpgme`     | _all_                 |         | GPG crypto backend using GPGME (not supported on Windows)  |
 | `backend-gnupg-bin` | _all_                 | Default | GPG crypto backend using GnuPG binary                      |
 | `select-skim`       | `prc-cli`             | Default | Interactive selection with skim (ignored on Windows)       |
@@ -715,6 +717,7 @@ SUBCOMMANDS:
     show            Display a secret
     sync            Sync password store
     tomb            Manage password store Tomb
+    totp            Manage TOTP tokens
 ```
 
 ## License

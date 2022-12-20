@@ -8,6 +8,7 @@ impl CmdClose {
         Command::new("close")
             .alias("c")
             .alias("stop")
+            .alias("lock")
             .about("Close tomb")
             .arg(
                 Arg::new("try")

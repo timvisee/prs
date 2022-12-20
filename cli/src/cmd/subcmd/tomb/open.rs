@@ -7,7 +7,7 @@ impl CmdOpen {
     pub fn build() -> Command {
         Command::new("open")
             .alias("o")
-            .alias("lock")
+            .alias("unlock")
             .about("Open tomb")
             .arg(
                 Arg::new("timer")

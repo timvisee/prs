@@ -21,7 +21,7 @@ name = "prs"
 path = "./src/main.rs"
 
 [features]
-default = ["backend-gnupg-bin", "alias", "clipboard", "notify", "select-skim", "select-fzf-bin"]
+default = ["backend-gnupg-bin", "alias", "clipboard", "notify", "select-skim", "select-fzf-bin", "totp"]
 
 ### Regular features
 
@@ -35,7 +35,10 @@ clipboard = ["copypasta-ext", "x11-clipboard", "base64"]
 notify = ["notify-rust"]
 
 # Option (default): tomb support for password store on Linux
-tomb = ["prs-lib/tomb","bytesize",  "fs_extra", "regex"]
+tomb = ["prs-lib/tomb", "bytesize",  "fs_extra", "regex"]
+
+# Option (default): TOTP token support
+totp = ["totp-rs"]
 
 ### Pluggable cryptography backends
 
@@ -80,6 +83,9 @@ notify-rust = { version = "4.6.0", optional = true }
 bytesize = { version = "1.1.0", optional = true }
 fs_extra = { version = "1.2.0", optional = true }
 regex = { version = "1.7.0", optional = true, default-features = false, features = ["std"] }
+
+# TOTP support
+totp-rs = { version = "3.1", optional = true, default-features = false, features = ["otpauth"] }
 
 # Clipboard support
 base64 = { version = "0.20.0", optional = true }

@@ -67,16 +67,15 @@ fn parse_encoded(plaintext: &Plaintext) -> Option<Result<ZeroingTotp>> {
         return None;
     }
 
-    // Decode to bytes
-    let secret = Secret::Encoded(plaintext.to_string());
-    let mut bytes = secret.to_bytes().unwrap();
-    zero_secret(secret);
-
-    // Secret must have at least 16 bytes
-    if bytes.len() < 16 {
-        bytes.zeroize();
+    // Encoded secret must have at least 16 bytes
+    if plaintext.len() < 16 {
         return None;
     }
+
+    // Decode to bytes
+    let secret = Secret::Encoded(plaintext.to_string());
+    let bytes = secret.to_bytes().unwrap();
+    zero_secret(secret);
 
     // Parse RFC6238 TOTP
     Some(

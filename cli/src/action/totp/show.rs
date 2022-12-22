@@ -3,7 +3,7 @@ use std::time::Duration;
 
 use anyhow::{anyhow, Result};
 use clap::ArgMatches;
-use prs_lib::{crypto::prelude::*, Plaintext, Store};
+use prs_lib::{crypto::prelude::*, Store};
 use thiserror::Error;
 
 #[cfg(feature = "clipboard")]
@@ -63,9 +63,9 @@ impl<'a> Show<'a> {
         }
 
         // Get current TOTP token
+        // TODO: don't unwrap
         let totp = totp::find_token(&plaintext).expect("no token found");
-        let token = Plaintext::from(totp.generate_current().unwrap());
-        totp::zero_totp(totp);
+        let token = totp.generate_current().unwrap();
 
         // Copy to clipboard
         #[cfg(feature = "clipboard")]

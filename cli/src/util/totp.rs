@@ -1,3 +1,5 @@
+use std::time::SystemTimeError;
+
 use linkify::{LinkFinder, LinkKind};
 use prs_lib::Plaintext;
 use totp_rs::{Rfc6238, Secret, TOTP};
@@ -9,10 +11,10 @@ const OTPAUTH_SCHEME: &str = "otpauth://";
 /// Possible property names to search in for TOTP tokens.
 const PROPERTY_NAMES: [&str; 2] = ["2fa", "totp"];
 
-/// Try to find a TOTOP token in the given plaintext.
+/// Try to find a TOTP token in the given plaintext.
 ///
 /// Returns `None` if no TOTP is found.
-pub fn find_token(plaintext: &Plaintext) -> Option<TOTP> {
+pub fn find_token(plaintext: &Plaintext) -> Option<ZeroingTOTP> {
     // Find first TOTP URL globally
     match find_otpauth_url(plaintext) {
         totp @ Some(_) => return totp,
@@ -35,7 +37,7 @@ pub fn find_token(plaintext: &Plaintext) -> Option<TOTP> {
 
 /// Scan the plaintext for `otpauth` URLs.
 // TODO: return result
-fn find_otpauth_url(plaintext: &Plaintext) -> Option<TOTP> {
+fn find_otpauth_url(plaintext: &Plaintext) -> Option<ZeroingTOTP> {
     // Configure linkfinder
     let mut finder = LinkFinder::new();
     finder.url_must_have_scheme(true);
@@ -46,7 +48,7 @@ fn find_otpauth_url(plaintext: &Plaintext) -> Option<TOTP> {
         .filter(|l| l.as_str().starts_with(OTPAUTH_SCHEME))
         .map(|l| {
             // TODO: don't unwrap but return error
-            TOTP::<Vec<u8>>::from_url(l.as_str()).unwrap()
+            TOTP::<Vec<u8>>::from_url(l.as_str()).unwrap().into()
         })
         .next()
 }
@@ -56,7 +58,7 @@ fn find_otpauth_url(plaintext: &Plaintext) -> Option<TOTP> {
 /// Uses RFC6238 defaults, see:
 /// - https://docs.rs/totp-rs/3.1.0/totp_rs/struct.Rfc6238.html#method.with_defaults
 /// - https://tools.ietf.org/html/rfc6238
-fn parse_encoded(plaintext: &Plaintext) -> Option<TOTP> {
+fn parse_encoded(plaintext: &Plaintext) -> Option<ZeroingTOTP> {
     // Trim plaintext, must be base32 encoded
     let plaintext = plaintext.unsecure_to_str().unwrap().trim();
     if !is_base32(plaintext) {
@@ -78,7 +80,7 @@ fn parse_encoded(plaintext: &Plaintext) -> Option<TOTP> {
     let rfc = Rfc6238::with_defaults(bytes).unwrap();
     let totp = TOTP::from_rfc6238(rfc).unwrap();
 
-    Some(totp)
+    Some(totp.into())
 }
 
 /// Print a nicely formatted token.
@@ -103,26 +105,50 @@ pub fn print_token(token: &Plaintext, quiet: bool) {
     println!("{}", formatted.unsecure_to_str().unwrap());
 }
 
-/// Securely zero the `TOTP` type.
-pub fn zero_totp(totp: TOTP) {
-    let TOTP {
-        mut digits,
-        mut secret,
-        mut issuer,
-        mut account_name,
-        ..
-    } = totp;
-    digits.zeroize();
-    secret.zeroize();
-    issuer.zeroize();
-    account_name.zeroize();
-}
-
 /// Securely zero the `Secret` type.
-pub fn zero_secret(secret: Secret) {
+fn zero_secret(secret: Secret) {
     match secret {
         Secret::Encoded(mut encoded) => encoded.zeroize(),
         Secret::Raw(mut raw) => raw.zeroize(),
+    }
+}
+
+/// A secure TOTP type that zeroes on drop.
+pub struct ZeroingTOTP {
+    totp: TOTP,
+}
+
+impl ZeroingTOTP {
+    pub fn generate_current(&self) -> Result<Plaintext, SystemTimeError> {
+        self.totp.generate_current().map(|t| t.into())
+    }
+}
+
+impl From<TOTP> for ZeroingTOTP {
+    fn from(totp: TOTP) -> Self {
+        Self { totp }
+    }
+}
+
+impl Drop for ZeroingTOTP {
+    fn drop(&mut self) {
+        self.zeroize()
+    }
+}
+
+impl Zeroize for ZeroingTOTP {
+    fn zeroize(&mut self) {
+        let TOTP {
+            ref mut digits,
+            ref mut secret,
+            ref mut issuer,
+            ref mut account_name,
+            ..
+        } = self.totp;
+        digits.zeroize();
+        secret.zeroize();
+        issuer.zeroize();
+        account_name.zeroize();
     }
 }
 

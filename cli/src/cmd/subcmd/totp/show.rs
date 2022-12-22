@@ -1,4 +1,6 @@
-use clap::{Arg, Command};
+#[cfg(feature = "clipboard")]
+use clap::Arg;
+use clap::Command;
 
 use crate::cmd::arg::{ArgProperty, ArgQuery, ArgTimeout, CmdArg};
 

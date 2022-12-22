@@ -1,3 +1,5 @@
+#[cfg(feature = "clipboard")]
+pub mod copy;
 pub mod show;
 
 use anyhow::Result;
@@ -20,6 +22,11 @@ impl<'a> Totp<'a> {
     pub fn invoke(&self) -> Result<()> {
         // Create the command matchers
         let matcher_totp = TotpMatcher::with(self.cmd_matches).unwrap();
+
+        #[cfg(feature = "clipboard")]
+        if matcher_totp.cmd_copy().is_some() {
+            return copy::Copy::new(self.cmd_matches).invoke();
+        }
 
         if matcher_totp.cmd_show().is_some() {
             return show::Show::new(self.cmd_matches).invoke();

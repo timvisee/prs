@@ -1,3 +1,5 @@
+#[cfg(feature = "clipboard")]
+pub mod copy;
 pub mod show;
 
 use clap::Command;
@@ -9,7 +11,7 @@ pub struct CmdTotp;
 
 impl CmdTotp {
     pub fn build() -> Command {
-        Command::new("totp")
+        let cmd = Command::new("totp")
             .alias("otp")
             .alias("hotp")
             .about("Manage TOTP tokens")
@@ -17,6 +19,11 @@ impl CmdTotp {
             .subcommand_required(true)
             .subcommand_value_name("CMD")
             .subcommand(show::CmdShow::build())
-            .arg(ArgStore::build())
+            .arg(ArgStore::build());
+
+        #[cfg(feature = "clipboard")]
+        let cmd = cmd.subcommand(copy::CmdCopy::build());
+
+        cmd
     }
 }

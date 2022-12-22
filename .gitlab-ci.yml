@@ -164,8 +164,8 @@ build-x86_64-linux-musl:
     - find . -name prs -exec ls -lah {} \;
     - mv target/$TARGET/release/prs ./prs-$TARGET
     - mv target/$TARGET/release/prs-gtk3-copy ./prs-gtk3-copy-$TARGET
-    - strip -g ./prs-$TARGET
-    - strip -g ./prs-gtk3-copy-$TARGET
+    # - strip -g ./prs-$TARGET
+    # - strip -g ./prs-gtk3-copy-$TARGET
   artifacts:
     name: prs-x86_64-linux-musl
     paths:
@@ -271,6 +271,7 @@ test-integration:
     - git config --global user.name "Example User"
 
     # TODO: add/edit/remove secrets
+    - ./prs --version
     - ./prs init
     - ./prs sync init
     - ./prs list

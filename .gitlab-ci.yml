@@ -136,27 +136,70 @@ build-x86_64-linux-gnu:
       - prs-gtk3-copy-$TARGET
     expire_in: 1 month
 
+# # Build a static version
+# build-x86_64-linux-musl:
+#   stage: build
+#   needs: []
+#   variables:
+#     TARGET: x86_64-unknown-linux-musl
+#     APT_PACKAGES: "bzip2 gnupg2 curl libsystemd-dev"
+#     PKG_CONFIG_ALLOW_CROSS: 1
+#     PKG_CONFIG_ALL_STATIC: 1
+#     LIBGPG_ERROR_INCLUDE: "$PREFIX/include"
+#     LIBGPG_ERROR_LIB_DIR: "$PREFIX/lib"
+#     LIBGPG_ERROR_LIBS: "gpg-error"
+#     LIBGPG_ERROR_STATIC: 1
+#     GPGME_INCLUDE: "$PREFIX/include"
+#     GPGME_LIB_DIR: "$PREFIX/lib"
+#     GPGME_LIBS: "gpgme:assuan"
+#     GPGME_STATIC: 1
+#   script:
+#     - ./ci/gpgme/build
+
+#     - rustup target add $TARGET
+#     - cd cli; cargo build --target=$TARGET --release --no-default-features --features $FEATURES_CLI_UNIX --locked --verbose; cd ..
+#     - cd gtk3; cargo build --target=$TARGET --release --no-default-features --features $FEATURES_GTK3_UNIX --locked --verbose; cd ..
+
+#     # Prepare the release artifact, strip it
+#     - find . -name prs -exec ls -lah {} \;
+#     - mv target/$TARGET/release/prs ./prs-$TARGET
+#     - mv target/$TARGET/release/prs-gtk3-copy ./prs-gtk3-copy-$TARGET
+#     - strip -g ./prs-$TARGET
+#     - strip -g ./prs-gtk3-copy-$TARGET
+#   artifacts:
+#     name: prs-x86_64-linux-musl
+#     paths:
+#       - prs-$TARGET
+#       - prs-gtk3-copy-$TARGET
+#     expire_in: 1 month
+
 # Build a static version
 build-x86_64-linux-musl:
+  image: alpine
   stage: build
   needs: []
   variables:
     TARGET: x86_64-unknown-linux-musl
-    APT_PACKAGES: "bzip2 gnupg2 curl libsystemd-dev"
-    PKG_CONFIG_ALLOW_CROSS: 1
-    PKG_CONFIG_ALL_STATIC: 1
-    LIBGPG_ERROR_INCLUDE: "$PREFIX/include"
-    LIBGPG_ERROR_LIB_DIR: "$PREFIX/lib"
-    LIBGPG_ERROR_LIBS: "gpg-error"
-    LIBGPG_ERROR_STATIC: 1
-    GPGME_INCLUDE: "$PREFIX/include"
-    GPGME_LIB_DIR: "$PREFIX/lib"
-    GPGME_LIBS: "gpgme:assuan"
-    GPGME_STATIC: 1
+    FEATURES_CLI_UNIX: backend-gnupg-bin,alias,clipboard,notify,select-skim,tomb
+    FEATURES_GTK3_UNIX: backend-gnupg-bin
+    # APT_PACKAGES: "bzip2 gnupg2 curl libsystemd-dev"
+    # PKG_CONFIG_ALLOW_CROSS: 1
+    # PKG_CONFIG_ALL_STATIC: 1
+    # LIBGPG_ERROR_INCLUDE: "$PREFIX/include"
+    # LIBGPG_ERROR_LIB_DIR: "$PREFIX/lib"
+    # LIBGPG_ERROR_LIBS: "gpg-error"
+    # LIBGPG_ERROR_STATIC: 1
+    # GPGME_INCLUDE: "$PREFIX/include"
+    # GPGME_LIB_DIR: "$PREFIX/lib"
+    # GPGME_LIBS: "gpgme:assuan"
+    # GPGME_STATIC: 1
+  before_script: []
   script:
-    - ./ci/gpgme/build
+    - apk add rustup alpine-sdk libxcb-dev gtk+3.0-dev
 
-    - rustup target add $TARGET
+    - rustup-init -y --target=$TARGET
+    - source $HOME/.cargo/env
+
     - cd cli; cargo build --target=$TARGET --release --no-default-features --features $FEATURES_CLI_UNIX --locked --verbose; cd ..
     - cd gtk3; cargo build --target=$TARGET --release --no-default-features --features $FEATURES_GTK3_UNIX --locked --verbose; cd ..
 
@@ -164,8 +207,8 @@ build-x86_64-linux-musl:
     - find . -name prs -exec ls -lah {} \;
     - mv target/$TARGET/release/prs ./prs-$TARGET
     - mv target/$TARGET/release/prs-gtk3-copy ./prs-gtk3-copy-$TARGET
-    # - strip -g ./prs-$TARGET
-    # - strip -g ./prs-gtk3-copy-$TARGET
+    - strip -g ./prs-$TARGET
+    - strip -g ./prs-gtk3-copy-$TARGET
   artifacts:
     name: prs-x86_64-linux-musl
     paths:

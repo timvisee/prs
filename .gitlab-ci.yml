@@ -22,12 +22,6 @@ variables:
   FEATURES_GTK3_UNIX: backend-gpgme
   FEATURES_CLI_WINDOWS: backend-gnupg-bin,clipboard,notify,select-fzf-bin
 
-# Rust build cache configuration
-.rust-build-cache: &rust-build-cache
-  key: "$CI_PIPELINE_ID-$RUST_VERSION"
-  paths:
-    - target/
-
 # Install compiler and OpenSSL dependencies
 before_script:
   - apt-get update
@@ -62,8 +56,6 @@ before_script:
 # Check on stable, beta and nightly 
 .check-base: &check-base
   stage: check
-  cache:
-    <<: *rust-build-cache
   script:
     - cargo check --verbose
     - cd cli; cargo check --no-default-features --features $FEATURES_CLI_UNIX --locked --verbose; cd ..
@@ -74,8 +66,8 @@ before_script:
     - cd cli; cargo check --no-default-features --features backend-gnupg-bin --locked --verbose; cd ..
     - cd gtk3; cargo check --no-default-features --features backend-gpgme --locked --verbose; cd ..
     - cd gtk3; cargo check --no-default-features --features backend-gnupg-bin --locked --verbose; cd ..
-check-stable:
-  <<: *check-base
+# check-stable:
+#   <<: *check-base
 check-beta:
   <<: *check-base
   variables:
@@ -105,25 +97,23 @@ check-macos-stable:
     - brew upgrade
     - brew install $BREW_PACKAGES
   <<: *check-base
-check-windows:
-  stage: check
-  allow_failure: true
-  tags:
-    - windows
-  cache: {}
-  <<: *before_script-windows
-  script:
-    - cargo check --locked --verbose; cd ..
-    - cd lib; cargo check --no-default-features --features $FEATURES_CLI_WINDOWS --locked --verbose; cd ..
-    - cd lib; cargo check --no-default-features --features backend-gnupg-bin --locked --verbose; cd ..
-    - cd cli; cargo check --no-default-features --features backend-gnupg-bin --locked --verbose; cd ..
+# check-windows:
+#   stage: check
+#   allow_failure: true
+#   tags:
+#     - windows
+#   cache: {}
+#   <<: *before_script-windows
+#   script:
+#     - cargo check --locked --verbose; cd ..
+#     - cd lib; cargo check --no-default-features --features $FEATURES_CLI_WINDOWS --locked --verbose; cd ..
+#     - cd lib; cargo check --no-default-features --features backend-gnupg-bin --locked --verbose; cd ..
+#     - cd cli; cargo check --no-default-features --features backend-gnupg-bin --locked --verbose; cd ..
 
 # Build using Rust stable on Linux
 build-x86_64-linux-gnu:
   stage: build
   needs: []
-  cache:
-    <<: *rust-build-cache
   script:
     - cd cli; cargo build --target=$TARGET --release --no-default-features --features $FEATURES_CLI_UNIX --locked --verbose; cd ..
     - cd gtk3; cargo build --target=$TARGET --release --no-default-features --features $FEATURES_GTK3_UNIX --locked --verbose; cd ..
@@ -155,8 +145,6 @@ build-x86_64-linux-musl:
     GPGME_LIB_DIR: "$PREFIX/lib"
     GPGME_LIBS: "gpgme:assuan"
     GPGME_STATIC: 1
-  cache:
-    <<: *rust-build-cache
   script:
     - ./ci/gpgme/build
 
@@ -234,8 +222,6 @@ test-cargo-x86_64-linux-gnu:
   stage: test
   needs: []
   dependencies: []
-  cache:
-    <<: *rust-build-cache
   script:
     - cargo test --locked --verbose
 

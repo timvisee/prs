@@ -107,6 +107,7 @@ check-macos-stable:
   <<: *check-base
 check-windows:
   stage: check
+  allow_failure: true
   tags:
     - windows
   cache: {}
@@ -212,6 +213,7 @@ build-macos:
 # Build using Rust stable on Windows
 build-x86_64-windows:
   stage: build
+  allow_failure: true
   tags:
     - windows
   needs: []
@@ -240,6 +242,7 @@ test-cargo-x86_64-linux-gnu:
 # Run the unit tests through Cargo on Windows
 test-cargo-x86_64-windows:
   stage: test
+  allow_failure: true
   tags:
     - windows
   needs: []

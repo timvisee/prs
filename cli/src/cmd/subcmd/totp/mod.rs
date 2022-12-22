@@ -10,6 +10,8 @@ pub struct CmdTotp;
 impl CmdTotp {
     pub fn build() -> Command {
         Command::new("totp")
+            .alias("otp")
+            .alias("hotp")
             .about("Manage TOTP tokens")
             .arg_required_else_help(true)
             .subcommand_required(true)

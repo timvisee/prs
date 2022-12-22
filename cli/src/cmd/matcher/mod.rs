@@ -46,7 +46,7 @@ pub use self::show::ShowMatcher;
 pub use self::sync::SyncMatcher;
 #[cfg(all(feature = "tomb", target_os = "linux"))]
 pub use self::tomb::TombMatcher;
-#[cfg(feature = "tomb")]
+#[cfg(feature = "totp")]
 pub use self::totp::TotpMatcher;
 
 use clap::ArgMatches;

@@ -72,14 +72,20 @@ check-beta:
   <<: *check-base
   variables:
     RUST_VERSION: beta
+  only:
+    - master
 check-nightly:
   <<: *check-base
   variables:
     RUST_VERSION: nightly
+  only:
+    - master
 check-old:
   <<: *check-base
   variables:
     RUST_VERSION: "1.64.0"
+  only:
+    - master
 check-macos-stable:
   tags:
     - macos
@@ -102,6 +108,8 @@ check-macos-stable:
 #   allow_failure: true
 #   tags:
 #     - windows
+#   only:
+#     - master
 #   cache: {}
 #   <<: *before_script-windows
 #   script:
@@ -204,6 +212,8 @@ build-x86_64-windows:
   allow_failure: true
   tags:
     - windows
+  only:
+    - master
   needs: []
   variables:
     TARGET: x86_64-pc-windows-msvc
@@ -231,6 +241,8 @@ test-cargo-x86_64-windows:
   allow_failure: true
   tags:
     - windows
+  only:
+    - master
   needs: []
   dependencies: []
   cache: {}
@@ -272,6 +284,8 @@ package-docker:
     - build-x86_64-linux-musl
   services:
     - docker:dind
+  only:
+    - master
   variables:
     TARGET: x86_64-unknown-linux-musl
     IMAGE_NAME: prs:$CI_COMMIT_SHA

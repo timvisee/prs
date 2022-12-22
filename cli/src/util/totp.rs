@@ -1,7 +1,9 @@
 use std::time::SystemTimeError;
 
+use anyhow::Result;
 use linkify::{LinkFinder, LinkKind};
 use prs_lib::Plaintext;
+use thiserror::Error;
 use totp_rs::{Rfc6238, Secret, TOTP};
 use zeroize::Zeroize;
 
@@ -14,7 +16,7 @@ const PROPERTY_NAMES: [&str; 2] = ["2fa", "totp"];
 /// Try to find a TOTP token in the given plaintext.
 ///
 /// Returns `None` if no TOTP is found.
-pub fn find_token(plaintext: &Plaintext) -> Option<ZeroingTotp> {
+pub fn find_token(plaintext: &Plaintext) -> Option<Result<ZeroingTotp>> {
     // Find first TOTP URL globally
     match find_otpauth_url(plaintext) {
         totp @ Some(_) => return totp,
@@ -36,8 +38,7 @@ pub fn find_token(plaintext: &Plaintext) -> Option<ZeroingTotp> {
 }
 
 /// Scan the plaintext for `otpauth` URLs.
-// TODO: return result
-fn find_otpauth_url(plaintext: &Plaintext) -> Option<ZeroingTotp> {
+fn find_otpauth_url(plaintext: &Plaintext) -> Option<Result<ZeroingTotp>> {
     // Configure linkfinder
     let mut finder = LinkFinder::new();
     finder.url_must_have_scheme(true);
@@ -47,8 +48,9 @@ fn find_otpauth_url(plaintext: &Plaintext) -> Option<ZeroingTotp> {
         .links(plaintext.unsecure_to_str().unwrap())
         .filter(|l| l.as_str().starts_with(OTPAUTH_SCHEME))
         .map(|l| {
-            // TODO: don't unwrap but return error
-            TOTP::<Vec<u8>>::from_url(l.as_str()).unwrap().into()
+            TOTP::<Vec<u8>>::from_url(l.as_str())
+                .map(|t| t.into())
+                .map_err(|e| Err::Url(e).into())
         })
         .next()
 }
@@ -58,7 +60,7 @@ fn find_otpauth_url(plaintext: &Plaintext) -> Option<ZeroingTotp> {
 /// Uses RFC6238 defaults, see:
 /// - https://docs.rs/totp-rs/3.1.0/totp_rs/struct.Rfc6238.html#method.with_defaults
 /// - https://tools.ietf.org/html/rfc6238
-fn parse_encoded(plaintext: &Plaintext) -> Option<ZeroingTotp> {
+fn parse_encoded(plaintext: &Plaintext) -> Option<Result<ZeroingTotp>> {
     // Trim plaintext, must be base32 encoded
     let plaintext = plaintext.unsecure_to_str().unwrap().trim();
     if !is_base32(plaintext) {
@@ -76,11 +78,14 @@ fn parse_encoded(plaintext: &Plaintext) -> Option<ZeroingTotp> {
         return None;
     }
 
-    // TODO: do not unwrap
-    let rfc = Rfc6238::with_defaults(bytes).unwrap();
-    let totp = TOTP::from_rfc6238(rfc).unwrap();
-
-    Some(totp.into())
+    // Parse RFC6238 TOTP
+    Some(
+        Rfc6238::with_defaults(bytes)
+            .map_err(Err::Rfc6238)
+            .and_then(|rfc| TOTP::from_rfc6238(rfc).map_err(Err::Url))
+            .map(|t| t.into())
+            .map_err(|e| e.into()),
+    )
 }
 
 /// Print a nicely formatted token.
@@ -124,13 +129,16 @@ pub struct ZeroingTotp {
 
 impl ZeroingTotp {
     /// Generate a token from the current system time.
-    pub fn generate_current(&self) -> Result<Plaintext, SystemTimeError> {
-        self.totp.generate_current().map(|t| t.into())
+    pub fn generate_current(&self) -> Result<Plaintext> {
+        self.totp
+            .generate_current()
+            .map(|t| t.into())
+            .map_err(|e| Err::Time(e).into())
     }
 
     /// Give the ttl (in seconds) of the current token.
-    pub fn ttl(&self) -> Result<u64, SystemTimeError> {
-        self.totp.ttl()
+    pub fn ttl(&self) -> Result<u64> {
+        self.totp.ttl().map_err(|e| Err::Time(e).into())
     }
 }
 
@@ -169,4 +177,16 @@ pub fn is_base32(material: &str) -> bool {
     material
         .chars()
         .all(|c| ('A'..='Z').contains(&c) || ('2'..='7').contains(&c))
+}
+
+#[derive(Debug, Error)]
+pub enum Err {
+    #[error("invalid RFC6238 TOTP secret")]
+    Rfc6238(#[source] totp_rs::Rfc6238Error),
+
+    #[error("invalid TOTP secret URL")]
+    Url(#[source] totp_rs::TotpUrlError),
+
+    #[error("TOTP system time error")]
+    Time(#[source] SystemTimeError),
 }

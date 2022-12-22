@@ -1,8 +1,7 @@
-use anyhow::Result;
 use clap::ArgMatches;
 
 use super::Matcher;
-use crate::cmd::arg::{ArgProperty, ArgQuery, ArgTimeout, CmdArgOption};
+use crate::cmd::arg::{ArgProperty, ArgQuery, CmdArgOption};
 
 /// The TOTP live command matcher.
 pub struct LiveMatcher<'a> {

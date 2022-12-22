@@ -1,13 +1,11 @@
 use std::thread;
 use std::time::Duration;
 
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use clap::ArgMatches;
 use prs_lib::{crypto::prelude::*, Store};
 use thiserror::Error;
 
-#[cfg(feature = "clipboard")]
-use crate::util::clipboard;
 #[cfg(all(feature = "tomb", target_os = "linux"))]
 use crate::util::tomb;
 use crate::{
@@ -66,8 +64,9 @@ impl<'a> Live<'a> {
         }
 
         // Get current TOTP token
-        // TODO: don't unwrap
-        let totp = totp::find_token(&plaintext).expect("no token found");
+        let totp = totp::find_token(&plaintext)
+            .ok_or(Err::NoTotp)?
+            .map_err(Err::Totp)?;
 
         // Finalize tomb before watching tokens
         #[cfg(all(feature = "tomb", target_os = "linux"))]
@@ -75,20 +74,22 @@ impl<'a> Live<'a> {
 
         // Watch or follow tokens
         if !matcher_live.follow() {
-            watch(totp, matcher_main.quiet());
+            watch(totp, matcher_main.quiet())?;
         } else {
-            follow(totp, matcher_main.quiet());
+            follow(totp, matcher_main.quiet())?;
         }
+
+        Ok(())
     }
 }
 
 /// Watch the token.
 ///
 /// Show countdown if not quiet, clear when a new token is shown.
-fn watch(totp: ZeroingTotp, quiet: bool) -> ! {
+fn watch(totp: ZeroingTotp, quiet: bool) -> Result<()> {
     loop {
-        let token = totp.generate_current().unwrap();
-        let ttl = totp.ttl().unwrap();
+        let token = totp.generate_current().map_err(Err::Totp)?;
+        let ttl = totp.ttl().map_err(Err::Totp)?;
 
         totp::print_token(&token, quiet, quiet);
         if !quiet {
@@ -103,10 +104,10 @@ fn watch(totp: ZeroingTotp, quiet: bool) -> ! {
 /// Follow the token.
 ///
 /// Keep printing new tokens on a new line as they arrive.
-fn follow(totp: ZeroingTotp, quiet: bool) -> ! {
+fn follow(totp: ZeroingTotp, quiet: bool) -> Result<()> {
     loop {
-        let token = totp.generate_current().unwrap();
-        let ttl = totp.ttl().unwrap();
+        let token = totp.generate_current().map_err(Err::Totp)?;
+        let ttl = totp.ttl().map_err(Err::Totp)?;
 
         totp::print_token(&token, quiet, true);
         thread::sleep(Duration::from_secs(ttl));
@@ -130,4 +131,10 @@ pub enum Err {
 
     #[error("failed to select property from secret")]
     Property(#[source] anyhow::Error),
+
+    #[error("no TOTP secret found")]
+    NoTotp,
+
+    #[error("failed to generate TOTP token")]
+    Totp(#[source] anyhow::Error),
 }

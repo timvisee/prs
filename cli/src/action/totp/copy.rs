@@ -1,4 +1,4 @@
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use clap::ArgMatches;
 use prs_lib::{crypto::prelude::*, Store};
 use thiserror::Error;
@@ -60,9 +60,10 @@ impl<'a> Copy<'a> {
         }
 
         // Get current TOTP token
-        // TODO: don't unwrap
-        let totp = totp::find_token(&plaintext).expect("no token found");
-        let token = totp.generate_current().unwrap();
+        let totp = totp::find_token(&plaintext)
+            .ok_or(Err::NoTotp)?
+            .map_err(Err::Totp)?;
+        let token = totp.generate_current().map_err(Err::Totp)?;
 
         clipboard::plaintext_copy(
             token,
@@ -97,4 +98,10 @@ pub enum Err {
 
     #[error("failed to select property from secret")]
     Property(#[source] anyhow::Error),
+
+    #[error("no TOTP secret found")]
+    NoTotp,
+
+    #[error("failed to generate TOTP token")]
+    Totp(#[source] anyhow::Error),
 }

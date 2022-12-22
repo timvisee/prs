@@ -10,14 +10,19 @@ pub struct CopyMatcher<'a> {
 }
 
 impl<'a: 'b, 'b> CopyMatcher<'a> {
+    /// Don't recopy if the token changes within the timeout.
+    pub fn no_recopy(&self) -> bool {
+        self.matches.get_flag("no-recopy")
+    }
+
     /// The secret query.
     pub fn query(&self) -> Option<String> {
         ArgQuery::value(self.matches)
     }
 
     /// Clipboard timeout in seconds.
-    pub fn timeout(&self) -> Result<u64> {
-        ArgTimeout::value_or_default(self.matches)
+    pub fn timeout(&self) -> Option<Result<u64>> {
+        ArgTimeout::value(self.matches)
     }
 
     /// The selected property.

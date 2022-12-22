@@ -1,4 +1,4 @@
-use clap::Command;
+use clap::{Arg, Command};
 
 use crate::cmd::arg::{ArgProperty, ArgQuery, ArgStore, ArgTimeout, CmdArg};
 
@@ -18,5 +18,12 @@ impl CmdCopy {
             .arg(ArgTimeout::build())
             .arg(ArgStore::build())
             .arg(ArgProperty::build())
+            .arg(
+                Arg::new("no-recopy")
+                    .long("no-recopy")
+                    .short('C')
+                    .num_args(0)
+                    .help("Don't recopy token when it changes within the timeout"),
+            )
     }
 }

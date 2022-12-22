@@ -1,5 +1,4 @@
-use clap::Arg;
-use clap::Command;
+use clap::{Arg, Command};
 
 use crate::cmd::arg::{ArgProperty, ArgQuery, CmdArg};
 

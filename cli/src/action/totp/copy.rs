@@ -64,13 +64,14 @@ impl<'a> Copy<'a> {
             .ok_or(Err::NoTotp)?
             .map_err(Err::Totp)?;
         let token = totp.generate_current().map_err(Err::Totp)?;
+        let ttl = totp.ttl().map_err(Err::Totp)?;
 
         clipboard::plaintext_copy(
             token,
             false,
             !matcher_main.force(),
             !matcher_main.quiet(),
-            matcher_copy.timeout()?,
+            matcher_copy.timeout().unwrap_or(Ok(ttl + 1))?,
         )?;
 
         // Finalize tomb

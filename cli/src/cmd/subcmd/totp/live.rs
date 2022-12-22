@@ -8,10 +8,12 @@ pub struct CmdLive;
 impl CmdLive {
     pub fn build() -> Command {
         Command::new("live")
-            .alias("l")
             .alias("watch")
             .alias("follow")
-            .about("Live TOTP token")
+            .alias("l")
+            .alias("w")
+            .alias("f")
+            .about("Watch TOTP token")
             .arg(ArgQuery::build())
             .arg(ArgProperty::build())
             .arg(

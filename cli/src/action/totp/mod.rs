@@ -1,5 +1,6 @@
 #[cfg(feature = "clipboard")]
 pub mod copy;
+pub mod live;
 pub mod show;
 
 use anyhow::Result;
@@ -26,6 +27,10 @@ impl<'a> Totp<'a> {
         #[cfg(feature = "clipboard")]
         if matcher_totp.cmd_copy().is_some() {
             return copy::Copy::new(self.cmd_matches).invoke();
+        }
+
+        if matcher_totp.cmd_live().is_some() {
+            return live::Live::new(self.cmd_matches).invoke();
         }
 
         if matcher_totp.cmd_show().is_some() {

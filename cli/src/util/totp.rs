@@ -14,7 +14,7 @@ const PROPERTY_NAMES: [&str; 2] = ["2fa", "totp"];
 /// Try to find a TOTP token in the given plaintext.
 ///
 /// Returns `None` if no TOTP is found.
-pub fn find_token(plaintext: &Plaintext) -> Option<ZeroingTOTP> {
+pub fn find_token(plaintext: &Plaintext) -> Option<ZeroingTotp> {
     // Find first TOTP URL globally
     match find_otpauth_url(plaintext) {
         totp @ Some(_) => return totp,
@@ -37,7 +37,7 @@ pub fn find_token(plaintext: &Plaintext) -> Option<ZeroingTOTP> {
 
 /// Scan the plaintext for `otpauth` URLs.
 // TODO: return result
-fn find_otpauth_url(plaintext: &Plaintext) -> Option<ZeroingTOTP> {
+fn find_otpauth_url(plaintext: &Plaintext) -> Option<ZeroingTotp> {
     // Configure linkfinder
     let mut finder = LinkFinder::new();
     finder.url_must_have_scheme(true);
@@ -58,7 +58,7 @@ fn find_otpauth_url(plaintext: &Plaintext) -> Option<ZeroingTOTP> {
 /// Uses RFC6238 defaults, see:
 /// - https://docs.rs/totp-rs/3.1.0/totp_rs/struct.Rfc6238.html#method.with_defaults
 /// - https://tools.ietf.org/html/rfc6238
-fn parse_encoded(plaintext: &Plaintext) -> Option<ZeroingTOTP> {
+fn parse_encoded(plaintext: &Plaintext) -> Option<ZeroingTotp> {
     // Trim plaintext, must be base32 encoded
     let plaintext = plaintext.unsecure_to_str().unwrap().trim();
     if !is_base32(plaintext) {
@@ -86,7 +86,7 @@ fn parse_encoded(plaintext: &Plaintext) -> Option<ZeroingTOTP> {
 /// Print a nicely formatted token.
 ///
 /// If `quiet` is `true` the token is printed with no formatting.
-pub fn print_token(token: &Plaintext, quiet: bool) {
+pub fn print_token(token: &Plaintext, quiet: bool, newline: bool) {
     // If quiet, print regularly
     if quiet {
         println!("{}", token.unsecure_to_str().unwrap());
@@ -102,7 +102,11 @@ pub fn print_token(token: &Plaintext, quiet: bool) {
             .collect::<Vec<_>>()
             .join(" "),
     );
-    println!("{}", formatted.unsecure_to_str().unwrap());
+    if newline {
+        println!("{}", formatted.unsecure_to_str().unwrap());
+    } else {
+        print!("{}", formatted.unsecure_to_str().unwrap());
+    }
 }
 
 /// Securely zero the `Secret` type.
@@ -114,29 +118,35 @@ fn zero_secret(secret: Secret) {
 }
 
 /// A secure TOTP type that zeroes on drop.
-pub struct ZeroingTOTP {
+pub struct ZeroingTotp {
     totp: TOTP,
 }
 
-impl ZeroingTOTP {
+impl ZeroingTotp {
+    /// Generate a token from the current system time.
     pub fn generate_current(&self) -> Result<Plaintext, SystemTimeError> {
         self.totp.generate_current().map(|t| t.into())
     }
+
+    /// Give the ttl (in seconds) of the current token.
+    pub fn ttl(&self) -> Result<u64, SystemTimeError> {
+        self.totp.ttl()
+    }
 }
 
-impl From<TOTP> for ZeroingTOTP {
+impl From<TOTP> for ZeroingTotp {
     fn from(totp: TOTP) -> Self {
         Self { totp }
     }
 }
 
-impl Drop for ZeroingTOTP {
+impl Drop for ZeroingTotp {
     fn drop(&mut self) {
         self.zeroize()
     }
 }
 
-impl Zeroize for ZeroingTOTP {
+impl Zeroize for ZeroingTotp {
     fn zeroize(&mut self) {
         let TOTP {
             ref mut digits,

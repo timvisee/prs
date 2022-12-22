@@ -1,5 +1,6 @@
 #[cfg(feature = "clipboard")]
 pub mod copy;
+pub mod live;
 pub mod show;
 
 use clap::ArgMatches;
@@ -14,10 +15,15 @@ pub struct TotpMatcher<'a> {
 }
 
 impl<'a: 'b, 'b> TotpMatcher<'a> {
-    /// Get the TOTP show sub command, if matched.
+    /// Get the TOTP copy sub command, if matched.
     #[cfg(feature = "clipboard")]
     pub fn cmd_copy(&'a self) -> Option<copy::CopyMatcher> {
         copy::CopyMatcher::with(self.root)
+    }
+
+    /// Get the TOTP live sub command, if matched.
+    pub fn cmd_live(&'a self) -> Option<live::LiveMatcher> {
+        live::LiveMatcher::with(self.root)
     }
 
     /// Get the TOTP show sub command, if matched.

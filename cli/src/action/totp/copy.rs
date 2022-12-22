@@ -79,8 +79,12 @@ impl<'a> Copy<'a> {
             let remaining_timeout = until.duration_since(std::time::Instant::now());
             let ttl = totp.ttl().map_err(Err::Totp)?;
 
-            // Calculate current clipboard timeou
-            let clip_timeout = ttl.min(remaining_timeout.as_secs() + 1);
+            // Keep clipboard timeout within timeout remaining and current toeken TTL if recopying
+            let clip_timeout = if !matcher_copy.no_recopy() {
+                ttl.min(remaining_timeout.as_secs() + 1)
+            } else {
+                timeout
+            };
             clipboard::plaintext_copy(
                 totp.generate_current().map_err(Err::Totp)?,
                 false,
@@ -102,7 +106,7 @@ impl<'a> Copy<'a> {
                     );
                 } else {
                     eprintln!(
-                        "Token copied to clipboard. Copying changing token after {} seconds...",
+                        "Token copied to clipboard. Recopying changing token after {} seconds...",
                         clip_timeout,
                     );
                 }

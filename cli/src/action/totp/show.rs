@@ -3,9 +3,8 @@ use std::time::Duration;
 
 use anyhow::{anyhow, Result};
 use clap::ArgMatches;
-use prs_lib::{crypto::prelude::*, Store};
+use prs_lib::{crypto::prelude::*, Plaintext, Store};
 use thiserror::Error;
-use totp_rs::TOTP;
 
 #[cfg(feature = "clipboard")]
 use crate::util::clipboard;
@@ -16,11 +15,8 @@ use crate::{
         totp::{show::ShowMatcher, TotpMatcher},
         MainMatcher, Matcher,
     },
-    util::{secret, select},
+    util::{secret, select, totp},
 };
-
-/// Default property name for TOTP secret.
-const TOTP_PROPERTY: &str = "totp";
 
 /// A TOTP show action.
 pub struct Show<'a> {
@@ -64,31 +60,28 @@ impl<'a> Show<'a> {
         // Trim plaintext to property
         if let Some(property) = matcher_show.property() {
             plaintext = plaintext.property(property).map_err(Err::Property)?;
-        } else {
-            // TODO: use this?
-            plaintext = plaintext.property(TOTP_PROPERTY).map_err(Err::Property)?;
-
-            // TODO: if not found, search plaintext for otpauth URI
         }
 
-        // TODO: validate URL, handle unwrap errors
-        let otpauth = plaintext.unsecure_to_str().unwrap();
-        let totp = TOTP::<Vec<u8>>::from_url(otpauth).unwrap();
-        let token = totp.generate_current().unwrap();
+        // Get current TOTP token
+        let totp = totp::find_token(&plaintext).expect("no token found");
+        let token = Plaintext::from(totp.generate_current().unwrap());
+        totp::zero_totp(totp);
 
         // Copy to clipboard
         #[cfg(feature = "clipboard")]
         if matcher_show.copy() {
-            clipboard::copy_timeout(
-                token.as_bytes(),
+            clipboard::plaintext_copy(
+                token.clone(),
+                true,
+                !matcher_main.force(),
+                !matcher_main.quiet(),
                 matcher_show
                     .timeout()
                     .unwrap_or(Ok(crate::CLIPBOARD_TIMEOUT))?,
-                !matcher_main.quiet(),
             )?;
         }
 
-        println!("{}", token);
+        totp::print_token(&token, matcher_main.quiet());
 
         // Clear after timeout
         if let Some(timeout) = matcher_show.timeout() {

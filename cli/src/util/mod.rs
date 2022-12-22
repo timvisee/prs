@@ -21,6 +21,8 @@ pub mod sync;
 pub mod time;
 #[cfg(all(feature = "tomb", target_os = "linux"))]
 pub mod tomb;
+#[cfg(feature = "totp")]
+pub mod totp;
 
 use std::env;
 use std::path::{Path, PathBuf};

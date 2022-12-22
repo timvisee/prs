@@ -90,8 +90,9 @@ fn parse_encoded(plaintext: &Plaintext) -> Option<Result<ZeroingTotp>> {
 
 /// Print a nicely formatted token.
 ///
-/// If `quiet` is `true` the token is printed with no formatting.
-pub fn print_token(token: &Plaintext, quiet: bool, newline: bool) {
+/// If `quiet` is `true` the token is printed with no formatting or TTL.
+/// If a TTL is specified, it is printed after.
+pub fn print_token(token: &Plaintext, quiet: bool, ttl: Option<u64>) {
     // If quiet, print regularly
     if quiet {
         println!("{}", token.unsecure_to_str().unwrap());
@@ -107,10 +108,14 @@ pub fn print_token(token: &Plaintext, quiet: bool, newline: bool) {
             .collect::<Vec<_>>()
             .join(" "),
     );
-    if newline {
-        println!("{}", formatted.unsecure_to_str().unwrap());
+    if let Some(ttl) = ttl {
+        println!(
+            "{} (valid for {}s)",
+            formatted.unsecure_to_str().unwrap(),
+            ttl
+        );
     } else {
-        print!("{}", formatted.unsecure_to_str().unwrap());
+        println!("{}", formatted.unsecure_to_str().unwrap());
     }
 }
 

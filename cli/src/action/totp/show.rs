@@ -67,6 +67,7 @@ impl<'a> Show<'a> {
             .ok_or(Err::NoTotp)?
             .map_err(Err::Totp)?;
         let token = totp.generate_current().map_err(Err::Totp)?;
+        let ttl = totp.ttl().map_err(Err::Totp)?;
 
         // Copy to clipboard
         #[cfg(feature = "clipboard")]
@@ -82,7 +83,7 @@ impl<'a> Show<'a> {
             )?;
         }
 
-        totp::print_token(&token, matcher_main.quiet(), true);
+        totp::print_token(&token, matcher_main.quiet(), Some(ttl));
 
         // Clear after timeout
         if let Some(timeout) = matcher_show.timeout() {

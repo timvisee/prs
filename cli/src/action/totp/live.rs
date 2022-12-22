@@ -91,10 +91,7 @@ fn watch(totp: ZeroingTotp, quiet: bool) -> Result<()> {
         let token = totp.generate_current().map_err(Err::Totp)?;
         let ttl = totp.ttl().map_err(Err::Totp)?;
 
-        totp::print_token(&token, quiet, quiet);
-        if !quiet {
-            println!(" (valid for {}s)", ttl);
-        }
+        totp::print_token(&token, quiet, Some(ttl));
 
         thread::sleep(Duration::from_secs(if !quiet { 1 } else { ttl }));
         eprint!("{}", ansi_escapes::EraseLines(2));
@@ -109,7 +106,7 @@ fn follow(totp: ZeroingTotp, quiet: bool) -> Result<()> {
         let token = totp.generate_current().map_err(Err::Totp)?;
         let ttl = totp.ttl().map_err(Err::Totp)?;
 
-        totp::print_token(&token, quiet, true);
+        totp::print_token(&token, quiet, Some(ttl));
         thread::sleep(Duration::from_secs(ttl));
     }
 }

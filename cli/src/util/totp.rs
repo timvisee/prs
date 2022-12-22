@@ -11,7 +11,7 @@ use zeroize::Zeroize;
 const OTPAUTH_SCHEME: &str = "otpauth://";
 
 /// Possible property names to search in for TOTP tokens.
-const PROPERTY_NAMES: [&str; 2] = ["2fa", "totp"];
+const PROPERTY_NAMES: [&str; 2] = ["totp", "2fa"];
 
 /// Try to find a TOTP token in the given plaintext.
 ///

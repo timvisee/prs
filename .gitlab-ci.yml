@@ -276,6 +276,9 @@ test-integration:
 package-docker:
   image: docker:latest
   stage: package
+  tags:
+    - linux
+    - docker
   needs:
     - build-x86_64-linux-musl
   dependencies:
@@ -436,6 +439,9 @@ release-crate:
 release-docker:
   image: docker:latest
   stage: release
+  tags:
+    - linux
+    - docker
   only:
     - /^v(\d+\.)*\d+$/
   dependencies:
@@ -467,6 +473,9 @@ release-docker:
 release-docker-hub:
   image: docker:latest
   stage: release
+  tags:
+    - linux
+    - docker
   only:
     - /^v(\d+\.)*\d+$/
   dependencies:

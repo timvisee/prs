@@ -5,6 +5,9 @@ use anyhow::Result;
 use clap::ArgMatches;
 use thiserror::Error;
 
+#[cfg(all(feature = "tomb", target_os = "linux"))]
+use crate::util::tomb;
+
 use prs_lib::{
     crypto,
     sync::{Readyness, Sync as StoreSync},
@@ -46,6 +49,16 @@ impl<'a> Sync<'a> {
 
         let store = Store::open(matcher_sync.store()).map_err(Err::Store)?;
         let sync = StoreSync::new(&store);
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        let mut tomb = store.tomb(
+            !matcher_main.verbose(),
+            matcher_main.verbose(),
+            matcher_main.force(),
+        );
+
+        // Prepare tomb
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        tomb::prepare_tomb(&mut tomb, &matcher_main).map_err(Err::Tomb)?;
 
         // Don't sync if not initialized or no remote, show help on how to set up
         match sync.readyness()? {
@@ -96,6 +109,10 @@ impl<'a> Sync<'a> {
             eprintln!("Sync complete");
         }
 
+        // Finalize tomb
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        tomb::finalize_tomb(&mut tomb, &matcher_main, false).map_err(Err::Tomb)?;
+
         Ok(())
     }
 }
@@ -104,6 +121,10 @@ impl<'a> Sync<'a> {
 pub enum Err {
     #[error("failed to access password store")]
     Store(#[source] anyhow::Error),
+
+    #[cfg(all(feature = "tomb", target_os = "linux"))]
+    #[error("failed to prepare password store tomb for usage")]
+    Tomb(#[source] anyhow::Error),
 
     #[error("failed to import store recipients")]
     ImportRecipients(#[source] anyhow::Error),

@@ -276,6 +276,8 @@ test-integration:
 package-docker:
   image: docker:latest
   stage: package
+  needs:
+    - build-x86_64-linux-musl
   dependencies:
     - build-x86_64-linux-musl
   services:

@@ -101,6 +101,10 @@ fn invoke_action(handler: &Handler) -> Result<()> {
         return action::list::List::new(handler.matches()).invoke();
     }
 
+    if handler.lock().is_some() {
+        return action::lock::Lock::new(handler.matches()).invoke();
+    }
+
     if handler.recipients().is_some() {
         return action::recipients::Recipients::new(handler.matches()).invoke();
     }

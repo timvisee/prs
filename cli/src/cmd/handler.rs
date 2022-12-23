@@ -88,7 +88,8 @@ impl<'a> Handler {
             .subcommand(subcmd::CmdList::build())
             .subcommand(subcmd::CmdInit::build())
             .subcommand(subcmd::CmdClone::build())
-            .subcommand(subcmd::CmdSync::build());
+            .subcommand(subcmd::CmdSync::build())
+            .subcommand(subcmd::CmdLock::build());
 
         #[cfg(feature = "totp")]
         let app = app.subcommand(subcmd::CmdTotp::build());
@@ -183,6 +184,11 @@ impl<'a> Handler {
     /// Get the list sub command, if matched.
     pub fn list(&'a self) -> Option<matcher::ListMatcher> {
         matcher::ListMatcher::with(&self.matches)
+    }
+
+    /// Get the lock sub command, if matched.
+    pub fn lock(&'a self) -> Option<matcher::LockMatcher> {
+        matcher::LockMatcher::with(&self.matches)
     }
 
     /// Get the move sub command, if matched.

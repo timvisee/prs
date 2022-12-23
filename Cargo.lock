@@ -1867,7 +1867,6 @@ dependencies = [
  "git-state",
  "gpgme",
  "lazy_static",
- "libc",
  "nix 0.25.0",
  "ofiles",
  "quickcheck",

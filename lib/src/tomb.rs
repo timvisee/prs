@@ -503,7 +503,8 @@ fn kill_ssh_by_session(store: &Store) {
 
         pids.into_iter()
             .map(Into::into)
-            .filter(|pid: &u32| {
+            .filter(|pid: &u32| pid > &0 && pid < &(i32::MAX as u32))
+            .filter(|pid| {
                 // Only handle ssh clients
                 fs::read_to_string(format!("/proc/{}/cmdline", pid))
                     .map(|cmdline| {
@@ -513,14 +514,14 @@ fn kill_ssh_by_session(store: &Store) {
                     .unwrap_or(true)
             })
             .for_each(|pid| {
-                let status = unsafe { libc::kill(pid as i32, libc::SIGTERM) };
-                match status {
-                    0 => {}
-                    -1 => eprintln!("Failed to kill persistent SSH client (pid: {})", pid),
-                    _ => eprintln!(
-                        "Failed to kill persistent SSH client due to an unknown error (pid: {})",
-                        pid
-                    ),
+                if let Err(err) = nix::sys::signal::kill(
+                    nix::unistd::Pid::from_raw(pid as i32),
+                    Some(nix::sys::signal::Signal::SIGTERM),
+                ) {
+                    eprintln!(
+                        "Failed to kill persistent SSH client (pid: {}): {}",
+                        pid, err
+                    );
                 }
             });
     });

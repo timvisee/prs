@@ -19,6 +19,12 @@ const GIT_ENV_SSH: &str = "GIT_SSH_COMMAND";
 /// quickly abort a connection attempt if the persistent connection fails.
 const SSH_PERSIST_CMD: &str = "ssh -o 'ControlMaster auto' -o 'ControlPath /tmp/.prs-session--%r@%h:%p' -o 'ControlPersist 1h' -o 'ConnectTimeout 10'";
 
+/// Directory for SSH persistent session files.
+pub(crate) const SSH_PERSIST_SESSION_FILE_DIR: &str = "/tmp";
+
+/// Prefix for SSH persistent session files.
+pub(crate) const SSH_PERSIST_SESSION_FILE_PREFIX: &str = ".prs-session--";
+
 /// A whitelist of SSH hosts that support connection persisting.
 const SSH_PERSIST_HOST_WHITELIST: [&str; 2] = ["github.com", "gitlab.com"];
 

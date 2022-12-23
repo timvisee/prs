@@ -21,6 +21,9 @@ pub const TOMB_FILE_SUFFIX: &str = ".tomb";
 /// Common tomb key file suffix.
 pub const TOMB_KEY_FILE_SUFFIX: &str = ".tomb.key";
 
+/// Name of SSH client process.
+pub const SSH_PROCESS_NAME: &str = "ssh";
+
 /// Tomb helper for given store.
 pub struct Tomb<'a> {
     /// The store.
@@ -95,6 +98,10 @@ impl<'a> Tomb<'a> {
     /// Close the tomb.
     pub fn close(&self) -> Result<()> {
         let tomb = self.find_tomb_path()?;
+
+        // Kill SSH clients that still have a persistent session open for this store
+        kill_ssh_by_session(self.store);
+
         tomb_bin::tomb_close(&tomb, self.settings)
     }
 
@@ -452,4 +459,69 @@ fn find_tomb_key_path(root: &Path) -> Option<PathBuf> {
     }
 
     tomb_key_paths(root).into_iter().find(|p| p.is_file())
+}
+
+/// Kill SSH clients that have an opened persistent session on a password store.
+///
+/// Closing these is required to close any open Tomb mount.
+fn kill_ssh_by_session(store: &Store) {
+    use crate::util::git;
+    use ofiles::opath;
+    use std::fs;
+    use std::os::unix::fs::FileTypeExt;
+
+    // If persistent SSH isn't used, we don't have to close sessions
+    if !git::guess_ssh_persist_support(&store.root) {
+        return;
+    }
+
+    // TODO: guess SSH session directory and file details from environment variable
+
+    // Find prs persistent SSH session files
+    let dir = match fs::read_dir(git::SSH_PERSIST_SESSION_FILE_DIR) {
+        Ok(dir) => dir,
+        Err(_) => return,
+    };
+    let session_files = dir
+        .flatten()
+        .filter(|e| e.file_type().map(|t| t.is_socket()).unwrap_or(false))
+        .filter(|e| {
+            e.file_name()
+                .to_str()
+                .map(|n| n.starts_with(git::SSH_PERSIST_SESSION_FILE_PREFIX))
+                .unwrap_or(false)
+        })
+        .map(|e| e.path());
+
+    // For each session file, kill attached SSH clients
+    session_files.for_each(|p| {
+        // List PIDs having this session file open
+        let pids = match opath(p) {
+            Ok(pids) => pids,
+            Err(_) => return,
+        };
+
+        pids.into_iter()
+            .map(Into::into)
+            .filter(|pid: &u32| {
+                // Only handle ssh clients
+                fs::read_to_string(format!("/proc/{}/cmdline", pid))
+                    .map(|cmdline| {
+                        let cmd = cmdline.split(|b| b == ' ' || b == ':').next().unwrap();
+                        cmd.starts_with("ssh")
+                    })
+                    .unwrap_or(true)
+            })
+            .for_each(|pid| {
+                let status = unsafe { libc::kill(pid as i32, libc::SIGTERM) };
+                match status {
+                    0 => {}
+                    -1 => eprintln!("Failed to kill persistent SSH client (pid: {})", pid),
+                    _ => eprintln!(
+                        "Failed to kill persistent SSH client due to an unknown error (pid: {})",
+                        pid
+                    ),
+                }
+            });
+    });
 }

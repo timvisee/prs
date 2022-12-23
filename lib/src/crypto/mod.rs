@@ -302,7 +302,7 @@ impl ContextPool {
 /// Crypto error.
 #[derive(Debug, Error)]
 pub enum Err {
-    #[error("failed to obtain GPGME cryptography context")]
+    #[error("failed to obtain GPG cryptography context")]
     Context(#[source] anyhow::Error),
 
     #[error("failed to built context, protocol not supportd: {:?}", _0)]

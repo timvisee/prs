@@ -113,7 +113,7 @@ build-x86_64-linux-musl:
   needs: []
   variables:
     TARGET: x86_64-unknown-linux-musl
-    FEATURES_CLI_UNIX: backend-gnupg-bin,alias,clipboard,notify,select-skim,tomb
+    FEATURES_CLI_UNIX: backend-gnupg-bin,alias,clipboard,notify,select-skim,tomb,totp
     FEATURES_GTK3_UNIX: backend-gnupg-bin
   before_script: []
   script:

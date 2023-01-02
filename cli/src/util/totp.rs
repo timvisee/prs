@@ -48,7 +48,7 @@ fn find_otpauth_url(plaintext: &Plaintext) -> Option<Result<ZeroingTotp>> {
         .links(plaintext.unsecure_to_str().unwrap())
         .filter(|l| l.as_str().starts_with(OTPAUTH_SCHEME))
         .map(|l| {
-            TOTP::<Vec<u8>>::from_url(l.as_str())
+            TOTP::from_url(l.as_str())
                 .map(|t| t.into())
                 .map_err(|e| Err::Url(e).into())
         })

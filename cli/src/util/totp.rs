@@ -4,7 +4,7 @@ use anyhow::Result;
 use linkify::{LinkFinder, LinkKind};
 use prs_lib::Plaintext;
 use thiserror::Error;
-use totp_rs::{Rfc6238, Secret, TOTP};
+use totp_rs::{Algorithm, Secret, TOTP};
 use zeroize::Zeroize;
 
 /// OTPAUTH URL scheme.
@@ -77,13 +77,11 @@ fn parse_encoded(plaintext: &Plaintext) -> Option<Result<ZeroingTotp>> {
     let bytes = secret.to_bytes().unwrap();
     zero_secret(secret);
 
-    // Parse RFC6238 TOTP
+    // Parse RFC6238 TOTP (with looser requirements)
     Some(
-        Rfc6238::with_defaults(bytes)
-            .map_err(Err::Rfc6238)
-            .and_then(|rfc| TOTP::from_rfc6238(rfc).map_err(Err::Url))
+        TOTP::new(Algorithm::SHA1, 6, 1, 30, bytes, None, "".into())
             .map(|t| t.into())
-            .map_err(|e| e.into()),
+            .map_err(|e| Err::EncodedSecret(e).into()),
     )
 }
 
@@ -189,8 +187,8 @@ pub fn is_base32(material: &str) -> bool {
 
 #[derive(Debug, Error)]
 pub enum Err {
-    #[error("invalid RFC6238 TOTP secret")]
-    Rfc6238(#[source] totp_rs::Rfc6238Error),
+    #[error("invalid encoded RFC6238 TOTP secret")]
+    EncodedSecret(#[source] totp_rs::TotpUrlError),
 
     #[error("invalid TOTP secret URL")]
     Url(#[source] totp_rs::TotpUrlError),

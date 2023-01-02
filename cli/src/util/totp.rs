@@ -99,14 +99,18 @@ pub fn print_token(token: &Plaintext, quiet: bool, ttl: Option<u64>) {
     }
 
     // Format with spaces
-    let formatted = Plaintext::from(
-        token
-            .unsecure_ref()
-            .chunks(3)
-            .map(|c| std::str::from_utf8(c).unwrap())
-            .collect::<Vec<_>>()
-            .join(" "),
-    );
+    let formatted = if token.unsecure_ref().len() > 5 {
+        Plaintext::from(
+            token
+                .unsecure_ref()
+                .chunks(3)
+                .map(|c| std::str::from_utf8(c).unwrap())
+                .collect::<Vec<_>>()
+                .join(" "),
+        )
+    } else {
+        token.clone()
+    };
     if let Some(ttl) = ttl {
         println!(
             "{} (valid for {}s)",

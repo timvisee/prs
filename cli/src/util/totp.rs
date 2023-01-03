@@ -34,7 +34,7 @@ pub fn find_token(plaintext: &Plaintext) -> Option<Result<ZeroingTotp>> {
     }
 
     // Try to parse full secret as encoded TOTP secret
-    parse_encoded(plaintext)
+    parse_encoded(plaintext).map(|t| Ok(t))
 }
 
 /// Scan the plaintext for `otpauth` URLs.
@@ -48,7 +48,7 @@ fn find_otpauth_url(plaintext: &Plaintext) -> Option<Result<ZeroingTotp>> {
         .links(plaintext.unsecure_to_str().unwrap())
         .filter(|l| l.as_str().starts_with(OTPAUTH_SCHEME))
         .map(|l| {
-            TOTP::from_url(l.as_str())
+            TOTP::from_url_unchecked(l.as_str())
                 .map(|t| t.into())
                 .map_err(|e| Err::Url(e).into())
         })
@@ -60,7 +60,7 @@ fn find_otpauth_url(plaintext: &Plaintext) -> Option<Result<ZeroingTotp>> {
 /// Uses RFC6238 defaults, see:
 /// - https://docs.rs/totp-rs/3.1.0/totp_rs/struct.Rfc6238.html#method.with_defaults
 /// - https://tools.ietf.org/html/rfc6238
-fn parse_encoded(plaintext: &Plaintext) -> Option<Result<ZeroingTotp>> {
+fn parse_encoded(plaintext: &Plaintext) -> Option<ZeroingTotp> {
     // Trim plaintext, must be base32 encoded
     let plaintext = plaintext.unsecure_to_str().unwrap().trim();
     if !is_base32(plaintext) {
@@ -78,11 +78,7 @@ fn parse_encoded(plaintext: &Plaintext) -> Option<Result<ZeroingTotp>> {
     zero_secret(secret);
 
     // Parse RFC6238 TOTP (with looser requirements)
-    Some(
-        TOTP::new(Algorithm::SHA1, 6, 1, 30, bytes, None, "".into())
-            .map(|t| t.into())
-            .map_err(|e| Err::EncodedSecret(e).into()),
-    )
+    Some(TOTP::new_unchecked(Algorithm::SHA1, 6, 1, 30, bytes, None, "".into()).into())
 }
 
 /// Print a nicely formatted token.
@@ -187,9 +183,6 @@ pub fn is_base32(material: &str) -> bool {
 
 #[derive(Debug, Error)]
 pub enum Err {
-    #[error("invalid encoded RFC6238 TOTP secret")]
-    EncodedSecret(#[source] totp_rs::TotpUrlError),
-
     #[error("invalid TOTP secret URL")]
     Url(#[source] totp_rs::TotpUrlError),
 

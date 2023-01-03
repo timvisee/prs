@@ -595,7 +595,7 @@ See [Compatible Clients][pass-compatible-clients] on `pass`s website.
 No, if you lose all keys, there is no way to recover your secrets.
 
 You might lose your key (recipient, GPG secret key) if your machine crashes or
-if you reinstall it's operating system.
+if you reinstall its operating system.
 
 If you are using the same password store on multiple machines with git sync, you
 can still read the secrets on your other machines. To re-add the machine you

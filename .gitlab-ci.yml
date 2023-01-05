@@ -87,23 +87,6 @@ check-old:
     RUST_VERSION: "1.64.0"
   only:
     - master
-check-macos-stable:
-  tags:
-    - macos
-  only:
-    - master
-    - /^v(\d+\.)*\d+$/
-  before_script:
-    - |
-      rustup install $RUST_VERSION
-      rustup default $RUST_VERSION
-    - |
-      rustc --version
-      cargo --version
-    - brew update
-    - brew upgrade
-    - brew install $BREW_PACKAGES
-  <<: *check-base
 
 # Build using Rust stable on Linux
 build-x86_64-linux-gnu:
@@ -150,39 +133,6 @@ build-x86_64-linux-musl:
     - strip -g ./prs-gtk3-copy-$TARGET
   artifacts:
     name: prs-x86_64-linux-musl
-    paths:
-      - prs-$TARGET
-      - prs-gtk3-copy-$TARGET
-    expire_in: 1 month
-
-# Build using Rust stable on macOS
-build-macos:
-  stage: build
-  tags:
-    - macos
-  only:
-    - master
-    - /^v(\d+\.)*\d+$/
-  needs: []
-  variables:
-    TARGET: x86_64-apple-darwin
-  before_script:
-    - |
-      rustup install $RUST_VERSION
-      rustup default $RUST_VERSION
-    - |
-      rustc --version
-      cargo --version
-    - brew update
-    - brew upgrade
-    - brew install $BREW_PACKAGES
-  script:
-    - cd cli; cargo build --target=$TARGET --release --no-default-features --features $FEATURES_CLI_UNIX --locked --verbose; cd ..
-    - cd gtk3; cargo build --target=$TARGET --release --no-default-features --features $FEATURES_GTK3_UNIX --locked --verbose; cd ..
-    - mv target/$TARGET/release/prs ./prs-$TARGET
-    - mv target/$TARGET/release/prs-gtk3-copy ./prs-gtk3-copy-$TARGET
-  artifacts:
-    name: prs-x86_64-macos
     paths:
       - prs-$TARGET
       - prs-gtk3-copy-$TARGET
@@ -307,7 +257,6 @@ release-gitlab-generic-package:
   dependencies:
     - build-x86_64-linux-gnu
     - build-x86_64-linux-musl
-    - build-macos
     - build-x86_64-windows
   only:
     - /^v(\d+\.)*\d+$/
@@ -316,8 +265,6 @@ release-gitlab-generic-package:
     LINUX_GNU_BIN_GTK_COPY: "prs-gtk3-copy-x86_64-unknown-linux-gnu"
     LINUX_MUSL_BIN: "prs-x86_64-unknown-linux-musl"
     LINUX_MUSL_BIN_GTK_COPY: "prs-gtk3-copy-x86_64-unknown-linux-musl"
-    MACOS_BIN: "prs-x86_64-apple-darwin"
-    MACOS_BIN_GTK_COPY: "prs-gtk3-copy-x86_64-apple-darwin"
     WINDOWS_BIN: "prs-x86_64-pc-windows-msvc.exe"
   before_script: []
   script:
@@ -335,10 +282,6 @@ release-gitlab-generic-package:
     - |
       curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file ${LINUX_MUSL_BIN_GTK_COPY} ${PACKAGE_REGISTRY_URL}/${LINUX_MUSL_BIN_GTK_COPY}
     - |
-      curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file ${MACOS_BIN} ${PACKAGE_REGISTRY_URL}/${MACOS_BIN}
-    - |
-      curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file ${MACOS_BIN_GTK_COPY} ${PACKAGE_REGISTRY_URL}/${MACOS_BIN_GTK_COPY}
-    - |
       curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file ${WINDOWS_BIN} ${PACKAGE_REGISTRY_URL}/${WINDOWS_BIN}
 
 # Publish GitLab release
@@ -352,8 +295,6 @@ release-gitlab-release:
     LINUX_GNU_BIN_GTK_COPY: "prs-gtk3-copy-x86_64-unknown-linux-gnu"
     LINUX_MUSL_BIN: "prs-x86_64-unknown-linux-musl"
     LINUX_MUSL_BIN_GTK_COPY: "prs-gtk3-copy-x86_64-unknown-linux-musl"
-    MACOS_BIN: "prs-x86_64-apple-darwin"
-    MACOS_BIN_GTK_COPY: "prs-gtk3-copy-x86_64-apple-darwin"
     WINDOWS_BIN: "prs-x86_64-pc-windows-msvc.exe"
   before_script: []
   script:
@@ -368,8 +309,6 @@ release-gitlab-release:
         --assets-link "{\"name\":\"${LINUX_GNU_BIN_GTK_COPY}\",\"url\":\"${PACKAGE_REGISTRY_URL}/${LINUX_GNU_BIN_GTK_COPY}\"}" \
         --assets-link "{\"name\":\"${LINUX_MUSL_BIN}\",\"url\":\"${PACKAGE_REGISTRY_URL}/${LINUX_MUSL_BIN}\"}" \
         --assets-link "{\"name\":\"${LINUX_MUSL_BIN_GTK_COPY}\",\"url\":\"${PACKAGE_REGISTRY_URL}/${LINUX_MUSL_BIN_GTK_COPY}\"}" \
-        --assets-link "{\"name\":\"${MACOS_BIN}\",\"url\":\"${PACKAGE_REGISTRY_URL}/${MACOS_BIN}\"}" \
-        --assets-link "{\"name\":\"${MACOS_BIN_GTK_COPY}\",\"url\":\"${PACKAGE_REGISTRY_URL}/${MACOS_BIN_GTK_COPY}\"}" \
         --assets-link "{\"name\":\"${WINDOWS_BIN}\",\"url\":\"${PACKAGE_REGISTRY_URL}/${WINDOWS_BIN}\"}"
 
 # Publish GitHub release
@@ -380,7 +319,6 @@ release-github:
   dependencies:
     - build-x86_64-linux-gnu
     - build-x86_64-linux-musl
-    - build-macos
     - build-x86_64-windows
   before_script: []
   script:
@@ -399,8 +337,6 @@ release-github:
     - ./github-release upload --token "$GITHUB_TOKEN" --owner timvisee --repo prs --tag "$CI_COMMIT_REF_NAME" --file ./prs-gtk3-copy-x86_64-unknown-linux-gnu --name prs-gtk3-copy-$CI_COMMIT_REF_NAME-linux-x64
     - ./github-release upload --token "$GITHUB_TOKEN" --owner timvisee --repo prs --tag "$CI_COMMIT_REF_NAME" --file ./prs-x86_64-unknown-linux-musl --name prs-$CI_COMMIT_REF_NAME-linux-x64-static
     - ./github-release upload --token "$GITHUB_TOKEN" --owner timvisee --repo prs --tag "$CI_COMMIT_REF_NAME" --file ./prs-gtk3-copy-x86_64-unknown-linux-musl --name prs-gtk3-copy-$CI_COMMIT_REF_NAME-linux-x64-static
-    - ./github-release upload --token "$GITHUB_TOKEN" --owner timvisee --repo prs --tag "$CI_COMMIT_REF_NAME" --file ./prs-x86_64-apple-darwin --name prs-$CI_COMMIT_REF_NAME-macos
-    - ./github-release upload --token "$GITHUB_TOKEN" --owner timvisee --repo prs --tag "$CI_COMMIT_REF_NAME" --file ./prs-gtk3-copy-x86_64-apple-darwin --name prs-gtk3-copy-$CI_COMMIT_REF_NAME-macos
     - ./github-release upload --token "$GITHUB_TOKEN" --owner timvisee --repo prs --tag "$CI_COMMIT_REF_NAME" --file ./prs-x86_64-pc-windows-msvc.exe --name prs-$CI_COMMIT_REF_NAME-windows.exe
 
 # Cargo crate release

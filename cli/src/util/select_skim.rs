@@ -14,14 +14,14 @@ fn skim_select(items: SkimItemReceiver, prompt: &str) -> Option<String> {
     let prompt = format!("{}: ", prompt);
     let options = SkimOptionsBuilder::default()
         .prompt(Some(&prompt))
-        .height(Some("50%"))
         .multi(false)
+        // Disabled becayse of: https://github.com/lotabout/skim/issues/494
+        // .height(Some("50%"))
         .build()
         .unwrap();
 
     // Run skim, get output, abort on close
     let output = Skim::run_with(&options, Some(items))?;
-    eprintln!();
     if output.is_abort {
         return None;
     }

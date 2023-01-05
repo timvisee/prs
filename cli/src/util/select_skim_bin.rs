@@ -46,8 +46,10 @@ fn select_item<'a, S: AsRef<str>>(prompt: &'a str, items: &'a [S]) -> Option<Str
     let mut child = Command::new(BIN_NAME)
         .arg("--prompt")
         .arg(format!("{}: ", prompt))
-        .arg("--height")
-        .arg("50%")
+        .arg("--no-multi")
+        // Disabled becayse of: https://github.com/lotabout/skim/issues/494
+        // .arg("--height")
+        // .arg("50%")
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .stderr(Stdio::inherit())

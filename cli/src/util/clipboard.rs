@@ -473,6 +473,7 @@ fn is_wayland() -> bool {
 
 #[derive(Debug, Error)]
 pub enum Err {
+    #[cfg(not(windows))]
     #[error("failed to parse clipboard contents as UTF-8")]
     Utf8(#[source] std::str::Utf8Error),
 

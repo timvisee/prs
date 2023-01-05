@@ -289,23 +289,35 @@ mod tests {
         // Append to empty with newline
         let mut plaintext = Plaintext::empty();
         plaintext.append(Plaintext::from("abc"), true);
-        assert_eq!(plaintext.unsecure_to_str().unwrap(), "\nabc");
+        assert_eq!(
+            plaintext.unsecure_to_str().unwrap().replace("\r\n", "\n"),
+            "\nabc"
+        );
         plaintext.append(Plaintext::from("def"), true);
-        assert_eq!(plaintext.unsecure_to_str().unwrap(), "\nabc\ndef");
+        assert_eq!(
+            plaintext.unsecure_to_str().unwrap().replace("\r\n", "\n"),
+            "\nabc\ndef"
+        );
 
         // Append empty to empty
         let mut plaintext = Plaintext::empty();
         plaintext.append(Plaintext::empty(), false);
         assert!(plaintext.is_empty());
         plaintext.append(Plaintext::empty(), true);
-        assert_eq!(plaintext.unsecure_to_str().unwrap(), "\n");
+        assert_eq!(
+            plaintext.unsecure_to_str().unwrap().replace("\r\n", "\n"),
+            "\n"
+        );
 
         // Keep existing newlines
         let mut plaintext = Plaintext::from("\n\n");
         plaintext.append(Plaintext::from("\n\n"), false);
         assert_eq!(plaintext.unsecure_to_str().unwrap(), "\n\n\n\n");
         plaintext.append(Plaintext::from("\n\n"), true);
-        assert_eq!(plaintext.unsecure_to_str().unwrap(), "\n\n\n\n\n\n\n");
+        assert_eq!(
+            plaintext.unsecure_to_str().unwrap().replace("\r\n", "\n"),
+            "\n\n\n\n\n\n\n"
+        );
     }
 
     #[quickcheck]
@@ -396,7 +408,7 @@ mod tests {
         };
 
         // Memory must have been explicitly zeroed, it must never be the same as before
-        slice != &must_not_match
+        slice != must_not_match
     }
 
     #[test]
@@ -427,6 +439,6 @@ mod tests {
         };
 
         // Memory must have been explicitly zeroed, it must never be the same as before
-        slice != &must_not_match
+        slice != must_not_match
     }
 }

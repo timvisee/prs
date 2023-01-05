@@ -253,8 +253,9 @@ Make sure you meet and install the 'Run' [requirements](#requirements).
 
 See the operating system/distribution specific instructions below:
 - [Linux](#linux-all-distributions)
+- [macOS](#macos)
 - [Windows](#windows)
-- [Other](#other) _(other Linux's, macOS)_
+- [Other](#other)
 
 ### Linux (all distributions)
 Limited installation options are currently available. See the list below.
@@ -305,6 +306,9 @@ sudo mv ./prs /usr/local/bin/
 
 prs
 ```
+
+### macOS
+Currently no macOS binaries are provided, you must therefore [compile from source](#build).
 
 ### Windows
 Using the [`scoop` package](#windows-scoop-package) is recommended.  
@@ -366,7 +370,7 @@ mv ./prs /usr/local/bin/prs
 
 To build and install `prs` yourself, you need the following:
 
-- Rust 1.64 or newer
+- Rust 1.64 or newer (MSRV)
 - The 'Build' [requirements](#requirements).
 
 _Not all features are supported on macOS or Windows. The default configuration

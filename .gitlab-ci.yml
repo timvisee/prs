@@ -104,20 +104,6 @@ check-macos-stable:
     - brew upgrade
     - brew install $BREW_PACKAGES
   <<: *check-base
-# check-windows:
-#   stage: check
-#   allow_failure: true
-#   tags:
-#     - windows
-#   only:
-#     - master
-#   cache: {}
-#   <<: *before_script-windows
-#   script:
-#     - cargo check --locked --verbose; cd ..
-#     - cd lib; cargo check --no-default-features --features $FEATURES_CLI_WINDOWS --locked --verbose; cd ..
-#     - cd lib; cargo check --no-default-features --features backend-gnupg-bin --locked --verbose; cd ..
-#     - cd cli; cargo check --no-default-features --features backend-gnupg-bin --locked --verbose; cd ..
 
 # Build using Rust stable on Linux
 build-x86_64-linux-gnu:

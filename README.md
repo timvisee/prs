@@ -681,43 +681,43 @@ See a list of compatible `pass` clients [here][pass-compatible-clients].
 ```
 $ prs help
 
-prs-cli 0.3.2
+prs-cli 0.3.5
 Tim Visee <3a4fb3964f@sinenomine.email>
 Secure, fast & convenient password manager CLI with GPG & git sync
 
-USAGE:
-    prs [FLAGS] [SUBCOMMAND]
+Usage: prs [OPTIONS] [COMMAND]
 
-FLAGS:
-    -f, --force          Force the action, ignore warnings
-        --gpg-tty        Instruct GPG to ask passphrase in TTY rather than pinentry
-    -h, --help           Prints help information
-    -I, --no-interact    Not interactive, do not prompt
-    -q, --quiet          Produce output suitable for logging and automation
-    -v, --verbose        Enable verbose information and logging
-    -V, --version        Prints version information
-    -y, --yes            Assume yes for prompts
+Commands:
+  show          Display a secret
+  copy          Copy secret to clipboard
+  generate      Generate a secure secret
+  add           Add a secret
+  edit          Edit a secret
+  duplicate     Duplicate a secret
+  alias         Alias/symlink a secret
+  move          Move a secret
+  remove        Remove a secret
+  list          List all secrets
+  init          Initialize new password store
+  clone         Clone existing password store
+  sync          Sync password store
+  slam          Aggresively lock password store & keys preventing access (emergency)
+  totp          Manage TOTP tokens
+  recipients    Manage store recipients
+  git           Invoke git command in password store
+  tomb          Manage password store Tomb
+  housekeeping  Housekeeping utilities
+  help          Print this message or the help of the given subcommand(s)
 
-SUBCOMMANDS:
-    add             Add a secret
-    alias           Alias/symlink a secret
-    clone           Clone existing password store
-    copy            Copy secret to clipboard
-    duplicate       Duplicate a secret
-    edit            Edit a secret
-    generate        Generate a secure secret
-    git             Invoke git command in password store
-    help            Prints this message or the help of the given subcommand(s)
-    housekeeping    Housekeeping utilities
-    init            Initialize new password store
-    list            List all secrets
-    move            Move a secret
-    recipients      Manage store recipients
-    remove          Remove a secret
-    show            Display a secret
-    sync            Sync password store
-    tomb            Manage password store Tomb
-    totp            Manage TOTP tokens
+Options:
+  -f, --force        Force the action, ignore warnings
+  -I, --no-interact  Not interactive, do not prompt
+  -y, --yes          Assume yes for prompts
+  -q, --quiet        Produce output suitable for logging and automation
+  -v, --verbose...   Enable verbose information and logging
+      --gpg-tty      Instruct GPG to ask passphrase in TTY rather than pinentry
+  -h, --help         Print help information
+  -V, --version      Print version information
 ```
 
 ## License

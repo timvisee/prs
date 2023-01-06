@@ -66,6 +66,7 @@ impl CmdGenerate {
                     .long("show")
                     .alias("cat")
                     .alias("display")
+                    .alias("stdout")
                     .num_args(0)
                     .help("Display secret after generation"),
             )

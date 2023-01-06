@@ -1,5 +1,34 @@
 # Changelog
 
+## 0.4.0-rc.1 (2023-01-06)
+- Reorder commands in help output to show the most useful commands first
+- Add TOTP token support for handling two factor authentication codes
+- Add support for Steam TOTP tokens
+- Add `totp show` command to show a TOTP token from the store
+- Add `totp copy` command to copy a TOTP token to the clipboard
+- Add `totp live` command to watch a TOTP token live until cancelled
+- Add `totp qr` command to show a TOTP QR code for adding to another authenticator
+- Add `slam` command to aggressively close the password store, Tomb, opened GPG
+  keys and persistent SSH connections in case of an emergency
+- For the `generate` command, add `--stdout` alias for `--show`
+- Automatically open Tomb when using `sync` command
+- Make hints shown with `prs` Tomb aware, preventing weird suggestions when a
+  Tomb is closed
+- Fix Tomb's not closing due to persistent SSH connections, these connections
+  are now dropped automatically
+- Make interactive selection through skim full screen
+- Improve various error messages making them more descriptive
+- Use GnuPG binary backend by default now, rather than GPGME
+- Improve GNU and musl CI builds
+- Fix errors and warnings for Windows builds
+- Remove macOS builds from releases, users can compile from source
+- Remove unsafe code for handling UTF-16 output
+- Remove unsafe code for signalling SSH processes
+- Disable unused features in dependencies to shrink dependency count
+- Update command-line interface handling system
+- Update MSRV to 1.64
+- Update dependencies
+
 ## 0.3.5 (2022-08-18)
 - Add secret autocompletion for bash
 - Update MSRV to 1.60

@@ -155,7 +155,7 @@ pub enum Err {
     #[error("failed to load usable keys from keychain")]
     Load(#[source] anyhow::Error),
 
-    #[error("no GPG key selected to create Tomb")]
+    #[error("no GPG key selected to create tomb")]
     NoGpgKey,
 
     #[error("failed to start timer to automatically close password store tomb")]

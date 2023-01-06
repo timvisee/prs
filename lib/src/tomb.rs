@@ -102,15 +102,8 @@ impl<'a> Tomb<'a> {
         // Kill SSH clients that still have a persistent session open for this store
         util::git::kill_ssh_by_session(self.store);
 
-        tomb_bin::tomb_close(&tomb, self.settings)
-    }
-
-    /// Slam all open tombs.
-    ///
-    /// Warning: this may be dangerous and could have unwanted side effects. This also closes
-    /// non-password Tombs and kills all programs using it.
-    pub fn slam(&self) -> Result<()> {
-        tomb_bin::tomb_slam(self.settings)
+        tomb_bin::tomb_close(&tomb, self.settings).map_err(Err::Close)?;
+        Ok(())
     }
 
     /// Prepare a Tomb store for usage.
@@ -391,6 +384,9 @@ pub enum Err {
 
     #[error("failed to open password store tomb through tomb CLI")]
     Open(#[source] anyhow::Error),
+
+    #[error("failed to close password store tomb through tomb CLI")]
+    Close(#[source] anyhow::Error),
 
     #[error("failed to resize password store tomb through tomb CLI")]
     Resize(#[source] anyhow::Error),

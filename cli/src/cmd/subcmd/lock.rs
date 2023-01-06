@@ -7,9 +7,9 @@ pub struct CmdLock;
 
 impl CmdLock {
     pub fn build() -> Command {
-        Command::new("lock")
+        Command::new("slam")
+            .alias("lock")
             .alias("lockdown")
-            .alias("slam")
             .alias("shut")
             .alias("emergency")
             .alias("sos")

@@ -100,6 +100,7 @@ impl<'a> Handler {
         #[cfg(all(feature = "tomb", target_os = "linux"))]
         let app = app.subcommand(subcmd::CmdTomb::build());
 
+        #[allow(clippy::let_and_return)]
         let app = app
             .subcommand(subcmd::CmdHousekeeping::build())
             .subcommand(subcmd::CmdInternal::build());

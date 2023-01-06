@@ -38,8 +38,6 @@ impl<'a> Lock<'a> {
             }
         };
 
-        // TODO: wipe open GPG keys from RAM
-
         // Attempt to kill GPG agents
         kill_gpg_agent(&matcher_main);
 

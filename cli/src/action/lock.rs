@@ -26,7 +26,14 @@ impl<'a> Lock<'a> {
         let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
         let matcher_lock = LockMatcher::with(self.cmd_matches).unwrap();
 
-        let store = Store::open(matcher_lock.store()).map_err(Err::Store)?;
+        // Attempt to open store for some locking operations
+        let store = match Store::open(matcher_lock.store()) {
+            Ok(store) => Some(store),
+            Err(err) => {
+                error::print_error(Err::Store(err).into());
+                None
+            }
+        };
 
         // TODO: wipe open GPG keys from RAM
 
@@ -35,8 +42,10 @@ impl<'a> Lock<'a> {
 
         // Attempt to lock Tomb
         #[cfg(all(feature = "tomb", target_os = "linux"))]
-        if let Err(err) = tomb_lock(&store, &matcher_main) {
-            error::print_error(Err::Close(err));
+        if let Some(store) = &store {
+            if let Err(err) = tomb_lock(store, &matcher_main) {
+                error::print_error(Err::Close(err).into());
+            }
         }
 
         // Attempt to invalidate cached sudo credentials
@@ -44,7 +53,9 @@ impl<'a> Lock<'a> {
 
         // Drop open prs persistent SSH sessions
         #[cfg(unix)]
-        drop_persistent_ssh(&store, &matcher_main);
+        if let Some(store) = &store {
+            drop_persistent_ssh(store, &matcher_main);
+        }
 
         if !matcher_main.quiet() {
             eprintln!("Password store locked");

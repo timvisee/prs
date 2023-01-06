@@ -99,7 +99,7 @@ fn build_ui(application: &gtk::Application) {
     #[cfg(all(feature = "tomb", target_os = "linux"))]
     if let Err(err) = tomb.prepare() {
         eprintln!("{}", err);
-        error_dialog("Failed to prepare password store Tomb", None);
+        error_dialog("Failed to prepare password store tomb", None);
         application.quit();
         return;
     }

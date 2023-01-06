@@ -1,10 +1,15 @@
 use std::collections::HashMap;
-use std::env;
+#[cfg(unix)]
+use std::os::unix::fs::FileTypeExt;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::sync::Mutex;
+use std::{env, fs};
 
-use crate::git;
+use crate::{git, Store};
+
+#[cfg(unix)]
+use ofiles::opath;
 
 /// Environment variable git uses to modify the ssh command.
 const GIT_ENV_SSH: &str = "GIT_SSH_COMMAND";
@@ -20,11 +25,11 @@ const GIT_ENV_SSH: &str = "GIT_SSH_COMMAND";
 const SSH_PERSIST_CMD: &str = "ssh -o 'ControlMaster auto' -o 'ControlPath /tmp/.prs-session--%r@%h:%p' -o 'ControlPersist 1h' -o 'ConnectTimeout 10'";
 
 /// Directory for SSH persistent session files.
-#[cfg(all(feature = "tomb", target_os = "linux"))]
+#[cfg(unix)]
 pub(crate) const SSH_PERSIST_SESSION_FILE_DIR: &str = "/tmp";
 
 /// Prefix for SSH persistent session files.
-#[cfg(all(feature = "tomb", target_os = "linux"))]
+#[cfg(unix)]
 pub(crate) const SSH_PERSIST_SESSION_FILE_PREFIX: &str = ".prs-session--";
 
 /// A whitelist of SSH hosts that support connection persisting.
@@ -38,7 +43,7 @@ lazy_static! {
 /// Configure given git command to use SSH connection persisting.
 ///
 /// `guess_ssh_connection_persist_support` should be used to guess whether this is supported.
-pub fn configure_ssh_persist(cmd: &mut Command) {
+pub(crate) fn configure_ssh_persist(cmd: &mut Command) {
     cmd.env(self::GIT_ENV_SSH, self::SSH_PERSIST_CMD);
 }
 
@@ -55,7 +60,7 @@ pub fn configure_ssh_persist(cmd: &mut Command) {
 /// Related: https://gitlab.com/timvisee/prs/-/issues/31
 /// Related: https://github.com/timvisee/prs/issues/5#issuecomment-803940880
 // TODO: make configurable, add current user ID to path
-pub fn guess_ssh_persist_support(repo: &Path) -> bool {
+pub(crate) fn guess_ssh_persist_support(repo: &Path) -> bool {
     // We must be using Unix, unreliable on Windows (and others?)
     if !cfg!(unix) {
         return false;
@@ -137,4 +142,66 @@ fn ssh_uri_host(mut uri: &str) -> Option<&str> {
     } else {
         None
     }
+}
+
+/// Kill SSH clients that have an opened persistent session on a password store.
+///
+/// Closing these is required to close any open Tomb mount.
+#[cfg(unix)]
+pub fn kill_ssh_by_session(store: &Store) {
+    // If persistent SSH isn't used, we don't have to close sessions
+    if !guess_ssh_persist_support(&store.root) {
+        return;
+    }
+
+    // TODO: guess SSH session directory and file details from environment variable
+
+    // Find prs persistent SSH session files
+    let dir = match fs::read_dir(SSH_PERSIST_SESSION_FILE_DIR) {
+        Ok(dir) => dir,
+        Err(_) => return,
+    };
+    let session_files = dir
+        .flatten()
+        .filter(|e| e.file_type().map(|t| t.is_socket()).unwrap_or(false))
+        .filter(|e| {
+            e.file_name()
+                .to_str()
+                .map(|n| n.starts_with(SSH_PERSIST_SESSION_FILE_PREFIX))
+                .unwrap_or(false)
+        })
+        .map(|e| e.path());
+
+    // For each session file, kill attached SSH clients
+    session_files.for_each(|p| {
+        // List PIDs having this session file open
+        let pids = match opath(p) {
+            Ok(pids) => pids,
+            Err(_) => return,
+        };
+
+        pids.into_iter()
+            .map(Into::into)
+            .filter(|pid: &u32| pid > &0 && pid < &(i32::MAX as u32))
+            .filter(|pid| {
+                // Only handle ssh clients
+                fs::read_to_string(format!("/proc/{}/cmdline", pid))
+                    .map(|cmdline| {
+                        let cmd = cmdline.split(|b| b == ' ' || b == ':').next().unwrap();
+                        cmd.starts_with("ssh")
+                    })
+                    .unwrap_or(true)
+            })
+            .for_each(|pid| {
+                if let Err(err) = nix::sys::signal::kill(
+                    nix::unistd::Pid::from_raw(pid as i32),
+                    Some(nix::sys::signal::Signal::SIGTERM),
+                ) {
+                    eprintln!(
+                        "Failed to kill persistent SSH client (pid: {}): {}",
+                        pid, err
+                    );
+                }
+            });
+    });
 }

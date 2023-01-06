@@ -8,7 +8,7 @@ use anyhow::{anyhow, Result};
 use thiserror::Error;
 
 use crate::crypto::Proto;
-use crate::tomb_bin::TombSettings;
+pub use crate::tomb_bin::TombSettings;
 use crate::util;
 use crate::{systemd_bin, tomb_bin, Key, Store};
 
@@ -100,9 +100,10 @@ impl<'a> Tomb<'a> {
         let tomb = self.find_tomb_path()?;
 
         // Kill SSH clients that still have a persistent session open for this store
-        kill_ssh_by_session(self.store);
+        util::git::kill_ssh_by_session(self.store);
 
-        tomb_bin::tomb_close(&tomb, self.settings)
+        tomb_bin::tomb_close(&tomb, self.settings).map_err(Err::Close)?;
+        Ok(())
     }
 
     /// Prepare a Tomb store for usage.
@@ -323,6 +324,15 @@ impl<'a> Tomb<'a> {
     }
 }
 
+/// Slam all open tombs.
+///
+/// Warning: this may be dangerous and could have unwanted side effects. This also closes
+/// non-password Tombs and kills all programs using it.
+pub fn slam(settings: TombSettings) -> Result<()> {
+    tomb_bin::tomb_slam(settings).map_err(Err::Slam)?;
+    Ok(())
+}
+
 /// Holds information for password store Tomb sizes.
 #[derive(Debug, Copy, Clone)]
 pub struct TombSize {
@@ -375,8 +385,14 @@ pub enum Err {
     #[error("failed to open password store tomb through tomb CLI")]
     Open(#[source] anyhow::Error),
 
+    #[error("failed to close password store tomb through tomb CLI")]
+    Close(#[source] anyhow::Error),
+
     #[error("failed to resize password store tomb through tomb CLI")]
     Resize(#[source] anyhow::Error),
+
+    #[error("failed to slam all open tombs through tomb CLI")]
+    Slam(#[source] anyhow::Error),
 
     #[error("failed to change permissions to current user for tomb mountpoint")]
     Chown(#[source] anyhow::Error),
@@ -459,70 +475,4 @@ fn find_tomb_key_path(root: &Path) -> Option<PathBuf> {
     }
 
     tomb_key_paths(root).into_iter().find(|p| p.is_file())
-}
-
-/// Kill SSH clients that have an opened persistent session on a password store.
-///
-/// Closing these is required to close any open Tomb mount.
-fn kill_ssh_by_session(store: &Store) {
-    use crate::util::git;
-    use ofiles::opath;
-    use std::fs;
-    use std::os::unix::fs::FileTypeExt;
-
-    // If persistent SSH isn't used, we don't have to close sessions
-    if !git::guess_ssh_persist_support(&store.root) {
-        return;
-    }
-
-    // TODO: guess SSH session directory and file details from environment variable
-
-    // Find prs persistent SSH session files
-    let dir = match fs::read_dir(git::SSH_PERSIST_SESSION_FILE_DIR) {
-        Ok(dir) => dir,
-        Err(_) => return,
-    };
-    let session_files = dir
-        .flatten()
-        .filter(|e| e.file_type().map(|t| t.is_socket()).unwrap_or(false))
-        .filter(|e| {
-            e.file_name()
-                .to_str()
-                .map(|n| n.starts_with(git::SSH_PERSIST_SESSION_FILE_PREFIX))
-                .unwrap_or(false)
-        })
-        .map(|e| e.path());
-
-    // For each session file, kill attached SSH clients
-    session_files.for_each(|p| {
-        // List PIDs having this session file open
-        let pids = match opath(p) {
-            Ok(pids) => pids,
-            Err(_) => return,
-        };
-
-        pids.into_iter()
-            .map(Into::into)
-            .filter(|pid: &u32| pid > &0 && pid < &(i32::MAX as u32))
-            .filter(|pid| {
-                // Only handle ssh clients
-                fs::read_to_string(format!("/proc/{}/cmdline", pid))
-                    .map(|cmdline| {
-                        let cmd = cmdline.split(|b| b == ' ' || b == ':').next().unwrap();
-                        cmd.starts_with("ssh")
-                    })
-                    .unwrap_or(true)
-            })
-            .for_each(|pid| {
-                if let Err(err) = nix::sys::signal::kill(
-                    nix::unistd::Pid::from_raw(pid as i32),
-                    Some(nix::sys::signal::Signal::SIGTERM),
-                ) {
-                    eprintln!(
-                        "Failed to kill persistent SSH client (pid: {}): {}",
-                        pid, err
-                    );
-                }
-            });
-    });
 }

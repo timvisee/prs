@@ -101,6 +101,10 @@ fn invoke_action(handler: &Handler) -> Result<()> {
         return action::list::List::new(handler.matches()).invoke();
     }
 
+    if handler.slam().is_some() {
+        return action::slam::Slam::new(handler.matches()).invoke();
+    }
+
     if handler.recipients().is_some() {
         return action::recipients::Recipients::new(handler.matches()).invoke();
     }

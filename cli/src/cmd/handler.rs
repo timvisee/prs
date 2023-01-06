@@ -88,7 +88,8 @@ impl<'a> Handler {
             .subcommand(subcmd::CmdList::build())
             .subcommand(subcmd::CmdInit::build())
             .subcommand(subcmd::CmdClone::build())
-            .subcommand(subcmd::CmdSync::build());
+            .subcommand(subcmd::CmdSync::build())
+            .subcommand(subcmd::CmdSlam::build());
 
         #[cfg(feature = "totp")]
         let app = app.subcommand(subcmd::CmdTotp::build());
@@ -99,6 +100,7 @@ impl<'a> Handler {
         #[cfg(all(feature = "tomb", target_os = "linux"))]
         let app = app.subcommand(subcmd::CmdTomb::build());
 
+        #[allow(clippy::let_and_return)]
         let app = app
             .subcommand(subcmd::CmdHousekeeping::build())
             .subcommand(subcmd::CmdInternal::build());
@@ -183,6 +185,11 @@ impl<'a> Handler {
     /// Get the list sub command, if matched.
     pub fn list(&'a self) -> Option<matcher::ListMatcher> {
         matcher::ListMatcher::with(&self.matches)
+    }
+
+    /// Get the slam sub command, if matched.
+    pub fn slam(&'a self) -> Option<matcher::SlamMatcher> {
+        matcher::SlamMatcher::with(&self.matches)
     }
 
     /// Get the move sub command, if matched.

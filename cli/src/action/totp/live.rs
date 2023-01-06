@@ -15,7 +15,7 @@ use crate::{
     },
     util::{
         secret, select,
-        totp::{self, ZeroingTotp},
+        totp::{self, Totp},
     },
 };
 
@@ -86,7 +86,7 @@ impl<'a> Live<'a> {
 /// Watch the token.
 ///
 /// Show countdown if not quiet, clear when a new token is shown.
-fn watch(totp: ZeroingTotp, quiet: bool) -> Result<()> {
+fn watch(totp: Totp, quiet: bool) -> Result<()> {
     loop {
         let token = totp.generate_current().map_err(Err::Totp)?;
         let ttl = totp.ttl().map_err(Err::Totp)?;
@@ -101,7 +101,7 @@ fn watch(totp: ZeroingTotp, quiet: bool) -> Result<()> {
 /// Follow the token.
 ///
 /// Keep printing new tokens on a new line as they arrive.
-fn follow(totp: ZeroingTotp, quiet: bool) -> Result<()> {
+fn follow(totp: Totp, quiet: bool) -> Result<()> {
     loop {
         let token = totp.generate_current().map_err(Err::Totp)?;
         let ttl = totp.ttl().map_err(Err::Totp)?;

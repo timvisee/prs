@@ -16,7 +16,7 @@ const PROPERTY_NAMES: [&str; 2] = ["totp", "2fa"];
 /// Try to find a TOTP token in the given plaintext.
 ///
 /// Returns `None` if no TOTP is found.
-pub fn find_token(plaintext: &Plaintext) -> Option<Result<ZeroingTotp>> {
+pub fn find_token(plaintext: &Plaintext) -> Option<Result<Totp>> {
     // Find first TOTP URL globally
     match find_otpauth_url(plaintext) {
         totp @ Some(_) => return totp,
@@ -38,7 +38,7 @@ pub fn find_token(plaintext: &Plaintext) -> Option<Result<ZeroingTotp>> {
 }
 
 /// Scan the plaintext for `otpauth` URLs.
-fn find_otpauth_url(plaintext: &Plaintext) -> Option<Result<ZeroingTotp>> {
+fn find_otpauth_url(plaintext: &Plaintext) -> Option<Result<Totp>> {
     // Configure linkfinder
     let mut finder = LinkFinder::new();
     finder.url_must_have_scheme(true);
@@ -60,7 +60,7 @@ fn find_otpauth_url(plaintext: &Plaintext) -> Option<Result<ZeroingTotp>> {
 /// Uses RFC6238 defaults, see:
 /// - https://docs.rs/totp-rs/3.1.0/totp_rs/struct.Rfc6238.html#method.with_defaults
 /// - https://tools.ietf.org/html/rfc6238
-fn parse_encoded(plaintext: &Plaintext) -> Option<ZeroingTotp> {
+fn parse_encoded(plaintext: &Plaintext) -> Option<Totp> {
     // Trim plaintext, must be base32 encoded
     let plaintext = plaintext.unsecure_to_str().unwrap().trim();
     if !is_base32(plaintext) {
@@ -124,12 +124,14 @@ fn zero_secret(secret: Secret) {
     }
 }
 
-/// A secure TOTP type that zeroes on drop.
-pub struct ZeroingTotp {
+/// A secure TOTP type.
+///
+/// This TOTP type outputs tokens as secure `Plaintext` and zeroes on drop.
+pub struct Totp {
     totp: TOTP,
 }
 
-impl ZeroingTotp {
+impl Totp {
     /// Generate a token from the current system time.
     pub fn generate_current(&self) -> Result<Plaintext> {
         self.totp
@@ -144,31 +146,9 @@ impl ZeroingTotp {
     }
 }
 
-impl From<TOTP> for ZeroingTotp {
+impl From<TOTP> for Totp {
     fn from(totp: TOTP) -> Self {
         Self { totp }
-    }
-}
-
-impl Drop for ZeroingTotp {
-    fn drop(&mut self) {
-        self.zeroize()
-    }
-}
-
-impl Zeroize for ZeroingTotp {
-    fn zeroize(&mut self) {
-        let TOTP {
-            ref mut digits,
-            ref mut secret,
-            ref mut issuer,
-            ref mut account_name,
-            ..
-        } = self.totp;
-        digits.zeroize();
-        secret.zeroize();
-        issuer.zeroize();
-        account_name.zeroize();
     }
 }
 

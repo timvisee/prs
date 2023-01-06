@@ -24,10 +24,10 @@ impl CmdRecipients {
             .subcommand_required(true)
             .subcommand_value_name("CMD")
             .subcommand(add::CmdAdd::build())
-            .subcommand(export::CmdExport::build())
             .subcommand(generate::CmdGenerate::build())
             .subcommand(list::CmdList::build())
             .subcommand(remove::CmdRemove::build())
+            .subcommand(export::CmdExport::build())
             .arg(ArgStore::build())
     }
 }

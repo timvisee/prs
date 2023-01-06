@@ -1939,7 +1939,6 @@ dependencies = [
  "totp-rs",
  "walkdir",
  "x11-clipboard 0.7.0",
- "zeroize",
 ]
 
 [[package]]

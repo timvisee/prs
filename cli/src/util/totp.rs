@@ -5,7 +5,6 @@ use linkify::{LinkFinder, LinkKind};
 use prs_lib::Plaintext;
 use thiserror::Error;
 use totp_rs::{Algorithm, Secret, TOTP};
-use zeroize::Zeroize;
 
 /// OTPAUTH URL scheme.
 const OTPAUTH_SCHEME: &str = "otpauth://";
@@ -75,7 +74,6 @@ fn parse_encoded(plaintext: &Plaintext) -> Option<Totp> {
     // Decode to bytes
     let secret = Secret::Encoded(plaintext.to_string());
     let bytes = secret.to_bytes().unwrap();
-    zero_secret(secret);
 
     // Parse RFC6238 TOTP (with looser requirements)
     Some(TOTP::new_unchecked(Algorithm::SHA1, 6, 1, 30, bytes, None, "".into()).into())
@@ -113,14 +111,6 @@ pub fn print_token(token: &Plaintext, quiet: bool, ttl: Option<u64>) {
         );
     } else {
         println!("{}", formatted.unsecure_to_str().unwrap());
-    }
-}
-
-/// Securely zero the `Secret` type.
-fn zero_secret(secret: Secret) {
-    match secret {
-        Secret::Encoded(mut encoded) => encoded.zeroize(),
-        Secret::Raw(mut raw) => raw.zeroize(),
     }
 }
 

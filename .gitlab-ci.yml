@@ -141,7 +141,6 @@ build-x86_64-linux-musl:
 # Build using Rust stable on Windows
 build-x86_64-windows:
   stage: build
-  allow_failure: true
   tags:
     - windows
   only:
@@ -170,7 +169,6 @@ test-cargo-x86_64-linux-gnu:
 # Run the unit tests through Cargo on Windows
 test-cargo-x86_64-windows:
   stage: test
-  allow_failure: true
   tags:
     - windows
   only:
@@ -187,7 +185,6 @@ test-cargo-x86_64-windows:
 test-integration:
   image: alpine
   stage: test
-  allow_failure: true
   needs:
     - build-x86_64-linux-musl
   dependencies:

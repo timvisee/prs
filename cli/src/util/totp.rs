@@ -34,7 +34,7 @@ pub fn find_token(plaintext: &Plaintext) -> Option<Result<Totp>> {
     }
 
     // Try to parse full secret as encoded TOTP secret
-    parse_encoded(plaintext).map(|t| Ok(t))
+    parse_encoded(plaintext).map(Ok)
 }
 
 /// Scan the plaintext for `otpauth` URLs.

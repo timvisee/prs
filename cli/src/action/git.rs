@@ -43,6 +43,7 @@ impl<'a> Git<'a> {
         #[cfg(all(feature = "tomb", target_os = "linux"))]
         tomb::prepare_tomb(&mut tomb, &matcher_main).map_err(Err::Tomb)?;
 
+        #[allow(clippy::let_and_return)]
         let result = git(&store, matcher_git.command(), matcher_main.verbose());
 
         // Finalize tomb

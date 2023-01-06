@@ -68,30 +68,40 @@ impl<'a> Handler {
                     .global(true)
                     .help("Instruct GPG to ask passphrase in TTY rather than pinentry"),
             )
-            .subcommand(subcmd::CmdAdd::build())
-            .subcommand(subcmd::CmdClone::build())
-            .subcommand(subcmd::CmdDuplicate::build())
-            .subcommand(subcmd::CmdEdit::build())
-            .subcommand(subcmd::CmdGenerate::build())
-            .subcommand(subcmd::CmdGit::build())
-            .subcommand(subcmd::CmdHousekeeping::build())
-            .subcommand(subcmd::CmdInit::build())
-            .subcommand(subcmd::CmdInternal::build())
-            .subcommand(subcmd::CmdList::build())
-            .subcommand(subcmd::CmdMove::build())
-            .subcommand(subcmd::CmdRecipients::build())
-            .subcommand(subcmd::CmdRemove::build())
-            .subcommand(subcmd::CmdShow::build())
-            .subcommand(subcmd::CmdSync::build());
-
-        #[cfg(feature = "alias")]
-        let app = app.subcommand(subcmd::CmdAlias::build());
+            .subcommand(subcmd::CmdShow::build());
 
         #[cfg(feature = "clipboard")]
         let app = app.subcommand(subcmd::CmdCopy::build());
 
+        let app = app
+            .subcommand(subcmd::CmdGenerate::build())
+            .subcommand(subcmd::CmdAdd::build())
+            .subcommand(subcmd::CmdEdit::build())
+            .subcommand(subcmd::CmdDuplicate::build());
+
+        #[cfg(feature = "alias")]
+        let app = app.subcommand(subcmd::CmdAlias::build());
+
+        let app = app
+            .subcommand(subcmd::CmdMove::build())
+            .subcommand(subcmd::CmdRemove::build())
+            .subcommand(subcmd::CmdList::build())
+            .subcommand(subcmd::CmdInit::build())
+            .subcommand(subcmd::CmdClone::build())
+            .subcommand(subcmd::CmdSync::build());
+
+        #[cfg(feature = "totp")]
+        let app = app.subcommand(subcmd::CmdTotp::build());
+
+        let app = app.subcommand(subcmd::CmdRecipients::build())
+            .subcommand(subcmd::CmdGit::build());
+
         #[cfg(all(feature = "tomb", target_os = "linux"))]
         let app = app.subcommand(subcmd::CmdTomb::build());
+
+        let app = app
+            .subcommand(subcmd::CmdHousekeeping::build())
+            .subcommand(subcmd::CmdInternal::build());
 
         // Disable color usage if compiled without color support
         // TODO: do not use feature, pull from env var instead
@@ -204,5 +214,11 @@ impl<'a> Handler {
     #[cfg(all(feature = "tomb", target_os = "linux"))]
     pub fn tomb(&'a self) -> Option<matcher::TombMatcher> {
         matcher::TombMatcher::with(&self.matches)
+    }
+
+    /// Get the TOTP sub command, if matched.
+    #[cfg(feature = "totp")]
+    pub fn totp(&'a self) -> Option<matcher::TotpMatcher> {
+        matcher::TotpMatcher::with(&self.matches)
     }
 }

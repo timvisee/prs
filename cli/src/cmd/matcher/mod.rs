@@ -20,6 +20,8 @@ pub mod show;
 pub mod sync;
 #[cfg(all(feature = "tomb", target_os = "linux"))]
 pub mod tomb;
+#[cfg(feature = "totp")]
+pub mod totp;
 
 // Re-export to matcher module
 pub use self::add::AddMatcher;
@@ -44,6 +46,8 @@ pub use self::show::ShowMatcher;
 pub use self::sync::SyncMatcher;
 #[cfg(all(feature = "tomb", target_os = "linux"))]
 pub use self::tomb::TombMatcher;
+#[cfg(feature = "totp")]
+pub use self::totp::TotpMatcher;
 
 use clap::ArgMatches;
 

@@ -18,8 +18,8 @@ impl CmdHousekeeping {
             .arg_required_else_help(true)
             .subcommand_required(true)
             .subcommand_value_name("ACTION")
-            .subcommand(recrypt::CmdRecrypt::build())
             .subcommand(run::CmdRun::build())
+            .subcommand(recrypt::CmdRecrypt::build())
             .subcommand(sync_keys::CmdSyncKeys::build())
             .arg(ArgStore::build())
     }

@@ -414,14 +414,7 @@ where
             Some(filter) => filter.to_lowercase(),
         };
 
-        // Return each secret matching the filter
-        for secret in self.inner.by_ref() {
-            if secret.name.to_lowercase().contains(&filter) {
-                return Some(secret);
-            }
-        }
-
-        None
+        self.inner.find(|secret| secret.name.to_lowercase().contains(&filter))
     }
 }
 

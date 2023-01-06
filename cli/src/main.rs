@@ -122,6 +122,11 @@ fn invoke_action(handler: &Handler) -> Result<()> {
         return action::tomb::Tomb::new(handler.matches()).invoke();
     }
 
+    #[cfg(feature = "totp")]
+    if handler.totp().is_some() {
+        return action::totp::Totp::new(handler.matches()).invoke();
+    }
+
     // Get the main matcher
     let matcher_main = MainMatcher::with(handler.matches()).unwrap();
     if !matcher_main.quiet() {

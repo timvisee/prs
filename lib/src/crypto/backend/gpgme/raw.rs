@@ -113,7 +113,7 @@ pub fn private_keys(context: &mut Context) -> Result<Vec<KeyId>> {
 /// Panics if the provides key does not look like a public key.
 pub fn import_key(context: &mut Context, key: &[u8]) -> Result<()> {
     // Assert we're importing a public key
-    let key_str = std::str::from_utf8(&key).expect("exported key is invalid UTF-8");
+    let key_str = std::str::from_utf8(key).expect("exported key is invalid UTF-8");
     assert!(
         !key_str.contains("PRIVATE KEY"),
         "imported key contains PRIVATE KEY, blocked to prevent accidentally leaked secret key"

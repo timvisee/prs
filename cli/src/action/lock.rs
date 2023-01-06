@@ -2,6 +2,7 @@ use std::process::Command;
 
 use anyhow::{anyhow, Result};
 use clap::ArgMatches;
+use prs_lib::util::git;
 use prs_lib::Store;
 use thiserror::Error;
 
@@ -35,19 +36,19 @@ impl<'a> Lock<'a> {
         // Attempt to lock Tomb
         #[cfg(all(feature = "tomb", target_os = "linux"))]
         if let Err(err) = tomb_lock(&store, &matcher_main) {
-            error::print_error(err.context("failed to close password store Tomb"));
+            error::print_error(Err::Close(err));
         }
 
         // Attempt to invalidate cached sudo credentials
         invalidate_sudo(&matcher_main);
 
-        // TODO: kill open persistent SSH sessions
+        // Drop open prs persistent SSH sessions
+        #[cfg(unix)]
+        drop_persistent_ssh(&store, &matcher_main);
 
         if !matcher_main.quiet() {
             eprintln!("Password store locked");
         }
-
-        // TODO: show warning if not using tomb on supported platform, metadata leakage
 
         Ok(())
     }
@@ -183,7 +184,7 @@ fn tomb_lock(store: &Store, matcher_main: &MainMatcher) -> Result<()> {
         error::print_error(err.context("failed to stop auto closing systemd timer, ignoring"));
     }
 
-    // TODO: slam tombs
+    // TODO: slam tombs if it is somehow still open
 
     Ok(())
 }
@@ -219,11 +220,27 @@ fn invalidate_sudo(matcher_main: &MainMatcher) {
     }
 }
 
+/// Drop any open prs persistent SSH sessions.
+#[cfg(unix)]
+fn drop_persistent_ssh(store: &Store, matcher_main: &MainMatcher) {
+    if !matcher_main.quiet() {
+        eprint!("Drop persistent SSH sessions: ");
+    }
+
+    // Kill any still open
+    git::kill_ssh_by_session(store);
+
+    if !matcher_main.quiet() {
+        eprintln!("ok");
+    }
+}
+
 #[derive(Debug, Error)]
 pub enum Err {
     #[error("failed to access password store")]
     Store(#[source] anyhow::Error),
 
+    #[cfg(all(feature = "tomb", target_os = "linux"))]
     #[error("failed to close password store tomb")]
     Close(#[source] anyhow::Error),
 }

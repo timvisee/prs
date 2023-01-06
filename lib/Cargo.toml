@@ -63,7 +63,7 @@ dirs-next = "2.0.0"
 
 [target.'cfg(unix)'.dependencies]
 nix = { version = "0.26.1", default-features = false, features = ["user", "signal"] }
-ofiles = { version = "0.2.0" }
+ofiles = "0.2.0"
 
 [dev-dependencies]
 quickcheck = { version = "1.0.3", default-features = false }

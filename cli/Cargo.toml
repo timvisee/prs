@@ -38,7 +38,7 @@ notify = ["notify-rust"]
 tomb = ["prs-lib/tomb", "bytesize",  "fs_extra", "regex"]
 
 # Option (default): TOTP token support
-totp = ["totp-rs", "linkify"]
+totp = ["totp-rs", "linkify", "qr2term"]
 
 ### Pluggable cryptography backends
 
@@ -87,6 +87,7 @@ regex = { version = "1.7.0", optional = true, default-features = false, features
 # TOTP support
 totp-rs = { version = "4.1", optional = true, default-features = false, features = ["otpauth", "steam"] }
 linkify = { version = "0.9", optional = true }
+qr2term = { version = "0.3.1", optional = true }
 
 # Clipboard support
 base64 = { version = "0.20.0", optional = true }

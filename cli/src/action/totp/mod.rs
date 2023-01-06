@@ -2,6 +2,7 @@
 pub mod copy;
 pub mod live;
 pub mod show;
+pub mod qr;
 
 use anyhow::Result;
 use clap::ArgMatches;
@@ -31,6 +32,10 @@ impl<'a> Totp<'a> {
 
         if matcher_totp.cmd_live().is_some() {
             return live::Live::new(self.cmd_matches).invoke();
+        }
+
+        if matcher_totp.cmd_qr().is_some() {
+            return qr::Qr::new(self.cmd_matches).invoke();
         }
 
         if matcher_totp.cmd_show().is_some() {

@@ -1,6 +1,7 @@
 #[cfg(feature = "clipboard")]
 pub mod copy;
 pub mod live;
+pub mod qr;
 pub mod show;
 
 use clap::ArgMatches;
@@ -24,6 +25,11 @@ impl<'a: 'b, 'b> TotpMatcher<'a> {
     /// Get the TOTP live sub command, if matched.
     pub fn cmd_live(&'a self) -> Option<live::LiveMatcher> {
         live::LiveMatcher::with(self.root)
+    }
+
+    /// Get the TOTP QR code sub command, if matched.
+    pub fn cmd_qr(&'a self) -> Option<qr::QrMatcher> {
+        qr::QrMatcher::with(self.root)
     }
 
     /// Get the TOTP show sub command, if matched.

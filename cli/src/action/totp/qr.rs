@@ -1,29 +1,24 @@
-use std::thread;
-use std::time::Duration;
-
 use anyhow::Result;
 use clap::ArgMatches;
 use prs_lib::{crypto::prelude::*, Store};
 use thiserror::Error;
 
-#[cfg(feature = "clipboard")]
-use crate::util::clipboard;
 #[cfg(all(feature = "tomb", target_os = "linux"))]
 use crate::util::tomb;
 use crate::{
     cmd::matcher::{
-        totp::{show::ShowMatcher, TotpMatcher},
+        totp::{qr::QrMatcher, TotpMatcher},
         MainMatcher, Matcher,
     },
     util::{secret, select, totp},
 };
 
-/// A TOTP show action.
-pub struct Show<'a> {
+/// A TOTP QR code action.
+pub struct Qr<'a> {
     cmd_matches: &'a ArgMatches,
 }
 
-impl<'a> Show<'a> {
+impl<'a> Qr<'a> {
     /// Construct a new init action.
     pub fn new(cmd_matches: &'a ArgMatches) -> Self {
         Self { cmd_matches }
@@ -34,7 +29,7 @@ impl<'a> Show<'a> {
         // Create the command matchers
         let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
         let matcher_totp = TotpMatcher::with(self.cmd_matches).unwrap();
-        let matcher_show = ShowMatcher::with(self.cmd_matches).unwrap();
+        let matcher_qr = QrMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(matcher_totp.store()).map_err(Err::Store)?;
         #[cfg(all(feature = "tomb", target_os = "linux"))]
@@ -49,16 +44,16 @@ impl<'a> Show<'a> {
         tomb::prepare_tomb(&mut tomb, &matcher_main).map_err(Err::Tomb)?;
 
         let secret =
-            select::store_select_secret(&store, matcher_show.query()).ok_or(Err::NoneSelected)?;
+            select::store_select_secret(&store, matcher_qr.query()).ok_or(Err::NoneSelected)?;
 
-        secret::print_name(matcher_show.query(), &secret, &store, matcher_main.quiet());
+        secret::print_name(matcher_qr.query(), &secret, &store, matcher_main.quiet());
 
         let mut plaintext = crate::crypto::context(&matcher_main)?
             .decrypt_file(&secret.path)
             .map_err(Err::Read)?;
 
         // Trim plaintext to property
-        if let Some(property) = matcher_show.property() {
+        if let Some(property) = matcher_qr.property() {
             plaintext = plaintext.property(property).map_err(Err::Property)?;
         }
 
@@ -66,38 +61,15 @@ impl<'a> Show<'a> {
         let totp = totp::find_token(&plaintext)
             .ok_or(Err::NoTotp)?
             .map_err(Err::Parse)?;
-        let token = totp.generate_current().map_err(Err::Totp)?;
-        let ttl = totp.ttl().map_err(Err::Totp)?;
+        let url = totp.generate_url();
 
-        // Copy to clipboard
-        #[cfg(feature = "clipboard")]
-        if matcher_show.copy() {
-            clipboard::plaintext_copy(
-                token.clone(),
-                true,
-                !matcher_main.force(),
-                !matcher_main.quiet(),
-                matcher_show
-                    .timeout()
-                    .unwrap_or(Ok(crate::CLIPBOARD_TIMEOUT))?,
-            )?;
+        // Print TOTP URL and QR code
+        if !matcher_main.quiet() {
+            print!("TOTP: ");
         }
-
-        totp::print_token(&token, matcher_main.quiet(), Some(ttl));
-
-        // Clear after timeout
-        if let Some(timeout) = matcher_show.timeout() {
-            let timeout = timeout?;
-            let mut lines = 2;
-
-            if matcher_main.verbose() {
-                lines += 2;
-                eprintln!();
-                eprint!("Clearing output in {} seconds...", timeout);
-            }
-
-            thread::sleep(Duration::from_secs(timeout));
-            eprint!("{}", ansi_escapes::EraseLines(lines));
+        println!("{}", url.unsecure_to_str().unwrap_or("?"));
+        if !matcher_main.quiet() {
+            qr2term::print_qr(url.unsecure_ref()).map_err(Err::Qr)?;
         }
 
         // Finalize tomb
@@ -132,6 +104,6 @@ pub enum Err {
     #[error("failed to parse TOTP secret")]
     Parse(#[source] anyhow::Error),
 
-    #[error("failed to generate TOTP token")]
-    Totp(#[source] anyhow::Error),
+    #[error("failed to generate and print QR code")]
+    Qr(#[source] qr2term::QrError),
 }

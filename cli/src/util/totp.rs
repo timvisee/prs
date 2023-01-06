@@ -130,6 +130,12 @@ impl Totp {
             .map_err(|e| Err::Time(e).into())
     }
 
+    /// Generate an URL for this TOTP secret.
+    pub fn generate_url(&self) -> Plaintext {
+        self.totp
+            .get_url().into()
+    }
+
     /// Give the ttl (in seconds) of the current token.
     pub fn ttl(&self) -> Result<u64> {
         self.totp.ttl().map_err(|e| Err::Time(e).into())

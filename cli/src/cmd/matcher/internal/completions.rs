@@ -47,8 +47,8 @@ impl<'a: 'b, 'b> CompletionsMatcher<'a> {
     /// The target directory to output the shell completion files to.
     pub fn output(&'a self) -> PathBuf {
         self.matches
-            .get_one("output")
-            .map(|v: &String| PathBuf::from(v))
+            .get_one::<String>("output")
+            .map(PathBuf::from)
             .unwrap_or_else(|| PathBuf::from("./"))
     }
 

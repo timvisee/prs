@@ -9,6 +9,9 @@ use thiserror::Error;
 use crate::cmd::matcher::{lock::LockMatcher, MainMatcher, Matcher};
 use crate::util::error;
 
+#[cfg(all(feature = "tomb", target_os = "linux"))]
+use prs_lib::tomb::{self, TombSettings};
+
 /// Lock password store action.
 pub struct Lock<'a> {
     cmd_matches: &'a ArgMatches,
@@ -195,9 +198,41 @@ fn tomb_lock(store: &Store, matcher_main: &MainMatcher) -> Result<()> {
         error::print_error(err.context("failed to stop auto closing systemd timer, ignoring"));
     }
 
-    // TODO: slam tombs if it is somehow still open
+    // If the Tomb is still open, slam all open Tombs
+    if tomb.is_open().unwrap_or(false) {
+        tomb_slam(matcher_main)?;
+    }
 
     Ok(())
+}
+
+/// Attempt to slam Tombs.
+#[cfg(all(feature = "tomb", target_os = "linux"))]
+fn tomb_slam(matcher_main: &MainMatcher) -> Result<()> {
+    let tomb_settings = TombSettings {
+        quiet: matcher_main.quiet(),
+        verbose: matcher_main.verbose(),
+        force: matcher_main.force(),
+    };
+
+    // Slam open tombs
+    if !matcher_main.quiet() {
+        eprint!("Slam Tombs: ");
+    }
+    match tomb::slam(tomb_settings) {
+        Err(err) => {
+            if !matcher_main.quiet() {
+                eprintln!("FAIL");
+            }
+            Err(Err::Slam(err).into())
+        }
+        Ok(_) => {
+            if !matcher_main.quiet() {
+                eprintln!("ok");
+            }
+            Ok(())
+        }
+    }
 }
 
 /// Attempt to invalidate cached sudo credentials that are still active.
@@ -254,4 +289,8 @@ pub enum Err {
     #[cfg(all(feature = "tomb", target_os = "linux"))]
     #[error("failed to close password store tomb")]
     Close(#[source] anyhow::Error),
+
+    #[cfg(all(feature = "tomb", target_os = "linux"))]
+    #[error("failed to slam open tombs")]
+    Slam(#[source] anyhow::Error),
 }

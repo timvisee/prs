@@ -111,6 +111,11 @@ pub fn tomb_close(tomb_file: &Path, settings: TombSettings) -> Result<()> {
     )
 }
 
+/// Invoke tomb slam.
+pub fn tomb_slam(settings: TombSettings) -> Result<()> {
+    tomb(&["slam"], settings)
+}
+
 /// Invoke tomb resize.
 pub fn tomb_resize(
     tomb_file: &Path,

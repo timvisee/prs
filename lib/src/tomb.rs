@@ -8,7 +8,7 @@ use anyhow::{anyhow, Result};
 use thiserror::Error;
 
 use crate::crypto::Proto;
-use crate::tomb_bin::TombSettings;
+pub use crate::tomb_bin::TombSettings;
 use crate::util;
 use crate::{systemd_bin, tomb_bin, Key, Store};
 
@@ -103,6 +103,14 @@ impl<'a> Tomb<'a> {
         util::git::kill_ssh_by_session(self.store);
 
         tomb_bin::tomb_close(&tomb, self.settings)
+    }
+
+    /// Slam all open tombs.
+    ///
+    /// Warning: this may be dangerous and could have unwanted side effects. This also closes
+    /// non-password Tombs and kills all programs using it.
+    pub fn slam(&self) -> Result<()> {
+        tomb_bin::tomb_slam(self.settings)
     }
 
     /// Prepare a Tomb store for usage.
@@ -323,6 +331,15 @@ impl<'a> Tomb<'a> {
     }
 }
 
+/// Slam all open tombs.
+///
+/// Warning: this may be dangerous and could have unwanted side effects. This also closes
+/// non-password Tombs and kills all programs using it.
+pub fn slam(settings: TombSettings) -> Result<()> {
+    tomb_bin::tomb_slam(settings).map_err(Err::Slam)?;
+    Ok(())
+}
+
 /// Holds information for password store Tomb sizes.
 #[derive(Debug, Copy, Clone)]
 pub struct TombSize {
@@ -377,6 +394,9 @@ pub enum Err {
 
     #[error("failed to resize password store tomb through tomb CLI")]
     Resize(#[source] anyhow::Error),
+
+    #[error("failed to slam all open tombs through tomb CLI")]
+    Slam(#[source] anyhow::Error),
 
     #[error("failed to change permissions to current user for tomb mountpoint")]
     Chown(#[source] anyhow::Error),

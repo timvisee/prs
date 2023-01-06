@@ -6,31 +6,31 @@ use prs_lib::util::git;
 use prs_lib::Store;
 use thiserror::Error;
 
-use crate::cmd::matcher::{lock::LockMatcher, MainMatcher, Matcher};
+use crate::cmd::matcher::{slam::SlamMatcher, MainMatcher, Matcher};
 use crate::util::error;
 
 #[cfg(all(feature = "tomb", target_os = "linux"))]
 use prs_lib::tomb::{self, TombSettings};
 
-/// Lock password store action.
-pub struct Lock<'a> {
+/// Slam password store action.
+pub struct Slam<'a> {
     cmd_matches: &'a ArgMatches,
 }
 
-impl<'a> Lock<'a> {
-    /// Construct a new lock action.
+impl<'a> Slam<'a> {
+    /// Construct a new slam action.
     pub fn new(cmd_matches: &'a ArgMatches) -> Self {
         Self { cmd_matches }
     }
 
-    /// Invoke the lock action.
+    /// Invoke the slam action.
     pub fn invoke(&self) -> Result<()> {
         // Create the command matchers
         let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
-        let matcher_lock = LockMatcher::with(self.cmd_matches).unwrap();
+        let matcher_slam = SlamMatcher::with(self.cmd_matches).unwrap();
 
         // Attempt to open store for some locking operations
-        let store = match Store::open(matcher_lock.store()) {
+        let store = match Store::open(matcher_slam.store()) {
             Ok(store) => Some(store),
             Err(err) => {
                 error::print_error(Err::Store(err).into());

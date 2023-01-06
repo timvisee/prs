@@ -2,10 +2,10 @@ use clap::Command;
 
 use crate::cmd::arg::{ArgStore, CmdArg};
 
-/// The lock command definition.
-pub struct CmdLock;
+/// The slam command definition.
+pub struct CmdSlam;
 
-impl CmdLock {
+impl CmdSlam {
     pub fn build() -> Command {
         Command::new("slam")
             .alias("lock")

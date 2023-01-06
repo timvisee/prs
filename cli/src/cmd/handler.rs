@@ -3,6 +3,15 @@ use clap::{Arg, ArgAction, ArgMatches, Command};
 use super::matcher::{self, Matcher};
 use super::subcmd;
 
+/// Custom template for help
+const HELP_TEMPLATE: &str = "\
+{before-help}{name} {version}
+{author-with-newline}{about-with-newline}
+{usage-heading} {usage}
+
+{all-args}{after-help}
+";
+
 /// CLI argument handler.
 pub struct Handler {
     /// The CLI matches.
@@ -17,6 +26,7 @@ impl<'a> Handler {
             .version(crate_version!())
             .author(crate_authors!())
             .about(crate_description!())
+            .help_template(HELP_TEMPLATE)
             .arg(
                 Arg::new("force")
                     .long("force")

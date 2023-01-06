@@ -145,6 +145,7 @@ build-x86_64-windows:
     - windows
   only:
     - master
+    - /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
   needs: []
   variables:
     TARGET: x86_64-pc-windows-msvc
@@ -221,6 +222,7 @@ package-docker:
     - docker:dind
   only:
     - master
+    - /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
   variables:
     TARGET: x86_64-unknown-linux-musl
     IMAGE_NAME: prs:$CI_COMMIT_SHA
@@ -256,7 +258,7 @@ release-gitlab-generic-package:
     - build-x86_64-linux-musl
     - build-x86_64-windows
   only:
-    - /^v(\d+\.)*\d+$/
+    - /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
   variables:
     LINUX_GNU_BIN: "prs-x86_64-unknown-linux-gnu"
     LINUX_GNU_BIN_GTK_COPY: "prs-gtk3-copy-x86_64-unknown-linux-gnu"
@@ -286,7 +288,7 @@ release-gitlab-release:
   image: registry.gitlab.com/gitlab-org/release-cli
   stage: release
   only:
-    - /^v(\d+\.)*\d+$/
+    - /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
   variables:
     LINUX_GNU_BIN: "prs-x86_64-unknown-linux-gnu"
     LINUX_GNU_BIN_GTK_COPY: "prs-gtk3-copy-x86_64-unknown-linux-gnu"
@@ -312,7 +314,7 @@ release-gitlab-release:
 release-github:
   stage: release
   only:
-    - /^v(\d+\.)*\d+$/
+    - /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
   dependencies:
     - build-x86_64-linux-gnu
     - build-x86_64-linux-musl
@@ -341,7 +343,7 @@ release-crate:
   stage: release
   dependencies: []
   only:
-    - /^v(\d+\.)*\d+$/
+    - /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
   before_script: []
   script:
     - echo "Creating release crate to publish on crates.io..."
@@ -363,7 +365,7 @@ release-docker:
     - linux
     - docker
   only:
-    - /^v(\d+\.)*\d+$/
+    - /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
   dependencies:
     - package-docker
   services:
@@ -397,7 +399,7 @@ release-docker-hub:
     - linux
     - docker
   only:
-    - /^v(\d+\.)*\d+$/
+    - /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
   dependencies:
     - package-docker
   services:
@@ -428,7 +430,7 @@ release-aur:
   image: archlinux
   stage: release
   only:
-    - /^v(\d+\.)*\d+$/
+    - /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
   timeout: 1h 30m
   before_script: []
   script:

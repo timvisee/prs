@@ -156,12 +156,31 @@ pub fn print_main_info(matcher_main: &MainMatcher) -> ! {
     eprintln!();
 
     if let Some(store) = store {
+        #[cfg(not(all(feature = "tomb", target_os = "linux")))]
+        let has_closed_tomb = false;
+        #[cfg(all(feature = "tomb", target_os = "linux"))]
+        let has_closed_tomb = {
+            let tomb = store.tomb(
+                !matcher_main.verbose(),
+                matcher_main.verbose(),
+                matcher_main.force(),
+            );
+            tomb.is_tomb() && !tomb.is_open().unwrap_or(true)
+        };
+
+        // Hint tomb open command
+        if has_closed_tomb {
+            eprintln!("Open password store Tomb:");
+            eprintln!("    {}", style::highlight(&format!("{} tomb open", bin)));
+            eprintln!();
+        }
+
         // Hint user to add ourselves as recipient if it doesn't have recipient we own
         let we_own_any_recipient = store
             .recipients()
             .and_then(|recip| prs_lib::crypto::recipients::contains_own_secret_key(&recip))
             .unwrap_or(false);
-        if !we_own_any_recipient {
+        if !has_closed_tomb && !we_own_any_recipient {
             let config = crate::crypto::config(matcher_main);
             let system_has_secret = prs_lib::crypto::util::has_private_key(&config).unwrap_or(true);
             if system_has_secret {
@@ -184,7 +203,7 @@ pub fn print_main_info(matcher_main: &MainMatcher) -> ! {
 
         // Hint show/copy commands if user has secret
         let has_secret = store.secret_iter().next().is_some();
-        if has_secret {
+        if has_closed_tomb || has_secret {
             #[cfg(not(feature = "clipboard"))]
             eprintln!("Show a secret:");
             #[cfg(feature = "clipboard")]
@@ -196,7 +215,7 @@ pub fn print_main_info(matcher_main: &MainMatcher) -> ! {
         }
 
         // Hint add/edit/remove commands if store has recipient we own
-        if we_own_any_recipient {
+        if has_closed_tomb || we_own_any_recipient {
             eprintln!("Generate, add, edit or remove secrets:");
             eprintln!(
                 "    {}",
@@ -212,14 +231,16 @@ pub fn print_main_info(matcher_main: &MainMatcher) -> ! {
         }
 
         // Hint about sync
-        if has_sync {
-            eprintln!("Sync your password store:");
-            eprintln!("    {}", style::highlight(&format!("{} sync", bin)));
-            eprintln!();
-        } else {
-            eprintln!("Enable sync for your password store:");
-            eprintln!("    {}", style::highlight(&format!("{} sync init", bin)));
-            eprintln!();
+        if !has_closed_tomb {
+            if has_sync {
+                eprintln!("Sync your password store:");
+                eprintln!("    {}", style::highlight(&format!("{} sync", bin)));
+                eprintln!();
+            } else {
+                eprintln!("Enable sync for your password store:");
+                eprintln!("    {}", style::highlight(&format!("{} sync init", bin)));
+                eprintln!();
+            }
         }
     } else {
         eprintln!("Initialize a new password store or clone an existing one:");

@@ -13,7 +13,7 @@ impl CmdSlam {
             .alias("shut")
             .alias("emergency")
             .alias("sos")
-            .about("Aggresively lock password store & keys preventing access (emergency)")
+            .about("Aggressively lock password store & keys preventing access (emergency)")
             .arg(ArgStore::build())
     }
 }

@@ -16,7 +16,7 @@ makedepends=('cargo' 'python')
 optdepends=('tomb: password store Tomb support')
 source=("$url/-/archive/v$pkgver/$pkgname-v$pkgver.tar.gz")
 sha512sums=('__SHA512SUM__')
-_prs_cli_features=alias,clipboard,notify,backend-gpgme,select-skim-bin,tomb
+_prs_cli_features=alias,clipboard,notify,backend-gpgme,select-skim-bin,tomb,totp
 
 prepare() {
     cd "prs-v$pkgver"

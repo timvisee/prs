@@ -6,9 +6,7 @@ use prs_lib::{store::SecretIterConfig, Secret, Store};
 use text_trees::{FormatCharacters, StringTreeNode, TreeFormatting};
 use thiserror::Error;
 
-#[cfg(all(feature = "tomb", target_os = "linux"))]
-use crate::cmd::matcher::MainMatcher;
-use crate::cmd::matcher::{list::ListMatcher, Matcher};
+use crate::cmd::matcher::{MainMatcher, list::ListMatcher, Matcher};
 #[cfg(all(feature = "tomb", target_os = "linux"))]
 use crate::util::tomb;
 
@@ -26,7 +24,6 @@ impl<'a> List<'a> {
     /// Invoke the list action.
     pub fn invoke(&self) -> Result<()> {
         // Create the command matchers
-        #[cfg(all(feature = "tomb", target_os = "linux"))]
         let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
         let matcher_list = ListMatcher::with(self.cmd_matches).unwrap();
 

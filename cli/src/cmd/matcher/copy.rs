@@ -2,7 +2,7 @@ use anyhow::Result;
 use clap::ArgMatches;
 
 use super::Matcher;
-use crate::cmd::arg::{ArgProperty, ArgQuery, ArgStore, ArgTimeout, CmdArgOption};
+use crate::cmd::arg::{ArgProperty, ArgQuery, ArgTimeout, CmdArgOption};
 
 /// The copy command matcher.
 pub struct CopyMatcher<'a> {
@@ -23,11 +23,6 @@ impl<'a: 'b, 'b> CopyMatcher<'a> {
     /// Clipboard timeout in seconds.
     pub fn timeout(&self) -> Result<u64> {
         ArgTimeout::value_or_default(self.matches)
-    }
-
-    /// The store.
-    pub fn store(&self) -> String {
-        ArgStore::value(self.matches)
     }
 
     /// The selected property.

@@ -27,10 +27,10 @@ impl<'a> Slam<'a> {
     pub fn invoke(&self) -> Result<()> {
         // Create the command matchers
         let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
-        let matcher_slam = SlamMatcher::with(self.cmd_matches).unwrap();
+        let _matcher_slam = SlamMatcher::with(self.cmd_matches).unwrap();
 
         // Attempt to open store for some locking operations
-        let store = match Store::open(matcher_slam.store()) {
+        let store = match Store::open(matcher_main.store()) {
             Ok(store) => Some(store),
             Err(err) => {
                 error::print_error(Err::Store(err).into());

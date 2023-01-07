@@ -27,7 +27,7 @@ impl<'a> Clone<'a> {
         let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
         let matcher_clone = CloneMatcher::with(self.cmd_matches).unwrap();
 
-        let path = matcher_clone.store();
+        let path = matcher_main.store();
         let path = shellexpand::full(&path).map_err(Err::ExpandPath)?;
 
         util::fs::ensure_dir_free(Path::new(path.as_ref()))?;

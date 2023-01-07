@@ -2,7 +2,7 @@ use anyhow::Result;
 use clap::ArgMatches;
 
 use super::Matcher;
-use crate::cmd::arg::{ArgProperty, ArgQuery, ArgStore, ArgTimeout, CmdArgOption};
+use crate::cmd::arg::{ArgProperty, ArgQuery, ArgTimeout, CmdArgOption};
 
 /// The show command matcher.
 pub struct ShowMatcher<'a> {
@@ -18,11 +18,6 @@ impl<'a: 'b, 'b> ShowMatcher<'a> {
     /// The secret query.
     pub fn query(&self) -> Option<String> {
         ArgQuery::value(self.matches)
-    }
-
-    /// The store.
-    pub fn store(&self) -> String {
-        ArgStore::value(self.matches)
     }
 
     /// Show timeout in seconds.

@@ -6,8 +6,6 @@ pub mod remove;
 
 use clap::Command;
 
-use crate::cmd::arg::{ArgStore, CmdArg};
-
 /// The recipients command definition.
 pub struct CmdRecipients;
 
@@ -28,6 +26,5 @@ impl CmdRecipients {
             .subcommand(list::CmdList::build())
             .subcommand(remove::CmdRemove::build())
             .subcommand(export::CmdExport::build())
-            .arg(ArgStore::build())
     }
 }

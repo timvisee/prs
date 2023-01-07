@@ -6,14 +6,12 @@ pub mod remove;
 
 use clap::ArgMatches;
 
-use crate::cmd::arg::{ArgStore, CmdArgOption};
-
 use super::Matcher;
 
 /// The recipients matcher.
 pub struct RecipientsMatcher<'a> {
     root: &'a ArgMatches,
-    matches: &'a ArgMatches,
+    _matches: &'a ArgMatches,
 }
 
 impl<'a: 'b, 'b> RecipientsMatcher<'a> {
@@ -41,16 +39,11 @@ impl<'a: 'b, 'b> RecipientsMatcher<'a> {
     pub fn cmd_remove(&'a self) -> Option<remove::RemoveMatcher> {
         remove::RemoveMatcher::with(self.root)
     }
-
-    /// The store.
-    pub fn store(&self) -> String {
-        ArgStore::value(self.matches)
-    }
 }
 
 impl<'a> Matcher<'a> for RecipientsMatcher<'a> {
     fn with(root: &'a ArgMatches) -> Option<Self> {
         root.subcommand_matches("recipients")
-            .map(|matches| RecipientsMatcher { root, matches })
+            .map(|matches| RecipientsMatcher { root, _matches: matches })
     }
 }

@@ -25,9 +25,9 @@ impl<'a> Init<'a> {
     pub fn invoke(&self) -> Result<()> {
         // Create the command matchers
         let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
-        let matcher_init = InitMatcher::with(self.cmd_matches).unwrap();
+        let _matcher_init = InitMatcher::with(self.cmd_matches).unwrap();
 
-        let path = shellexpand::full(&matcher_init.store())
+        let path = shellexpand::full(&matcher_main.store())
             .map_err(Err::ExpandPath)?
             .to_string();
 

@@ -7,12 +7,11 @@ pub mod status;
 use clap::ArgMatches;
 
 use super::Matcher;
-use crate::cmd::arg::{ArgStore, CmdArgOption};
 
 /// The tomb command matcher.
 pub struct TombMatcher<'a> {
     root: &'a ArgMatches,
-    matches: &'a ArgMatches,
+    _matches: &'a ArgMatches,
 }
 
 impl<'a: 'b, 'b> TombMatcher<'a> {
@@ -40,16 +39,11 @@ impl<'a: 'b, 'b> TombMatcher<'a> {
     pub fn cmd_resize(&'a self) -> Option<resize::ResizeMatcher> {
         resize::ResizeMatcher::with(self.root)
     }
-
-    /// The store.
-    pub fn store(&self) -> String {
-        ArgStore::value(self.matches)
-    }
 }
 
 impl<'a> Matcher<'a> for TombMatcher<'a> {
     fn with(root: &'a ArgMatches) -> Option<Self> {
         root.subcommand_matches("tomb")
-            .map(|matches| TombMatcher { root, matches })
+            .map(|matches| TombMatcher { root, _matches: matches })
     }
 }

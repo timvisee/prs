@@ -1,6 +1,6 @@
 use clap::Command;
 
-use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, ArgQuery, ArgStore, CmdArg};
+use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, ArgQuery, CmdArg};
 
 /// The remove command definition.
 pub struct CmdRemove;
@@ -14,7 +14,6 @@ impl CmdRemove {
             .alias("yeet")
             .about("Remove a secret")
             .arg(ArgQuery::build())
-            .arg(ArgStore::build())
             .arg(ArgAllowDirty::build())
             .arg(ArgNoSync::build())
     }

@@ -1,6 +1,7 @@
 use clap::ArgMatches;
 
 use super::Matcher;
+use crate::cmd::arg::{ArgStore, CmdArgOption};
 
 /// The main command matcher.
 pub struct MainMatcher<'a> {
@@ -31,6 +32,11 @@ impl<'a: 'b, 'b> MainMatcher<'a> {
     /// Check whether verbose mode is used.
     pub fn verbose(&self) -> bool {
         self.matches.get_count("verbose") > 0
+    }
+
+    /// The store.
+    pub fn store(&self) -> String {
+        ArgStore::value(self.matches)
     }
 
     /// Check whether to use GPG in TTY mode.

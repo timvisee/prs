@@ -24,10 +24,10 @@ impl<'a> Status<'a> {
     pub fn invoke(&self) -> Result<()> {
         // Create the command matchers
         let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
-        let matcher_tomb = TombMatcher::with(self.cmd_matches).unwrap();
+        let _matcher_tomb = TombMatcher::with(self.cmd_matches).unwrap();
         let matcher_status = StatusMatcher::with(self.cmd_matches).unwrap();
 
-        let store = Store::open(matcher_tomb.store()).map_err(Err::Store)?;
+        let store = Store::open(matcher_main.store()).map_err(Err::Store)?;
         let tomb = store.tomb(
             !matcher_main.verbose(),
             matcher_main.verbose(),

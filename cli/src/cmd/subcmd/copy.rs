@@ -1,6 +1,6 @@
 use clap::{Arg, Command};
 
-use crate::cmd::arg::{ArgProperty, ArgQuery, ArgStore, ArgTimeout, CmdArg};
+use crate::cmd::arg::{ArgProperty, ArgQuery, ArgTimeout, CmdArg};
 
 /// The copy command definition.
 pub struct CmdCopy;
@@ -23,7 +23,6 @@ impl CmdCopy {
             )
             .arg(ArgQuery::build())
             .arg(ArgTimeout::build())
-            .arg(ArgStore::build())
             .arg(ArgProperty::build().conflicts_with("all"))
     }
 }

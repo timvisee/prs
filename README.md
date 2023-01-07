@@ -716,6 +716,7 @@ Options:
   -q, --quiet        Produce output suitable for logging and automation
   -v, --verbose...   Enable verbose information and logging
       --gpg-tty      Instruct GPG to ask passphrase in TTY rather than pinentry
+  -s, --store <PATH>  Password store to use [env: PASSWORD_STORE_DIR]
   -h, --help         Print help information
   -V, --version      Print version information
 ```

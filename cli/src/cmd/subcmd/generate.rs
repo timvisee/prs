@@ -2,7 +2,7 @@ use clap::{Arg, Command};
 
 #[cfg(feature = "clipboard")]
 use crate::cmd::arg::ArgTimeout;
-use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, ArgStore, CmdArg};
+use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, CmdArg};
 
 /// The generate command definition.
 pub struct CmdGenerate;
@@ -70,7 +70,6 @@ impl CmdGenerate {
                     .num_args(0)
                     .help("Display secret after generation"),
             )
-            .arg(ArgStore::build())
             .arg(ArgAllowDirty::build())
             .arg(ArgNoSync::build());
 

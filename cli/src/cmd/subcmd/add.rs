@@ -1,6 +1,6 @@
 use clap::{Arg, Command};
 
-use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, ArgStore, CmdArg};
+use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, CmdArg};
 
 /// The add command definition.
 pub struct CmdAdd;
@@ -32,7 +32,6 @@ impl CmdAdd {
                     .help("Read secret from stdin, do not open editor")
                     .conflicts_with("empty"),
             )
-            .arg(ArgStore::build())
             .arg(ArgAllowDirty::build())
             .arg(ArgNoSync::build())
     }

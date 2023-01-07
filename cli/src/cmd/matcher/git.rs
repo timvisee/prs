@@ -1,7 +1,6 @@
 use clap::{parser::ValuesRef, ArgMatches};
 
 use super::Matcher;
-use crate::cmd::arg::{ArgStore, CmdArgOption};
 
 /// The git command matcher.
 pub struct GitMatcher<'a> {
@@ -15,11 +14,6 @@ impl<'a: 'b, 'b> GitMatcher<'a> {
             .get_many("COMMAND")
             .map(|c: ValuesRef<String>| c.map(|s| s.as_str()).collect::<Vec<_>>().join(" "))
             .unwrap_or_else(String::default)
-    }
-
-    /// The store.
-    pub fn store(&self) -> String {
-        ArgStore::value(self.matches)
     }
 }
 

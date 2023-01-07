@@ -47,7 +47,7 @@ impl<'a> Sync<'a> {
             return remote::Remote::new(self.cmd_matches).invoke();
         }
 
-        let store = Store::open(matcher_sync.store()).map_err(Err::Store)?;
+        let store = Store::open(matcher_main.store()).map_err(Err::Store)?;
         let sync = StoreSync::new(&store);
         #[cfg(all(feature = "tomb", target_os = "linux"))]
         let mut tomb = store.tomb(

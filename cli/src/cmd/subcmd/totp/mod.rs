@@ -6,8 +6,6 @@ pub mod qr;
 
 use clap::Command;
 
-use crate::cmd::arg::{ArgStore, CmdArg};
-
 /// The TOTP command definition.
 pub struct CmdTotp;
 
@@ -27,6 +25,5 @@ impl CmdTotp {
 
         cmd.subcommand(live::CmdLive::build())
             .subcommand(qr::CmdQr::build())
-            .arg(ArgStore::build())
     }
 }

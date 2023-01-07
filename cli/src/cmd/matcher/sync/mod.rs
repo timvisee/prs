@@ -4,7 +4,7 @@ pub mod remote;
 use clap::ArgMatches;
 
 use super::Matcher;
-use crate::cmd::arg::{ArgAllowDirty, ArgStore, CmdArgFlag, CmdArgOption};
+use crate::cmd::arg::{ArgAllowDirty, CmdArgFlag};
 
 /// The sync command matcher.
 pub struct SyncMatcher<'a> {
@@ -21,11 +21,6 @@ impl<'a: 'b, 'b> SyncMatcher<'a> {
     /// Get the sync remote sub command, if matched.
     pub fn cmd_remote(&'a self) -> Option<remote::RemoteMatcher> {
         remote::RemoteMatcher::with(self.root)
-    }
-
-    /// The store.
-    pub fn store(&self) -> String {
-        ArgStore::value(self.matches)
     }
 
     /// Whether to allow a dirty repository for syncing.

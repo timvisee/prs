@@ -1,5 +1,6 @@
 use clap::{Arg, ArgAction, ArgMatches, Command};
 
+use super::arg::{ArgStore, CmdArg};
 use super::matcher::{self, Matcher};
 use super::subcmd;
 
@@ -71,6 +72,7 @@ impl<'a> Handler {
                     .global(true)
                     .help("Enable verbose information and logging"),
             )
+            .arg(ArgStore::build())
             .arg(
                 Arg::new("gpg-tty")
                     .long("gpg-tty")

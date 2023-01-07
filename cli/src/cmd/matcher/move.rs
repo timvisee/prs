@@ -1,7 +1,7 @@
 use clap::ArgMatches;
 
 use super::Matcher;
-use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, ArgQuery, ArgStore, CmdArgFlag, CmdArgOption};
+use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, ArgQuery, CmdArgFlag, CmdArgOption};
 
 /// The move command matcher.
 pub struct MoveMatcher<'a> {
@@ -17,11 +17,6 @@ impl<'a: 'b, 'b> MoveMatcher<'a> {
     /// Secret destination.
     pub fn destination(&self) -> &String {
         self.matches.get_one("DEST").unwrap()
-    }
-
-    /// The store.
-    pub fn store(&self) -> String {
-        ArgStore::value(self.matches)
     }
 
     /// Whether to allow a dirty repository for syncing.

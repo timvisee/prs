@@ -1,7 +1,5 @@
 use clap::{Arg, Command};
 
-use crate::cmd::arg::{ArgStore, CmdArg};
-
 /// The clone command definition.
 pub struct CmdClone;
 
@@ -14,6 +12,5 @@ impl CmdClone {
                     .help("Remote git URL to clone from")
                     .required(true),
             )
-            .arg(ArgStore::build())
     }
 }

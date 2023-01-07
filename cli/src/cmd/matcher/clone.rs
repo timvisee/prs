@@ -1,7 +1,6 @@
 use clap::ArgMatches;
 
 use super::Matcher;
-use crate::cmd::arg::{ArgStore, CmdArgOption};
 
 /// The clone command matcher.
 pub struct CloneMatcher<'a> {
@@ -12,11 +11,6 @@ impl<'a: 'b, 'b> CloneMatcher<'a> {
     /// The git URL to clone from.
     pub fn git_url(&self) -> &String {
         self.matches.get_one("GIT_URL").unwrap()
-    }
-
-    /// The store.
-    pub fn store(&self) -> String {
-        ArgStore::value(self.matches)
     }
 }
 

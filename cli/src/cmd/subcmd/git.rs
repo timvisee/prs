@@ -1,7 +1,5 @@
 use clap::{Arg, Command};
 
-use crate::cmd::arg::{ArgStore, CmdArg};
-
 /// The git command definition.
 pub struct CmdGit;
 
@@ -14,7 +12,6 @@ impl CmdGit {
                     .help("Git command to invoke")
                     .num_args(..),
             )
-            .arg(ArgStore::build())
             .trailing_var_arg(true)
     }
 }

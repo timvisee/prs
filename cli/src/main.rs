@@ -146,7 +146,7 @@ pub fn print_main_info(matcher_main: &MainMatcher) -> ! {
     let bin = util::bin_name();
 
     // Attempt to load default store
-    let store = Store::open(prs_lib::STORE_DEFAULT_ROOT).ok();
+    let store = Store::open(matcher_main.store()).ok();
     let has_sync = store.as_ref().map(|s| s.sync().is_init()).unwrap_or(false);
 
     // Print the main info

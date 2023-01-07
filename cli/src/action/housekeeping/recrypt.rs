@@ -32,10 +32,10 @@ impl<'a> Recrypt<'a> {
     pub fn invoke(&self) -> Result<()> {
         // Create the command matchers
         let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
-        let matcher_housekeeping = HousekeepingMatcher::with(self.cmd_matches).unwrap();
+        let _matcher_housekeeping = HousekeepingMatcher::with(self.cmd_matches).unwrap();
         let matcher_recrypt = RecryptMatcher::with(self.cmd_matches).unwrap();
 
-        let store = Store::open(matcher_housekeeping.store()).map_err(Err::Store)?;
+        let store = Store::open(matcher_main.store()).map_err(Err::Store)?;
         #[cfg(all(feature = "tomb", target_os = "linux"))]
         let mut tomb = store.tomb(
             !matcher_main.verbose(),

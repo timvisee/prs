@@ -5,7 +5,7 @@ use clap::ArgMatches;
 use super::Matcher;
 #[cfg(feature = "clipboard")]
 use crate::cmd::arg::ArgTimeout;
-use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, ArgStore, CmdArgFlag, CmdArgOption};
+use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, CmdArgFlag};
 
 /// Default password length in characters.
 const PASSWORD_LENGTH: u16 = 24;
@@ -73,11 +73,6 @@ impl<'a: 'b, 'b> GenerateMatcher<'a> {
     /// Check whether to read from show.
     pub fn show(&self) -> bool {
         self.matches.get_flag("show")
-    }
-
-    /// The store.
-    pub fn store(&self) -> String {
-        ArgStore::value(self.matches)
     }
 
     /// Whether to allow a dirty repository for syncing.

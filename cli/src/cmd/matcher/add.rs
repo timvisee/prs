@@ -1,7 +1,7 @@
 use clap::ArgMatches;
 
 use super::Matcher;
-use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, ArgStore, CmdArgFlag, CmdArgOption};
+use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, CmdArgFlag};
 
 /// The add command matcher.
 pub struct AddMatcher<'a> {
@@ -22,11 +22,6 @@ impl<'a: 'b, 'b> AddMatcher<'a> {
     /// Check whether to read from stdin.
     pub fn stdin(&self) -> bool {
         self.matches.get_flag("stdin")
-    }
-
-    /// The store.
-    pub fn store(&self) -> String {
-        ArgStore::value(self.matches)
     }
 
     /// Whether to allow a dirty repository for syncing.

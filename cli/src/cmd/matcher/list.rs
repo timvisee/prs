@@ -1,7 +1,7 @@
 use clap::ArgMatches;
 
 use super::Matcher;
-use crate::cmd::arg::{ArgQuery, ArgStore, CmdArgOption};
+use crate::cmd::arg::{ArgQuery, CmdArgOption};
 
 /// The list command matcher.
 pub struct ListMatcher<'a> {
@@ -12,11 +12,6 @@ impl<'a: 'b, 'b> ListMatcher<'a> {
     /// The secret query.
     pub fn query(&self) -> Option<String> {
         ArgQuery::value(self.matches)
-    }
-
-    /// The store.
-    pub fn store(&self) -> String {
-        ArgStore::value(self.matches)
     }
 
     /// Whether to show as plain list.

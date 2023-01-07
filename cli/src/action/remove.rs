@@ -32,7 +32,7 @@ impl<'a> Remove<'a> {
         let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
         let matcher_remove = RemoveMatcher::with(self.cmd_matches).unwrap();
 
-        let store = Store::open(matcher_remove.store()).map_err(Err::Store)?;
+        let store = Store::open(matcher_main.store()).map_err(Err::Store)?;
         #[cfg(all(feature = "tomb", target_os = "linux"))]
         let mut tomb = store.tomb(
             !matcher_main.verbose(),

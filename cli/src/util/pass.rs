@@ -1,4 +1,8 @@
+use rand::Rng;
+
 use prs_lib::Plaintext;
+
+use crate::util::error;
 
 /// Character sets to use for password generation.
 ///
@@ -26,36 +30,32 @@ const PASSWORD_CHAR_SETS: [&str; 4] = [
 ///
 /// Panics if `len` is shorter than the number of sets in `PASSWORD_CHAR_SETS`.
 pub fn generate_password(len: u16) -> Plaintext {
-    assert!(
-        len as usize >= PASSWORD_CHAR_SETS.len(),
-        "password length shorter than character set count",
-    );
+    // Show warning if length if too short to cover all sets
+    let too_short = (len as usize) < PASSWORD_CHAR_SETS.len();
+    if too_short {
+        error::print_warning(format!("password length too short to use all character sets (should be at least {})", PASSWORD_CHAR_SETS.len()));
+    }
 
-    // Obtain cryptografically secure random source, build char dictionary
+    // Obtain secure random source, build char dictionary
     let mut rng = rand::thread_rng();
     let chars = PASSWORD_CHAR_SETS.join("");
 
+    // Build password until we have an accepted one
+    let mut pass = String::with_capacity(len as usize);
     loop {
-        // Sample random list of char set indices
-        let indices = rand::seq::index::sample(&mut rng, chars.len(), len as usize);
-
-        // Ensure we have at least one char index in all sets, retry otherwise
-        if !PASSWORD_CHAR_SETS
-            .iter()
-            .scan(0, |index, char_set| {
-                *index += char_set.len();
-                Some(*index - char_set.len()..*index)
-            })
-            .all(|range| indices.iter().any(|i| range.contains(&i)))
-        {
-            continue;
+        for _ in 0..len {
+            let c = rng.gen_range(0..chars.len());
+            let c = chars.chars().nth(c).unwrap();
+            pass.push(c);
         }
 
-        // Build password string
-        return indices
-            .into_iter()
-            .map(|i| chars.chars().nth(i).unwrap())
-            .collect::<String>()
-            .into();
+        // Ensure password covers all sets
+        if too_short || PASSWORD_CHAR_SETS.iter().all(|set| {
+            set.chars().any(|c| pass.contains(c))
+        }) {
+            return pass .into();
+        }
+
+        pass.truncate(0);
     }
 }

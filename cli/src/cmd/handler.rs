@@ -28,6 +28,7 @@ impl<'a> Handler {
             .author(crate_authors!())
             .about(crate_description!())
             .help_template(HELP_TEMPLATE)
+            .help_expected(true)
             .arg(
                 Arg::new("force")
                     .long("force")

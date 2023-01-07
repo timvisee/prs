@@ -1,6 +1,7 @@
 use anyhow::Result;
 use clap::ArgMatches;
 use prs_lib::Store;
+use prs_lib::sync::{Readyness, Sync as StoreSync};
 use thiserror::Error;
 
 use crate::cmd::matcher::{git::GitMatcher, MainMatcher, Matcher};
@@ -32,6 +33,7 @@ impl<'a> Git<'a> {
         let matcher_git = GitMatcher::with(self.cmd_matches).unwrap();
 
         let store = Store::open(matcher_main.store()).map_err(Err::Store)?;
+        let sync = StoreSync::new(&store);
         #[cfg(all(feature = "tomb", target_os = "linux"))]
         let mut tomb = store.tomb(
             !matcher_main.verbose(),
@@ -42,6 +44,11 @@ impl<'a> Git<'a> {
         // Prepare tomb
         #[cfg(all(feature = "tomb", target_os = "linux"))]
         tomb::prepare_tomb(&mut tomb, &matcher_main).map_err(Err::Tomb)?;
+
+        // Warn if sync is not configured
+        if sync.readyness().map(|r| r == Readyness::NoSync).unwrap_or(false) {
+            util::error::print_warning("sync not configured, store is not a git repository");
+        }
 
         #[allow(clippy::let_and_return)]
         let result = git(&store, matcher_git.command(), matcher_main.verbose());

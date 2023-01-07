@@ -238,7 +238,7 @@ impl<'a> Sync<'a> {
 /// Some states block sync usage, including:
 /// - Sync not initialized
 /// - Git repository is dirty
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq)]
 pub enum Readyness {
     /// Sync is not initialized for this store.
     NoSync,

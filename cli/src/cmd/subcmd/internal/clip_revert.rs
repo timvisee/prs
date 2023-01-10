@@ -9,6 +9,6 @@ impl CmdClipRevert {
     pub fn build() -> Command {
         Command::new("clip-revert")
             .about("Revert clipboard after timeout")
-            .arg(ArgTimeout::build())
+            .arg(ArgTimeout::build().required(true))
     }
 }

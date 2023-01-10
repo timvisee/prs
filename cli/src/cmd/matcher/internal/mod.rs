@@ -3,6 +3,8 @@ pub mod clip;
 #[cfg(feature = "clipboard")]
 pub mod clip_revert;
 pub mod completions;
+#[cfg(all(feature = "clipboard", feature = "totp"))]
+pub mod totp_recopy;
 
 use clap::ArgMatches;
 
@@ -30,6 +32,12 @@ impl<'a: 'b, 'b> InternalMatcher<'a> {
     /// Get the internal completions generator sub command, if matched.
     pub fn completions(&'a self) -> Option<completions::CompletionsMatcher> {
         completions::CompletionsMatcher::with(self.root)
+    }
+
+    /// Get the internal clipboard revert sub command, if matched.
+    #[cfg(all(feature = "clipboard", feature = "totp"))]
+    pub fn totp_recopy(&'a self) -> Option<totp_recopy::TotpRecopyMatcher> {
+        totp_recopy::TotpRecopyMatcher::with(self.root)
     }
 }
 

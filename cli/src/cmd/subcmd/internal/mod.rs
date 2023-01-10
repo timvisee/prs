@@ -3,6 +3,8 @@ pub mod clip;
 #[cfg(feature = "clipboard")]
 pub mod clip_revert;
 pub mod completions;
+#[cfg(all(feature = "clipboard", feature = "totp"))]
+pub mod totp_recopy;
 
 use clap::Command;
 
@@ -24,6 +26,11 @@ impl CmdInternal {
         {
             cmd = cmd.subcommand(clip::CmdClip::build())
                 .subcommand(clip_revert::CmdClipRevert::build());
+        }
+
+        #[cfg(all(feature = "clipboard", feature = "totp"))]
+        {
+            cmd = cmd.subcommand(totp_recopy::CmdTotpRecopy::build());
         }
 
         cmd

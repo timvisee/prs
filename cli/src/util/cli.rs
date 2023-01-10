@@ -1,3 +1,5 @@
+#[cfg(feature = "clipboard")]
+use std::process::Command;
 use std::io::{stderr, stdin, Write};
 
 use crate::cmd::matcher::MainMatcher;
@@ -120,4 +122,18 @@ fn derive_bool(input: &str) -> Option<bool> {
 
     // The answer could not be determined, return none
     None
+}
+
+/// Get the current command to spawn a subprocess.
+#[cfg(feature = "clipboard")]
+pub(crate) fn current_cmd() -> Option<Command> {
+    let current_exe = match std::env::current_exe() {
+        Ok(exe) => exe,
+        Err(_) => match std::env::args().next() {
+            Some(bin) => bin.into(),
+            None => return None,
+        },
+    };
+
+    Some(Command::new(current_exe))
 }

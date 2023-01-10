@@ -1,6 +1,9 @@
+use std::io::{Error as IoError, Write};
+use std::process::{Child, Stdio};
 use std::time::SystemTimeError;
 
 use anyhow::Result;
+use base64::Engine;
 use linkify::{LinkFinder, LinkKind};
 use prs_lib::Plaintext;
 use thiserror::Error;
@@ -46,11 +49,7 @@ fn find_otpauth_url(plaintext: &Plaintext) -> Option<Result<Totp>> {
     finder
         .links(plaintext.unsecure_to_str().unwrap())
         .filter(|l| l.as_str().starts_with(OTPAUTH_SCHEME))
-        .map(|l| {
-            TOTP::from_url_unchecked(l.as_str())
-                .map(|t| t.into())
-                .map_err(|e| Err::Url(e).into())
-        })
+        .map(|l| Totp::from_url(l.as_str()))
         .next()
 }
 
@@ -128,6 +127,13 @@ pub struct Totp {
 }
 
 impl Totp {
+    /// Construct a TOTP from the given TOTP URL.
+    pub fn from_url(url: &str) -> Result<Self> {
+        TOTP::from_url_unchecked(url)
+            .map(|t| t.into())
+            .map_err(|e| Err::Url(e).into())
+    }
+
     /// Generate a token from the current system time.
     pub fn generate_current(&self) -> Result<Plaintext> {
         self.totp
@@ -162,10 +168,50 @@ pub fn is_base32(material: &str) -> bool {
         .all(|c| ('A'..='Z').contains(&c) || ('2'..='7').contains(&c))
 }
 
+/// Copy the given data to the clipboard in a subprocess.
+/// Revert to the old data after the given timeout.
+#[cfg(feature = "clipboard")]
+pub(crate) fn spawn_process_totp_recopy(totp: &Totp, timeout_sec: u64) -> Result<Child> {
+    use super::cli;
+
+    // Spawn & disown background process to set clipboard
+    let mut process = cli::current_cmd()
+        .ok_or(Err::NoSubProcess)?
+        .args(["internal", "totp-recopy"])
+        .arg("--timeout")
+        .arg(&format!("{}", timeout_sec))
+        .stdin(Stdio::piped())
+        .spawn()
+        .map_err(Err::SpawnProcess)?;
+
+    // Send data to copy to process
+    writeln!(
+        process.stdin.as_mut().unwrap(),
+        "{}",
+        base64::engine::general_purpose::STANDARD
+            .encode(totp.generate_url().unsecure_to_str().unwrap()),
+    )
+    .map_err(Err::ConfigProcess)?;
+
+    Ok(process)
+}
+
 #[derive(Debug, Error)]
 pub enum Err {
     #[error("invalid TOTP secret URL")]
     Url(#[source] totp_rs::TotpUrlError),
+
+    #[cfg(feature = "clipboard")]
+    #[error("failed to use clipboard, no way to spawn subprocess for clipboard manager, must run as standalone binary")]
+    NoSubProcess,
+
+    #[cfg(feature = "clipboard")]
+    #[error("failed to spawn subprocess for clipboard manager")]
+    SpawnProcess(#[source] IoError),
+
+    #[cfg(feature = "clipboard")]
+    #[error("failed to configure subprocess for clipboard manager")]
+    ConfigProcess(#[source] IoError),
 
     #[error("TOTP system time error")]
     Time(#[source] SystemTimeError),

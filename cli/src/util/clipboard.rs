@@ -1,5 +1,5 @@
 use std::io::{Error as IoError, ErrorKind as IoErrorKind, Write};
-use std::process::{Child, Command, Stdio};
+use std::process::{Child, Stdio};
 use std::sync::Mutex;
 use std::thread;
 use std::time::{Duration, Instant};
@@ -15,7 +15,10 @@ use notify_rust::Notification;
 use prs_lib::Plaintext;
 use thiserror::Error;
 
-use crate::util::error::{self, ErrorHintsBuilder};
+use crate::util::{
+    cli,
+    error::{self, ErrorHintsBuilder},
+};
 
 /// Delay for checking changed clipboard in `timeout_or_clip_change`.
 const TIMEOUT_CLIP_CHECK_DELAY: Duration = Duration::from_secs(3);
@@ -454,7 +457,7 @@ fn x11_set_blocking(data: &Plaintext) -> Result<()> {
 /// Copy the given data to the clipboard in a subprocess.
 fn spawn_process_copy(data: &Plaintext) -> Result<Child> {
     // Spawn & disown background process to set clipboard
-    let mut process = current_cmd()
+    let mut process = cli::current_cmd()
         .ok_or(Err::NoSubProcess)?
         .args(["internal", "clip"])
         .stdin(Stdio::piped())
@@ -480,7 +483,7 @@ fn spawn_process_copy_revert(
     timeout_sec: u64,
 ) -> Result<Child> {
     // Spawn & disown background process to set clipboard
-    let mut process = current_cmd()
+    let mut process = cli::current_cmd()
         .ok_or(Err::NoSubProcess)?
         .args(["internal", "clip-revert"])
         .arg("--timeout")
@@ -614,19 +617,6 @@ pub(crate) fn notify_cleared(changed: bool, restored: bool) -> Result<()> {
 /// Assumes no on failure.
 fn is_child_running(child: &mut Child) -> bool {
     matches!(child.try_wait(), Ok(None))
-}
-
-/// Get the current command to spawn a subprocess.
-fn current_cmd() -> Option<Command> {
-    let current_exe = match std::env::current_exe() {
-        Ok(exe) => exe,
-        Err(_) => match std::env::args().next() {
-            Some(bin) => bin.into(),
-            None => return None,
-        },
-    };
-
-    Some(Command::new(current_exe))
 }
 
 #[derive(Debug, Error)]

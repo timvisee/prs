@@ -1,11 +1,9 @@
-use std::time::{Duration, Instant};
-
 use anyhow::Result;
 use clap::ArgMatches;
 use prs_lib::{crypto::prelude::*, Store};
 use thiserror::Error;
 
-use crate::util::clipboard;
+use crate::util::{clipboard, error};
 #[cfg(all(feature = "tomb", target_os = "linux"))]
 use crate::util::tomb;
 use crate::{
@@ -60,68 +58,41 @@ impl<'a> Copy<'a> {
             plaintext = plaintext.property(property).map_err(Err::Property)?;
         }
 
-        // Get TOTP instance
+        // Get TOTP instance, determine timeout
         let totp = totp::find_token(&plaintext)
             .ok_or(Err::NoTotp)?
             .map_err(Err::Totp)?;
-
-        // Determine until time based on timeout
         let timeout = matcher_copy
             .timeout()
             .unwrap_or(Ok(crate::CLIPBOARD_TIMEOUT))?;
-        let until = Instant::now() + Duration::from_secs(timeout);
 
-        // Keep recopying chaning token until the copy timeout is reached
-        loop {
-            // Calculate remaining timeout time, get current TOTP TTL
-            let remaining_timeout = until.duration_since(std::time::Instant::now());
-            let token = totp.generate_current().map_err(Err::Totp)?;
-            let ttl = totp.ttl().map_err(Err::Totp)?;
+        let mut copied = false;
 
-            // Keep clipboard timeout within timeout remaining and current toeken TTL if recopying
-            let clip_timeout = if !matcher_copy.no_recopy() {
-                ttl.min(remaining_timeout.as_secs() + 1)
-            } else {
-                timeout
-            };
+        // Use background token recopy implementation if token changes within timeout
+        let ttl = totp.ttl().map_err(Err::Totp)?;
+        if timeout > ttl && !matcher_copy.no_recopy() {
+            match totp::spawn_process_totp_recopy(&totp, timeout) {
+                Ok(_) => {
+                    if !matcher_main.quiet() {
+                        eprintln!("Token copied to clipboard. Clearing after {} seconds...", timeout);
+                    }
+                    copied = true;
+                },
+                Err(err) => error::print_error(Err::Recopy(err).into()),
+            }
+        }
+
+        // Fall back to simply copy
+        if !copied {
             clipboard::copy_plaintext(
-                token.clone(),
+                totp.generate_current().map_err(Err::Totp)?,
                 false,
-                !matcher_main.force(),
+                true,
                 false,
-                clip_timeout,
+                timeout,
             )?;
-
-            // We're done looping if remaining timeout is less than token TTL or we don't recopy
-            let ttl_duration = Duration::from_secs(ttl);
-            let done = matcher_copy.no_recopy() || remaining_timeout <= ttl_duration;
-
-            // Report if not quiet
             if !matcher_main.quiet() {
-                if done {
-                    eprintln!(
-                        "Token copied to clipboard. Clearing after {} seconds...",
-                        clip_timeout
-                    );
-                } else {
-                    eprintln!(
-                        "Token copied to clipboard. Recopying changing token after {} seconds...",
-                        clip_timeout,
-                    );
-                }
-            }
-
-            // Break if done or wait for TTL for next loop
-            if done {
-                break;
-            }
-
-            // Wait for timeout, stop if clipboard was changed
-            if clipboard::timeout_or_clip_change(&token, ttl_duration) {
-                if !matcher_main.quiet() {
-                    eprintln!("Clipboard changed, TOTP copy stopped");
-                }
-                break;
+                eprintln!("Token copied to clipboard. Clearing after {} seconds...", timeout);
             }
         }
 
@@ -156,4 +127,7 @@ pub enum Err {
 
     #[error("failed to generate TOTP token")]
     Totp(#[source] anyhow::Error),
+
+    #[error("failed to use TOTP recopy system, falling back to simple copy")]
+    Recopy(#[source] anyhow::Error),
 }

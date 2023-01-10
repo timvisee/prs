@@ -3,6 +3,8 @@ pub mod clip;
 #[cfg(feature = "clipboard")]
 pub mod clip_revert;
 pub mod completions;
+#[cfg(all(feature = "clipboard", feature = "totp"))]
+pub mod totp_recopy;
 
 use anyhow::Result;
 use clap::ArgMatches;
@@ -37,6 +39,11 @@ impl<'a> Internal<'a> {
 
         if matcher_internal.completions().is_some() {
             return completions::Completions::new(self.cmd_matches).invoke();
+        }
+
+        #[cfg(all(feature = "clipboard", feature = "totp"))]
+        if matcher_internal.totp_recopy().is_some() {
+            return totp_recopy::TotpRecopy::new(self.cmd_matches).invoke();
         }
 
         // Unreachable, clap will print help for missing sub command instead

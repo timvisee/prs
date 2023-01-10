@@ -2,7 +2,7 @@ fn main() {
     // Crypto features warning
     #[cfg(not(any(feature = "backend-gnupg-bin", feature = "backend-gpgme")))]
     {
-        println!("cargo:warning=prs-lib: no crypto backend selected, you must set any of the following features: backend-gnupg-bin, backend-gpgme");
+        compile_error!("no crypto backend selected, must set any of these features: backend-gnupg-bin, backend-gpgme");
     }
 
     // GPG cryptography

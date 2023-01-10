@@ -38,13 +38,11 @@ impl<'a> TotpRecopy<'a> {
         drop(Plaintext::from(buffer));
 
         // Determine until time based on timeout
-        let timeout = matcher_totp_recopy
-            .timeout()
-            .unwrap_or(crate::CLIPBOARD_TIMEOUT);
+        let timeout = matcher_totp_recopy.timeout().unwrap();
         let until = Instant::now() + Duration::from_secs(timeout);
 
         // Keep recopying chaning token until the copy timeout is reached
-        loop {
+        while until > Instant::now() {
             // Calculate remaining timeout time, get current TOTP TTL
             let remaining_timeout = until.duration_since(std::time::Instant::now());
             let token = totp.generate_current().map_err(Err::Totp)?;
@@ -56,16 +54,11 @@ impl<'a> TotpRecopy<'a> {
                 false,
                 !matcher_main.force(),
                 false,
-                remaining_timeout.as_secs(),
+                remaining_timeout.as_secs() + 1,
             )?;
 
-            // We're done looping if remaining timeout is less than token TTL or we don't recopy
-            let ttl_duration = Duration::from_secs(ttl);
-            if remaining_timeout <= ttl_duration {
-                break;
-            }
-
             // Wait for timeout, stop if clipboard was changed
+            let ttl_duration = Duration::from_secs(ttl);
             if clipboard::timeout_or_clip_change(&token, ttl_duration) {
                 if matcher_main.verbose() {
                     eprintln!("Clipboard changed, TOTP copy stopped");

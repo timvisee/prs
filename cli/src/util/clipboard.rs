@@ -524,6 +524,7 @@ pub(crate) fn subprocess_copy_revert(
     data: &Plaintext,
     data_old: &Plaintext,
     timeout: Duration,
+    quiet: bool,
 ) -> Result<()> {
     set(data, false, false).map_err(Err::Set)?;
 
@@ -532,9 +533,13 @@ pub(crate) fn subprocess_copy_revert(
 
     // Revert clipboard to previous if contents didn't change
     if changed {
-        notify_cleared(true, false).map_err(Err::Notify)?;
+        if !quiet {
+            notify_cleared(true, false).map_err(Err::Notify)?;
+        }
     } else if &get().map_err(Err::Get)? == data {
-        notify_cleared(false, !data_old.is_empty()).map_err(Err::Notify)?;
+        if !quiet {
+            notify_cleared(false, !data_old.is_empty()).map_err(Err::Notify)?;
+        }
         set(data_old, true, true).map_err(Err::Revert)?;
     }
 

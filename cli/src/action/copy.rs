@@ -53,7 +53,7 @@ impl<'a> Copy<'a> {
             plaintext = plaintext.first_line()?;
         }
 
-        clipboard::plaintext_copy(
+        clipboard::copy_plaintext(
             plaintext,
             false,
             !matcher_main.force(),

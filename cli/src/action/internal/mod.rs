@@ -1,4 +1,6 @@
 #[cfg(feature = "clipboard")]
+pub mod clip;
+#[cfg(feature = "clipboard")]
 pub mod clip_revert;
 pub mod completions;
 
@@ -22,6 +24,11 @@ impl<'a> Internal<'a> {
     pub fn invoke(&self) -> Result<()> {
         // Create the command matcher
         let matcher_internal = InternalMatcher::with(self.cmd_matches).unwrap();
+
+        #[cfg(feature = "clipboard")]
+        if matcher_internal.clip().is_some() {
+            return clip::Clip::new(self.cmd_matches).invoke();
+        }
 
         #[cfg(feature = "clipboard")]
         if matcher_internal.clip_revert().is_some() {

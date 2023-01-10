@@ -58,7 +58,7 @@ impl<'a> Show<'a> {
         // Copy to clipboard
         #[cfg(feature = "clipboard")]
         if matcher_show.copy() {
-            clipboard::plaintext_copy(
+            clipboard::copy_plaintext(
                 plaintext.clone(),
                 true,
                 !matcher_main.force(),

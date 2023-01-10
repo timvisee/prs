@@ -1,4 +1,6 @@
 #[cfg(feature = "clipboard")]
+pub mod clip;
+#[cfg(feature = "clipboard")]
 pub mod clip_revert;
 pub mod completions;
 
@@ -20,7 +22,8 @@ impl CmdInternal {
 
         #[cfg(feature = "clipboard")]
         {
-            cmd = cmd.subcommand(clip_revert::CmdClipRevert::build());
+            cmd = cmd.subcommand(clip::CmdClip::build())
+                .subcommand(clip_revert::CmdClipRevert::build());
         }
 
         cmd

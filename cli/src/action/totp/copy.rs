@@ -1,4 +1,3 @@
-use std::thread;
 use std::time::{Duration, Instant};
 
 use anyhow::Result;
@@ -6,7 +5,6 @@ use clap::ArgMatches;
 use prs_lib::{crypto::prelude::*, Store};
 use thiserror::Error;
 
-#[cfg(feature = "clipboard")]
 use crate::util::clipboard;
 #[cfg(all(feature = "tomb", target_os = "linux"))]
 use crate::util::tomb;
@@ -77,6 +75,7 @@ impl<'a> Copy<'a> {
         loop {
             // Calculate remaining timeout time, get current TOTP TTL
             let remaining_timeout = until.duration_since(std::time::Instant::now());
+            let token = totp.generate_current().map_err(Err::Totp)?;
             let ttl = totp.ttl().map_err(Err::Totp)?;
 
             // Keep clipboard timeout within timeout remaining and current toeken TTL if recopying
@@ -85,8 +84,8 @@ impl<'a> Copy<'a> {
             } else {
                 timeout
             };
-            clipboard::plaintext_copy(
-                totp.generate_current().map_err(Err::Totp)?,
+            clipboard::copy_plaintext(
+                token.clone(),
                 false,
                 !matcher_main.force(),
                 false,
@@ -115,8 +114,14 @@ impl<'a> Copy<'a> {
             // Break if done or wait for TTL for next loop
             if done {
                 break;
-            } else {
-                thread::sleep(ttl_duration);
+            }
+
+            // Wait for timeout, stop if clipboard was changed
+            if clipboard::timeout_or_clip_change(&token, ttl_duration) {
+                if !matcher_main.quiet() {
+                    eprintln!("Clipboard changed, TOTP copy stopped");
+                }
+                break;
             }
         }
 

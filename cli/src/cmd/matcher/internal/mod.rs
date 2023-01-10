@@ -1,4 +1,6 @@
 #[cfg(feature = "clipboard")]
+pub mod clip;
+#[cfg(feature = "clipboard")]
 pub mod clip_revert;
 pub mod completions;
 
@@ -13,6 +15,12 @@ pub struct InternalMatcher<'a> {
 }
 
 impl<'a: 'b, 'b> InternalMatcher<'a> {
+    /// Get the internal clipboard sub command, if matched.
+    #[cfg(feature = "clipboard")]
+    pub fn clip(&'a self) -> Option<clip::ClipMatcher> {
+        clip::ClipMatcher::with(self.root)
+    }
+
     /// Get the internal clipboard revert sub command, if matched.
     #[cfg(feature = "clipboard")]
     pub fn clip_revert(&'a self) -> Option<clip_revert::ClipRevertMatcher> {

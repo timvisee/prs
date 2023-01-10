@@ -1,10 +1,10 @@
 use std::io;
-use std::thread;
 use std::time::Duration;
 
 use anyhow::Result;
 use base64::Engine;
 use clap::ArgMatches;
+use prs_lib::Plaintext;
 use thiserror::Error;
 
 use crate::cmd::matcher::{internal::clip_revert::ClipRevertMatcher, MainMatcher, Matcher};
@@ -27,34 +27,30 @@ impl<'a> ClipRevert<'a> {
         let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
         let matcher_clip_revert = ClipRevertMatcher::with(self.cmd_matches).unwrap();
 
-        // Remember current clipboard contents, fetch previous contents
-        let current = clipboard::get().map_err(Err::Current)?;
-        let mut previous = None;
-        if matcher_clip_revert.previous_base64_stdin() {
-            let mut buffer = String::new();
-            io::stdin().read_line(&mut buffer)?;
-            previous = base64::engine::general_purpose::STANDARD
-                .decode(buffer.trim())
-                .ok();
-        }
+        // Grab clipboard data from stdin
+        let mut buffer = String::new();
+        io::stdin().read_line(&mut buffer)?;
+        let (a, b) = buffer.split_once(',').ok_or(Err::Data(None))?;
+        let (data, data_old) = (
+            base64::engine::general_purpose::STANDARD
+                .decode(a.trim())
+                .map_err(|err| Err::Data(Some(err)))?
+                .into(),
+            base64::engine::general_purpose::STANDARD
+                .decode(b.trim())
+                .map_err(|err| Err::Data(Some(err)))?
+                .into(),
+        );
+        drop(Plaintext::from(buffer));
 
-        // Wait for timeout
-        let timeout = matcher_clip_revert.timeout().unwrap();
-        if timeout > 0 {
-            thread::sleep(Duration::from_secs(timeout));
-        }
+        let timeout = Duration::from_secs(matcher_clip_revert.timeout().unwrap());
 
-        // Revert clipboard to previous if contents didn't change
-        if current == clipboard::get().map_err(Err::Current)? {
-            clipboard::set(previous.as_deref().unwrap_or(&[])).map_err(Err::Revert)?;
-        }
+        // Set clipboard contents
+        clipboard::subprocess_copy_revert(&data, &data_old, timeout).map_err(Err::CopyRevert)?;
 
         if matcher_main.verbose() {
-            eprintln!("Clipboard cleared");
+            eprintln!("Clipboard reverted");
         }
-
-        // Notify user about cleared clipboard
-        clipboard::notify_cleared().map_err(Err::Notify)?;
 
         Ok(())
     }
@@ -62,12 +58,9 @@ impl<'a> ClipRevert<'a> {
 
 #[derive(Debug, Error)]
 pub enum Err {
-    #[error("failed to get current clipboard contents")]
-    Current(#[source] anyhow::Error),
+    #[error("failed to obtain clipboard content from stdin, malformed data")]
+    Data(#[source] Option<base64::DecodeError>),
 
-    #[error("failed to revert clipboard")]
-    Revert(#[source] anyhow::Error),
-
-    #[error("failed to notify user for cleared clipboard")]
-    Notify(#[source] anyhow::Error),
+    #[error("failed to copy and revert clipboard contents")]
+    CopyRevert(#[source] anyhow::Error),
 }

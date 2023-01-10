@@ -118,7 +118,7 @@ impl<'a> Generate<'a> {
             // Quietly copy generated password to clipboard before editing
             #[cfg(feature = "clipboard")]
             if matcher_generate.copy() {
-                clipboard::plaintext_copy(
+                clipboard::copy_plaintext(
                     plaintext.clone(),
                     true,
                     !matcher_main.force(),
@@ -156,7 +156,7 @@ impl<'a> Generate<'a> {
         // Copy to clipboard after editing
         #[cfg(feature = "clipboard")]
         if matcher_generate.copy() {
-            clipboard::plaintext_copy(
+            clipboard::copy_plaintext(
                 plaintext.clone(),
                 true,
                 !matcher_main.force(),

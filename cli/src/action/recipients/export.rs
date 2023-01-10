@@ -3,7 +3,7 @@ use std::io::Write;
 
 use anyhow::Result;
 use clap::ArgMatches;
-use prs_lib::{crypto::prelude::*, Store};
+use prs_lib::{Plaintext, crypto::prelude::*, Store};
 use thiserror::Error;
 
 use crate::cmd::matcher::{
@@ -52,14 +52,14 @@ impl<'a> Export<'a> {
             .clone();
 
         // Export public key
-        let data = crate::crypto::context(&matcher_main)?.export_key(key)?;
+        let data = Plaintext::from(crate::crypto::context(&matcher_main)?.export_key(key)?);
 
         let mut stdout = true;
 
         // Output to file
         if let Some(path) = matcher_export.output_file() {
             stdout = false;
-            fs::write(path, &data).map_err(Err::Output)?;
+            fs::write(path, data.unsecure_ref()).map_err(Err::Output)?;
             if !matcher_main.quiet() {
                 eprintln!("Key exported to: {}", path);
             }
@@ -69,11 +69,11 @@ impl<'a> Export<'a> {
         #[cfg(feature = "clipboard")]
         if matcher_export.copy() {
             stdout = false;
-            clipboard::set(&data).map_err(Err::Clipboard)?;
+            clipboard::copy(&data, matcher_main.verbose()).map_err(Err::Clipboard)?;
         }
 
         if stdout {
-            std::io::stdout().write_all(&data).map_err(Err::Output)?;
+            std::io::stdout().write_all(data.unsecure_ref()).map_err(Err::Output)?;
         }
 
         // Finalize tomb

@@ -681,7 +681,7 @@ See a list of compatible `pass` clients [here][pass-compatible-clients].
 ```
 $ prs help
 
-prs-cli 0.4.0
+prs-cli 0.4.1
 Tim Visee <3a4fb3964f@sinenomine.email>
 Secure, fast & convenient password manager CLI with GPG & git sync
 
@@ -698,6 +698,7 @@ Commands:
   move          Move a secret
   remove        Remove a secret
   list          List all secrets
+  grep          Grep all secrets
   init          Initialize new password store
   clone         Clone existing password store
   sync          Sync password store

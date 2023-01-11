@@ -1,6 +1,13 @@
 # Changelog
 
-## 0.4.0 (2023-01-06)
+## 0.4.1 (2023-01-11)
+- Add `grep` command to search secret contents
+- Add `search` alias for `list`
+- Add `pwgen` alias for `generate`
+- Show progress bar in long tasks such as `housekeeping recrypt` and `grep`
+- Show descriptive compiler error when required features aren't selected
+
+## 0.4.0 (2023-01-07)
 - Reorder commands in help output to show the most useful commands first
 - Add TOTP token support for handling two factor authentication codes
 - Add support for Steam TOTP tokens

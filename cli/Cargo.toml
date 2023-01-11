@@ -110,3 +110,7 @@ copypasta-ext = { version = "0.3.9", optional = true, default-features = false, 
 # Interactive selection with skim on unix platforms
 [target.'cfg(unix)'.dependencies]
 skim = { version = "0.10.2", optional = true, default-features = false }
+
+# Directory logic on Windows
+[target.'cfg(windows)'.dependencies]
+dirs-next = "2.0.0"

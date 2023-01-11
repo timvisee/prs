@@ -2009,6 +2009,7 @@ dependencies = [
  "colored",
  "copypasta-ext",
  "derive_builder 0.12.0",
+ "dirs-next",
  "edit",
  "fs_extra",
  "indicatif",

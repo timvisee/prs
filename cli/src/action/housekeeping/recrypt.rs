@@ -14,7 +14,11 @@ use crate::{
         housekeeping::{recrypt::RecryptMatcher, HousekeepingMatcher},
         MainMatcher, Matcher,
     },
-    util::{self, error, style, sync},
+    util::{
+        self, error,
+        progress::{self, ProgressBarExt},
+        style, sync,
+    },
 };
 
 /// A housekeeping recrypt action.
@@ -83,28 +87,30 @@ pub fn recrypt_all(store: &Store, matcher_main: &MainMatcher) -> Result<()> {
 pub fn recrypt(store: &Store, secrets: &[Secret], matcher_main: &MainMatcher) -> Result<()> {
     let mut context = crate::crypto::context(matcher_main)?;
     let recipients = store.recipients().map_err(Err::Store)?;
-    let len = secrets.len();
 
     let mut failed = Vec::new();
 
-    for (i, secret) in secrets.iter().enumerate() {
-        if matcher_main.verbose() {
-            eprintln!("[{}/{}] Re-encrypting: {}", i + 1, len, secret.name);
-        }
+    // Progress bar
+    let pb = progress::progress_bar(secrets.len() as u64, matcher_main.quiet());
+
+    for secret in secrets.iter() {
+        pb.set_message_trunc(&secret.name);
 
         // Recrypt secret, show status, remember errors
-        match recrypt_single(&mut context, secret, &recipients) {
-            Ok(_) => {
-                if !matcher_main.quiet() {
-                    eprintln!("[{}/{}] Re-encrypted: {}", i + 1, len, secret.name);
-                }
-            }
-            Err(err) => {
-                eprintln!("[{}/{}] Re-encrypting failed: {}", i + 1, len, secret.name);
-                error::print_error(err.context("recrypting failed"));
-                failed.push(secret);
-            }
+        if let Err(err) = recrypt_single(&mut context, secret, &recipients) {
+            error::print_error(err.context(format!("recrypting failed: {}", secret.name)));
+            failed.push(secret);
         }
+
+        pb.inc(1);
+    }
+
+    pb.finish_and_clear();
+
+    // Show success message if any is recrypted
+    let recrypted = secrets.len() - failed.len();
+    if !matcher_main.quiet() && recrypted > 0 {
+        eprintln!("Re-encrypted {} of {} secrets", recrypted, secrets.len());
     }
 
     // Show recrypt failures

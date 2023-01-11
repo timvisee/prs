@@ -5,6 +5,7 @@ pub mod edit;
 pub mod error;
 pub mod fs;
 pub mod pass;
+pub mod progress;
 pub mod secret;
 pub mod select;
 pub mod select_basic;

@@ -9,9 +9,12 @@ use regex::Regex;
 use thiserror::Error;
 
 use crate::cmd::matcher::{grep::GrepMatcher, MainMatcher, Matcher};
-use crate::util::error;
 #[cfg(all(feature = "tomb", target_os = "linux"))]
 use crate::util::tomb;
+use crate::util::{
+    error,
+    progress::{self, ProgressBarExt},
+};
 
 /// Grep secrets action.
 pub struct Grep<'a> {
@@ -81,7 +84,6 @@ fn grep(
     matcher_grep: &GrepMatcher,
 ) -> Result<()> {
     let mut context = crate::crypto::context(matcher_main)?;
-    let len = secrets.len();
     let (mut found, mut failed) = (0, 0);
 
     // Parse regex if enabled
@@ -91,10 +93,11 @@ fn grep(
         None
     };
 
-    for (i, secret) in secrets.iter().enumerate() {
-        if matcher_main.verbose() {
-            eprintln!("[{}/{}] Re-encrypting: {}", i + 1, len, secret.name);
-        }
+    // Progress bar
+    let pb = progress::progress_bar(secrets.len() as u64, matcher_main.quiet());
+
+    for secret in secrets.iter() {
+        pb.set_message_trunc(&secret.name);
 
         // Parse normally or with regex
         let result = match &regex {
@@ -105,7 +108,7 @@ fn grep(
         // Grep single secret
         match result {
             Ok(true) => {
-                println!("{}", secret.name);
+                pb.println_always(&secret.name);
                 found += 1;
             }
             Ok(false) => {}
@@ -114,7 +117,11 @@ fn grep(
                 failed += 1;
             }
         }
+
+        pb.inc(1);
     }
+
+    pb.finish_and_clear();
 
     if !matcher_main.quiet() {
         if found > 0 {

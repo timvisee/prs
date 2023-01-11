@@ -122,7 +122,8 @@ impl<'a> Generate<'a> {
                     plaintext.clone(),
                     true,
                     !matcher_main.force(),
-                    !matcher_main.verbose(),
+                    matcher_main.quiet(),
+                    matcher_main.verbose(),
                     matcher_generate.timeout()?,
                 )?;
             }
@@ -160,7 +161,8 @@ impl<'a> Generate<'a> {
                 plaintext.clone(),
                 true,
                 !matcher_main.force(),
-                !matcher_main.quiet(),
+                matcher_main.quiet(),
+                matcher_main.verbose(),
                 matcher_generate.timeout()?,
             )?;
         }

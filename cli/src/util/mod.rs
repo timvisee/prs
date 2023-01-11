@@ -1,6 +1,7 @@
 pub mod cli;
 #[cfg(feature = "clipboard")]
 pub mod clipboard;
+pub mod cmd;
 pub mod edit;
 pub mod error;
 pub mod fs;

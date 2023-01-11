@@ -172,10 +172,10 @@ pub fn is_base32(material: &str) -> bool {
 /// Revert to the old data after the given timeout.
 #[cfg(feature = "clipboard")]
 pub(crate) fn spawn_process_totp_recopy(totp: &Totp, timeout_sec: u64) -> Result<Child> {
-    use super::cli;
+    use super::cmd;
 
     // Spawn & disown background process to set clipboard
-    let mut process = cli::current_cmd()
+    let mut process = cmd::current_cmd()
         .ok_or(Err::NoSubProcess)?
         .args(["internal", "totp-recopy"])
         .arg("--timeout")

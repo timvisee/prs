@@ -73,7 +73,8 @@ impl<'a> Show<'a> {
                 token.clone(),
                 true,
                 !matcher_main.force(),
-                !matcher_main.quiet(),
+                matcher_main.quiet(),
+                matcher_main.verbose(),
                 matcher_show
                     .timeout()
                     .unwrap_or(Ok(crate::CLIPBOARD_TIMEOUT))?,

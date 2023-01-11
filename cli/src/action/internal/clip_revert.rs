@@ -46,7 +46,14 @@ impl<'a> ClipRevert<'a> {
         let timeout = Duration::from_secs(matcher_clip_revert.timeout().unwrap());
 
         // Set clipboard contents
-        clipboard::subprocess_copy_revert(&data, &data_old, timeout, matcher_main.quiet()).map_err(Err::CopyRevert)?;
+        clipboard::subprocess_copy_revert(
+            &data,
+            &data_old,
+            timeout,
+            matcher_main.quiet(),
+            matcher_main.verbose(),
+        )
+        .map_err(Err::CopyRevert)?;
 
         if matcher_main.verbose() {
             eprintln!("Clipboard reverted");

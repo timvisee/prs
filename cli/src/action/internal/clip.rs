@@ -23,7 +23,7 @@ impl<'a> Clip<'a> {
     /// Invoke the clipboard action.
     pub fn invoke(&self) -> Result<()> {
         // Create the command matchers
-        let _matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
+        let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
         let _matcher_clip = ClipMatcher::with(self.cmd_matches).unwrap();
 
         // Grab clipboard data from stdin
@@ -36,7 +36,8 @@ impl<'a> Clip<'a> {
         drop(Plaintext::from(buffer));
 
         // Set clipboard contents
-        clipboard::subprocess_copy(&data).map_err(Err::Clip)?;
+        clipboard::subprocess_copy(&data, matcher_main.quiet(), matcher_main.verbose())
+            .map_err(Err::Clip)?;
         Ok(())
     }
 }

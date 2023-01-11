@@ -16,7 +16,7 @@ use prs_lib::Plaintext;
 use thiserror::Error;
 
 use crate::util::{
-    cli,
+    cmd::{self, CommandExt},
     error::{self, ErrorHintsBuilder},
 };
 
@@ -42,13 +42,18 @@ lazy_static! {
 }
 
 /// Copy the given data to the clipboard.
-pub(crate) fn copy(data: &Plaintext, report: bool) -> Result<()> {
-    CLIP_MANAGER.copy(data, report)
+pub(crate) fn copy(data: &Plaintext, quiet: bool, verbose: bool) -> Result<()> {
+    CLIP_MANAGER.copy(data, quiet, verbose)
 }
 
 /// Copy the given data to the clipboard, revert clipboard state after timeout.
-pub(crate) fn copy_timeout_revert(data: Plaintext, timeout: Duration, report: bool) -> Result<()> {
-    CLIP_MANAGER.copy_timeout_revert(data, timeout, report)
+pub(crate) fn copy_timeout_revert(
+    data: Plaintext,
+    timeout: Duration,
+    quiet: bool,
+    verbose: bool,
+) -> Result<()> {
+    CLIP_MANAGER.copy_timeout_revert(data, timeout, quiet, verbose)
 }
 
 /// Copy the given plain text to the user clipboard.
@@ -56,7 +61,8 @@ pub(crate) fn copy_plaintext(
     mut plaintext: Plaintext,
     first_line: bool,
     error_empty: bool,
-    report: bool,
+    quiet: bool,
+    verbose: bool,
     timeout: u64,
 ) -> Result<()> {
     if first_line {
@@ -72,7 +78,7 @@ pub(crate) fn copy_plaintext(
     }
 
     // Copy with timeout
-    copy_timeout_revert(plaintext, Duration::from_secs(timeout), report)
+    copy_timeout_revert(plaintext, Duration::from_secs(timeout), quiet, verbose)
         .map_err(Err::CopySecret)?;
     Ok(())
 }
@@ -163,15 +169,15 @@ struct ClipManager {
 
 impl ClipManager {
     /// Copy the given data to the clipboard without reverting.
-    pub fn copy(&self, data: &Plaintext, report: bool) -> Result<()> {
+    pub fn copy(&self, data: &Plaintext, quiet: bool, verbose: bool) -> Result<()> {
         // Stop any current clipboard without reverting
         if let Some(clip) = self.clip.lock().unwrap().take() {
             clip.stop_no_revert();
         }
 
-        set(data, true, false).map_err(Err::Set)?;
+        set(data, true, false, quiet, verbose).map_err(Err::Set)?;
 
-        if report {
+        if !quiet {
             eprintln!("Secret copied to clipboard");
         }
 
@@ -183,11 +189,12 @@ impl ClipManager {
         &self,
         data: Plaintext,
         timeout: Duration,
-        report: bool,
+        quiet: bool,
+        verbose: bool,
     ) -> Result<()> {
         let mut clip_guard = self.clip.lock().unwrap();
 
-        if report {
+        if !quiet {
             eprintln!(
                 "Secret copied to clipboard. Clearing after {} seconds...",
                 timeout.as_secs(),
@@ -197,13 +204,14 @@ impl ClipManager {
         // If the temporary clipboard is still active, we should replace it
         if let Some(clip) = &mut *clip_guard {
             if clip.is_active() {
-                clip.replace(data, timeout).map_err(Err::ClipMan)?;
+                clip.replace(data, timeout, quiet, verbose)
+                    .map_err(Err::ClipMan)?;
                 return Ok(());
             }
         }
 
         // Create new clip session
-        *clip_guard = Some(TempClip::new(data, timeout).map_err(Err::ClipMan)?);
+        *clip_guard = Some(TempClip::new(data, timeout, quiet, verbose).map_err(Err::ClipMan)?);
 
         Ok(())
     }
@@ -232,29 +240,35 @@ impl TempClip {
     ///
     /// Copy the given data for the given timeout, then revert the clipboard.
     /// This internally spawns a subprocess to handle the timeout and reversal.
-    pub fn new(data: Plaintext, timeout: Duration) -> Result<Self> {
+    pub fn new(data: Plaintext, timeout: Duration, quiet: bool, verbose: bool) -> Result<Self> {
         let mut session = Self {
             data,
             old_data: get()?,
             process: None,
             timeout_until: Instant::now() + timeout,
         };
-        session.spawn(timeout)?;
+        session.spawn(timeout, quiet, verbose)?;
         Ok(session)
     }
 
     /// Replace the contents of this clipboard session and reset the timeout.
     ///
     /// This keeps the original clipboard state intact but respawns the timeout and reversal subprocess.
-    pub fn replace(&mut self, data: Plaintext, timeout: Duration) -> Result<()> {
+    pub fn replace(
+        &mut self,
+        data: Plaintext,
+        timeout: Duration,
+        quiet: bool,
+        verbose: bool,
+    ) -> Result<()> {
         self.data = data;
         self.timeout_until = Instant::now() + timeout;
-        self.spawn(timeout)?;
+        self.spawn(timeout, quiet, verbose)?;
         Ok(())
     }
 
     /// Spawn or respawn detached process to copy, timeout and revert.
-    fn spawn(&mut self, timeout: Duration) -> Result<()> {
+    fn spawn(&mut self, timeout: Duration, quiet: bool, verbose: bool) -> Result<()> {
         // Kill current child to spawn new process
         self.kill_child();
 
@@ -262,6 +276,8 @@ impl TempClip {
             &self.data,
             &self.old_data,
             timeout.as_secs(),
+            quiet,
+            verbose,
         )?);
         Ok(())
     }
@@ -327,22 +343,22 @@ impl TempClip {
         let current = match get() {
             Ok(data) => data,
             Err(_) => {
-                return set(&self.old_data, true, false);
+                return set(&self.old_data, true, false, true, false);
             }
         };
 
         // If current data is still copied, revert to original state or clear for security reasons
         if current == self.data {
             if !self.old_data.is_empty() {
-                return set(&self.old_data, true, false);
+                return set(&self.old_data, true, false, true, false);
             } else {
-                return set(&Plaintext::empty(), false, false);
+                return set(&Plaintext::empty(), false, false, true, false);
             }
         }
 
         // If current data is empty, revert to old content if that isn't empty
         if current.is_empty() && !self.old_data.is_empty() {
-            return set(&self.old_data, true, false);
+            return set(&self.old_data, true, false, true, false);
         }
 
         Ok(())
@@ -362,7 +378,13 @@ fn get() -> Result<Plaintext> {
 /// false, this spawns a subprocess to keep the clipboard non-blocking.
 ///
 /// On other display servers this will always set the clipboard forever.
-fn set(data: &Plaintext, forever: bool, forever_blocks: bool) -> Result<()> {
+fn set(
+    data: &Plaintext,
+    forever: bool,
+    forever_blocks: bool,
+    quiet: bool,
+    verbose: bool,
+) -> Result<()> {
     // Set clipboard forever using subprocess/blocking on X11/Wayland if this context is limited to binary
     // lifetime
     if forever && CLIP.has_bin_lifetime().unwrap_or(false) {
@@ -377,13 +399,13 @@ fn set(data: &Plaintext, forever: bool, forever_blocks: bool) -> Result<()> {
                 return Ok(());
             }
             Ok(Some(DisplayServer::Wayland)) if forever_blocks => {
-                set_blocking(data).map_err(Err::Set)?;
+                set_blocking(data, quiet, verbose).map_err(Err::Set)?;
                 return Ok(());
             }
             _ => {}
         }
 
-        return spawn_process_copy(data).map(|_| ());
+        return spawn_process_copy(data, quiet, verbose).map(|_| ());
     }
 
     // Set clipboard normally
@@ -399,12 +421,12 @@ fn set(data: &Plaintext, forever: bool, forever_blocks: bool) -> Result<()> {
     not(any(target_os = "macos", target_os = "android", target_os = "emscripten")),
     not(target_env = "musl")
 ))]
-fn set_blocking(data: &Plaintext) -> Result<()> {
+fn set_blocking(data: &Plaintext, quiet: bool, verbose: bool) -> Result<()> {
     const BASE: Duration = Duration::from_secs(2);
     const MAX_DELAY: Duration = Duration::from_secs(60);
 
     // Set clipboard
-    set(data, false, false)?;
+    set(data, false, false, quiet, verbose)?;
 
     // Spin until changed
     let mut delay = BASE;
@@ -455,10 +477,12 @@ fn x11_set_blocking(data: &Plaintext) -> Result<()> {
 }
 
 /// Copy the given data to the clipboard in a subprocess.
-fn spawn_process_copy(data: &Plaintext) -> Result<Child> {
+fn spawn_process_copy(data: &Plaintext, quiet: bool, verbose: bool) -> Result<Child> {
     // Spawn & disown background process to set clipboard
-    let mut process = cli::current_cmd()
+    let mut process = cmd::current_cmd()
         .ok_or(Err::NoSubProcess)?
+        .arg_if("--quiet", quiet)
+        .arg_if("--verbose", verbose)
         .args(["internal", "clip"])
         .stdin(Stdio::piped())
         .spawn()
@@ -468,7 +492,7 @@ fn spawn_process_copy(data: &Plaintext) -> Result<Child> {
     writeln!(
         process.stdin.as_mut().unwrap(),
         "{}",
-        base64::engine::general_purpose::STANDARD.encode(data.unsecure_ref())
+        base64::engine::general_purpose::STANDARD.encode(data.unsecure_ref()),
     )
     .map_err(Err::ConfigProcess)?;
 
@@ -481,10 +505,14 @@ fn spawn_process_copy_revert(
     data: &Plaintext,
     data_old: &Plaintext,
     timeout_sec: u64,
+    quiet: bool,
+    verbose: bool,
 ) -> Result<Child> {
     // Spawn & disown background process to set clipboard
-    let mut process = cli::current_cmd()
+    let mut process = cmd::current_cmd()
         .ok_or(Err::NoSubProcess)?
+        .arg_if("--quiet", quiet)
+        .arg_if("--verbose", verbose)
         .args(["internal", "clip-revert"])
         .arg("--timeout")
         .arg(&format!("{}", timeout_sec))
@@ -509,8 +537,8 @@ fn spawn_process_copy_revert(
 /// This should be called in the subprocess that is spawned with `spawn_process_copy`.
 ///
 /// Copies the given data to the clipboard.
-pub(crate) fn subprocess_copy(data: &Plaintext) -> Result<()> {
-    set(data, false, true).map_err(Err::Set)?;
+pub(crate) fn subprocess_copy(data: &Plaintext, quiet: bool, verbose: bool) -> Result<()> {
+    set(data, false, true, quiet, verbose).map_err(Err::Set)?;
     Ok(())
 }
 
@@ -525,8 +553,9 @@ pub(crate) fn subprocess_copy_revert(
     data_old: &Plaintext,
     timeout: Duration,
     quiet: bool,
+    verbose: bool,
 ) -> Result<()> {
-    set(data, false, false).map_err(Err::Set)?;
+    set(data, false, false, quiet, verbose).map_err(Err::Set)?;
 
     // Wait for timeout or until clipboard is changed
     let changed = timeout_or_clip_change(data, timeout);
@@ -540,7 +569,7 @@ pub(crate) fn subprocess_copy_revert(
         if !quiet {
             notify_cleared(false, !data_old.is_empty()).map_err(Err::Notify)?;
         }
-        set(data_old, true, true).map_err(Err::Revert)?;
+        set(data_old, true, true, quiet, verbose).map_err(Err::Revert)?;
     }
 
     Ok(())

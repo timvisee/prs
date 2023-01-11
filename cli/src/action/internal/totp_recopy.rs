@@ -53,7 +53,8 @@ impl<'a> TotpRecopy<'a> {
                 token.clone(),
                 false,
                 !matcher_main.force(),
-                false,
+                matcher_main.quiet(),
+                matcher_main.verbose(),
                 remaining_timeout.as_secs() + 1,
             )?;
 

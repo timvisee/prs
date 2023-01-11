@@ -57,7 +57,8 @@ impl<'a> Copy<'a> {
             plaintext,
             false,
             !matcher_main.force(),
-            !matcher_main.quiet(),
+            matcher_main.quiet(),
+            matcher_main.verbose(),
             matcher_copy.timeout()?,
         )?;
 

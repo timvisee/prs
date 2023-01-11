@@ -3,9 +3,9 @@ use clap::ArgMatches;
 use prs_lib::{crypto::prelude::*, Store};
 use thiserror::Error;
 
-use crate::util::{clipboard, error};
 #[cfg(all(feature = "tomb", target_os = "linux"))]
 use crate::util::tomb;
+use crate::util::{clipboard, error};
 use crate::{
     cmd::matcher::{
         totp::{copy::CopyMatcher, TotpMatcher},
@@ -74,10 +74,13 @@ impl<'a> Copy<'a> {
             match totp::spawn_process_totp_recopy(&totp, timeout) {
                 Ok(_) => {
                     if !matcher_main.quiet() {
-                        eprintln!("Token copied to clipboard. Clearing after {} seconds...", timeout);
+                        eprintln!(
+                            "Token copied to clipboard. Clearing after {} seconds...",
+                            timeout
+                        );
                     }
                     copied = true;
-                },
+                }
                 Err(err) => error::print_error(Err::Recopy(err).into()),
             }
         }
@@ -88,11 +91,15 @@ impl<'a> Copy<'a> {
                 totp.generate_current().map_err(Err::Totp)?,
                 false,
                 true,
-                false,
+                matcher_main.quiet(),
+                matcher_main.verbose(),
                 timeout,
             )?;
             if !matcher_main.quiet() {
-                eprintln!("Token copied to clipboard. Clearing after {} seconds...", timeout);
+                eprintln!(
+                    "Token copied to clipboard. Clearing after {} seconds...",
+                    timeout
+                );
             }
         }
 

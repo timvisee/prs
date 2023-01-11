@@ -3,7 +3,7 @@ use clap::ArgMatches;
 use prs_lib::{
     crypto::{prelude::*, Context},
     store::SecretIterConfig,
-    Secret, Store,
+    Plaintext, Secret, Store,
 };
 use regex::Regex;
 use thiserror::Error;
@@ -146,19 +146,23 @@ fn grep(
 
 /// Grep a single secret.
 fn grep_single(context: &mut Context, secret: &Secret, pattern: &str) -> Result<bool> {
-    let path = &secret.path;
-    let plaintext = context.decrypt_file(path).map_err(Err::Read)?;
+    let plaintext: Plaintext = context
+        .decrypt_file(&secret.path)
+        .map_err(Err::Read)?
+        .unsecure_to_str()
+        .map_err(Err::Utf8)?
+        .to_uppercase()
+        .into();
 
     Ok(plaintext
         .unsecure_to_str()
-        .map_err(Err::Utf8)?
-        .contains(pattern))
+        .unwrap()
+        .contains(&pattern.to_uppercase()))
 }
 
 /// Grep a single secret using a regular expression.
 fn grep_single_regex(context: &mut Context, secret: &Secret, pattern: &Regex) -> Result<bool> {
-    let path = &secret.path;
-    let plaintext = context.decrypt_file(path).map_err(Err::Read)?;
+    let plaintext = context.decrypt_file(&secret.path).map_err(Err::Read)?;
 
     Ok(pattern.is_match(plaintext.unsecure_to_str().map_err(Err::Utf8)?))
 }

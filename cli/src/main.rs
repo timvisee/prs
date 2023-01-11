@@ -80,6 +80,10 @@ fn invoke_action(handler: &Handler) -> Result<()> {
         return action::git::Git::new(handler.matches()).invoke();
     }
 
+    if handler.grep().is_some() {
+        return action::grep::Grep::new(handler.matches()).invoke();
+    }
+
     if handler.housekeeping().is_some() {
         return action::housekeeping::Housekeeping::new(handler.matches()).invoke();
     }

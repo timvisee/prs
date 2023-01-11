@@ -99,6 +99,7 @@ impl<'a> Handler {
             .subcommand(subcmd::CmdMove::build())
             .subcommand(subcmd::CmdRemove::build())
             .subcommand(subcmd::CmdList::build())
+            .subcommand(subcmd::CmdGrep::build())
             .subcommand(subcmd::CmdInit::build())
             .subcommand(subcmd::CmdClone::build())
             .subcommand(subcmd::CmdSync::build())
@@ -179,6 +180,11 @@ impl<'a> Handler {
     /// Get the git sub command, if matched.
     pub fn git(&'a self) -> Option<matcher::GitMatcher> {
         matcher::GitMatcher::with(&self.matches)
+    }
+
+    /// Get the grep sub command, if matched.
+    pub fn grep(&'a self) -> Option<matcher::GrepMatcher> {
+        matcher::GrepMatcher::with(&self.matches)
     }
 
     /// Get the housekeeping sub command, if matched.

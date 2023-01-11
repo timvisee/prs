@@ -10,7 +10,6 @@ pub mod tomb;
 pub(crate) mod tomb_bin;
 pub mod types;
 pub mod util;
-mod vendor;
 
 #[cfg(test)]
 extern crate quickcheck;

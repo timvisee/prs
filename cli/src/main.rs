@@ -10,7 +10,6 @@ mod action;
 mod cmd;
 mod crypto;
 mod util;
-mod vendor;
 
 use anyhow::Result;
 use prs_lib::Store;

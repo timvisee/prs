@@ -13,7 +13,6 @@ use crate::tomb::Tomb;
 use crate::{
     crypto::{self, prelude::*},
     sync::Sync,
-    vendor::shellexpand,
     Recipients,
 };
 

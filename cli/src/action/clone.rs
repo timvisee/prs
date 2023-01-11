@@ -8,7 +8,6 @@ use thiserror::Error;
 
 use crate::cmd::matcher::{clone::CloneMatcher, MainMatcher, Matcher};
 use crate::util::{self, style};
-use crate::vendor::shellexpand;
 
 /// Clone store action.
 pub struct Clone<'a> {

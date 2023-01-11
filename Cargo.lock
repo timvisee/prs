@@ -1966,7 +1966,6 @@ dependencies = [
  "colored",
  "copypasta-ext",
  "derive_builder 0.12.0",
- "dirs-next",
  "edit",
  "fs_extra",
  "lazy_static",
@@ -1977,6 +1976,7 @@ dependencies = [
  "qr2term",
  "rand",
  "regex",
+ "shellexpand",
  "skim",
  "text_trees",
  "thiserror",
@@ -2004,7 +2004,6 @@ name = "prs-lib"
 version = "0.4.0"
 dependencies = [
  "anyhow",
- "dirs-next",
  "fs_extra",
  "git-state",
  "gpgme",
@@ -2015,6 +2014,7 @@ dependencies = [
  "quickcheck_macros",
  "regex",
  "secstr",
+ "shellexpand",
  "thiserror",
  "version-compare",
  "walkdir",
@@ -2320,6 +2320,15 @@ dependencies = [
  "cfg-if 1.0.0",
  "cpufeatures",
  "digest",
+]
+
+[[package]]
+name = "shellexpand"
+version = "3.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dd1c7ddea665294d484c39fd0c0d2b7e35bbfe10035c5fe1854741a57f6880e1"
+dependencies = [
+ "dirs",
 ]
 
 [[package]]

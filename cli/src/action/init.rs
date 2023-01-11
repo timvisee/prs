@@ -8,7 +8,6 @@ use thiserror::Error;
 
 use crate::cmd::matcher::{init::InitMatcher, MainMatcher, Matcher};
 use crate::util::{self, style};
-use crate::vendor::shellexpand;
 
 /// Init store action.
 pub struct Init<'a> {

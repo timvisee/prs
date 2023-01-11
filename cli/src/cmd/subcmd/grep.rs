@@ -19,6 +19,14 @@ impl CmdGrep {
                     .help("Limit grep to secrets by query"),
             )
             .arg(
+                Arg::new("regex")
+                    .long("regex")
+                    .alias("regexp")
+                    .short('r')
+                    .num_args(0)
+                    .help("Interpret pattern as regular expression"),
+            )
+            .arg(
                 Arg::new("aliases")
                     .long("aliases")
                     .short('a')

@@ -5,6 +5,7 @@ use prs_lib::{
     store::SecretIterConfig,
     Secret, Store,
 };
+use regex::Regex;
 use thiserror::Error;
 
 use crate::cmd::matcher::{grep::GrepMatcher, MainMatcher, Matcher};
@@ -57,7 +58,12 @@ impl<'a> Grep<'a> {
             return Err(Err::NoSecret.into());
         }
 
-        grep(&secrets, &matcher_grep.pattern(), &matcher_main)?;
+        grep(
+            &secrets,
+            &matcher_grep.pattern(),
+            &matcher_main,
+            &matcher_grep,
+        )?;
 
         // Finalize tomb
         #[cfg(all(feature = "tomb", target_os = "linux"))]
@@ -68,18 +74,36 @@ impl<'a> Grep<'a> {
 }
 
 /// Grep the given secrets.
-fn grep(secrets: &[Secret], pattern: &str, matcher_main: &MainMatcher) -> Result<()> {
+fn grep(
+    secrets: &[Secret],
+    pattern: &str,
+    matcher_main: &MainMatcher,
+    matcher_grep: &GrepMatcher,
+) -> Result<()> {
     let mut context = crate::crypto::context(matcher_main)?;
     let len = secrets.len();
     let (mut found, mut failed) = (0, 0);
+
+    // Parse regex if enabled
+    let regex = if matcher_grep.regex() {
+        Some(Regex::new(pattern).map_err(Err::Regex)?)
+    } else {
+        None
+    };
 
     for (i, secret) in secrets.iter().enumerate() {
         if matcher_main.verbose() {
             eprintln!("[{}/{}] Re-encrypting: {}", i + 1, len, secret.name);
         }
 
+        // Parse normally or with regex
+        let result = match &regex {
+            Some(re) => grep_single_regex(&mut context, secret, re),
+            None => grep_single(&mut context, secret, pattern),
+        };
+
         // Grep single secret
-        match grep_single(&mut context, secret, pattern) {
+        match result {
             Ok(true) => {
                 println!("{}", secret.name);
                 found += 1;
@@ -124,6 +148,14 @@ fn grep_single(context: &mut Context, secret: &Secret, pattern: &str) -> Result<
         .contains(pattern))
 }
 
+/// Grep a single secret using a regular expression.
+fn grep_single_regex(context: &mut Context, secret: &Secret, pattern: &Regex) -> Result<bool> {
+    let path = &secret.path;
+    let plaintext = context.decrypt_file(path).map_err(Err::Read)?;
+
+    Ok(pattern.is_match(plaintext.unsecure_to_str().map_err(Err::Utf8)?))
+}
+
 #[derive(Debug, Error)]
 pub enum Err {
     #[error("failed to access password store")]
@@ -135,6 +167,9 @@ pub enum Err {
     #[cfg(all(feature = "tomb", target_os = "linux"))]
     #[error("failed to prepare password store tomb for usage")]
     Tomb(#[source] anyhow::Error),
+
+    #[error("failed to parse pattern as regular expression")]
+    Regex(#[source] regex::Error),
 
     #[error("failed to read secret")]
     Read(#[source] anyhow::Error),

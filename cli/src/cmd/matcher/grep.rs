@@ -18,6 +18,11 @@ impl<'a: 'b, 'b> GrepMatcher<'a> {
         self.matches.get_one("query").cloned()
     }
 
+    /// Whether to parse the pattern as regular expression.
+    pub fn regex(&self) -> bool {
+        self.matches.get_flag("regex")
+    }
+
     /// Whether to include searching aliases.
     pub fn with_aliases(&self) -> bool {
         self.matches.get_flag("aliases")

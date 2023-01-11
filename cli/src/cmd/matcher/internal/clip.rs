@@ -7,8 +7,7 @@ pub struct ClipMatcher<'a> {
     _matches: &'a ArgMatches,
 }
 
-impl<'a: 'b, 'b> ClipMatcher<'a> {
-}
+impl<'a: 'b, 'b> ClipMatcher<'a> {}
 
 impl<'a> Matcher<'a> for ClipMatcher<'a> {
     fn with(matches: &'a ArgMatches) -> Option<Self> {

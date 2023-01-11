@@ -24,7 +24,8 @@ impl CmdInternal {
 
         #[cfg(feature = "clipboard")]
         {
-            cmd = cmd.subcommand(clip::CmdClip::build())
+            cmd = cmd
+                .subcommand(clip::CmdClip::build())
                 .subcommand(clip_revert::CmdClipRevert::build());
         }
 

@@ -5,7 +5,6 @@ pub struct CmdClip;
 
 impl CmdClip {
     pub fn build() -> Command {
-        Command::new("clip")
-            .about("Set clipboard contents from stdin")
+        Command::new("clip").about("Set clipboard contents from stdin")
     }
 }

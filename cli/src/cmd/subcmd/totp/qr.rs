@@ -7,7 +7,7 @@ pub struct CmdQr;
 
 impl CmdQr {
     pub fn build() -> Command {
-         Command::new("qr")
+        Command::new("qr")
             .alias("q")
             .alias("qrcode")
             .alias("qr-code")

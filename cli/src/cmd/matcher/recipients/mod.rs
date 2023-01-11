@@ -44,6 +44,9 @@ impl<'a: 'b, 'b> RecipientsMatcher<'a> {
 impl<'a> Matcher<'a> for RecipientsMatcher<'a> {
     fn with(root: &'a ArgMatches) -> Option<Self> {
         root.subcommand_matches("recipients")
-            .map(|matches| RecipientsMatcher { root, _matches: matches })
+            .map(|matches| RecipientsMatcher {
+                root,
+                _matches: matches,
+            })
     }
 }

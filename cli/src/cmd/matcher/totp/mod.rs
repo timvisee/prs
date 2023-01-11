@@ -39,7 +39,9 @@ impl<'a: 'b, 'b> TotpMatcher<'a> {
 
 impl<'a> Matcher<'a> for TotpMatcher<'a> {
     fn with(root: &'a ArgMatches) -> Option<Self> {
-        root.subcommand_matches("totp")
-            .map(|matches| TotpMatcher { root, _matches: matches })
+        root.subcommand_matches("totp").map(|matches| TotpMatcher {
+            root,
+            _matches: matches,
+        })
     }
 }

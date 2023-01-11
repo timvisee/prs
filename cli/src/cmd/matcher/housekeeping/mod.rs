@@ -32,6 +32,9 @@ impl<'a: 'b, 'b> HousekeepingMatcher<'a> {
 impl<'a> Matcher<'a> for HousekeepingMatcher<'a> {
     fn with(root: &'a ArgMatches) -> Option<Self> {
         root.subcommand_matches("housekeeping")
-            .map(|matches| HousekeepingMatcher { root, _matches: matches })
+            .map(|matches| HousekeepingMatcher {
+                root,
+                _matches: matches,
+            })
     }
 }

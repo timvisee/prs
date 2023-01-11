@@ -107,7 +107,8 @@ impl<'a> Handler {
         #[cfg(feature = "totp")]
         let app = app.subcommand(subcmd::CmdTotp::build());
 
-        let app = app.subcommand(subcmd::CmdRecipients::build())
+        let app = app
+            .subcommand(subcmd::CmdRecipients::build())
             .subcommand(subcmd::CmdGit::build());
 
         #[cfg(all(feature = "tomb", target_os = "linux"))]

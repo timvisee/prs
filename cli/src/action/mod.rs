@@ -12,11 +12,11 @@ pub mod housekeeping;
 pub mod init;
 pub mod internal;
 pub mod list;
-pub mod slam;
 pub mod r#move;
 pub mod recipients;
 pub mod remove;
 pub mod show;
+pub mod slam;
 pub mod sync;
 #[cfg(all(feature = "tomb", target_os = "linux"))]
 pub mod tomb;

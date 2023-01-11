@@ -12,12 +12,12 @@ pub mod housekeeping;
 pub mod init;
 pub mod internal;
 pub mod list;
-pub mod slam;
 pub mod main;
 pub mod r#move;
 pub mod recipients;
 pub mod remove;
 pub mod show;
+pub mod slam;
 pub mod sync;
 #[cfg(all(feature = "tomb", target_os = "linux"))]
 pub mod tomb;
@@ -39,12 +39,12 @@ pub use self::housekeeping::HousekeepingMatcher;
 pub use self::init::InitMatcher;
 pub use self::internal::InternalMatcher;
 pub use self::list::ListMatcher;
-pub use self::slam::SlamMatcher;
 pub use self::main::MainMatcher;
 pub use self::r#move::MoveMatcher;
 pub use self::recipients::RecipientsMatcher;
 pub use self::remove::RemoveMatcher;
 pub use self::show::ShowMatcher;
+pub use self::slam::SlamMatcher;
 pub use self::sync::SyncMatcher;
 #[cfg(all(feature = "tomb", target_os = "linux"))]
 pub use self::tomb::TombMatcher;

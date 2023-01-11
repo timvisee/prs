@@ -6,7 +6,7 @@ use prs_lib::{store::SecretIterConfig, Secret, Store};
 use text_trees::{FormatCharacters, StringTreeNode, TreeFormatting};
 use thiserror::Error;
 
-use crate::cmd::matcher::{MainMatcher, list::ListMatcher, Matcher};
+use crate::cmd::matcher::{list::ListMatcher, MainMatcher, Matcher};
 #[cfg(all(feature = "tomb", target_os = "linux"))]
 use crate::util::tomb;
 

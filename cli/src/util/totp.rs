@@ -132,8 +132,7 @@ impl Totp {
 
     /// Generate an URL for this TOTP secret.
     pub fn generate_url(&self) -> Plaintext {
-        self.totp
-            .get_url().into()
+        self.totp.get_url().into()
     }
 
     /// Give the ttl (in seconds) of the current token.

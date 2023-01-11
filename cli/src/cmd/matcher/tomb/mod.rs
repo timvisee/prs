@@ -43,7 +43,9 @@ impl<'a: 'b, 'b> TombMatcher<'a> {
 
 impl<'a> Matcher<'a> for TombMatcher<'a> {
     fn with(root: &'a ArgMatches) -> Option<Self> {
-        root.subcommand_matches("tomb")
-            .map(|matches| TombMatcher { root, _matches: matches })
+        root.subcommand_matches("tomb").map(|matches| TombMatcher {
+            root,
+            _matches: matches,
+        })
     }
 }

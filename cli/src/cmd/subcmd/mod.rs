@@ -12,11 +12,11 @@ pub mod housekeeping;
 pub mod init;
 pub mod internal;
 pub mod list;
-pub mod slam;
 pub mod r#move;
 pub mod recipients;
 pub mod remove;
 pub mod show;
+pub mod slam;
 pub mod sync;
 #[cfg(all(feature = "tomb", target_os = "linux"))]
 pub mod tomb;
@@ -38,11 +38,11 @@ pub use self::housekeeping::CmdHousekeeping;
 pub use self::init::CmdInit;
 pub use self::internal::CmdInternal;
 pub use self::list::CmdList;
-pub use self::slam::CmdSlam;
 pub use self::r#move::CmdMove;
 pub use self::recipients::CmdRecipients;
 pub use self::remove::CmdRemove;
 pub use self::show::CmdShow;
+pub use self::slam::CmdSlam;
 pub use self::sync::CmdSync;
 #[cfg(all(feature = "tomb", target_os = "linux"))]
 pub use self::tomb::CmdTomb;

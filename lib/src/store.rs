@@ -414,7 +414,8 @@ where
             Some(filter) => filter.to_lowercase(),
         };
 
-        self.inner.find(|secret| secret.name.to_lowercase().contains(&filter))
+        self.inner
+            .find(|secret| secret.name.to_lowercase().contains(&filter))
     }
 }
 

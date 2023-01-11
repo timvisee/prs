@@ -7,7 +7,7 @@ pub struct SlamMatcher<'a> {
     _matches: &'a ArgMatches,
 }
 
-impl<'a: 'b, 'b> SlamMatcher<'a> { }
+impl<'a: 'b, 'b> SlamMatcher<'a> {}
 
 impl<'a> Matcher<'a> for SlamMatcher<'a> {
     fn with(matches: &'a ArgMatches) -> Option<Self> {

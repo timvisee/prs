@@ -33,7 +33,10 @@ pub fn generate_password(len: u16) -> Plaintext {
     // Show warning if length if too short to cover all sets
     let too_short = (len as usize) < PASSWORD_CHAR_SETS.len();
     if too_short {
-        error::print_warning(format!("password length too short to use all character sets (should be at least {})", PASSWORD_CHAR_SETS.len()));
+        error::print_warning(format!(
+            "password length too short to use all character sets (should be at least {})",
+            PASSWORD_CHAR_SETS.len()
+        ));
     }
 
     // Obtain secure random source, build char dictionary
@@ -50,10 +53,12 @@ pub fn generate_password(len: u16) -> Plaintext {
         }
 
         // Ensure password covers all sets
-        if too_short || PASSWORD_CHAR_SETS.iter().all(|set| {
-            set.chars().any(|c| pass.contains(c))
-        }) {
-            return pass .into();
+        if too_short
+            || PASSWORD_CHAR_SETS
+                .iter()
+                .all(|set| set.chars().any(|c| pass.contains(c)))
+        {
+            return pass.into();
         }
 
         pass.truncate(0);

@@ -1,8 +1,8 @@
 #[cfg(feature = "clipboard")]
 pub mod copy;
 pub mod live;
-pub mod show;
 pub mod qr;
+pub mod show;
 
 use anyhow::Result;
 use clap::ArgMatches;

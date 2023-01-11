@@ -1,7 +1,7 @@
 use anyhow::Result;
 use clap::ArgMatches;
-use prs_lib::Store;
 use prs_lib::sync::{Readyness, Sync as StoreSync};
+use prs_lib::Store;
 use thiserror::Error;
 
 use crate::cmd::matcher::{git::GitMatcher, MainMatcher, Matcher};
@@ -46,7 +46,11 @@ impl<'a> Git<'a> {
         tomb::prepare_tomb(&mut tomb, &matcher_main).map_err(Err::Tomb)?;
 
         // Warn if sync is not configured
-        if sync.readyness().map(|r| r == Readyness::NoSync).unwrap_or(false) {
+        if sync
+            .readyness()
+            .map(|r| r == Readyness::NoSync)
+            .unwrap_or(false)
+        {
             util::error::print_warning("sync not configured, store is not a git repository");
         }
 

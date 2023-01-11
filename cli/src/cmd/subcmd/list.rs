@@ -10,6 +10,7 @@ impl CmdList {
         Command::new("list")
             .alias("ls")
             .alias("l")
+            .alias("search")
             .about("List all secrets")
             .arg(ArgQuery::build())
             .arg(

@@ -13,6 +13,7 @@ impl CmdGenerate {
             .alias("gen")
             .alias("g")
             .alias("random")
+            .alias("pwgen")
             .about("Generate a secure secret")
             .arg(
                 Arg::new("NAME")

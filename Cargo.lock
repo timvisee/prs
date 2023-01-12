@@ -2027,6 +2027,7 @@ dependencies = [
  "thiserror",
  "totp-rs",
  "walkdir",
+ "which",
  "x11-clipboard 0.7.0",
 ]
 

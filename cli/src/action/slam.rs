@@ -38,8 +38,8 @@ impl<'a> Slam<'a> {
             }
         };
 
-        // Attempt to kill GPG agents
-        kill_gpg_agent(&matcher_main);
+        // Attempt to flush GPG agents
+        flush_gpg_agents(&matcher_main);
 
         // Attempt to lock Tomb
         #[cfg(all(feature = "tomb", target_os = "linux"))]
@@ -50,7 +50,16 @@ impl<'a> Slam<'a> {
         }
 
         // Attempt to invalidate cached sudo credentials
-        invalidate_sudo(&matcher_main);
+        match has_bin("sudo") {
+            Ok(true) => invalidate_sudo(&matcher_main),
+            Ok(false) => {}
+            Err(err) => error::print_error(err.context("failed to invalidate sudo credentials")),
+        }
+        match has_bin("doas") {
+            Ok(true) => invalidate_doas(&matcher_main),
+            Ok(false) => {}
+            Err(err) => error::print_error(err.context("failed to invalidate doas credentials")),
+        }
 
         // Drop open prs persistent SSH sessions
         #[cfg(unix)]
@@ -66,8 +75,40 @@ impl<'a> Slam<'a> {
     }
 }
 
-/// Attempt to kill and clear all GPG agents that potentially unlock secrets.
-fn kill_gpg_agent(matcher_main: &MainMatcher) {
+/// Attempt to flush and clear all GPG agents that potentially unlock secrets.
+fn flush_gpg_agents(matcher_main: &MainMatcher) {
+    let mut flushed = false;
+
+    // Kill GPG agent through gpgconf
+    match has_bin("gpgconf") {
+        Ok(true) => flushed = gpgconf_kill(matcher_main) || flushed,
+        Ok(false) => {}
+        Err(err) => error::print_error(err.context("failed to kill GPG agent through gpgconf")),
+    }
+
+    // Clear GPG agent through keychain
+    match has_bin("keychain") {
+        Ok(true) => flushed = keychain_clear(matcher_main) || flushed,
+        Ok(false) => {}
+        Err(err) => error::print_error(err.context("failed to clear GPG agent through keychain")),
+    }
+
+    // Reload GPG agents through pkill
+    #[cfg(unix)]
+    match has_bin("pkill") {
+        Ok(true) => flushed = pkill_reload_gpgagent(matcher_main) || flushed,
+        Ok(false) => {}
+        Err(err) => error::print_error(err.context("failed to reload GPG agents through pkill")),
+    }
+
+    // Show warning if not flushed
+    if !flushed {
+        error::print_warning("no GPG agent is flushed, cleared or killed");
+    }
+}
+
+/// Kill GPG agent using gpgconf.
+fn gpgconf_kill(matcher_main: &MainMatcher) -> bool {
     // Signal gpg-agent kill through gpgconf
     // Invoke: gpgconf --kill gpg-agent
     if !matcher_main.quiet() {
@@ -82,6 +123,7 @@ fn kill_gpg_agent(matcher_main: &MainMatcher) {
                 eprintln!("FAIL");
             }
             error::print_error(anyhow!(err).context("failed to kill gpgconf gpg-agent"));
+            false
         }
         Ok(status) if !status.success() => {
             if !matcher_main.quiet() {
@@ -91,14 +133,19 @@ fn kill_gpg_agent(matcher_main: &MainMatcher) {
                 "failed to kill gpgconf gpg-agent (exit status: {})",
                 status
             ));
+            false
         }
         Ok(_) => {
             if !matcher_main.quiet() {
                 eprintln!("ok");
             }
+            true
         }
     }
+}
 
+/// Clear GPG agent through keychain.
+fn keychain_clear(matcher_main: &MainMatcher) -> bool {
     // Signal to clear keychain GPG agent
     // Invoke: keychain --quiet --clear --agents gpg
     if !matcher_main.quiet() {
@@ -113,6 +160,7 @@ fn kill_gpg_agent(matcher_main: &MainMatcher) {
                 eprintln!("FAIL");
             }
             error::print_error(anyhow!(err).context("failed to kill keychain GPG agent"));
+            false
         }
         Ok(status) if !status.success() => {
             if !matcher_main.quiet() {
@@ -122,39 +170,50 @@ fn kill_gpg_agent(matcher_main: &MainMatcher) {
                 "failed to kill keychain GPG agent (exit status: {})",
                 status
             ));
+            false
         }
         Ok(_) => {
             if !matcher_main.quiet() {
                 eprintln!("ok");
             }
+            true
         }
     }
+}
 
+/// Reload configuration of gpg-agent processes.
+#[cfg(unix)]
+fn pkill_reload_gpgagent(matcher_main: &MainMatcher) -> bool {
     // Kill any remaining gpg-agent processes
     // Invoke: pkill -HUP gpg-agent
     if !matcher_main.quiet() {
-        eprint!("Kill other gpg-agent processes: ");
+        eprint!("Reload gpg-agent processes: ");
     }
     match Command::new("pkill").args(["-HUP", "gpg-agent"]).status() {
+        Ok(status) if status.code() == Some(0) => {
+            if !matcher_main.quiet() {
+                eprintln!("ok");
+            }
+            true
+        }
+        Ok(status) if status.code() == Some(1) => {
+            if !matcher_main.quiet() {
+                eprintln!("ok");
+            }
+            false
+        }
+        Ok(_) => {
+            if !matcher_main.quiet() {
+                eprintln!("FAIL");
+            }
+            false
+        }
         Err(err) => {
             if !matcher_main.quiet() {
                 eprintln!("FAIL");
             }
-            error::print_error(anyhow!(err).context("failed to kill gpg-agent processes"));
-        }
-        Ok(status) if !status.success() => {
-            if !matcher_main.quiet() {
-                eprintln!("FAIL");
-            }
-            error::print_error_msg(format!(
-                "failed to kill gpg-agent processes (exit status: {})",
-                status
-            ));
-        }
-        Ok(_) => {
-            if !matcher_main.quiet() {
-                eprintln!("ok");
-            }
+            error::print_error(anyhow!(err).context("failed to reload gpg-agent processes"));
+            false
         }
     }
 }
@@ -264,6 +323,37 @@ fn invalidate_sudo(matcher_main: &MainMatcher) {
     }
 }
 
+/// Attempt to invalidate cached doas credentials that are still active.
+fn invalidate_doas(matcher_main: &MainMatcher) {
+    if !matcher_main.quiet() {
+        eprint!("Invalidate cached doas credentials: ");
+    }
+    match Command::new("doas").args(["-L"]).status() {
+        Err(err) => {
+            if !matcher_main.quiet() {
+                eprintln!("FAIL");
+            }
+            error::print_error(
+                anyhow!(err).context("failed to invalidate cached doas credentials"),
+            );
+        }
+        Ok(status) if !status.success() => {
+            if !matcher_main.quiet() {
+                eprintln!("FAIL");
+            }
+            error::print_error_msg(format!(
+                "failed to invalidate cached doas credentials (exit status: {})",
+                status
+            ));
+        }
+        Ok(_) => {
+            if !matcher_main.quiet() {
+                eprintln!("ok");
+            }
+        }
+    }
+}
+
 /// Drop any open prs persistent SSH sessions.
 #[cfg(unix)]
 fn drop_persistent_ssh(store: &Store, matcher_main: &MainMatcher) {
@@ -279,10 +369,22 @@ fn drop_persistent_ssh(store: &Store, matcher_main: &MainMatcher) {
     }
 }
 
+/// Check if the given binary is found and is invokable.
+fn has_bin(bin: &str) -> Result<bool> {
+    match which::which(bin) {
+        Ok(_) => Ok(true),
+        Err(which::Error::CannotFindBinaryPath) => Ok(false),
+        Err(err) => Err(Err::ProbeBinary(err, bin.into()).into()),
+    }
+}
+
 #[derive(Debug, Error)]
 pub enum Err {
     #[error("failed to access password store")]
     Store(#[source] anyhow::Error),
+
+    #[error("failed to find binary: {1}")]
+    ProbeBinary(#[source] which::Error, String),
 
     #[cfg(all(feature = "tomb", target_os = "linux"))]
     #[error("failed to close password store tomb")]

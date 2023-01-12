@@ -58,7 +58,7 @@ impl<'a> Show<'a> {
             plaintext = plaintext.property(property).map_err(Err::Property)?;
         }
 
-        let lines = plaintext.unsecure_to_str().unwrap().lines().count();
+        let lines = plaintext.unsecure_to_str().ok().map(|s| s.lines().count());
 
         // Copy to clipboard
         #[cfg(feature = "clipboard")]
@@ -77,7 +77,7 @@ impl<'a> Show<'a> {
         secret::print(plaintext).map_err(Err::Print)?;
 
         // Clear after timeout
-        if let Some(timeout) = matcher_show.timeout() {
+        if let (Some(lines), Some(timeout)) = (lines, matcher_show.timeout()) {
             let timeout = timeout?;
             let mut lines = lines as u16 + 1;
 

@@ -16,6 +16,7 @@ pub fn store_select_secret(store: &Store, query: Option<String>) -> Option<Secre
                 return None;
             }
 
+            // When updating features, also update warning in build.rs
             #[cfg(all(feature = "select-skim", unix))]
             {
                 return super::select_skim::select_secret(&secrets).cloned();
@@ -37,6 +38,8 @@ pub fn store_select_secret(store: &Store, query: Option<String>) -> Option<Secre
 #[allow(unreachable_code)]
 pub fn select_key<'a>(keys: &'a [Key], prompt: Option<&'a str>) -> Option<&'a Key> {
     // TODO: do not use interactive selection with --no-interact mode
+
+    // When updating features, also update warning in build.rs
     #[cfg(all(feature = "select-skim", unix))]
     {
         return super::select_skim::select_key(keys, prompt);

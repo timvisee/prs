@@ -12,9 +12,12 @@ use crate::cmd::matcher::{grep::GrepMatcher, MainMatcher, Matcher};
 #[cfg(all(feature = "tomb", target_os = "linux"))]
 use crate::util::tomb;
 use crate::util::{
-    error,
+    error::{self, ErrorHints, ErrorHintsBuilder},
     progress::{self, ProgressBarExt},
 };
+
+/// Maximum number of failures without forcing.
+const MAX_FAIL: usize = 4;
 
 /// Grep secrets action.
 pub struct Grep<'a> {
@@ -119,6 +122,14 @@ fn grep(
         }
 
         pb.inc(1);
+
+        // Stop after many failures
+        if failed > MAX_FAIL && !matcher_main.force() {
+            error::quit_error_msg(
+                format!("stopped after {} failures", failed),
+                ErrorHintsBuilder::default().force(true).build().unwrap(),
+            );
+        }
     }
 
     pb.finish_and_clear();
@@ -133,12 +144,10 @@ fn grep(
     }
 
     if failed > 0 {
-        error::print_error_msg(format!(
-            "Failed to grep {} of {} secrets",
-            failed,
-            secrets.len()
-        ));
-        error::exit(1);
+        error::quit_error_msg(
+            format!("Failed to grep {} of {} secrets", failed, secrets.len()),
+            ErrorHints::default(),
+        );
     }
 
     Ok(())

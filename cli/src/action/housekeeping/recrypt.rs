@@ -15,11 +15,15 @@ use crate::{
         MainMatcher, Matcher,
     },
     util::{
-        self, error,
+        self,
+        error::{self, ErrorHintsBuilder},
         progress::{self, ProgressBarExt},
         style, sync,
     },
 };
+
+/// Maximum number of failures without forcing.
+const MAX_FAIL: usize = 4;
 
 /// A housekeeping recrypt action.
 pub struct Recrypt<'a> {
@@ -103,6 +107,14 @@ pub fn recrypt(store: &Store, secrets: &[Secret], matcher_main: &MainMatcher) ->
         }
 
         pb.inc(1);
+
+        // Stop after many failures
+        if failed.len() > MAX_FAIL && !matcher_main.force() {
+            error::quit_error_msg(
+                format!("stopped after {} failures", failed.len()),
+                ErrorHintsBuilder::default().force(true).build().unwrap(),
+            );
+        }
     }
 
     pb.finish_and_clear();

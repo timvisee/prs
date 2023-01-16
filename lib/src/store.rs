@@ -35,6 +35,7 @@ impl Store {
             .map_err(Err::ExpandPath)?
             .as_ref()
             .into();
+        let root = root.canonicalize().map_err(Err::CanonicalizePath)?;
 
         // Make sure store directory exists
         ensure!(root.is_dir(), Err::NoRootDir(root));
@@ -423,6 +424,9 @@ where
 pub enum Err {
     #[error("failed to expand store root path")]
     ExpandPath(#[source] shellexpand::LookupError<std::env::VarError>),
+
+    #[error("failed to canonicalize store root path")]
+    CanonicalizePath(#[source] std::io::Error),
 
     #[error("failed to open password store, not a directory: {0}")]
     NoRootDir(PathBuf),

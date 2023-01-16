@@ -200,7 +200,7 @@ test-integration:
     - git config --global user.name "Example User"
 
     # TODO: add/edit/remove secrets
-    - ./prs --version
+    - ./prs help
     - ./prs init
     - ./prs sync init
     - ./prs list

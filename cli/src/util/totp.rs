@@ -3,7 +3,6 @@ use std::process::{Child, Stdio};
 use std::time::SystemTimeError;
 
 use anyhow::Result;
-use base64::Engine;
 use linkify::{LinkFinder, LinkKind};
 use prs_lib::Plaintext;
 use thiserror::Error;
@@ -172,7 +171,7 @@ pub fn is_base32(material: &str) -> bool {
 /// Revert to the old data after the given timeout.
 #[cfg(feature = "clipboard")]
 pub(crate) fn spawn_process_totp_recopy(totp: &Totp, timeout_sec: u64) -> Result<Child> {
-    use super::cmd;
+    use super::{base64, cmd};
 
     // Spawn & disown background process to set clipboard
     let mut process = cmd::current_cmd()
@@ -188,8 +187,7 @@ pub(crate) fn spawn_process_totp_recopy(totp: &Totp, timeout_sec: u64) -> Result
     writeln!(
         process.stdin.as_mut().unwrap(),
         "{}",
-        base64::engine::general_purpose::STANDARD
-            .encode(totp.generate_url().unsecure_to_str().unwrap()),
+        base64::encode(totp.generate_url().unsecure_to_str().unwrap()),
     )
     .map_err(Err::ConfigProcess)?;
 

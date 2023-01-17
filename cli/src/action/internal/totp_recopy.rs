@@ -2,13 +2,12 @@ use std::io;
 use std::time::{Duration, Instant};
 
 use anyhow::{anyhow, Result};
-use base64::Engine;
 use clap::ArgMatches;
 use prs_lib::Plaintext;
 use thiserror::Error;
 
 use crate::cmd::matcher::{internal::totp_recopy::TotpRecopyMatcher, MainMatcher, Matcher};
-use crate::util::{clipboard, totp::Totp};
+use crate::util::{base64, clipboard, totp::Totp};
 
 /// A internal TOTP recopy action.
 pub struct TotpRecopy<'a> {
@@ -30,9 +29,7 @@ impl<'a> TotpRecopy<'a> {
         // Grab clipboard data from stdin
         let mut buffer = String::new();
         io::stdin().read_line(&mut buffer)?;
-        let totp = base64::engine::general_purpose::STANDARD
-            .decode(buffer.trim())
-            .map_err(|err| Err::Data(anyhow!(err)))?;
+        let totp = base64::decode(buffer.trim()).map_err(|err| Err::Data(anyhow!(err)))?;
         let totp = std::str::from_utf8(&totp).map_err(|err| Err::Data(anyhow!(err)))?;
         let totp = Totp::from_url(totp).map_err(Err::Data)?;
         drop(Plaintext::from(buffer));

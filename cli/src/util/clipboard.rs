@@ -5,7 +5,6 @@ use std::thread;
 use std::time::{Duration, Instant};
 
 use anyhow::{anyhow, Result};
-use base64::Engine;
 use copypasta_ext::display::DisplayServer;
 use copypasta_ext::prelude::*;
 #[cfg(all(feature = "notify", target_os = "linux", not(target_env = "musl")))]
@@ -16,6 +15,7 @@ use prs_lib::Plaintext;
 use thiserror::Error;
 
 use crate::util::{
+    base64,
     cmd::{self, CommandExt},
     error::{self, ErrorHintsBuilder},
 };
@@ -492,7 +492,7 @@ fn spawn_process_copy(data: &Plaintext, quiet: bool, verbose: bool) -> Result<Ch
     writeln!(
         process.stdin.as_mut().unwrap(),
         "{}",
-        base64::engine::general_purpose::STANDARD.encode(data.unsecure_ref()),
+        base64::encode(data.unsecure_ref()),
     )
     .map_err(Err::ConfigProcess)?;
 
@@ -524,8 +524,8 @@ fn spawn_process_copy_revert(
     writeln!(
         process.stdin.as_mut().unwrap(),
         "{},{}",
-        base64::engine::general_purpose::STANDARD.encode(data.unsecure_ref()),
-        base64::engine::general_purpose::STANDARD.encode(data_old.unsecure_ref()),
+        base64::encode(data.unsecure_ref()),
+        base64::encode(data_old.unsecure_ref()),
     )
     .map_err(Err::ConfigProcess)?;
 

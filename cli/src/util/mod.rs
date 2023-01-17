@@ -1,3 +1,5 @@
+#[cfg(feature = "clipboard")]
+pub mod base64;
 pub mod cli;
 #[cfg(feature = "clipboard")]
 pub mod clipboard;

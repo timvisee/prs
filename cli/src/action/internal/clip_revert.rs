@@ -2,13 +2,12 @@ use std::io;
 use std::time::Duration;
 
 use anyhow::Result;
-use base64::Engine;
 use clap::ArgMatches;
 use prs_lib::Plaintext;
 use thiserror::Error;
 
 use crate::cmd::matcher::{internal::clip_revert::ClipRevertMatcher, MainMatcher, Matcher};
-use crate::util::clipboard;
+use crate::util::{base64, clipboard};
 
 /// A internal clipboard revert action.
 pub struct ClipRevert<'a> {
@@ -32,12 +31,10 @@ impl<'a> ClipRevert<'a> {
         io::stdin().read_line(&mut buffer)?;
         let (a, b) = buffer.split_once(',').ok_or(Err::Data(None))?;
         let (data, data_old) = (
-            base64::engine::general_purpose::STANDARD
-                .decode(a.trim())
+            base64::decode(a.trim())
                 .map_err(|err| Err::Data(Some(err)))?
                 .into(),
-            base64::engine::general_purpose::STANDARD
-                .decode(b.trim())
+            base64::decode(b.trim())
                 .map_err(|err| Err::Data(Some(err)))?
                 .into(),
         );
@@ -66,7 +63,7 @@ impl<'a> ClipRevert<'a> {
 #[derive(Debug, Error)]
 pub enum Err {
     #[error("failed to obtain clipboard content from stdin, malformed data")]
-    Data(#[source] Option<base64::DecodeError>),
+    Data(#[source] Option<::base64::DecodeError>),
 
     #[error("failed to copy and revert clipboard contents")]
     CopyRevert(#[source] anyhow::Error),

@@ -1,13 +1,12 @@
 use std::io;
 
 use anyhow::Result;
-use base64::Engine;
 use clap::ArgMatches;
 use prs_lib::Plaintext;
 use thiserror::Error;
 
 use crate::cmd::matcher::{internal::clip::ClipMatcher, MainMatcher, Matcher};
-use crate::util::clipboard;
+use crate::util::{base64, clipboard};
 
 /// A internal clipboard action.
 pub struct Clip<'a> {
@@ -29,10 +28,7 @@ impl<'a> Clip<'a> {
         // Grab clipboard data from stdin
         let mut buffer = String::new();
         io::stdin().read_line(&mut buffer)?;
-        let data = base64::engine::general_purpose::STANDARD
-            .decode(buffer.trim())
-            .map_err(Err::Data)?
-            .into();
+        let data = base64::decode(buffer.trim()).map_err(Err::Data)?.into();
         drop(Plaintext::from(buffer));
 
         // Set clipboard contents
@@ -45,7 +41,7 @@ impl<'a> Clip<'a> {
 #[derive(Debug, Error)]
 pub enum Err {
     #[error("failed to obtain clipboard content from stdin, malformed data")]
-    Data(#[source] base64::DecodeError),
+    Data(#[source] ::base64::DecodeError),
 
     #[error("failed to set clipboard contents")]
     Clip(#[source] anyhow::Error),

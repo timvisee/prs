@@ -2008,6 +2008,7 @@ dependencies = [
  "clap_complete",
  "colored",
  "copypasta-ext",
+ "crossterm",
  "derive_builder 0.12.0",
  "dirs-next",
  "edit",

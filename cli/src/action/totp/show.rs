@@ -1,4 +1,3 @@
-use std::thread;
 use std::time::Duration;
 
 use anyhow::Result;
@@ -6,6 +5,7 @@ use clap::ArgMatches;
 use prs_lib::{crypto::prelude::*, Store};
 use thiserror::Error;
 
+use crate::action;
 #[cfg(feature = "clipboard")]
 use crate::util::clipboard;
 #[cfg(all(feature = "tomb", target_os = "linux"))]
@@ -51,8 +51,6 @@ impl<'a> Show<'a> {
         let secret =
             select::store_select_secret(&store, matcher_show.query()).ok_or(Err::NoneSelected)?;
 
-        secret::print_name(matcher_show.query(), &secret, &store, matcher_main.quiet());
-
         let mut plaintext = crate::crypto::context(&matcher_main)?
             .decrypt_file(&secret.path)
             .map_err(Err::Read)?;
@@ -83,21 +81,21 @@ impl<'a> Show<'a> {
             )?;
         }
 
-        totp::print_token(&token, matcher_main.quiet(), Some(ttl));
-
-        // Clear after timeout
-        if let Some(timeout) = matcher_show.timeout() {
-            let timeout = timeout?;
-            let mut lines = 2;
-
-            if matcher_main.verbose() {
-                lines += 2;
-                eprintln!();
-                eprint!("Clearing output in {} seconds...", timeout);
+        // Show directly or with timeout
+        match matcher_show.timeout() {
+            None => {
+                secret::print_name(matcher_show.query(), &secret, &store, matcher_main.quiet());
+                totp::print_token(&token, matcher_main.quiet(), Some(ttl));
             }
-
-            thread::sleep(Duration::from_secs(timeout));
-            eprint!("{}", ansi_escapes::EraseLines(lines));
+            Some(sec) => action::show::show_timeout(
+                &store,
+                &secret,
+                totp::format_token(&token, matcher_main.quiet(), Some(ttl)),
+                Duration::from_secs(sec?),
+                &matcher_main,
+                matcher_show.query(),
+            )
+            .map_err(Err::ShowTimeout)?,
         }
 
         // Finalize tomb
@@ -134,4 +132,7 @@ pub enum Err {
 
     #[error("failed to generate TOTP token")]
     Totp(#[source] anyhow::Error),
+
+    #[error("failed to show secret in viewer with timeout")]
+    ShowTimeout(#[source] anyhow::Error),
 }

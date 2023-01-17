@@ -66,6 +66,7 @@ chbs = "0.1.1"
 clap = { version = "4.0.32", default-features = false, features = ["std", "help", "suggestions", "color", "usage", "cargo", "env"] }
 clap_complete = "4.0.7"
 colored = "2.0.0"
+crossterm = { version = "0.25.0", default-features = false }
 derive_builder = "0.12.0"
 edit = "0.1.4"
 indicatif = "0.17.2"

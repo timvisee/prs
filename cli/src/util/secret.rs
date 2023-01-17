@@ -26,17 +26,32 @@ pub fn print(plaintext: Plaintext) -> Result<(), std::io::Error> {
 ///
 /// This notifies the user on what exact secret is selected when only part of the secret name is
 /// entered. This is useful for when a partial (short) query selects the wrong secret.
-pub fn print_name(query: Option<String>, secret: &Secret, store: &Store, quiet: bool) {
+pub fn display_name(
+    query: Option<String>,
+    secret: &Secret,
+    store: &Store,
+    quiet: bool,
+) -> Option<String> {
     // If quiet or query matches exact name, do not print it
     if quiet || query.map(|q| secret.name.eq(&q)).unwrap_or(false) {
-        return;
+        return None;
     }
 
     // Show secret with alias target if available
     if let Some(alias) = resolve_alias(secret, store) {
-        eprintln!("Secret: {} -> {}", secret.name, alias.name);
+        Some(format!("{} -> {}", secret.name, alias.name))
     } else {
-        eprintln!("Secret: {}", secret.name);
+        Some(secret.name.to_string())
+    }
+}
+
+/// Show full secret name if query was partial.
+///
+/// This notifies the user on what exact secret is selected when only part of the secret name is
+/// entered. This is useful for when a partial (short) query selects the wrong secret.
+pub fn print_name(query: Option<String>, secret: &Secret, store: &Store, quiet: bool) {
+    if let Some(name) = display_name(query, secret, store, quiet) {
+        eprintln!("Secret: {}", name);
     }
 }
 

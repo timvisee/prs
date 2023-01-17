@@ -79,19 +79,18 @@ fn parse_encoded(plaintext: &Plaintext) -> Option<Totp> {
     Some(TOTP::new_unchecked(Algorithm::SHA1, 6, 1, 30, bytes, None, "".into()).into())
 }
 
-/// Print a nicely formatted token.
+/// Format a token as a string.
 ///
 /// If `quiet` is `true` the token is printed with no formatting or TTL.
 /// If a TTL is specified, it is printed after.
-pub fn print_token(token: &Plaintext, quiet: bool, ttl: Option<u64>) {
+pub fn format_token(token: &Plaintext, quiet: bool, ttl: Option<u64>) -> Plaintext {
     // If quiet, print regularly
     if quiet {
-        println!("{}", token.unsecure_to_str().unwrap());
-        return;
+        return token.clone();
     }
 
     // Format with spaces
-    let formatted = if token.unsecure_ref().len() > 5 {
+    let mut formatted = if token.unsecure_ref().len() > 5 {
         Plaintext::from(
             token
                 .unsecure_ref()
@@ -104,14 +103,21 @@ pub fn print_token(token: &Plaintext, quiet: bool, ttl: Option<u64>) {
         token.clone()
     };
     if let Some(ttl) = ttl {
-        println!(
-            "{} (valid for {}s)",
-            formatted.unsecure_to_str().unwrap(),
-            ttl
-        );
-    } else {
-        println!("{}", formatted.unsecure_to_str().unwrap());
+        formatted.append(format!(" (valid for {}s)", ttl).into(), false);
     }
+
+    formatted
+}
+
+/// Print a nicely formatted token.
+///
+/// If `quiet` is `true` the token is printed with no formatting or TTL.
+/// If a TTL is specified, it is printed after.
+pub fn print_token(token: &Plaintext, quiet: bool, ttl: Option<u64>) {
+    println!(
+        "{}",
+        format_token(token, quiet, ttl).unsecure_to_str().unwrap()
+    );
 }
 
 /// A secure TOTP type.

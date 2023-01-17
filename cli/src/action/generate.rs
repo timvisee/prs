@@ -115,6 +115,18 @@ impl<'a> Generate<'a> {
 
         // Edit in editor
         if matcher_generate.edit() {
+            // Quietly copy generated password to clipboard before editing
+            #[cfg(feature = "clipboard")]
+            if matcher_generate.copy() {
+                clipboard::plaintext_copy(
+                    plaintext.clone(),
+                    true,
+                    !matcher_main.force(),
+                    !matcher_main.verbose(),
+                    matcher_generate.timeout()?,
+                )?;
+            }
+
             if let Some(changed) = edit::edit(&plaintext).map_err(Err::Edit)? {
                 plaintext = changed;
             }
@@ -141,7 +153,7 @@ impl<'a> Generate<'a> {
                 .map_err(Err::Write)?;
         }
 
-        // Copy to clipboard
+        // Copy to clipboard after editing
         #[cfg(feature = "clipboard")]
         if matcher_generate.copy() {
             clipboard::plaintext_copy(

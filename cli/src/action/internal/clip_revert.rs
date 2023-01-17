@@ -3,6 +3,7 @@ use std::thread;
 use std::time::Duration;
 
 use anyhow::Result;
+use base64::Engine;
 use clap::ArgMatches;
 use thiserror::Error;
 
@@ -32,7 +33,9 @@ impl<'a> ClipRevert<'a> {
         if matcher_clip_revert.previous_base64_stdin() {
             let mut buffer = String::new();
             io::stdin().read_line(&mut buffer)?;
-            previous = base64::decode(buffer.trim()).ok();
+            previous = base64::engine::general_purpose::STANDARD
+                .decode(buffer.trim())
+                .ok();
         }
 
         // Wait for timeout

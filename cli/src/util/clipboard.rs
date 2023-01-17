@@ -4,6 +4,7 @@ use std::thread;
 use std::time::Duration;
 
 use anyhow::Result;
+use base64::Engine;
 #[cfg(all(
     unix,
     not(any(target_os = "macos", target_os = "android", target_os = "emscripten")),
@@ -368,7 +369,12 @@ fn copy_timeout_process(data: &[u8], timeout: u64, report: bool) -> Result<()> {
         .stdin(Stdio::piped())
         .spawn()
         .map_err(Err::Timeout)?;
-    writeln!(process.stdin.unwrap(), "{}", base64::encode(previous)).map_err(Err::Timeout)?;
+    writeln!(
+        process.stdin.unwrap(),
+        "{}",
+        base64::engine::general_purpose::STANDARD.encode(previous)
+    )
+    .map_err(Err::Timeout)?;
 
     if report {
         eprintln!(

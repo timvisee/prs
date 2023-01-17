@@ -16,7 +16,11 @@ impl CmdShow {
             .alias("print")
             .about("Show TOTP token")
             .arg(ArgQuery::build())
-            .arg(ArgTimeout::build().help("Timeout after which to clear output"))
+            .arg(
+                ArgTimeout::build()
+                    .conflicts_with("no-interact")
+                    .help("Timeout after which to clear output"),
+            )
             .arg(ArgProperty::build());
 
         #[cfg(feature = "clipboard")]

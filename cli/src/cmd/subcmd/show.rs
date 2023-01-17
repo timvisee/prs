@@ -22,7 +22,11 @@ impl CmdShow {
                     .help("Show only the first line of the secret"),
             )
             .arg(ArgQuery::build())
-            .arg(ArgTimeout::build().help("Timeout after which to clear output"))
+            .arg(
+                ArgTimeout::build()
+                    .help("Timeout after which to clear output")
+                    .conflicts_with("no-interact"),
+            )
             .arg(ArgProperty::build().conflicts_with("first"));
 
         #[cfg(feature = "clipboard")]

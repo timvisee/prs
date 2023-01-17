@@ -72,7 +72,7 @@ pub(crate) fn viewer(
                     timeout.as_secs()
                 )
             } else {
-                format!("Press Q to close",)
+                "Press Q to close".to_string()
             }
             .reverse()
         );

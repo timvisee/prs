@@ -24,6 +24,7 @@ pub mod time;
 pub mod tomb;
 #[cfg(feature = "totp")]
 pub mod totp;
+pub mod viewer;
 
 use std::env;
 use std::path::{Path, PathBuf};

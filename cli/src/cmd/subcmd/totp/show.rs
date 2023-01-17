@@ -2,7 +2,7 @@
 use clap::Arg;
 use clap::Command;
 
-use crate::cmd::arg::{ArgProperty, ArgQuery, ArgTimeout, CmdArg};
+use crate::cmd::arg::{ArgProperty, ArgQuery, ArgTimeout, ArgViewer, CmdArg};
 
 /// The TOTP show command definition.
 pub struct CmdShow;
@@ -18,10 +18,11 @@ impl CmdShow {
             .arg(ArgQuery::build())
             .arg(
                 ArgTimeout::build()
-                    .conflicts_with("no-interact")
-                    .help("Timeout after which to clear output"),
+                    .conflicts_with_all(["no-interact", "viewer"])
+                    .help("Timeout after which to clear output, implies --viewer"),
             )
-            .arg(ArgProperty::build());
+            .arg(ArgProperty::build())
+            .arg(ArgViewer::build());
 
         #[cfg(feature = "clipboard")]
         let cmd = cmd.arg(

@@ -4,6 +4,7 @@ pub mod property;
 pub mod query;
 pub mod store;
 pub mod timeout;
+pub mod viewer;
 
 use clap::{parser::ValuesRef, Arg, ArgMatches};
 
@@ -14,6 +15,7 @@ pub use self::property::ArgProperty;
 pub use self::query::ArgQuery;
 pub use self::store::ArgStore;
 pub use self::timeout::ArgTimeout;
+pub use self::viewer::ArgViewer;
 
 /// A generic trait, for a reusable command argument struct.
 /// The `CmdArgFlag` and `CmdArgOption` traits further specify what kind of

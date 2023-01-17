@@ -2,7 +2,7 @@ use anyhow::Result;
 use clap::ArgMatches;
 
 use super::Matcher;
-use crate::cmd::arg::{ArgProperty, ArgQuery, ArgTimeout, CmdArgOption};
+use crate::cmd::arg::{ArgProperty, ArgQuery, ArgTimeout, ArgViewer, CmdArgFlag, CmdArgOption};
 
 /// The show command matcher.
 pub struct ShowMatcher<'a> {
@@ -34,6 +34,11 @@ impl<'a: 'b, 'b> ShowMatcher<'a> {
     #[cfg(feature = "clipboard")]
     pub fn copy(&self) -> bool {
         self.matches.get_flag("copy")
+    }
+
+    /// Check whether to show in a viewer.
+    pub fn viewer(&self) -> bool {
+        ArgViewer::is_present(self.matches) || self.timeout().is_some()
     }
 }
 

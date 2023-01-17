@@ -5,7 +5,6 @@ use clap::ArgMatches;
 use prs_lib::{crypto::prelude::*, Store};
 use thiserror::Error;
 
-use crate::action;
 #[cfg(feature = "clipboard")]
 use crate::util::clipboard;
 #[cfg(all(feature = "tomb", target_os = "linux"))]
@@ -15,7 +14,7 @@ use crate::{
         totp::{show::ShowMatcher, TotpMatcher},
         MainMatcher, Matcher,
     },
-    util::{secret, select, totp},
+    util::{secret, select, totp, viewer},
 };
 
 /// A TOTP show action.
@@ -81,21 +80,20 @@ impl<'a> Show<'a> {
             )?;
         }
 
-        // Show directly or with timeout
-        match matcher_show.timeout() {
-            None => {
-                secret::print_name(matcher_show.query(), &secret, &store, matcher_main.quiet());
-                totp::print_token(&token, matcher_main.quiet(), Some(ttl));
-            }
-            Some(sec) => action::show::show_timeout(
+        // Show directly or in viewer
+        if matcher_show.viewer() {
+            viewer::viewer(
                 &store,
                 &secret,
                 totp::format_token(&token, matcher_main.quiet(), Some(ttl)),
-                Duration::from_secs(sec?),
+                matcher_show.timeout().transpose()?.map(Duration::from_secs),
                 &matcher_main,
                 matcher_show.query(),
             )
-            .map_err(Err::ShowTimeout)?,
+            .map_err(Err::Viewer)?;
+        } else {
+            secret::print_name(matcher_show.query(), &secret, &store, matcher_main.quiet());
+            totp::print_token(&token, matcher_main.quiet(), Some(ttl));
         }
 
         // Finalize tomb
@@ -133,6 +131,6 @@ pub enum Err {
     #[error("failed to generate TOTP token")]
     Totp(#[source] anyhow::Error),
 
-    #[error("failed to show secret in viewer with timeout")]
-    ShowTimeout(#[source] anyhow::Error),
+    #[error("failed to start secret viewer")]
+    Viewer(#[source] anyhow::Error),
 }

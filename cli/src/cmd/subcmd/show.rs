@@ -1,6 +1,6 @@
 use clap::{Arg, Command};
 
-use crate::cmd::arg::{ArgProperty, ArgQuery, ArgTimeout, CmdArg};
+use crate::cmd::arg::{ArgProperty, ArgQuery, ArgTimeout, ArgViewer, CmdArg};
 
 /// The show command definition.
 pub struct CmdShow;
@@ -24,10 +24,11 @@ impl CmdShow {
             .arg(ArgQuery::build())
             .arg(
                 ArgTimeout::build()
-                    .help("Timeout after which to clear output")
-                    .conflicts_with("no-interact"),
+                    .conflicts_with_all(["no-interact", "viewer"])
+                    .help("Timeout after which to clear output, implies --viewer"),
             )
-            .arg(ArgProperty::build().conflicts_with("first"));
+            .arg(ArgProperty::build().conflicts_with("first"))
+            .arg(ArgViewer::build());
 
         #[cfg(feature = "clipboard")]
         let cmd = cmd.arg(

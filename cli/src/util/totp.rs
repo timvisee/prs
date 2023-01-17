@@ -1,4 +1,6 @@
+#[cfg(feature = "clipboard")]
 use std::io::{Error as IoError, Write};
+#[cfg(feature = "clipboard")]
 use std::process::{Child, Stdio};
 use std::time::SystemTimeError;
 

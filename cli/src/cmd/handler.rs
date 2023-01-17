@@ -23,7 +23,7 @@ impl<'a> Handler {
     /// Build the application CLI definition.
     pub fn build() -> Command {
         // Build the CLI application definition
-        let app = Command::new(crate_name!())
+        let app = Command::new(crate::NAME)
             .version(crate_version!())
             .author(crate_authors!())
             .about(crate_description!())

@@ -82,5 +82,5 @@ pub fn bin_name() -> String {
         .or_else(|| env::current_exe().ok())
         .and_then(|p| p.file_name().map(|n| n.to_owned()))
         .and_then(|n| n.into_string().ok())
-        .unwrap_or_else(|| crate_name!().into())
+        .unwrap_or_else(|| crate::NAME.into())
 }

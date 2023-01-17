@@ -23,6 +23,9 @@ use crate::{
     },
 };
 
+/// Binary name.
+pub const NAME: &str = "prs";
+
 /// Clipboard timeout in seconds.
 #[cfg(feature = "clipboard")]
 const CLIPBOARD_TIMEOUT: u64 = 20;
@@ -153,7 +156,7 @@ pub fn print_main_info(matcher_main: &MainMatcher) -> ! {
     let has_sync = store.as_ref().map(|s| s.sync().is_init()).unwrap_or(false);
 
     // Print the main info
-    eprintln!("{} {}", crate_name!(), crate_version!());
+    eprintln!("{} {}", NAME, crate_version!());
     eprintln!("Usage: {} [FLAGS] <SUBCOMMAND> ...", bin);
     eprintln!(crate_description!());
     eprintln!();

@@ -40,7 +40,8 @@ fn main() {
 
     // Invoke the proper action
     if let Err(err) = invoke_action(&cmd_handler) {
-        quit_error(err, ErrorHints::default());
+        let matcher_main = MainMatcher::with(cmd_handler.matches()).unwrap();
+        quit_error(err, ErrorHints::from_matcher(&matcher_main));
     };
 }
 

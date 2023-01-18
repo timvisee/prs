@@ -197,7 +197,6 @@ impl ErrorHints {
     }
 
     /// Construct an error hints object with defaults based on the main matcher.
-    #[allow(unused)]
     pub fn from_matcher(matcher_main: &MainMatcher) -> Self {
         ErrorHintsBuilder::from_matcher(matcher_main)
             .build()

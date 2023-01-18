@@ -116,10 +116,12 @@ pub struct ErrorHints {
 impl ErrorHints {
     /// Check whether any hint should be printed.
     pub fn any(&self) -> bool {
-        self.sync
+        !self.info.is_empty()
+            || self.sync
             || self.sync_init
             || self.sync_remote
             || self.git
+            || self.allow_dirty
             || self.force
             || self.verbose
             || self.help

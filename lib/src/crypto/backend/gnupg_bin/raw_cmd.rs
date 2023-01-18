@@ -114,6 +114,11 @@ where
         }
     }
     cmd.args(args);
+
+    if config.verbose {
+        log_cmd(&cmd);
+    }
+
     cmd
 }
 
@@ -150,6 +155,49 @@ fn cmd_assert_status(config: &Config, output: &Output) -> Result<()> {
     }
 
     Ok(())
+}
+
+/// Log the command to stderr.
+// TODO: output working directory as well
+// TODO: show stdin given to command
+fn log_cmd(cmd: &Command) {
+    let mut sh_cmd: Vec<String> = vec![];
+
+    // Add environment variables
+    sh_cmd.extend(cmd.get_envs().map(|(k, v)| {
+        format!(
+            "{}={}",
+            shlex::quote(k.to_str().expect("gpg env key is not valid UTF-8")),
+            shlex::quote(
+                v.map(|v| v.to_str().expect("gpg env value is not valid UTF-8"))
+                    .unwrap_or("")
+            ),
+        )
+    }));
+
+    // Add program name
+    sh_cmd.push(
+        shlex::quote(
+            cmd.get_program()
+                .to_str()
+                .expect("gpg program is not valid UTF-8"),
+        )
+        .into(),
+    );
+
+    // Add program arguments
+    sh_cmd.extend(
+        cmd.get_args()
+            .map(|a| shlex::quote(a.to_str().expect("gpg argument is not valid UTF-8")).into()),
+    );
+
+    // Join invoked command into single string, and print
+    let sh_cmd = sh_cmd
+        .into_iter()
+        .filter(|a| !a.is_empty())
+        .collect::<Vec<_>>()
+        .join(" ");
+    eprintln!("$ {}", sh_cmd);
 }
 
 /// Try to parse command output bytes as text.

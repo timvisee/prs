@@ -309,7 +309,19 @@ prs
 ```
 
 ### macOS
-Currently no macOS binaries are provided, you must therefore [compile from source](#build).
+`prs` can be installed using [`homebrew`][homebrew].  
+Alternatively you may [compile from source](#build).
+
+Make sure you've [`homebrew`][homebrew] installed, and run:
+
+```bash
+brew install prs
+prs
+```
+
+_Note: this package isn't automatically updated on release, feel free to
+contribute
+[here](https://github.com/Homebrew/homebrew-core/blob/master/Formula/prs.rb)._
 
 ### Windows
 Using the [`scoop` package](#windows-scoop-package) is recommended.  
@@ -736,6 +748,7 @@ Check out the [lib/LICENSE](lib/LICENSE) file for more information.
 [gitlab-packages]: https://gitlab.com/timvisee/prs/-/packages
 [gitlab-releases]: https://gitlab.com/timvisee/prs/-/releases
 [gpg]: https://gnupg.org/
+[homebrew]: https://brew.sh/
 [linux-notifications]: https://wiki.archlinux.org/index.php/Desktop_notifications
 [pass-compatible-clients]: https://www.passwordstore.org#other
 [pass]: https://www.passwordstore.org/

@@ -37,4 +37,5 @@ pub const STORE_DEFAULT_ROOT: &str = "~\\.password-store";
 const CONFIG: Config = Config {
     proto: Proto::Gpg,
     gpg_tty: false,
+    verbose: false,
 };

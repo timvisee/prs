@@ -22,6 +22,7 @@ const VERSION_MIN: &str = "2.0.0";
 pub fn context(config: &CryptoConfig) -> Result<Context, Err> {
     let mut gpg_config = find_gpg_bin().map_err(Err::Context)?;
     gpg_config.gpg_tty = config.gpg_tty;
+    gpg_config.verbose = config.verbose;
     Ok(Context::from(gpg_config))
 }
 

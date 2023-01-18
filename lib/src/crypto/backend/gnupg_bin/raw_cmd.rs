@@ -2,8 +2,8 @@
 
 use std::char::decode_utf16;
 use std::ffi::OsStr;
-use std::io::Write;
-use std::process::{Command, ExitStatus, Output, Stdio};
+use std::io::{self, Write};
+use std::process::{Command, Output, Stdio};
 
 use anyhow::Result;
 use thiserror::Error;
@@ -59,7 +59,7 @@ where
     S: AsRef<OsStr>,
 {
     let output = gpg_output(config, args)?;
-    cmd_assert_status(output.status)?;
+    cmd_assert_status(config, &output)?;
     Ok(output.stdout)
 }
 
@@ -86,7 +86,7 @@ where
     S: AsRef<OsStr>,
 {
     let output = gpg_stdin_output(config, args, stdin)?;
-    cmd_assert_status(output.status)?;
+    cmd_assert_status(config, &output)?;
     Ok(output.stdout)
 }
 
@@ -101,6 +101,8 @@ where
 
     let mut cmd = Command::new(&config.bin);
     cmd.stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
         .env("LANG", "en_US.UTF-8")
         .env("LANGUAGE", "en_US.UTF-8");
     if config.gpg_tty {
@@ -111,17 +113,42 @@ where
             }
         }
     }
-    cmd.stdout(Stdio::piped()).stderr(Stdio::piped()).args(args);
+    cmd.args(args);
     cmd
 }
 
-/// Assert the exit status of a command.
+/// Assert the exit status of a command based on its output.
+///
+/// On error, this prints stdout/stderr output in verbose mode.
 ///
 /// Returns error is status is not succesful.
-fn cmd_assert_status(status: ExitStatus) -> Result<()> {
-    if !status.success() {
-        return Err(Err::Status(status).into());
+fn cmd_assert_status(config: &Config, output: &Output) -> Result<()> {
+    if !output.status.success() {
+        // Output stdout/stderr in verbose mode
+        if config.verbose {
+            if !output.stdout.is_empty() {
+                let mut stdout = io::stdout();
+                eprintln!("= gnupg stdout: ================");
+                stdout
+                    .write_all(&output.stdout)
+                    .expect("failed to print gnupg stdout");
+                let _ = stdout.flush();
+                eprintln!("================================");
+            }
+            if !output.stderr.is_empty() {
+                let mut stderr = io::stderr();
+                eprintln!("= gnupg stderr: ================");
+                stderr
+                    .write_all(&output.stderr)
+                    .expect("failed to print gnupg stderr");
+                let _ = stderr.flush();
+                eprintln!("================================");
+            }
+        }
+
+        return Err(Err::Status(output.status).into());
     }
+
     Ok(())
 }
 

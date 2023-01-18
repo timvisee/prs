@@ -8,6 +8,7 @@ const PROTO: Proto = Proto::Gpg;
 pub(crate) fn config(matcher_main: &MainMatcher) -> Config {
     let mut config = Config::from(PROTO);
     config.gpg_tty = matcher_main.gpg_tty();
+    config.verbose = matcher_main.verbose();
     config
 }
 

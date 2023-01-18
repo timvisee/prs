@@ -50,6 +50,9 @@ pub struct Config {
 
     /// Use TTY for password input with GPG.
     pub gpg_tty: bool,
+
+    /// Whether to show verbose output.
+    pub verbose: bool,
 }
 
 impl Config {
@@ -58,6 +61,7 @@ impl Config {
         Self {
             proto,
             gpg_tty: false,
+            verbose: false,
         }
     }
 }

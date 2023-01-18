@@ -13,6 +13,9 @@ pub struct Config {
 
     /// Use TTY for GPG password input, rather than GUI pinentry.
     pub gpg_tty: bool,
+
+    /// Whether to show verbose output.
+    pub verbose: bool,
 }
 
 impl Config {
@@ -23,6 +26,7 @@ impl Config {
         Self {
             bin,
             gpg_tty: false,
+            verbose: false,
         }
     }
 }

@@ -112,7 +112,10 @@ pub fn recrypt(store: &Store, secrets: &[Secret], matcher_main: &MainMatcher) ->
         if failed.len() > MAX_FAIL && !matcher_main.force() {
             error::quit_error_msg(
                 format!("stopped after {} failures", failed.len()),
-                ErrorHintsBuilder::default().force(true).build().unwrap(),
+                ErrorHintsBuilder::from_matcher(matcher_main)
+                    .force(true)
+                    .build()
+                    .unwrap(),
             );
         }
     }

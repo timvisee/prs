@@ -43,7 +43,10 @@ impl<'a> Resize<'a> {
             // TODO: error hint to initialize tomb
             error::quit_error_msg(
                 "password store is not a tomb",
-                ErrorHintsBuilder::default().force(true).build().unwrap(),
+                ErrorHintsBuilder::from_matcher(&matcher_main)
+                    .force(true)
+                    .build()
+                    .unwrap(),
             );
         }
 

@@ -43,7 +43,10 @@ impl<'a> Init<'a> {
         if sync.is_init() {
             error::quit_error_msg(
                 "sync is already initialized",
-                ErrorHintsBuilder::default().sync(true).build().unwrap(),
+                ErrorHintsBuilder::from_matcher(&matcher_main)
+                    .sync(true)
+                    .build()
+                    .unwrap(),
             );
         }
 

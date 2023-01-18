@@ -127,7 +127,10 @@ fn grep(
         if failed > MAX_FAIL && !matcher_main.force() {
             error::quit_error_msg(
                 format!("stopped after {} failures", failed),
-                ErrorHintsBuilder::default().force(true).build().unwrap(),
+                ErrorHintsBuilder::from_matcher(matcher_main)
+                    .force(true)
+                    .build()
+                    .unwrap(),
             );
         }
     }

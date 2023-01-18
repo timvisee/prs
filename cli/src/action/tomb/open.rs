@@ -49,7 +49,10 @@ impl<'a> Open<'a> {
             // TODO: error hint to initialize tomb
             error::quit_error_msg(
                 "password store is not a tomb",
-                ErrorHintsBuilder::default().force(true).build().unwrap(),
+                ErrorHintsBuilder::from_matcher(&matcher_main)
+                    .force(true)
+                    .build()
+                    .unwrap(),
             );
         }
 
@@ -57,7 +60,10 @@ impl<'a> Open<'a> {
         if tomb.is_open().map_err(Err::Open)? && !matcher_main.force() {
             error::quit_error_msg(
                 "password store tomb is already open",
-                ErrorHintsBuilder::default().force(true).build().unwrap(),
+                ErrorHintsBuilder::from_matcher(&matcher_main)
+                    .force(true)
+                    .build()
+                    .unwrap(),
             );
         }
 
@@ -117,7 +123,7 @@ pub(crate) fn open(tomb: &mut Tomb, matcher_main: &MainMatcher) -> Result<(), Er
         );
     }
     if show_error_hints {
-        error::ErrorHintsBuilder::default()
+        error::ErrorHintsBuilder::from_matcher(matcher_main)
             .force(true)
             .verbose(true)
             .build()

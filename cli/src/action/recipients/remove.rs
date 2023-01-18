@@ -60,7 +60,7 @@ impl<'a> Remove<'a> {
             error::print_error_msg(
                 "cannot remove last recipient from store, you will permanently loose access to it",
             );
-            error::ErrorHintsBuilder::default()
+            error::ErrorHintsBuilder::from_matcher(&matcher_main)
                 .force(true)
                 .verbose(false)
                 .build()

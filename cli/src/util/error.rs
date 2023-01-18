@@ -5,6 +5,7 @@ pub use std::process::exit;
 
 use anyhow::anyhow;
 
+use crate::cmd::matcher::MainMatcher;
 use crate::util::style::{highlight, highlight_error, highlight_info, highlight_warning};
 
 // /// Print a success message.
@@ -192,6 +193,14 @@ impl ErrorHints {
         // Flush
         let _ = io::stderr().flush();
     }
+
+    /// Construct an error hints object with defaults based on the main matcher.
+    #[allow(unused)]
+    pub fn from_matcher(matcher_main: &MainMatcher) -> Self {
+        ErrorHintsBuilder::from_matcher(matcher_main)
+            .build()
+            .unwrap()
+    }
 }
 
 impl Default for ErrorHints {
@@ -211,6 +220,20 @@ impl Default for ErrorHints {
 }
 
 impl ErrorHintsBuilder {
+    /// Construct an error hints object with defaults based on the main matcher.
+    pub fn from_matcher(matcher_main: &MainMatcher) -> Self {
+        let mut builder = Self::default();
+
+        if matcher_main.force() {
+            builder.force = Some(false);
+        }
+        if matcher_main.verbose() {
+            builder.verbose = Some(false);
+        }
+
+        builder
+    }
+
     /// Add a single info entry.
     pub fn add_info(mut self, info: String) -> Self {
         // Initialize the info list

@@ -46,7 +46,10 @@ impl<'a> Init<'a> {
         if tomb.is_tomb() && !matcher_main.force() {
             error::quit_error_msg(
                 "password store already is a tomb",
-                ErrorHintsBuilder::default().force(true).build().unwrap(),
+                ErrorHintsBuilder::from_matcher(&matcher_main)
+                    .force(true)
+                    .build()
+                    .unwrap(),
             );
         }
 

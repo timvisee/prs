@@ -51,7 +51,7 @@ impl<'a> Remote<'a> {
         if !sync.is_init() {
             error::quit_error_msg(
                 "sync is not configured",
-                ErrorHintsBuilder::default()
+                ErrorHintsBuilder::from_matcher(&matcher_main)
                     .sync_init(true)
                     .build()
                     .unwrap(),
@@ -67,7 +67,10 @@ impl<'a> Remote<'a> {
                     1 => sync.set_remote_url(&remotes[0], url)?,
                     _ => error::quit_error_msg(
                         "multiple remotes configured, cannot set automatically",
-                        ErrorHintsBuilder::default().git(true).build().unwrap(),
+                        ErrorHintsBuilder::from_matcher(&matcher_main)
+                            .git(true)
+                            .build()
+                            .unwrap(),
                     ),
                 }
                 if !matcher_main.quiet() {
@@ -85,7 +88,7 @@ impl<'a> Remote<'a> {
             None => match remotes.len() {
                 0 => error::quit_error_msg(
                     "no remote configured",
-                    ErrorHintsBuilder::default()
+                    ErrorHintsBuilder::from_matcher(&matcher_main)
                         .sync_remote(true)
                         .build()
                         .unwrap(),
@@ -93,7 +96,10 @@ impl<'a> Remote<'a> {
                 1 => println!("{}", sync.remote_url(&remotes[0])?),
                 _ => error::quit_error_msg(
                     "multiple remotes configured, cannot decide automatically",
-                    ErrorHintsBuilder::default().git(true).build().unwrap(),
+                    ErrorHintsBuilder::from_matcher(&matcher_main)
+                        .git(true)
+                        .build()
+                        .unwrap(),
                 ),
             },
         }

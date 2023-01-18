@@ -65,7 +65,7 @@ impl<'a> Sync<'a> {
             Readyness::NoSync => {
                 error::quit_error_msg(
                     "sync not configured",
-                    ErrorHintsBuilder::default()
+                    ErrorHintsBuilder::from_matcher(&matcher_main)
                         .sync_init(true)
                         .build()
                         .unwrap(),

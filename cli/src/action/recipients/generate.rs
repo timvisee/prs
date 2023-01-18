@@ -62,7 +62,10 @@ impl<'a> Generate<'a> {
         if matcher_main.no_interact() && !matcher_main.force() {
             error::quit_error_msg(
                 "generating recipient with --no-interact is not supported",
-                ErrorHintsBuilder::default().force(true).build().unwrap(),
+                ErrorHintsBuilder::from_matcher(&matcher_main)
+                    .force(true)
+                    .build()
+                    .unwrap(),
             )
         }
 
@@ -85,7 +88,7 @@ impl<'a> Generate<'a> {
             if new.keys().is_empty() {
                 error::quit_error_msg(
                     "not adding recipient to store because no new keys are found",
-                    ErrorHintsBuilder::default()
+                    ErrorHintsBuilder::from_matcher(&matcher_main)
                         .add_info(format!(
                             "Use '{}' to add a recipient",
                             style::highlight("prs recipients add")

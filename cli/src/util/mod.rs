@@ -37,15 +37,15 @@ use crate::util::error::{quit_error_msg, ErrorHints};
 /// Quit on error.
 // TODO: do not wrap commands in sh/cmd, we should not have to do this and only causes problems
 // TODO: provide list of arguments instead of a command string for better reliability/compatability
-pub fn invoke_cmd(cmd: String, dir: Option<&Path>, verbose: bool) -> Result<(), std::io::Error> {
+pub fn invoke_cmd(cmd: &str, dir: Option<&Path>, verbose: bool) -> Result<(), std::io::Error> {
     if verbose {
-        eprintln!("Invoking: {}\n", cmd);
+        eprintln!("$ {}\n", cmd);
     }
 
     // Invoke command
-    let mut process = Command::new(if cfg!(not(windows)) { "sh" } else { "cmd" });
-    process.arg(if cfg!(not(windows)) { "-c" } else { "/C" });
-    process.arg(&cmd);
+    let args = shlex::split(cmd).expect("no command specified");
+    let mut process = Command::new(&args[0]);
+    process.args(&args[1..]);
     if let Some(dir) = dir {
         process.current_dir(dir);
     }

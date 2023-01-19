@@ -2021,6 +2021,7 @@ dependencies = [
  "rand",
  "regex",
  "shellexpand",
+ "shlex",
  "skim",
  "text_trees",
  "thiserror",

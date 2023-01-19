@@ -1,5 +1,8 @@
+pub mod commit;
 pub mod init;
 pub mod remote;
+pub mod reset;
+pub mod status;
 
 use clap::ArgMatches;
 
@@ -13,6 +16,11 @@ pub struct SyncMatcher<'a> {
 }
 
 impl<'a: 'b, 'b> SyncMatcher<'a> {
+    /// Get the sync commit sub command, if matched.
+    pub fn cmd_commit(&'a self) -> Option<commit::CommitMatcher> {
+        commit::CommitMatcher::with(self.root)
+    }
+
     /// Get the sync init sub command, if matched.
     pub fn cmd_init(&'a self) -> Option<init::InitMatcher> {
         init::InitMatcher::with(self.root)
@@ -21,6 +29,16 @@ impl<'a: 'b, 'b> SyncMatcher<'a> {
     /// Get the sync remote sub command, if matched.
     pub fn cmd_remote(&'a self) -> Option<remote::RemoteMatcher> {
         remote::RemoteMatcher::with(self.root)
+    }
+
+    /// Get the sync reset sub command, if matched.
+    pub fn cmd_reset(&'a self) -> Option<reset::ResetMatcher> {
+        reset::ResetMatcher::with(self.root)
+    }
+
+    /// Get the sync status sub command, if matched.
+    pub fn cmd_status(&'a self) -> Option<status::StatusMatcher> {
+        status::StatusMatcher::with(self.root)
     }
 
     /// Whether to allow a dirty repository for syncing.

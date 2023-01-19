@@ -161,17 +161,19 @@ impl ErrorHints {
                 highlight(&format!("{} sync remote [GIT_URL]", bin))
             );
         }
+        if self.git || self.allow_dirty {
+            eprintln!(
+                "Use '{}' to show sync status, uncommitted changes and help",
+                highlight(&format!("{} sync status", bin))
+            );
+        }
         if self.git {
             eprintln!(
-                "Use '{}' to inspect or resolve this issue",
+                "Use '{}' to inspect or resolve this issue using git",
                 highlight(&format!("{} git", bin))
             );
         }
         if self.allow_dirty {
-            eprintln!(
-                "Use '{}' to show uncommitted changes",
-                highlight(&format!("{} git status", bin))
-            );
             eprintln!(
                 "To make changes while the store repository is dirty add '{}'",
                 highlight("--allow-dirty")

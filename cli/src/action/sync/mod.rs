@@ -1,5 +1,8 @@
+pub mod commit;
 pub mod init;
 pub mod remote;
+pub mod reset;
+pub mod status;
 
 use anyhow::Result;
 use clap::ArgMatches;
@@ -39,12 +42,21 @@ impl<'a> Sync<'a> {
         let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
         let matcher_sync = SyncMatcher::with(self.cmd_matches).unwrap();
 
+        // Subcommands
+        if matcher_sync.cmd_commit().is_some() {
+            return commit::Commit::new(self.cmd_matches).invoke();
+        }
         if matcher_sync.cmd_init().is_some() {
             return init::Init::new(self.cmd_matches).invoke();
         }
-
+        if matcher_sync.cmd_status().is_some() {
+            return status::Status::new(self.cmd_matches).invoke();
+        }
         if matcher_sync.cmd_remote().is_some() {
             return remote::Remote::new(self.cmd_matches).invoke();
+        }
+        if matcher_sync.cmd_reset().is_some() {
+            return reset::Reset::new(self.cmd_matches).invoke();
         }
 
         let store = Store::open(matcher_main.store()).map_err(Err::Store)?;

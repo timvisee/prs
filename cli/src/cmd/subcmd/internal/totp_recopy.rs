@@ -9,6 +9,6 @@ impl CmdTotpRecopy {
     pub fn build() -> Command {
         Command::new("totp-recopy")
             .about("Copy TOTP tokens, recopy on change")
-            .arg(ArgTimeout::build().required(true))
+            .arg(ArgTimeout::build().global(false).required(true))
     }
 }

@@ -2,6 +2,7 @@ pub mod commit;
 pub mod init;
 pub mod remote;
 pub mod reset;
+pub mod status;
 
 use anyhow::Result;
 use clap::ArgMatches;
@@ -47,6 +48,9 @@ impl<'a> Sync<'a> {
         }
         if matcher_sync.cmd_init().is_some() {
             return init::Init::new(self.cmd_matches).invoke();
+        }
+        if matcher_sync.cmd_status().is_some() {
+            return status::Status::new(self.cmd_matches).invoke();
         }
         if matcher_sync.cmd_remote().is_some() {
             return remote::Remote::new(self.cmd_matches).invoke();

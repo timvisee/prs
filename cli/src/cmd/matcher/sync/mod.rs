@@ -2,6 +2,7 @@ pub mod commit;
 pub mod init;
 pub mod remote;
 pub mod reset;
+pub mod status;
 
 use clap::ArgMatches;
 
@@ -33,6 +34,11 @@ impl<'a: 'b, 'b> SyncMatcher<'a> {
     /// Get the sync reset sub command, if matched.
     pub fn cmd_reset(&'a self) -> Option<reset::ResetMatcher> {
         reset::ResetMatcher::with(self.root)
+    }
+
+    /// Get the sync status sub command, if matched.
+    pub fn cmd_status(&'a self) -> Option<status::StatusMatcher> {
+        status::StatusMatcher::with(self.root)
     }
 
     /// Whether to allow a dirty repository for syncing.

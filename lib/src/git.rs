@@ -56,6 +56,11 @@ pub fn git_commit(repo: &Path, msg: &str, commit_empty: bool) -> Result<()> {
     git(repo, &args, false)
 }
 
+/// Git hard reset all changes.
+pub fn git_reset_hard(repo: &Path) -> Result<()> {
+    git(repo, &["reset", "--hard", "-q"], false)
+}
+
 /// Invoke git push.
 pub fn git_push(repo: &Path, set_branch: Option<&str>, set_upstream: Option<&str>) -> Result<()> {
     // TODO: do not set -q flag if in verbose mode?

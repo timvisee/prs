@@ -1,6 +1,7 @@
 pub mod commit;
 pub mod init;
 pub mod remote;
+pub mod reset;
 
 use clap::Command;
 
@@ -13,9 +14,10 @@ impl CmdSync {
     pub fn build() -> Command {
         Command::new("sync")
             .about("Sync password store")
-            .subcommand(commit::CmdCommit::build())
             .subcommand(init::CmdInit::build())
             .subcommand(remote::CmdRemote::build())
+            .subcommand(commit::CmdCommit::build())
+            .subcommand(reset::CmdReset::build())
             .arg(ArgAllowDirty::build())
     }
 }

@@ -231,6 +231,13 @@ impl<'a> Sync<'a> {
         git::git_add_all(path)?;
         git::git_commit(path, msg.as_ref(), commit_empty)
     }
+
+    /// Hard reset all changes.
+    pub fn reset_hard_all(&self) -> Result<()> {
+        let path = self.path();
+        git::git_add_all(path)?;
+        git::git_reset_hard(path)
+    }
 }
 
 /// Defines readyness of store sync.

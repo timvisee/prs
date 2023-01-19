@@ -2,7 +2,7 @@ use clap::{Arg, Command};
 
 use crate::cmd::arg::{ArgNoSync, CmdArg};
 
-/// The sync commit command defcommition.
+/// The sync commit command definition.
 pub struct CmdCommit;
 
 impl CmdCommit {
@@ -19,6 +19,6 @@ impl CmdCommit {
                     .global(true)
                     .help("Custom commit message"),
             )
-            .arg(ArgNoSync::build())
+            .arg(ArgNoSync::build().help("Do not sync changes after commit"))
     }
 }

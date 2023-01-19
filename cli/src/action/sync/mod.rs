@@ -1,6 +1,7 @@
 pub mod commit;
 pub mod init;
 pub mod remote;
+pub mod reset;
 
 use anyhow::Result;
 use clap::ArgMatches;
@@ -49,6 +50,9 @@ impl<'a> Sync<'a> {
         }
         if matcher_sync.cmd_remote().is_some() {
             return remote::Remote::new(self.cmd_matches).invoke();
+        }
+        if matcher_sync.cmd_reset().is_some() {
+            return reset::Reset::new(self.cmd_matches).invoke();
         }
 
         let store = Store::open(matcher_main.store()).map_err(Err::Store)?;

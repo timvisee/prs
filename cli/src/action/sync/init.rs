@@ -7,7 +7,10 @@ use thiserror::Error;
 use crate::util::tomb;
 use crate::{
     cmd::matcher::{sync::SyncMatcher, MainMatcher, Matcher},
-    util::error::{self, ErrorHintsBuilder},
+    util::{
+        error::{self, ErrorHintsBuilder},
+        style::highlight,
+    },
 };
 
 /// A sync init action.
@@ -63,8 +66,15 @@ impl<'a> Init<'a> {
 
         if !matcher_main.quiet() {
             eprintln!("Sync initialized");
+
             if !sync.has_remote()? {
-                eprintln!("Sync remote not configured, to set use: prs sync remote <GIT_URL>");
+                let bin = crate::util::bin_name();
+                eprintln!();
+                eprintln!("Sync remote not configured, to configure a remote use:");
+                eprintln!(
+                    "    {}",
+                    highlight(&format!("{} sync remote <GIT_URL>", bin))
+                );
             }
         }
 

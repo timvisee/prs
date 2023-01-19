@@ -1,5 +1,46 @@
 # Changelog
 
+## 0.5.0 (2023-01-19)
+- Add `prs` homebrew package for macOS
+- Add `sync status` command to show sync status, changed files and sync command
+  hints
+- Add `sync commit` command to commit all uncommitted changes in password store
+- Add `sync reset` command to reset all uncommitted changes in password store
+- Add secure viewer to show secret contents in TTY that clears when closed,
+  instead of outputting to stdout
+- Add `--viewer` flag to show contents in secure viewer with `show` and other
+  commands
+- Using `--timeout` now shows contents in secure viewer as this is much more
+  reliable
+- Add new clipboard handling system making it more secure, reliable and robust
+- Make clipboard reverting much more reliable
+- Fix clipboard reverting breaking when user copies again before reverting
+- Using `totp copy` now recopies the token when it changes within the timeout
+- Using `generate -ec` now copies the generated password both before and after
+  editing
+- Clipboard notifications now show if contents are reverted, replaced or cleared
+- Don't fork process on X11 when setting clipboard due to security concerns
+- Propagate `--quiet` and `--verbose` flags to clipboard handling and
+  notifications
+- Fix errors when using relative path for password store with `--store` or
+  `PASSWORD_STORE_DIR`
+- Fix `slam` errors, don't invoke `gpgconf`, `keychain` or `pkill` binaries if
+  they don't exist
+- Abort `grep` and `recrypt` commands after 5 failures unless forced
+- Fix panic using `show` when secret has non UTF-8 contents
+- Fix runtime errors for some regular expressions due to missing Perl features
+- Show verbose output and detailed errors when using `--verbose` with
+  `gnupg-bin` backend
+- Using `git` command now invokes git directly instead of calling through `sh`
+  making it more robust
+- Make sync remote hint style after `sync init` consistent with other hints
+- Don't show `--verbose` and `--force` hints in error output when already used
+- Don't allow `--no-interact` together with `--viewer` or `--timeout`
+- Rename `prs-cli` to `prs` in help output to be consistent with the binary name
+- Remove all `unsafe` usages from codebase
+- Show compiler warning when no interaction selection mode feature is used
+- Update dependencies
+
 ## 0.4.1 (2023-01-11)
 - Add `grep` command to search secret contents
 - Add `search` alias for `list`

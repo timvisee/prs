@@ -693,7 +693,7 @@ See a list of compatible `pass` clients [here][pass-compatible-clients].
 ```
 $ prs help
 
-prs 0.4.1
+prs 0.5.0
 Tim Visee <3a4fb3964f@sinenomine.email>
 Secure, fast & convenient password manager CLI with GPG & git sync
 
@@ -714,7 +714,7 @@ Commands:
   init          Initialize new password store
   clone         Clone existing password store
   sync          Sync password store
-  slam          Aggresively lock password store & keys preventing access (emergency)
+  slam          Aggressively lock password store & keys preventing access (emergency)
   totp          Manage TOTP tokens
   recipients    Manage store recipients
   git           Invoke git command in password store
@@ -723,15 +723,15 @@ Commands:
   help          Print this message or the help of the given subcommand(s)
 
 Options:
-  -f, --force        Force the action, ignore warnings
-  -I, --no-interact  Not interactive, do not prompt
-  -y, --yes          Assume yes for prompts
-  -q, --quiet        Produce output suitable for logging and automation
-  -v, --verbose...   Enable verbose information and logging
-      --gpg-tty      Instruct GPG to ask passphrase in TTY rather than pinentry
-  -s, --store <PATH>  Password store to use [env: PASSWORD_STORE_DIR]
-  -h, --help         Print help information
-  -V, --version      Print version information
+  -f, --force         Force the action, ignore warnings
+  -I, --no-interact   Not interactive, do not prompt
+  -y, --yes           Assume yes for prompts
+  -q, --quiet         Produce output suitable for logging and automation
+  -v, --verbose...    Enable verbose information and logging
+  -s, --store <PATH>  Password store to use [env: PASSWORD_STORE_DIR=]
+      --gpg-tty       Instruct GPG to ask passphrase in TTY rather than pinentry
+  -h, --help          Print help
+  -V, --version       Print version
 ```
 
 ## License

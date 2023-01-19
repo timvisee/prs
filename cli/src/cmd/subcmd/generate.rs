@@ -9,6 +9,7 @@ pub struct CmdGenerate;
 
 impl CmdGenerate {
     pub fn build() -> Command {
+        #[allow(clippy::let_and_return)]
         let cmd = Command::new("generate")
             .alias("gen")
             .alias("g")

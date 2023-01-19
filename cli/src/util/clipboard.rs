@@ -131,6 +131,7 @@ impl SharedContext {
     }
 
     /// Get clipboard context display server.
+    #[allow(unused)]
     pub fn display_server(&self) -> Result<Option<DisplayServer>> {
         self.ensure_context()?;
         Ok(self
@@ -381,7 +382,7 @@ fn get() -> Result<Plaintext> {
 fn set(
     data: &Plaintext,
     forever: bool,
-    forever_blocks: bool,
+    #[allow(unused_variables)] forever_blocks: bool,
     quiet: bool,
     verbose: bool,
 ) -> Result<()> {

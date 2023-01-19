@@ -7,6 +7,7 @@ pub struct CmdShow;
 
 impl CmdShow {
     pub fn build() -> Command {
+        #[allow(clippy::let_and_return)]
         let cmd = Command::new("show")
             .alias("s")
             .alias("cat")

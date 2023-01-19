@@ -1,12 +1,16 @@
 use std::collections::HashMap;
+use std::env;
+#[cfg(unix)]
+use std::fs;
 #[cfg(unix)]
 use std::os::unix::fs::FileTypeExt;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::sync::Mutex;
-use std::{env, fs};
 
-use crate::{git, Store};
+use crate::git;
+#[cfg(unix)]
+use crate::Store;
 
 #[cfg(unix)]
 use ofiles::opath;

@@ -94,40 +94,40 @@ impl<'a> Status<'a> {
             let bin = crate::util::bin_name();
             if readyness == Readyness::NoSync {
                 eprintln!(
-                    "To initialize sync for your password store use '{}'",
+                    "Use '{}' to initialize sync for your password store",
                     highlight(&format!("{} sync init", bin))
                 );
             } else {
                 if readyness == Readyness::Dirty {
                     eprintln!(
-                        "To commit dirty changes in your password store use '{}'",
+                        "Use '{}' to commit dirty changes in your password store",
                         highlight(&format!("{} sync commit", bin))
                     );
                     eprintln!(
-                        "To reset dirty changes in your password store use '{}'",
+                        "Use '{}' to reset dirty changes in your password store",
                         highlight(&format!("{} sync reset", bin))
-                    );
-                }
-                if readyness != Readyness::Ready {
-                    eprintln!(
-                        "To inspect or resolve sync repository issues use '{}'",
-                        highlight(&format!("{} git", bin))
                     );
                 }
                 if show_changes {
                     eprintln!(
-                        "To view changed files in detail use '{}'",
+                        "Use '{}' to view changed files in detail",
                         highlight(&format!("{} git status", bin))
+                    );
+                }
+                if readyness != Readyness::Ready {
+                    eprintln!(
+                        "Use '{}' to inspect or resolve sync repository issues using git",
+                        highlight(&format!("{} git", bin))
                     );
                 }
                 if !has_remote {
                     eprintln!(
-                        "To configure a remote use '{}'",
+                        "Use '{}' to configure a remote",
                         highlight(&format!("{} sync remote <GIT_URL>", bin))
                     );
                 }
                 eprintln!(
-                    "To sync your password store use '{}'",
+                    "Use '{}' to sync your password store",
                     highlight(&format!("{} sync", bin))
                 );
             }

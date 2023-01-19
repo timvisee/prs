@@ -87,12 +87,13 @@ impl<'a> Commit<'a> {
         }
 
         // Commit changes
-        sync.commit_all("Manual sync commit", matcher_main.force())
+        let msg = matcher_commit.message().unwrap_or("Manual sync commit");
+        sync.commit_all(msg, matcher_main.force())
             .map_err(Err::Commit)?;
 
         // Finalize sync
         if !matcher_commit.no_sync() {
-            sync.finalize("Manual sync commit")?;
+            sync.finalize(msg)?;
         }
 
         // Finalize tomb

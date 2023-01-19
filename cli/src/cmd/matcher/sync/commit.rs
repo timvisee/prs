@@ -13,6 +13,11 @@ impl<'a: 'b, 'b> CommitMatcher<'a> {
     pub fn no_sync(&self) -> bool {
         ArgNoSync::is_present(self.matches)
     }
+
+    /// Custom commit message.
+    pub fn message(&self) -> Option<&str> {
+        self.matches.get_one("message").map(|s: &String| s.as_str())
+    }
 }
 
 impl<'a> Matcher<'a> for CommitMatcher<'a> {

@@ -1,3 +1,4 @@
+pub mod commit;
 pub mod init;
 pub mod remote;
 
@@ -13,6 +14,11 @@ pub struct SyncMatcher<'a> {
 }
 
 impl<'a: 'b, 'b> SyncMatcher<'a> {
+    /// Get the sync commit sub command, if matched.
+    pub fn cmd_commit(&'a self) -> Option<commit::CommitMatcher> {
+        commit::CommitMatcher::with(self.root)
+    }
+
     /// Get the sync init sub command, if matched.
     pub fn cmd_init(&'a self) -> Option<init::InitMatcher> {
         init::InitMatcher::with(self.root)

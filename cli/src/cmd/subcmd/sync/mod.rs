@@ -1,3 +1,4 @@
+pub mod commit;
 pub mod init;
 pub mod remote;
 
@@ -12,6 +13,7 @@ impl CmdSync {
     pub fn build() -> Command {
         Command::new("sync")
             .about("Sync password store")
+            .subcommand(commit::CmdCommit::build())
             .subcommand(init::CmdInit::build())
             .subcommand(remote::CmdRemote::build())
             .arg(ArgAllowDirty::build())

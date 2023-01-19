@@ -226,7 +226,7 @@ impl<'a> Sync<'a> {
     }
 
     /// Add all changes and commit them.
-    fn commit_all<M: AsRef<str>>(&self, msg: M, commit_empty: bool) -> Result<()> {
+    pub fn commit_all<M: AsRef<str>>(&self, msg: M, commit_empty: bool) -> Result<()> {
         let path = self.path();
         git::git_add_all(path)?;
         git::git_commit(path, msg.as_ref(), commit_empty)

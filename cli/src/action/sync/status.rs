@@ -1,6 +1,9 @@
 use anyhow::Result;
 use clap::ArgMatches;
-use prs_lib::{sync::Readyness, Store};
+use prs_lib::{
+    sync::{Readyness, Sync},
+    Store,
+};
 use thiserror::Error;
 
 #[cfg(all(feature = "tomb", target_os = "linux"))]
@@ -69,23 +72,10 @@ impl<'a> Status<'a> {
         // List changed files if dirty or in unexpected state
         let mut show_changes = is_dirty || matches!(readyness, Readyness::RepoState(_));
         if show_changes {
-            let changed_files = sync
-                .changed_files_raw(!matcher_main.verbose())
-                .map_err(Err::ChangedFiles)?;
-            show_changes = !changed_files.is_empty();
-            if show_changes {
-                if !matcher_main.quiet() {
-                    eprintln!();
-                    eprintln!("Changed files:");
-                }
-                changed_files.lines().for_each(|l| {
-                    if !matcher_main.quiet() {
-                        println!("- {}", l)
-                    } else {
-                        println!("{}", l)
-                    }
-                });
+            if !matcher_main.quiet() {
+                eprintln!();
             }
+            show_changes = print_changed_files(&sync, &matcher_main)?;
         }
 
         // Show hints
@@ -139,6 +129,32 @@ impl<'a> Status<'a> {
 
         Ok(())
     }
+}
+
+/// Print a list of changed files.
+///
+/// Returns false if no file was listed.
+pub(super) fn print_changed_files(sync: &Sync, matcher_main: &MainMatcher) -> Result<bool> {
+    // List changed files, return early if empty
+    let changed_files = sync
+        .changed_files_raw(!matcher_main.verbose())
+        .map_err(Err::ChangedFiles)?;
+    if changed_files.is_empty() {
+        return Ok(false);
+    }
+
+    if !matcher_main.quiet() {
+        eprintln!("Changed files:");
+    }
+    changed_files.lines().for_each(|l| {
+        if !matcher_main.quiet() {
+            println!("- {}", l)
+        } else {
+            println!("{}", l)
+        }
+    });
+
+    Ok(true)
 }
 
 #[derive(Debug, Error)]

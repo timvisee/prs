@@ -76,10 +76,18 @@ impl<'a> Reset<'a> {
             }
         }
 
+        // List changed files
+        if !matcher_main.quiet() {
+            if let Err(err) = super::status::print_changed_files(&sync, &matcher_main) {
+                error::print_error(err.context("failed to print list of changed files, ignoring"));
+            }
+            eprintln!();
+        }
+
         // Confirm
         eprintln!("Password store got into a dirty state unexpectedly.");
-        eprintln!("Resetting may wipe sensitive information irrecoverably.");
-        if !cli::prompt_yes("Continue to reset?", Some(false), &matcher_main) {
+        eprintln!("Resetting the above changes may wipe sensitive information irrecoverably.");
+        if !cli::prompt_yes("Reset above changes?", Some(false), &matcher_main) {
             if matcher_main.verbose() {
                 eprintln!("Reset cancelled");
             }

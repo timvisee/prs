@@ -76,10 +76,18 @@ impl<'a> Commit<'a> {
             }
         }
 
+        // List changed files
+        if !matcher_main.quiet() {
+            if let Err(err) = super::status::print_changed_files(&sync, &matcher_main) {
+                error::print_error(err.context("failed to print list of changed files, ignoring"));
+            }
+            eprintln!();
+        }
+
         // Confirm
         eprintln!("Password store got into a dirty state unexpectedly.");
-        eprintln!("Committing may break your password store and may cause unexpected results.");
-        if !cli::prompt_yes("Continue to commit?", Some(false), &matcher_main) {
+        eprintln!("Committing the above changes may break your password store and may cause unexpected results.");
+        if !cli::prompt_yes("Commit above changes?", Some(false), &matcher_main) {
             if matcher_main.verbose() {
                 eprintln!("Commit cancelled");
             }

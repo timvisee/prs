@@ -98,16 +98,16 @@ base64 = { version = "0.21", optional = true }
 
 # Clipboard support for non-X11/Wayland
 [target.'cfg(not(all(unix, not(any(target_os="macos", target_os="android", target_os="emscripten")))))'.dependencies]
-copypasta-ext = { version = "0.4", optional = true, default-features = false }
+copypasta-ext = { version = "0.4.1", optional = true, default-features = false }
 
 # Clipboard support for X11/Wayland
 [target.'cfg(all(unix, not(any(target_os="macos", target_os="android", target_os="emscripten")), not(target_env = "musl")))'.dependencies]
-copypasta-ext = { version = "0.4", optional = true, default-features = false, features = ["wayland-bin"] }
+copypasta-ext = { version = "0.4.1", optional = true, default-features = false, features = ["wayland-bin"] }
 x11-clipboard = { version = "0.7", optional = true }
 
 # Clipboard support for X11/Wayland musl
 [target.'cfg(all(unix, not(any(target_os="macos", target_os="android", target_os="emscripten")), target_env = "musl"))'.dependencies]
-copypasta-ext = { version = "0.4", optional = true, default-features = false, features = ["x11-bin", "wayland-bin"] }
+copypasta-ext = { version = "0.4.1", optional = true, default-features = false, features = ["x11-bin", "wayland-bin"] }
 
 # Interactive selection with skim on unix platforms
 [target.'cfg(unix)'.dependencies]

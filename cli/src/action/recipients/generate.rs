@@ -156,7 +156,7 @@ pub fn gpg_generate(matcher_main: &MainMatcher) -> Result<Recipients> {
         eprintln!("===== GPG START =====");
     }
     util::invoke_cmd(
-        format!("{} --full-generate-key", BIN_NAME),
+        &format!("{} --full-generate-key", BIN_NAME),
         None,
         matcher_main.verbose(),
     )

@@ -54,17 +54,39 @@ impl<'a> Status<'a> {
         };
         let is_dirty = readyness == Readyness::Dirty;
         let has_remote = readyness != Readyness::NoSync && sync.has_remote()?;
-        println!("Sync state: {}", state_msg);
-        println!(
-            "Uncommitted changes: {}",
-            if is_dirty { "yes" } else { "no" }
-        );
-        println!(
-            "Remote configured: {}",
-            if has_remote { "yes" } else { "no" }
-        );
+        if !matcher_main.quiet() {
+            println!("Sync state: {}", state_msg);
+            println!(
+                "Uncommitted changes: {}",
+                if is_dirty { "yes" } else { "no" }
+            );
+            println!(
+                "Remote configured: {}",
+                if has_remote { "yes" } else { "no" }
+            );
+        }
 
-        // TODO: changed files?
+        // List changed files if dirty or in unexpected state
+        let mut show_changes = is_dirty || matches!(readyness, Readyness::RepoState(_));
+        if show_changes {
+            let changed_files = sync
+                .changed_files_raw(!matcher_main.verbose())
+                .map_err(Err::ChangedFiles)?;
+            show_changes = !changed_files.is_empty();
+            if show_changes {
+                if !matcher_main.quiet() {
+                    eprintln!();
+                    eprintln!("Changed files:");
+                }
+                changed_files.lines().for_each(|l| {
+                    if !matcher_main.quiet() {
+                        println!("- {}", l)
+                    } else {
+                        println!("{}", l)
+                    }
+                });
+            }
+        }
 
         // Show hints
         if !matcher_main.quiet() {
@@ -90,6 +112,12 @@ impl<'a> Status<'a> {
                     eprintln!(
                         "To inspect or resolve sync repository issues use '{}'",
                         highlight(&format!("{} git", bin))
+                    );
+                }
+                if show_changes {
+                    eprintln!(
+                        "To view changed files in detail use '{}'",
+                        highlight(&format!("{} git status", bin))
                     );
                 }
                 if !has_remote {
@@ -121,4 +149,7 @@ pub enum Err {
     #[cfg(all(feature = "tomb", target_os = "linux"))]
     #[error("failed to prepare password store tomb for usage")]
     Tomb(#[source] anyhow::Error),
+
+    #[error("failed to list changed files")]
+    ChangedFiles(#[source] anyhow::Error),
 }

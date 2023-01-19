@@ -61,6 +61,15 @@ pub fn git_reset_hard(repo: &Path) -> Result<()> {
     git(repo, &["reset", "--hard", "-q"], false)
 }
 
+/// Git status.
+pub fn git_status(repo: &Path, short: bool) -> Result<String> {
+    let mut args = vec!["status"];
+    if short {
+        args.push("--short");
+    }
+    git_stdout_ok(repo, &args, false)
+}
+
 /// Invoke git push.
 pub fn git_push(repo: &Path, set_branch: Option<&str>, set_upstream: Option<&str>) -> Result<()> {
     // TODO: do not set -q flag if in verbose mode?

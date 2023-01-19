@@ -238,6 +238,22 @@ impl<'a> Sync<'a> {
         git::git_add_all(path)?;
         git::git_reset_hard(path)
     }
+
+    /// Get a list of changed files as raw output.
+    /// This output is directly from git, is not processed, and is not stable.
+    ///
+    /// If the list is empty, an empty string is returned.
+    pub fn changed_files_raw(&self, short: bool) -> Result<String> {
+        let path = self.path();
+        let mut status = git::git_status(path, short)?;
+
+        // If empty when trimmed, wipe completely
+        if status.trim().is_empty() {
+            status.truncate(0);
+        }
+
+        Ok(status)
+    }
 }
 
 /// Defines readyness of store sync.

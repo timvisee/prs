@@ -190,6 +190,19 @@ impl<'a> Sync<'a> {
         git::git_remote(self.path())
     }
 
+    /// Get a list of tracked remote or all sync remotes.
+    pub fn tracked_remote_or_remotes(&self) -> Result<Vec<String>> {
+        // Get current branch and remote
+        let branch = git::git_current_branch(self.path())?;
+        let remote = git::git_branch_get_remote(self.path(), &branch);
+        if let Ok(Some(remote)) = remote {
+            return Ok(vec![remote]);
+        }
+
+        // Fall back to remote list
+        git::git_remote(self.path())
+    }
+
     /// Get the URL of the given remote.
     pub fn remote_url(&self, remote: &str) -> Result<String> {
         git::git_remote_get_url(self.path(), remote)

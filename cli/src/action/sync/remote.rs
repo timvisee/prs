@@ -59,7 +59,7 @@ impl<'a> Remote<'a> {
         }
 
         // Get or set remote
-        let remotes = sync.remotes()?;
+        let remotes = sync.tracked_remote_or_remotes()?;
         match matcher_remote.git_url() {
             Some(url) => {
                 match remotes.len() {

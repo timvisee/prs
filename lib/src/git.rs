@@ -144,7 +144,7 @@ pub fn git_current_branch(repo: &Path) -> Result<String> {
 }
 
 /// Get the current remote name for a git branch.
-pub fn git_branch_get_remote(repo: &Path, branch: &str) -> Result<Option<String>> {
+pub fn git_config_branch_remote(repo: &Path, branch: &str) -> Result<Option<String>> {
     // Grap configured remote for branch
     let mut remote = git_stdout_ok_or(
         repo,
@@ -170,6 +170,16 @@ pub fn git_branch_get_remote(repo: &Path, branch: &str) -> Result<Option<String>
 
     assert!(!branch.contains('\n'), "git returned multiple remotes");
     Ok(Some(remote))
+}
+
+/// Set the current remote name for a git branch.
+pub fn git_config_branch_set_remote(repo: &Path, branch: &str, remote: &str) -> Result<()> {
+    git_stdout_ok(
+        repo,
+        &["config", &format!("branch.{}.remote", branch), remote],
+        false,
+    )
+    .map(|_| ())
 }
 
 /// List remote git branches.

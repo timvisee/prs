@@ -3,6 +3,9 @@ use clap::ArgMatches;
 use prs_lib::Store;
 use thiserror::Error;
 
+/// The default name for a git remote.
+const DEFAULT_GIT_REMOTE_NAME: &str = "origin";
+
 #[cfg(all(feature = "tomb", target_os = "linux"))]
 use crate::util::tomb;
 use crate::{
@@ -63,7 +66,7 @@ impl<'a> Remote<'a> {
         match matcher_remote.git_url() {
             Some(url) => {
                 match remotes.len() {
-                    0 => sync.add_remote_url("origin", url)?,
+                    0 => sync.add_remote_url(DEFAULT_GIT_REMOTE_NAME, url)?,
                     1 => sync.set_remote_url(&remotes[0], url)?,
                     _ => error::quit_error_msg(
                         "multiple remotes configured, cannot set automatically",

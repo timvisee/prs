@@ -194,7 +194,7 @@ impl<'a> Sync<'a> {
     pub fn tracked_remote_or_remotes(&self) -> Result<Vec<String>> {
         // Get current branch and remote
         let branch = git::git_current_branch(self.path())?;
-        let remote = git::git_branch_get_remote(self.path(), &branch);
+        let remote = git::git_config_branch_remote(self.path(), &branch);
         if let Ok(Some(remote)) = remote {
             return Ok(vec![remote]);
         }
@@ -210,7 +210,15 @@ impl<'a> Sync<'a> {
 
     /// Add the URL of the given remote.
     pub fn add_remote_url(&self, remote: &str, url: &str) -> Result<()> {
-        git::git_remote_add(self.path(), remote, url)
+        git::git_remote_add(self.path(), remote, url)?;
+
+        // Set this remote for the current branch if none is set, ignore errors
+        let branch = git::git_current_branch(self.path());
+        if let Ok(ref branch) = branch {
+            let _ = git::git_config_branch_set_remote(self.path(), branch, remote);
+        }
+
+        Ok(())
     }
 
     /// Set the URL of the given remote.

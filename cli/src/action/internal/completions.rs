@@ -81,16 +81,16 @@ where
             let mut inner_buf = Vec::new();
             clap_complete::generate(shells::Bash, app, bin_name, &mut inner_buf);
 
+            // Patch bash completion to complete secret names
             let inner_buf = String::from_utf8(inner_buf)
-                .expect("clap_complete::generate should always return valid utf-8");
-
-            let inner_buf = inner_buf
+                .expect("clap_complete::generate should always return valid utf-8")
                 .replace("<QUERY>", "$(prs list --list --quiet)")
                 .replace("[QUERY]", "$(prs list --list --quiet)");
 
             buf.write_fmt(format_args!("{}", inner_buf))
                 .expect("failed to write to generated file"); // Same panic that clap_complete would trigger
         }
+        // TODO: patch other completion scripts to complete secret names like with bash
         Shell::Elvish => clap_complete::generate(shells::Elvish, app, bin_name, buf),
         Shell::Fish => clap_complete::generate(shells::Fish, app, bin_name, buf),
         Shell::PowerShell => clap_complete::generate(shells::PowerShell, app, bin_name, buf),

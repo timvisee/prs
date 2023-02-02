@@ -1,9 +1,7 @@
 use std::fmt;
-use std::io::Write;
 use std::path::PathBuf;
 
-use clap::{ArgMatches, Command};
-use clap_complete::shells;
+use clap::ArgMatches;
 
 use super::Matcher;
 use crate::util;
@@ -15,7 +13,7 @@ pub struct CompletionsMatcher<'a> {
 
 impl<'a: 'b, 'b> CompletionsMatcher<'a> {
     /// Get the shells to generate completions for.
-    pub fn shells(&'a self) -> Vec<Shell> {
+    pub(crate) fn shells(&'a self) -> Vec<Shell> {
         // Get the raw list of shells
         let raw = self
             .matches
@@ -77,7 +75,7 @@ impl<'a> Matcher<'a> for CompletionsMatcher<'a> {
 
 /// Available shells.
 #[derive(Copy, Clone)]
-pub enum Shell {
+pub(crate) enum Shell {
     Bash,
     Elvish,
     Fish,
@@ -130,56 +128,6 @@ impl Shell {
             Shell::Zsh => format!("_{}", bin_name),
         }
     }
-
-    /// Generate completion script.
-    pub fn generate<S>(self, app: &mut Command, bin_name: S, buf: &mut dyn Write)
-    where
-        S: Into<String>,
-    {
-        match self {
-            Shell::Bash => {
-                let mut inner_buf = Vec::new();
-                clap_complete::generate(shells::Bash, app, bin_name, &mut inner_buf);
-
-                let inner_buf = String::from_utf8(inner_buf)
-                    .expect("clap_complete::generate should always return valid utf-8");
-
-                let inner_buf = inner_buf.replace("<QUERY>", "$(prs list --list)");
-
-                buf.write_fmt(format_args!("{}", inner_buf))
-                    .expect("Failed to write to generated file"); // Same panic that clap_complete would trigger
-            }
-            Shell::Elvish => clap_complete::generate(shells::Elvish, app, bin_name, buf),
-            Shell::Fish => clap_complete::generate(shells::Fish, app, bin_name, buf),
-            Shell::PowerShell => clap_complete::generate(shells::PowerShell, app, bin_name, buf),
-            Shell::Zsh => clap_complete::generate(shells::Zsh, app, bin_name, buf),
-        }
-    }
-
-    // /// Generate completion script.
-    // pub fn generate_to<S, T>(self, app: &mut Command<'_>, bin_name: S, out_dir: T)
-    // where
-    //     S: Into<String>,
-    //     T: Into<std::ffi::OsString>,
-    // {
-    //     match self {
-    //         Shell::Bash => {
-    //             clap_complete::generate_to::<shells::Bash, _, _>(app, bin_name, out_dir)
-    //         }
-    //         Shell::Elvish => {
-    //             clap_complete::generate_to::<shells::Elvish, _, _>(app, bin_name, out_dir)
-    //         }
-    //         Shell::Fish => {
-    //             clap_complete::generate_to::<shells::Fish, _, _>(app, bin_name, out_dir)
-    //         }
-    //         Shell::PowerShell => {
-    //             clap_complete::generate_to::<shells::PowerShell, _, _>(app, bin_name, out_dir)
-    //         }
-    //         Shell::Zsh => {
-    //             clap_complete::generate_to::<shells::Zsh, _, _>(app, bin_name, out_dir)
-    //         }
-    //     }
-    // }
 }
 
 impl fmt::Display for Shell {

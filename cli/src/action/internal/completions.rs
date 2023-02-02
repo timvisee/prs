@@ -1,11 +1,16 @@
 use std::fs::{self, File};
-use std::io;
+use std::io::{self, Write};
 
 use anyhow::Result;
-use clap::ArgMatches;
+use clap::{ArgMatches, Command};
+use clap_complete::shells;
 use thiserror::Error;
 
-use crate::cmd::matcher::{internal::completions::CompletionsMatcher, main::MainMatcher, Matcher};
+use crate::cmd::matcher::{
+    internal::completions::{CompletionsMatcher, Shell},
+    main::MainMatcher,
+    Matcher,
+};
 
 /// A file completions action.
 pub struct Completions<'a> {
@@ -44,16 +49,17 @@ impl<'a> Completions<'a> {
                 );
             }
             if matcher_completions.stdout() {
-                shell.generate(&mut app, matcher_completions.name(), &mut std::io::stdout());
+                generate(
+                    shell,
+                    &mut app,
+                    matcher_completions.name(),
+                    &mut std::io::stdout(),
+                );
             } else {
-                // TODO: revert this to `generate_to` once clap v3.0.0-beta.3 is released, it fixes
-                //       an critical issue that caused a panic. See the `clap-3.0.0-beta.3` branch.
-                // shell.generate_to(&mut app, matcher_completions.name(), &dir);
-
                 // Determine path of final file, create file, write completion script to it
                 let path = dir.join(shell.file_name(&matcher_completions.name()));
                 let mut file = File::create(path).map_err(Error::Write)?;
-                shell.generate(&mut app, matcher_completions.name(), &mut file);
+                generate(shell, &mut app, matcher_completions.name(), &mut file);
                 file.sync_all().map_err(Error::Write)?;
             }
             if !quiet {
@@ -62,6 +68,33 @@ impl<'a> Completions<'a> {
         }
 
         Ok(())
+    }
+}
+
+/// Generate completion script.
+fn generate<S>(shell: Shell, app: &mut Command, bin_name: S, buf: &mut dyn Write)
+where
+    S: Into<String>,
+{
+    match shell {
+        Shell::Bash => {
+            let mut inner_buf = Vec::new();
+            clap_complete::generate(shells::Bash, app, bin_name, &mut inner_buf);
+
+            let inner_buf = String::from_utf8(inner_buf)
+                .expect("clap_complete::generate should always return valid utf-8");
+
+            let inner_buf = inner_buf
+                .replace("<QUERY>", "$(prs list --list --quiet)")
+                .replace("[QUERY]", "$(prs list --list --quiet)");
+
+            buf.write_fmt(format_args!("{}", inner_buf))
+                .expect("failed to write to generated file"); // Same panic that clap_complete would trigger
+        }
+        Shell::Elvish => clap_complete::generate(shells::Elvish, app, bin_name, buf),
+        Shell::Fish => clap_complete::generate(shells::Fish, app, bin_name, buf),
+        Shell::PowerShell => clap_complete::generate(shells::PowerShell, app, bin_name, buf),
+        Shell::Zsh => clap_complete::generate(shells::Zsh, app, bin_name, buf),
     }
 }
 

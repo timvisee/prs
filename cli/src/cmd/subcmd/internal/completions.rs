@@ -39,7 +39,6 @@ impl CmdCompletions {
             .arg(
                 Arg::new("stdout")
                     .long("stdout")
-                    .short('s')
                     .alias("print")
                     .num_args(0)
                     .help("Output completion files to stdout instead")

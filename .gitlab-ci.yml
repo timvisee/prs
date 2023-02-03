@@ -80,7 +80,7 @@ check-nightly:
     RUST_VERSION: nightly
   only:
     - master
-check-old:
+check-msrv:
   <<: *check-base
   variables:
     RUST_VERSION: "1.64.0"

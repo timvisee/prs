@@ -54,49 +54,33 @@ pub(crate) fn viewer(
         .unwrap_or_else(|| secret.name.to_string());
     let title = format!("{}: {}", crate::NAME, name);
 
-    // Enter alternative screen now, queue
+    // Enter alternative screen now, enable raw mode, queue paint actions
     execute!(stdout(), terminal::EnterAlternateScreen).map_err(Err::RawTerminal)?;
+    terminal::enable_raw_mode().map_err(Err::RawTerminal)?;
     queue!(
         stdout(),
         style::ResetColor,
-        terminal::Clear(terminal::ClearType::All),
         cursor::Hide,
-        cursor::MoveTo(0, 0),
         terminal::SetTitle(&title),
     )
     .map_err(Err::RawTerminal)?;
 
-    // Header
-    if !matcher_main.quiet() {
-        println!("{}", title.reverse());
-    }
+    let timeout_at = timeout.map(|t| Instant::now() + t);
 
-    // Secret contents
-    secret::print(plaintext).map_err(Err::Print)?;
+    // Viewer drawing loop
+    loop {
+        paint(&plaintext, &title, timeout_at, matcher_main)?;
 
-    // Footer
-    if !matcher_main.quiet() {
-        println!(
-            "\n{}",
-            if let Some(timeout) = timeout {
-                format!(
-                    "Press Q to close. Closing in {} seconds...",
-                    timeout.as_secs()
-                )
-            } else {
-                "Press Q to close".to_string()
-            }
-            .reverse()
-        );
-    }
-
-    // Enable raw input after printing to catch input
-    terminal::enable_raw_mode().map_err(Err::RawTerminal)?;
-
-    // Wait for quit key or timeout
-    match timeout {
-        Some(timeout) => wait_quit_key_timeout(timeout),
-        None => wait_quit_key(),
+        // Get actions from input, stop on quit or timeout
+        let action = match timeout_at {
+            Some(timeout_at) => wait_action_timeout(timeout_at - Instant::now()),
+            None => wait_action(),
+        };
+        match action {
+            // Quit or timeout reached
+            Some(Action::Quit) | None => break,
+            Some(_) => {}
+        }
     }
 
     // Clean up alternative screen, switch back to main
@@ -113,33 +97,96 @@ pub(crate) fn viewer(
     Ok(())
 }
 
-/// Block until a user presses a quit key.
-///
-/// See `is_quit_key` for a list of keys.
-fn wait_quit_key() {
-    while !event::read().map(is_quit_key).unwrap_or(false) {}
+/// Repaint the viewer in a raw terminal.
+fn paint(
+    plaintext: &Plaintext,
+    title: &str,
+    timeout_at: Option<Instant>,
+    matcher_main: &MainMatcher,
+) -> Result<()> {
+    // Clear screen and reset cursor
+    queue!(
+        stdout(),
+        terminal::Clear(terminal::ClearType::All),
+        cursor::MoveTo(0, 0),
+    )
+    .map_err(Err::RawTerminal)?;
+
+    // Grab terminal size
+    let size = terminal::size().map_err(Err::Size)?;
+
+    // Header
+    if !matcher_main.quiet() {
+        print!("{}\r\n", banner_text(title, size.0).reverse());
+    }
+
+    // Update plaintext contents, carriage return is required in raw mode, then print
+    let plaintext = plaintext
+        .unsecure_to_str()
+        .unwrap()
+        .replace('\n', "\r\n")
+        .into();
+    secret::print(plaintext).map_err(Err::Print)?;
+
+    // Footer
+    if !matcher_main.quiet() {
+        print!(
+            "\r\n{}\r\n",
+            banner_text(
+                if let Some(timeout_at) = timeout_at {
+                    format!(
+                        "Press Q to close. Closing in {} seconds...",
+                        (timeout_at - Instant::now()).as_secs()
+                    )
+                } else {
+                    "Press Q to close".to_string()
+                },
+                size.0
+            )
+            .reverse()
+        );
+    }
+
+    Ok(())
+}
+
+/// Possible actions.
+enum Action {
+    /// Quit viewer.
+    Quit,
+
+    /// Redraw viewer.
+    Redraw,
+}
+
+/// Wait for an action based on a terminal event indefinately.
+fn wait_action() -> Option<Action> {
+    match event::read() {
+        Ok(event) if is_quit_key(event) => Some(Action::Quit),
+        Ok(Event::Resize(_, _) | Event::FocusGained) => Some(Action::Redraw),
+        Ok(_) | Err(_) => None,
+    }
 }
 
 /// Block until a user presses a quit key, with timeout.
 ///
 /// See `is_quit_key` for a list of keys.
-fn wait_quit_key_timeout(timeout: Duration) {
+fn wait_action_timeout(timeout: Duration) -> Option<Action> {
     let until = Instant::now() + timeout;
     loop {
         // Return if timeout is reached
         let now = Instant::now();
         if until <= now {
-            return;
+            return None;
         }
 
         // Poll, stop if timeout is reached or on error
         if matches!(event::poll(until - now), Ok(false) | Err(_)) {
-            return;
+            return None;
         }
 
-        // Stop if quit key is pressed
-        if event::read().map(is_quit_key).unwrap_or(false) {
-            return;
+        if let Some(input) = wait_action() {
+            return Some(input);
         }
     }
 }
@@ -166,10 +213,40 @@ fn is_quit_key(event: Event) -> bool {
     }
 }
 
+/// Create a banner spanning the whole width.
+fn banner_text<S: AsRef<str>>(text: S, width: u16) -> String {
+    let text = text.as_ref().trim();
+
+    // Truncate if text is too long
+    if text.len() >= width as usize {
+        let mut text = text.to_string();
+        text.truncate(width as usize);
+        return text;
+    }
+
+    // TODO: this is very inefficient, use better way
+    let left = width as usize - text.len();
+    let before = left / 2;
+    let after = left - before;
+    let before = std::iter::repeat(" ")
+        .take(before)
+        .collect::<Vec<_>>()
+        .join("");
+    let after = std::iter::repeat(" ")
+        .take(after)
+        .collect::<Vec<_>>()
+        .join("");
+
+    format!("{before}{text}{after}")
+}
+
 #[derive(Debug, Error)]
 pub enum Err {
     #[error("failed to manage raw terminal")]
     RawTerminal(#[source] std::io::Error),
+
+    #[error("failed to determine terminal size")]
+    Size(#[source] std::io::Error),
 
     #[error("failed to print secret to viewer")]
     Print(#[source] std::io::Error),

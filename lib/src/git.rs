@@ -20,6 +20,9 @@ pub const BIN_NAME: &str = "git.exe";
 /// The git FETCH_HEAD file.
 const GIT_FETCH_HEAD_FILE: &str = ".git/FETCH_HEAD";
 
+/// Git exit status when a config item is not found.
+const GIT_EXIT_STATUS_NOT_FOUND: i32 = 1;
+
 /// Invoke git init.
 pub fn git_init(repo: &Path) -> Result<()> {
     git(repo, &["init", "-q"], false)
@@ -140,6 +143,45 @@ pub fn git_current_branch(repo: &Path) -> Result<String> {
     Ok(branch)
 }
 
+/// Get the current remote name for a git branch.
+pub fn git_config_branch_remote(repo: &Path, branch: &str) -> Result<Option<String>> {
+    // Grap configured remote for branch
+    let mut remote = git_stdout_ok_or(
+        repo,
+        &["config", "--get", &format!("branch.{}.remote", branch)],
+        false,
+        GIT_EXIT_STATUS_NOT_FOUND,
+    )?;
+
+    // Or grab default configured remote
+    if remote.is_empty() {
+        remote = git_stdout_ok_or(
+            repo,
+            &["config", "--get", "remote.pushDefault"],
+            false,
+            GIT_EXIT_STATUS_NOT_FOUND,
+        )?;
+    }
+
+    // Or return none if no remote is configured
+    if remote.is_empty() {
+        return Ok(None);
+    }
+
+    assert!(!branch.contains('\n'), "git returned multiple remotes");
+    Ok(Some(remote))
+}
+
+/// Set the current remote name for a git branch.
+pub fn git_config_branch_set_remote(repo: &Path, branch: &str, remote: &str) -> Result<()> {
+    git_stdout_ok(
+        repo,
+        &["config", &format!("branch.{}.remote", branch), remote],
+        false,
+    )
+    .map(|_| ())
+}
+
 /// List remote git branches.
 pub fn git_branch_remote(repo: &Path) -> Result<Vec<String>> {
     Ok(git_stdout_ok(repo, &["branch", "-r", "--no-color"], false)?
@@ -244,6 +286,31 @@ where
     cmd_git(args, repo, connects_remote)
         .output()
         .map_err(|err| Err::System(err).into())
+}
+
+/// Invoke a git command with the given arguments, return stdout on success or when the exit code
+/// is allowed.
+fn git_stdout_ok_or<I, S>(
+    repo: &Path,
+    args: I,
+    connects_remote: bool,
+    allow_exit_code: i32,
+) -> Result<String>
+where
+    I: IntoIterator<Item = S>,
+    S: AsRef<OsStr>,
+{
+    let output = git_output(repo, args, connects_remote)?;
+
+    // Assert exit status, but allow specified exit code
+    if output.status.code() != Some(allow_exit_code) {
+        cmd_assert_status(output.status)?;
+    }
+
+    Ok(std::str::from_utf8(&output.stdout)
+        .map_err(|err| Err::GitCli(err.into()))?
+        .trim()
+        .into())
 }
 
 /// Invoke a git command with the given arguments, return stdout on success.

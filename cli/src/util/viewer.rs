@@ -1,4 +1,4 @@
-use std::io::stdout;
+use std::io::{stdin, stdout};
 use std::time::{Duration, Instant};
 
 use anyhow::Result;
@@ -8,12 +8,16 @@ use crossterm::{
     execute, queue, style,
     style::Stylize,
     terminal,
+    tty::IsTty,
 };
 use prs_lib::{Plaintext, Secret, Store};
 use thiserror::Error;
 
 use crate::cmd::matcher::MainMatcher;
-use crate::util::secret;
+use crate::util::{
+    error::{self, ErrorHintsBuilder},
+    secret,
+};
 
 /// Show plaintext in secure viewer with optional timeout.
 ///
@@ -35,6 +39,14 @@ pub(crate) fn viewer(
             eprintln!("Secret is empty");
         }
         return Ok(());
+    }
+
+    // Require to be in a TTY
+    if !stdin().is_tty() {
+        error::quit_error_msg(
+            "secure viewer can only be used in TTY",
+            ErrorHintsBuilder::default().verbose(false).build().unwrap(),
+        );
     }
 
     // Get secret name and title

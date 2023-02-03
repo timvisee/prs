@@ -11,17 +11,6 @@ use thiserror::Error;
 use super::Config;
 use crate::util;
 
-// /// Invoke a gpg command with the given arguments.
-// ///
-// /// The command will take over the user console for in/output.
-// pub(super) fn gpg<I, S>(bin: &Path, args: I) -> Result<()>
-// where
-//     I: IntoIterator<Item = S>,
-//     S: AsRef<OsStr>,
-// {
-//     cmd_assert_status(cmd_gpg(bin, args).status().map_err(Err::System)?)
-// }
-
 /// Invoke a gpg command, returns output.
 pub(super) fn gpg_output<I, S>(config: &Config, args: I) -> Result<Output>
 where

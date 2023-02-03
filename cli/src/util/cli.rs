@@ -11,16 +11,13 @@ pub fn prompt(msg: &str, main_matcher: &MainMatcher) -> String {
     // Quit with an error if we may not interact
     if main_matcher.no_interact() {
         quit_error_msg(
-            format!(
-                "could not prompt for '{}' in no-interact mode, maybe specify it",
-                msg,
-            ),
+            format!("could not prompt for '{msg}' in no-interact mode, maybe specify it",),
             ErrorHints::default(),
         );
     }
 
     // Show the prompt
-    eprint!("{}: ", msg);
+    eprint!("{msg}: ");
     let _ = stderr().flush();
 
     // Get the input
@@ -60,7 +57,7 @@ pub fn prompt_yes(msg: &str, def: Option<bool>, main_matcher: &MainMatcher) -> b
 
     // Assume yes
     if main_matcher.assume_yes() {
-        eprintln!("{} {}: yes", msg, options);
+        eprintln!("{msg} {options}: yes");
         return true;
     }
 
@@ -71,17 +68,14 @@ pub fn prompt_yes(msg: &str, def: Option<bool>, main_matcher: &MainMatcher) -> b
             return def;
         } else {
             quit_error_msg(
-                format!(
-                    "could not prompt question '{}' in no-interact mode, maybe specify it",
-                    msg,
-                ),
+                format!("could not prompt question '{msg}' in no-interact mode, maybe specify it",),
                 ErrorHints::default(),
             );
         }
     }
 
     // Get the user input
-    let answer = prompt(&format!("{} {}", msg, options), main_matcher);
+    let answer = prompt(&format!("{msg} {options}"), main_matcher);
 
     // Assume the default if the answer is empty
     if answer.is_empty() {

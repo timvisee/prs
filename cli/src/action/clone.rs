@@ -66,12 +66,12 @@ impl<'a> Clone<'a> {
                 if system_has_secret {
                     println!(
                         "    {}",
-                        style::highlight(&format!("{} recipients add --secret", bin))
+                        style::highlight(&format!("{bin} recipients add --secret"))
                     );
                 }
                 println!(
                     "    {}",
-                    style::highlight(&format!("{} recipients generate", bin))
+                    style::highlight(&format!("{bin} recipients generate"))
                 );
                 println!();
             } else {

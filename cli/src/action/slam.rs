@@ -132,8 +132,7 @@ fn gpgconf_kill(matcher_main: &MainMatcher) -> bool {
                 eprintln!("FAIL");
             }
             error::print_error_msg(format!(
-                "failed to kill gpgconf gpg-agent (exit status: {})",
-                status
+                "failed to kill gpgconf gpg-agent (exit status: {status})"
             ));
             false
         }
@@ -169,8 +168,7 @@ fn keychain_clear(matcher_main: &MainMatcher) -> bool {
                 eprintln!("FAIL");
             }
             error::print_error_msg(format!(
-                "failed to kill keychain GPG agent (exit status: {})",
-                status
+                "failed to kill keychain GPG agent (exit status: {status})",
             ));
             false
         }
@@ -313,8 +311,7 @@ fn invalidate_sudo(matcher_main: &MainMatcher) {
                 eprintln!("FAIL");
             }
             error::print_error_msg(format!(
-                "failed to invalidate cached sudo credentials (exit status: {})",
-                status
+                "failed to invalidate cached sudo credentials (exit status: {status})",
             ));
         }
         Ok(_) => {
@@ -344,8 +341,7 @@ fn invalidate_doas(matcher_main: &MainMatcher) {
                 eprintln!("FAIL");
             }
             error::print_error_msg(format!(
-                "failed to invalidate cached doas credentials (exit status: {})",
-                status
+                "failed to invalidate cached doas credentials (exit status: {status})",
             ));
         }
         Ok(_) => {

@@ -55,12 +55,12 @@ impl<'a> Init<'a> {
             if system_has_secret {
                 eprintln!(
                     "    {}",
-                    style::highlight(&format!("{} recipients add --secret", bin))
+                    style::highlight(&format!("{bin} recipients add --secret"))
                 );
             }
             eprintln!(
                 "    {}",
-                style::highlight(&format!("{} recipients generate", bin))
+                style::highlight(&format!("{bin} recipients generate"))
             );
             eprintln!();
         }

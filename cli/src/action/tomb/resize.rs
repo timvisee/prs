@@ -63,7 +63,7 @@ impl<'a> Resize<'a> {
                 // Quit if Tomb is already this big
                 if let Some(tomb_size) = sizes.tomb_file_size_mbs() {
                     if tomb_size >= size {
-                        eprintln!("Tomb is large enough, not resizing ({}MB)", tomb_size);
+                        eprintln!("Tomb is large enough, not resizing ({tomb_size}MB)");
                         eprintln!(
                             "Use '{}' flag to specify a size",
                             style::highlight("--size MEGABYTE")
@@ -91,10 +91,7 @@ impl<'a> Resize<'a> {
         if let Some(tomb_file_size) = sizes.tomb_file_size_mbs() {
             if size <= tomb_file_size {
                 error::quit_error_msg(
-                    format!(
-                        "new tomb size must be larger than current size ({}MB)",
-                        tomb_file_size
-                    ),
+                    format!("new tomb size must be larger than current size ({tomb_file_size}MB)",),
                     ErrorHints::default(),
                 );
             }
@@ -102,7 +99,7 @@ impl<'a> Resize<'a> {
 
         // Resize tomb
         if !matcher_main.quiet() {
-            eprintln!("Resizing Tomb to {}MB...", size);
+            eprintln!("Resizing Tomb to {size}MB...");
         }
         tomb.resize(size).map_err(Err::Resize)?;
 

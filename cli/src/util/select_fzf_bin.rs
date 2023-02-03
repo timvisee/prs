@@ -45,7 +45,7 @@ fn select_item<'a, S: AsRef<str>>(prompt: &'a str, items: &'a [S]) -> Option<Str
     // Spawn fzf
     let mut child = Command::new(BIN_NAME)
         .arg("--prompt")
-        .arg(format!("{}: ", prompt))
+        .arg(format!("{prompt}: "))
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .stderr(Stdio::inherit())

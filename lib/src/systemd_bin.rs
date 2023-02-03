@@ -22,7 +22,7 @@ pub fn systemd_cmd_timer(time: u32, description: &str, unit: &str, cmd: &[&str])
     let _ = systemctl_reset_failed_timer(unit);
 
     // TODO: do not set -q flag if in verbose mode?
-    let time = format!("{}", time);
+    let time = format!("{time}");
     let mut systemd_cmd = vec![
         "--quiet",
         "--system",
@@ -47,7 +47,7 @@ pub fn systemd_cmd_timer(time: u32, description: &str, unit: &str, cmd: &[&str])
 /// same for the given unit with a `.timer` suffix.
 fn systemctl_reset_failed_timer(unit: &str) -> Result<()> {
     // Invoke command, collect result
-    let result = cmd_systemctl(&["--quiet", "--system", "reset-failed", unit])
+    let result = cmd_systemctl(["--quiet", "--system", "reset-failed", unit])
         .stderr(Stdio::null())
         .status()
         .map_err(Err::Systemctl);
@@ -69,7 +69,7 @@ fn systemctl_reset_failed_timer(unit: &str) -> Result<()> {
 /// same for the given unit with a `.timer` suffix.
 pub fn systemd_has_timer(unit: &str) -> Result<bool> {
     // TODO: check whether we can optimize this, the status command may be expensive
-    let cmd = cmd_systemctl(&["--system", "--no-pager", "--quiet", "status", unit])
+    let cmd = cmd_systemctl(["--system", "--no-pager", "--quiet", "status", unit])
         .stdout(Stdio::null())
         .stderr(Stdio::null())
         .status()
@@ -96,7 +96,7 @@ pub fn systemd_has_timer(unit: &str) -> Result<bool> {
 /// same for the given unit with a `.timer` suffix.
 pub fn systemd_remove_timer(unit: &str) -> Result<()> {
     // Invoke command, collect result
-    let result = cmd_systemctl(&["--system", "--quiet", "stop", unit])
+    let result = cmd_systemctl(["--system", "--quiet", "stop", unit])
         .stderr(Stdio::null())
         .status()
         .map_err(Err::Systemctl);

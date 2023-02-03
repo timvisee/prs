@@ -17,13 +17,13 @@ pub const BIN_NAME: &str = "tomb";
 /// `mbs` is the size of the tomb to create in megabytes.
 pub fn tomb_dig(tomb_file: &Path, mbs: u32, settings: TombSettings) -> Result<()> {
     tomb(
-        &[
+        [
             "dig",
             tomb_file
                 .to_str()
                 .expect("tomb path has invalid UTF-8 characters"),
             "-s",
-            &format!("{}", mbs),
+            &format!("{mbs}"),
         ],
         settings,
     )
@@ -32,7 +32,7 @@ pub fn tomb_dig(tomb_file: &Path, mbs: u32, settings: TombSettings) -> Result<()
 /// Invoke tomb forge.
 pub fn tomb_forge(key_file: &Path, key: &Key, settings: TombSettings) -> Result<()> {
     tomb(
-        &[
+        [
             "forge",
             key_file
                 .to_str()
@@ -52,7 +52,7 @@ pub fn tomb_lock(
     settings: TombSettings,
 ) -> Result<()> {
     tomb(
-        &[
+        [
             "lock",
             tomb_file
                 .to_str()
@@ -106,14 +106,14 @@ pub fn tomb_open(
 /// Invoke tomb close.
 pub fn tomb_close(tomb_file: &Path, settings: TombSettings) -> Result<()> {
     tomb(
-        &["close", name(tomb_file).expect("failed to get tomb name")],
+        ["close", name(tomb_file).expect("failed to get tomb name")],
         settings,
     )
 }
 
 /// Invoke tomb slam.
 pub fn tomb_slam(settings: TombSettings) -> Result<()> {
-    tomb(&["slam"], settings)
+    tomb(["slam"], settings)
 }
 
 /// Invoke tomb resize.
@@ -125,7 +125,7 @@ pub fn tomb_resize(
     settings: TombSettings,
 ) -> Result<()> {
     tomb(
-        &[
+        [
             "resize",
             tomb_file
                 .to_str()
@@ -136,7 +136,7 @@ pub fn tomb_resize(
                 .expect("tomb key path contains invalid UTF-8"),
             "-g",
             "-s",
-            &format!("{}", size_mb),
+            &format!("{size_mb}"),
         ],
         settings,
     )

@@ -183,12 +183,12 @@ impl From<Key> for KeyId {
                     }
                     if let Ok(comment) = user.comment() {
                         if !comment.trim().is_empty() {
-                            parts.push(format!("({})", comment));
+                            parts.push(format!("({comment})"));
                         }
                     }
                     if let Ok(email) = user.email() {
                         if !email.trim().is_empty() {
-                            parts.push(format!("<{}>", email));
+                            parts.push(format!("<{email}>"));
                         }
                     }
                     parts.join(" ")

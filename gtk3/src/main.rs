@@ -85,7 +85,7 @@ fn build_ui(application: &gtk::Application) {
         Ok(store) => store,
         Err(err) => {
             error_dialog(
-                &format!("Failed to load password store.\n\nError: {}", err),
+                &format!("Failed to load password store.\n\nError: {err}"),
                 None,
             );
             application.quit();
@@ -98,7 +98,7 @@ fn build_ui(application: &gtk::Application) {
     // Prepare tomb
     #[cfg(all(feature = "tomb", target_os = "linux"))]
     if let Err(err) = tomb.prepare() {
-        eprintln!("{}", err);
+        eprintln!("{err}");
         error_dialog("Failed to prepare password store tomb", None);
         application.quit();
         return;
@@ -227,7 +227,7 @@ fn selected(secret: Secret, window: gtk::ApplicationWindow, input: gtk::SearchEn
         Ok(plaintext) => plaintext,
         Err(err) => {
             error_dialog(
-                &format!("Failed to decrypt first line of secret.\n\nError: {}", err),
+                &format!("Failed to decrypt first line of secret.\n\nError: {err}"),
                 Some(&window),
             );
             window.close();
@@ -247,8 +247,7 @@ fn selected(secret: Secret, window: gtk::ApplicationWindow, input: gtk::SearchEn
     window.unstick();
     input.set_text("");
     input.set_placeholder_text(Some(&format!(
-        "Copied, clearing in {} seconds...",
-        CLIPBOARD_TIMEOUT
+        "Copied, clearing in {CLIPBOARD_TIMEOUT} seconds...",
     )));
 
     // Hack to unfocus and move window to back
@@ -320,7 +319,7 @@ fn notify_cleared() {
     {
         let mut n = Notification::new();
         n.appname(APP_NAME)
-            .summary(&format!("Clipboard cleared - {}", APP_NAME))
+            .summary(&format!("Clipboard cleared - {APP_NAME}"))
             .body("Secret cleared from clipboard")
             .auto_icon()
             .icon("lock")

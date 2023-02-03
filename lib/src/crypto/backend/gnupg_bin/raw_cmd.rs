@@ -186,7 +186,7 @@ fn log_cmd(cmd: &Command) {
         .filter(|a| !a.is_empty())
         .collect::<Vec<_>>()
         .join(" ");
-    eprintln!("$ {}", sh_cmd);
+    eprintln!("$ {sh_cmd}");
 }
 
 /// Try to parse command output bytes as text.

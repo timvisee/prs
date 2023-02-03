@@ -47,7 +47,7 @@ impl<'a> List<'a> {
                     key.fingerprint(false)
                 }
             })
-            .for_each(|key| println!("{}", key,));
+            .for_each(|key| println!("{key}"));
 
         // Finalize tomb
         #[cfg(all(feature = "tomb", target_os = "linux"))]

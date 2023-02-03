@@ -74,10 +74,7 @@ impl<'a> Copy<'a> {
             match totp::spawn_process_totp_recopy(&totp, timeout) {
                 Ok(_) => {
                     if !matcher_main.quiet() {
-                        eprintln!(
-                            "Token copied to clipboard. Clearing after {} seconds...",
-                            timeout
-                        );
+                        eprintln!("Token copied to clipboard. Clearing after {timeout} seconds...",);
                     }
                     copied = true;
                 }
@@ -96,10 +93,7 @@ impl<'a> Copy<'a> {
                 timeout,
             )?;
             if !matcher_main.quiet() {
-                eprintln!(
-                    "Token copied to clipboard. Clearing after {} seconds...",
-                    timeout
-                );
+                eprintln!("Token copied to clipboard. Clearing after {timeout} seconds...",);
             }
         }
 

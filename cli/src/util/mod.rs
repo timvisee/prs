@@ -42,7 +42,7 @@ use crate::util::error::{quit_error_msg, ErrorHints};
 // TODO: provide list of arguments instead of a command string for better reliability/compatability
 pub fn invoke_cmd(cmd: &str, dir: Option<&Path>, verbose: bool) -> Result<(), std::io::Error> {
     if verbose {
-        eprintln!("$ {}\n", cmd);
+        eprintln!("$ {cmd}\n");
     }
 
     // Invoke command

@@ -84,7 +84,7 @@ impl<'a> Add<'a> {
         tomb::finalize_tomb(&mut tomb, &matcher_main, true).map_err(Err::Tomb)?;
 
         if !matcher_main.quiet() {
-            eprintln!("Added recipient: {}", key);
+            eprintln!("Added recipient: {key}");
         }
 
         Ok(())
@@ -102,11 +102,11 @@ pub(crate) fn cannot_decrypt_show_recrypt_hints() {
     println!("Run this on another machine to re-encrypt secrets:");
     println!(
         "    {}",
-        style::highlight(&format!("{} housekeeping recrypt --all", bin))
+        style::highlight(&format!("{bin} housekeeping recrypt --all"))
     );
     println!();
     println!("When done, pull in the re-encrypted secrets here with:");
-    println!("    {}", style::highlight(&format!("{} sync", bin)));
+    println!("    {}", style::highlight(&format!("{bin} sync")));
     println!();
 }
 

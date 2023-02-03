@@ -19,7 +19,7 @@ pub fn print_error(err: anyhow::Error) {
     // Report each printable error, count them
     let count = err
         .chain()
-        .map(|err| format!("{}", err))
+        .map(|err| format!("{err}"))
         .filter(|err| !err.is_empty())
         .enumerate()
         .map(|(i, err)| {
@@ -146,31 +146,31 @@ impl ErrorHints {
         if self.sync {
             eprintln!(
                 "To sync your password store use '{}'",
-                highlight(&format!("{} sync", bin))
+                highlight(&format!("{bin} sync"))
             );
         }
         if self.sync_init {
             eprintln!(
                 "To initialize sync for your password store use '{}'",
-                highlight(&format!("{} sync init", bin))
+                highlight(&format!("{bin} sync init"))
             );
         }
         if self.sync_remote {
             eprintln!(
                 "Use '{}' to get or set a remote sync URL",
-                highlight(&format!("{} sync remote [GIT_URL]", bin))
+                highlight(&format!("{bin} sync remote [GIT_URL]"))
             );
         }
         if self.git || self.allow_dirty {
             eprintln!(
                 "Use '{}' to show sync status, uncommitted changes and help",
-                highlight(&format!("{} sync status", bin))
+                highlight(&format!("{bin} sync status"))
             );
         }
         if self.git {
             eprintln!(
                 "Use '{}' to inspect or resolve this issue using git",
-                highlight(&format!("{} git", bin))
+                highlight(&format!("{bin} git"))
             );
         }
         if self.allow_dirty {

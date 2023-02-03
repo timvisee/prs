@@ -26,7 +26,7 @@ pub fn ensure_ready(sync: &Sync, allow_dirty: bool) {
             Readyness::Dirty if allow_dirty => return,
             Readyness::Dirty => "store git repository is dirty and has uncommitted changes".into(),
             Readyness::RepoState(state) => {
-                format!("store git repository is in unfinished state: {:?}", state)
+                format!("store git repository is in unfinished state: {state:?}")
             }
         },
         error.build().unwrap(),

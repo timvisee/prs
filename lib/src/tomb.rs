@@ -146,7 +146,7 @@ impl<'a> Tomb<'a> {
         // Figure out tomb path and name
         let tomb_path = self.find_tomb_path()?;
         let name = tomb_bin::name(&tomb_path).unwrap_or(".unwrap");
-        let unit = format!("prs-tomb-close@{}.service", name);
+        let unit = format!("prs-tomb-close@{name}.service");
 
         // Skip if already running
         if !force && systemd_bin::systemd_has_timer(&unit).map_err(Err::AutoCloseTimer)? {
@@ -186,7 +186,7 @@ impl<'a> Tomb<'a> {
         // Figure out tomb path and name
         let tomb_path = self.find_tomb_path()?;
         let name = tomb_bin::name(&tomb_path).unwrap_or(".unwrap");
-        let unit = format!("prs-tomb-close@{}.service", name);
+        let unit = format!("prs-tomb-close@{name}.service");
 
         systemd_bin::systemd_has_timer(&unit).map_err(|err| Err::AutoCloseTimer(err).into())
     }
@@ -196,7 +196,7 @@ impl<'a> Tomb<'a> {
         // Figure out tomb path and name
         let tomb_path = self.find_tomb_path()?;
         let name = tomb_bin::name(&tomb_path).unwrap_or(".unwrap");
-        let unit = format!("prs-tomb-close@{}.service", name);
+        let unit = format!("prs-tomb-close@{name}.service");
 
         // We're done if none is running
         if !systemd_bin::systemd_has_timer(&unit).map_err(Err::AutoCloseTimer)? {
@@ -414,14 +414,14 @@ fn tomb_paths(root: &Path) -> Vec<PathBuf> {
 
     // Same path as store root with .tomb suffix
     if let (Some(parent), Some(file_name)) = (parent, file_name) {
-        paths.push(parent.join(format!("{}{}", file_name, TOMB_FILE_SUFFIX)));
+        paths.push(parent.join(format!("{file_name}{TOMB_FILE_SUFFIX}")));
     }
 
     // Path from pass-tomb in store parent and in home
     if let Some(parent) = parent {
-        paths.push(parent.join(format!(".password{}", TOMB_FILE_SUFFIX)));
+        paths.push(parent.join(format!(".password{TOMB_FILE_SUFFIX}")));
     }
-    paths.push(format!("~/.password{}", TOMB_FILE_SUFFIX).into());
+    paths.push(format!("~/.password{TOMB_FILE_SUFFIX}").into());
 
     paths
 }
@@ -451,14 +451,14 @@ fn tomb_key_paths(root: &Path) -> Vec<PathBuf> {
 
     // Same path as store root with .tomb suffix
     if let (Some(parent), Some(file_name)) = (parent, file_name) {
-        paths.push(parent.join(format!("{}{}", file_name, TOMB_KEY_FILE_SUFFIX)));
+        paths.push(parent.join(format!("{file_name}{TOMB_KEY_FILE_SUFFIX}")));
     }
 
     // Path from pass-tomb in store parent and in home
     if let Some(parent) = parent {
-        paths.push(parent.join(format!(".password{}", TOMB_KEY_FILE_SUFFIX)));
+        paths.push(parent.join(format!(".password{TOMB_KEY_FILE_SUFFIX}")));
     }
-    paths.push(format!("~/.password{}", TOMB_KEY_FILE_SUFFIX).into());
+    paths.push(format!("~/.password{TOMB_KEY_FILE_SUFFIX}").into());
 
     paths
 }

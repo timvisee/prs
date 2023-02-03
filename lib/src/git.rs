@@ -25,7 +25,7 @@ const GIT_EXIT_STATUS_NOT_FOUND: i32 = 1;
 
 /// Invoke git init.
 pub fn git_init(repo: &Path) -> Result<()> {
-    git(repo, &["init", "-q"], false)
+    git(repo, ["init", "-q"], false)
 }
 
 /// Invoke git clone.
@@ -42,7 +42,7 @@ pub fn git_clone(repo: &Path, url: &str, path: &str, quiet: bool) -> Result<()> 
 
 /// Git stage all files and changes.
 pub fn git_add_all(repo: &Path) -> Result<()> {
-    git(repo, &["add", "."], false)
+    git(repo, ["add", "."], false)
 }
 
 /// Invoke git commit.
@@ -61,7 +61,7 @@ pub fn git_commit(repo: &Path, msg: &str, commit_empty: bool) -> Result<()> {
 
 /// Git hard reset all changes.
 pub fn git_reset_hard(repo: &Path) -> Result<()> {
-    git(repo, &["reset", "--hard", "-q"], false)
+    git(repo, ["reset", "--hard", "-q"], false)
 }
 
 /// Git status.
@@ -89,7 +89,7 @@ pub fn git_push(repo: &Path, set_branch: Option<&str>, set_upstream: Option<&str
 /// Invoke git pull.
 pub fn git_pull(repo: &Path) -> Result<()> {
     // TODO: do not set -q flag if in verbose mode?
-    git(repo, &["pull", "-q"], true)
+    git(repo, ["pull", "-q"], true)
 }
 
 /// Invoke git fetch.
@@ -104,17 +104,17 @@ pub fn git_fetch(repo: &Path, reference: Option<&str>) -> Result<()> {
 
 /// Check if repository has (staged/unstaged) changes.
 pub fn git_has_changes(repo: &Path) -> Result<bool> {
-    Ok(!git_stdout_ok(repo, &["status", "-s"], false)?.is_empty())
+    Ok(!git_stdout_ok(repo, ["status", "-s"], false)?.is_empty())
 }
 
 /// Check if repository has remote configured.
 pub fn git_has_remote(repo: &Path) -> Result<bool> {
-    Ok(!git_stdout_ok(repo, &["remote"], false)?.is_empty())
+    Ok(!git_stdout_ok(repo, ["remote"], false)?.is_empty())
 }
 
 /// Git get remote list.
 pub fn git_remote(repo: &Path) -> Result<Vec<String>> {
-    Ok(git_stdout_ok(repo, &["remote"], false)?
+    Ok(git_stdout_ok(repo, ["remote"], false)?
         .lines()
         .map(|r| r.into())
         .collect())
@@ -122,22 +122,22 @@ pub fn git_remote(repo: &Path) -> Result<Vec<String>> {
 
 /// Get get remote URL.
 pub fn git_remote_get_url(repo: &Path, remote: &str) -> Result<String> {
-    git_stdout_ok(repo, &["remote", "get-url", remote], false)
+    git_stdout_ok(repo, ["remote", "get-url", remote], false)
 }
 
 /// Get add remote URL.
 pub fn git_remote_add(repo: &Path, remote: &str, url: &str) -> Result<()> {
-    git(repo, &["remote", "add", remote, url], false)
+    git(repo, ["remote", "add", remote, url], false)
 }
 
 /// Get remove remote URL.
 pub fn git_remote_remove(repo: &Path, remote: &str) -> Result<()> {
-    git(repo, &["remote", "remove", remote], false)
+    git(repo, ["remote", "remove", remote], false)
 }
 
 /// Get the current git branch name.
 pub fn git_current_branch(repo: &Path) -> Result<String> {
-    let branch = git_stdout_ok(repo, &["rev-parse", "--abbrev-ref", "HEAD"], false)?;
+    let branch = git_stdout_ok(repo, ["rev-parse", "--abbrev-ref", "HEAD"], false)?;
     assert!(!branch.is_empty(), "git returned empty branch name");
     assert!(!branch.contains('\n'), "git returned multiple branches");
     Ok(branch)
@@ -148,7 +148,7 @@ pub fn git_config_branch_remote(repo: &Path, branch: &str) -> Result<Option<Stri
     // Grap configured remote for branch
     let mut remote = git_stdout_ok_or(
         repo,
-        &["config", "--get", &format!("branch.{}.remote", branch)],
+        ["config", "--get", &format!("branch.{branch}.remote")],
         false,
         GIT_EXIT_STATUS_NOT_FOUND,
     )?;
@@ -157,7 +157,7 @@ pub fn git_config_branch_remote(repo: &Path, branch: &str) -> Result<Option<Stri
     if remote.is_empty() {
         remote = git_stdout_ok_or(
             repo,
-            &["config", "--get", "remote.pushDefault"],
+            ["config", "--get", "remote.pushDefault"],
             false,
             GIT_EXIT_STATUS_NOT_FOUND,
         )?;
@@ -176,7 +176,7 @@ pub fn git_config_branch_remote(repo: &Path, branch: &str) -> Result<Option<Stri
 pub fn git_config_branch_set_remote(repo: &Path, branch: &str, remote: &str) -> Result<()> {
     git_stdout_ok(
         repo,
-        &["config", &format!("branch.{}.remote", branch), remote],
+        ["config", &format!("branch.{branch}.remote"), remote],
         false,
     )
     .map(|_| ())
@@ -184,7 +184,7 @@ pub fn git_config_branch_set_remote(repo: &Path, branch: &str, remote: &str) -> 
 
 /// List remote git branches.
 pub fn git_branch_remote(repo: &Path) -> Result<Vec<String>> {
-    Ok(git_stdout_ok(repo, &["branch", "-r", "--no-color"], false)?
+    Ok(git_stdout_ok(repo, ["branch", "-r", "--no-color"], false)?
         .lines()
         .map(|r| {
             match r.strip_prefix("* ") {
@@ -203,7 +203,7 @@ pub fn git_branch_upstream<S: AsRef<str>>(repo: &Path, reference: S) -> Result<O
     // Invoke command
     let output = git_output(
         repo,
-        &[
+        [
             "rev-parse",
             "--abbrev-ref",
             &format!("{}@{{upstream}}", reference.as_ref()),
@@ -247,7 +247,7 @@ pub fn git_branch_set_upstream(repo: &Path, reference: Option<&str>, upstream: &
 
 /// Get the hash of a reference.
 pub fn git_ref_hash<S: AsRef<str>>(repo: &Path, reference: S) -> Result<String> {
-    let hash = git_stdout_ok(repo, &["rev-parse", reference.as_ref()], false)?;
+    let hash = git_stdout_ok(repo, ["rev-parse", reference.as_ref()], false)?;
     assert_eq!(hash.len(), 40, "git returned invalid hash");
     Ok(hash)
 }

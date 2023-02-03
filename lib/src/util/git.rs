@@ -189,7 +189,7 @@ pub fn kill_ssh_by_session(store: &Store) {
             .filter(|pid: &u32| pid > &0 && pid < &(i32::MAX as u32))
             .filter(|pid| {
                 // Only handle ssh clients
-                fs::read_to_string(format!("/proc/{}/cmdline", pid))
+                fs::read_to_string(format!("/proc/{pid}/cmdline"))
                     .map(|cmdline| {
                         let cmd = cmdline.split(|b| b == ' ' || b == ':').next().unwrap();
                         cmd.starts_with("ssh")
@@ -201,10 +201,7 @@ pub fn kill_ssh_by_session(store: &Store) {
                     nix::unistd::Pid::from_raw(pid as i32),
                     Some(nix::sys::signal::Signal::SIGTERM),
                 ) {
-                    eprintln!(
-                        "Failed to kill persistent SSH client (pid: {}): {}",
-                        pid, err
-                    );
+                    eprintln!("Failed to kill persistent SSH client (pid: {pid}): {err}",);
                 }
             });
     });

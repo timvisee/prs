@@ -157,8 +157,8 @@ pub fn print_main_info(matcher_main: &MainMatcher) -> ! {
     let has_sync = store.as_ref().map(|s| s.sync().is_init()).unwrap_or(false);
 
     // Print the main info
-    eprintln!("{} {}", NAME, crate_version!());
-    eprintln!("Usage: {} [FLAGS] <SUBCOMMAND> ...", bin);
+    eprintln!("{NAME} {}", crate_version!());
+    eprintln!("Usage: {bin} [FLAGS] <SUBCOMMAND> ...");
     eprintln!(crate_description!());
     eprintln!();
 
@@ -178,7 +178,7 @@ pub fn print_main_info(matcher_main: &MainMatcher) -> ! {
         // Hint tomb open command
         if has_closed_tomb {
             eprintln!("Open password store Tomb:");
-            eprintln!("    {}", style::highlight(&format!("{} tomb open", bin)));
+            eprintln!("    {}", style::highlight(&format!("{bin} tomb open")));
             eprintln!();
         }
 
@@ -198,12 +198,12 @@ pub fn print_main_info(matcher_main: &MainMatcher) -> ! {
             if system_has_secret {
                 eprintln!(
                     "    {}",
-                    style::highlight(&format!("{} recipients add --secret", bin))
+                    style::highlight(&format!("{bin} recipients add --secret"))
                 );
             }
             eprintln!(
                 "    {}",
-                style::highlight(&format!("{} recipients generate", bin))
+                style::highlight(&format!("{bin} recipients generate"))
             );
             eprintln!();
         }
@@ -215,9 +215,9 @@ pub fn print_main_info(matcher_main: &MainMatcher) -> ! {
             eprintln!("Show a secret:");
             #[cfg(feature = "clipboard")]
             eprintln!("Show or copy a secret:");
-            eprintln!("    {}", style::highlight(&format!("{} show [NAME]", bin)));
+            eprintln!("    {}", style::highlight(&format!("{bin} show [NAME]")));
             #[cfg(feature = "clipboard")]
-            eprintln!("    {}", style::highlight(&format!("{} copy [NAME]", bin)));
+            eprintln!("    {}", style::highlight(&format!("{bin} copy [NAME]")));
             eprintln!();
         }
 
@@ -226,14 +226,11 @@ pub fn print_main_info(matcher_main: &MainMatcher) -> ! {
             eprintln!("Generate, add, edit or remove secrets:");
             eprintln!(
                 "    {}",
-                style::highlight(&format!("{} generate <NAME>", bin))
+                style::highlight(&format!("{bin} generate <NAME>"))
             );
-            eprintln!("    {}", style::highlight(&format!("{} add <NAME>", bin)));
-            eprintln!("    {}", style::highlight(&format!("{} edit [NAME]", bin)));
-            eprintln!(
-                "    {}",
-                style::highlight(&format!("{} remove [NAME]", bin))
-            );
+            eprintln!("    {}", style::highlight(&format!("{bin} add <NAME>")));
+            eprintln!("    {}", style::highlight(&format!("{bin} edit [NAME]")));
+            eprintln!("    {}", style::highlight(&format!("{bin} remove [NAME]")));
             eprintln!();
         }
 
@@ -241,20 +238,20 @@ pub fn print_main_info(matcher_main: &MainMatcher) -> ! {
         if !has_closed_tomb {
             if has_sync {
                 eprintln!("Sync your password store:");
-                eprintln!("    {}", style::highlight(&format!("{} sync", bin)));
+                eprintln!("    {}", style::highlight(&format!("{bin} sync")));
                 eprintln!();
             } else {
                 eprintln!("Enable sync for your password store:");
-                eprintln!("    {}", style::highlight(&format!("{} sync init", bin)));
+                eprintln!("    {}", style::highlight(&format!("{bin} sync init")));
                 eprintln!();
             }
         }
     } else {
         eprintln!("Initialize a new password store or clone an existing one:");
-        eprintln!("    {}", style::highlight(&format!("{} init", bin)));
+        eprintln!("    {}", style::highlight(&format!("{bin} init")));
         eprintln!(
             "    {}",
-            style::highlight(&format!("{} clone <GIT_URL>", bin))
+            style::highlight(&format!("{bin} clone <GIT_URL>"))
         );
         eprintln!();
     }
@@ -262,7 +259,7 @@ pub fn print_main_info(matcher_main: &MainMatcher) -> ! {
     eprintln!("Show all subcommands, features and other help:");
     eprintln!(
         "    {}",
-        style::highlight(&format!("{} help [SUBCOMMAND]", bin))
+        style::highlight(&format!("{bin} help [SUBCOMMAND]"))
     );
 
     quit()

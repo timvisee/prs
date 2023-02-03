@@ -61,7 +61,7 @@ impl<'a> Export<'a> {
             stdout = false;
             fs::write(path, data.unsecure_ref()).map_err(Err::Output)?;
             if !matcher_main.quiet() {
-                eprintln!("Key exported to: {}", path);
+                eprintln!("Key exported to: {path}");
             }
         }
 

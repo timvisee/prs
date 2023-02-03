@@ -41,7 +41,7 @@ fn select_item<'a, S: AsRef<str>>(prompt: &'a str, items: &'a [S]) -> Option<Str
             .iter()
             .enumerate()
             .for_each(|(i, item)| eprintln!("{}: {}", i + 1, item));
-        eprint!("{} (number/empty): ", prompt);
+        eprint!("{prompt} (number/empty): ");
 
         let mut input = String::new();
         std::io::stdin()

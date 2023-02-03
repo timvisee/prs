@@ -83,7 +83,7 @@ impl Store {
         let path = path.to_str()?;
 
         // Try path with secret file suffix
-        let with_suffix = PathBuf::from(format!("{}{}", path, SECRET_SUFFIX));
+        let with_suffix = PathBuf::from(format!("{path}{SECRET_SUFFIX}"));
         if with_suffix.is_file() {
             return Some(Secret::from(self, with_suffix));
         }
@@ -249,7 +249,7 @@ pub fn relative_path<'a>(
     root: &'a Path,
     path: &'a Path,
 ) -> Result<&'a Path, std::path::StripPrefixError> {
-    path.strip_prefix(&root)
+    path.strip_prefix(root)
 }
 
 /// Secret iterator configuration.

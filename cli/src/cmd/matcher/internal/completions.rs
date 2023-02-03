@@ -121,11 +121,11 @@ impl Shell {
     /// Suggested file name for completions file of current shell.
     pub fn file_name(self, bin_name: &str) -> String {
         match self {
-            Shell::Bash => format!("{}.bash", bin_name),
-            Shell::Elvish => format!("{}.elv", bin_name),
-            Shell::Fish => format!("{}.fish", bin_name),
-            Shell::PowerShell => format!("_{}.ps1", bin_name),
-            Shell::Zsh => format!("_{}", bin_name),
+            Shell::Bash => format!("{bin_name}.bash"),
+            Shell::Elvish => format!("{bin_name}.elv"),
+            Shell::Fish => format!("{bin_name}.fish"),
+            Shell::PowerShell => format!("_{bin_name}.ps1"),
+            Shell::Zsh => format!("_{bin_name}"),
         }
     }
 }

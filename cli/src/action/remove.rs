@@ -165,7 +165,7 @@ pub fn find_symlinks_to(store: &Store, secret: &Secret) -> Vec<Secret> {
             sym.path
                 .parent()
                 .unwrap()
-                .join(&sym_path)
+                .join(sym_path)
                 .canonicalize()
                 .map(|full_path| secret.path == full_path)
                 .unwrap_or(false)
@@ -203,7 +203,7 @@ fn remove_empty_dir(path: &Path, remove_empty_parents: bool) -> Result<(), io::E
     }
 
     // Make sure directory is empty, assume no on error, stop if not empty
-    let is_empty = WalkDir::new(&path)
+    let is_empty = WalkDir::new(path)
         .follow_links(true)
         .into_iter()
         .any(|entry| match entry {

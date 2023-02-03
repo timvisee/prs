@@ -103,7 +103,7 @@ pub fn format_token(token: &Plaintext, quiet: bool, ttl: Option<u64>) -> Plainte
         token.clone()
     };
     if let Some(ttl) = ttl {
-        formatted.append(format!(" (valid for {}s)", ttl).into(), false);
+        formatted.append(format!(" (valid for {ttl}s)").into(), false);
     }
 
     formatted
@@ -180,7 +180,7 @@ pub(crate) fn spawn_process_totp_recopy(totp: &Totp, timeout_sec: u64) -> Result
         .ok_or(Err::NoSubProcess)?
         .args(["internal", "totp-recopy"])
         .arg("--timeout")
-        .arg(&format!("{}", timeout_sec))
+        .arg(&format!("{timeout_sec}"))
         .stdin(Stdio::piped())
         .spawn()
         .map_err(Err::SpawnProcess)?;

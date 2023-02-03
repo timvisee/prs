@@ -95,13 +95,12 @@ fn import_missing_keys(store: &Store, quiet: bool, verbose: bool) -> Result<()> 
         match result {
             ImportResult::Imported(fingerprint) => {
                 if !quiet {
-                    eprintln!("Imported key to keychain: {}", fingerprint);
+                    eprintln!("Imported key to keychain: {fingerprint}");
                 }
             }
-            ImportResult::Unavailable(fingerprint) => eprintln!(
-                "Cannot import missing public key, not available in store: {}",
-                fingerprint
-            ),
+            ImportResult::Unavailable(fingerprint) => {
+                eprintln!("Cannot import missing public key, not available in store: {fingerprint}",)
+            }
         }
     }
 

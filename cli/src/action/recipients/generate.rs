@@ -130,7 +130,7 @@ impl<'a> Generate<'a> {
 
             if !matcher_main.quiet() {
                 for key in new_keys {
-                    eprintln!("Added recipient: {}", key);
+                    eprintln!("Added recipient: {key}");
                 }
             }
         }
@@ -156,7 +156,7 @@ pub fn gpg_generate(matcher_main: &MainMatcher) -> Result<Recipients> {
         eprintln!("===== GPG START =====");
     }
     util::invoke_cmd(
-        &format!("{} --full-generate-key", BIN_NAME),
+        &format!("{BIN_NAME} --full-generate-key"),
         None,
         matcher_main.verbose(),
     )

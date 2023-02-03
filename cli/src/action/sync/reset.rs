@@ -70,7 +70,7 @@ impl<'a> Reset<'a> {
             }
             other => {
                 error::quit_error_msg(
-                    format!("unexpected sync state: {:?}", other),
+                    format!("unexpected sync state: {other:?}"),
                     ErrorHints::from_matcher(&matcher_main),
                 );
             }

@@ -52,7 +52,7 @@ pub fn encrypt(config: &Config, recipients: &[&str], plaintext: Plaintext) -> Re
 pub fn decrypt(config: &Config, ciphertext: Ciphertext) -> Result<Plaintext> {
     // TODO: ensure ciphertext ends with PGP footer
     Ok(Plaintext::from(
-        gpg_stdin_stdout_ok_bin(config, &["--quiet", "--decrypt"], ciphertext.unsecure_ref())
+        gpg_stdin_stdout_ok_bin(config, ["--quiet", "--decrypt"], ciphertext.unsecure_ref())
             .map_err(Err::Decrypt)?,
     ))
 }
@@ -68,7 +68,7 @@ pub fn decrypt(config: &Config, ciphertext: Ciphertext) -> Result<Plaintext> {
 pub fn can_decrypt(config: &Config, ciphertext: Ciphertext) -> Result<bool> {
     // TODO: ensure ciphertext ends with PGP footer
 
-    let output = gpg_stdin_output(config, &["--quiet", "--decrypt"], ciphertext.unsecure_ref())
+    let output = gpg_stdin_output(config, ["--quiet", "--decrypt"], ciphertext.unsecure_ref())
         .map_err(Err::Decrypt)?;
 
     match output.status.code() {
@@ -83,7 +83,7 @@ pub fn can_decrypt(config: &Config, ciphertext: Ciphertext) -> Result<bool> {
 /// - `config`: GPG config
 pub fn public_keys(config: &Config) -> Result<Vec<KeyId>> {
     let list =
-        gpg_stdout_ok(config, &["--list-keys", "--keyid-format", "LONG"]).map_err(Err::Keys)?;
+        gpg_stdout_ok(config, ["--list-keys", "--keyid-format", "LONG"]).map_err(Err::Keys)?;
     parse_key_list(list).ok_or_else(|| Err::UnexpectedOutput.into())
 }
 
@@ -91,7 +91,7 @@ pub fn public_keys(config: &Config) -> Result<Vec<KeyId>> {
 ///
 /// - `config`: GPG config
 pub fn private_keys(config: &Config) -> Result<Vec<KeyId>> {
-    let list = gpg_stdout_ok(config, &["--list-secret-keys", "--keyid-format", "LONG"])
+    let list = gpg_stdout_ok(config, ["--list-secret-keys", "--keyid-format", "LONG"])
         .map_err(Err::Keys)?;
     parse_key_list(list).ok_or_else(|| Err::UnexpectedOutput.into())
 }
@@ -116,7 +116,7 @@ pub fn import_key(config: &Config, key: &[u8]) -> Result<()> {
     );
 
     // Import key with gpg command
-    gpg_stdin_stdout_ok_bin(config, &["--quiet", "--import"], key)
+    gpg_stdin_stdout_ok_bin(config, ["--quiet", "--import"], key)
         .map(|_| ())
         .map_err(|err| Err::Import(err).into())
 }
@@ -129,7 +129,7 @@ pub fn import_key(config: &Config, key: &[u8]) -> Result<()> {
 /// gpg binary backend is broken.
 pub fn export_key(config: &Config, fingerprint: &str) -> Result<Vec<u8>> {
     // Export key with gpg command
-    let data = gpg_stdout_ok_bin(config, &["--quiet", "--armor", "--export", fingerprint])
+    let data = gpg_stdout_ok_bin(config, ["--quiet", "--armor", "--export", fingerprint])
         .map_err(Err::Export)?;
 
     // Assert we're exporting a public key

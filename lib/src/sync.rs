@@ -98,7 +98,7 @@ impl<'a> Sync<'a> {
 
             // Determine upstream reference
             let branch = git::git_current_branch(repo)?;
-            let upstream_ref = format!("{}/{}", remote, branch);
+            let upstream_ref = format!("{remote}/{branch}");
 
             // Set upstream reference if available on remote, otherwise stop
             if !remote_branches.contains(&upstream_ref) {
@@ -148,7 +148,7 @@ impl<'a> Sync<'a> {
 
                 // Determine upstream reference
                 let branch = git::git_current_branch(repo)?;
-                let upstream_ref = format!("{}/{}", remote, branch);
+                let upstream_ref = format!("{remote}/{branch}");
 
                 // Set upstream reference if not yet used on remote
                 if !remote_branches.contains(&upstream_ref) {
@@ -318,10 +318,7 @@ fn safe_need_to_push(repo: &Path) -> bool {
     match need_to_push(repo) {
         Ok(push) => push,
         Err(err) => {
-            eprintln!(
-                "failed to test if local branch is different than remote, ignoring: {}",
-                err,
-            );
+            eprintln!("failed to test if local branch is different than remote, ignoring: {err}",);
             true
         }
     }

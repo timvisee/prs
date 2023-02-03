@@ -113,7 +113,7 @@ fn tree_nodes(prefix: &str, mut secrets: &[&str]) -> Vec<StringTreeNode> {
         let child_prefix = if prefix.is_empty() {
             child_name.to_string()
         } else {
-            format!("{}/{}", prefix, child_name)
+            format!("{prefix}/{child_name}")
         };
 
         // Find position after last child having selected name

@@ -51,7 +51,7 @@ pub fn display_name(
 /// entered. This is useful for when a partial (short) query selects the wrong secret.
 pub fn print_name(query: Option<String>, secret: &Secret, store: &Store, quiet: bool) {
     if let Some(name) = display_name(query, secret, store, quiet) {
-        eprintln!("Secret: {}", name);
+        eprintln!("Secret: {name}");
     }
 }
 

@@ -45,7 +45,7 @@ impl<'a> Completions<'a> {
             if !quiet {
                 eprint!(
                     "Generating completions for {}...",
-                    format!("{}", shell).to_lowercase()
+                    format!("{shell}").to_lowercase()
                 );
             }
             if matcher_completions.stdout() {
@@ -87,7 +87,7 @@ where
                 .replace("<QUERY>", "$(prs list --list --quiet)")
                 .replace("[QUERY]", "$(prs list --list --quiet)");
 
-            buf.write_fmt(format_args!("{}", inner_buf))
+            buf.write_fmt(format_args!("{inner_buf}"))
                 .expect("failed to write to generated file"); // Same panic that clap_complete would trigger
         }
         // TODO: patch other completion scripts to complete secret names like with bash

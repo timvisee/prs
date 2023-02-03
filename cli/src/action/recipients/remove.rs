@@ -71,7 +71,7 @@ impl<'a> Remove<'a> {
 
         // Confirm removal
         if !matcher_main.force() {
-            eprintln!("{}", key);
+            eprintln!("{key}");
             if !cli::prompt_yes(
                 &format!("Remove '{}'?", key.fingerprint(true),),
                 Some(true),
@@ -103,7 +103,7 @@ impl<'a> Remove<'a> {
         tomb::finalize_tomb(&mut tomb, &matcher_main, true).map_err(Err::Tomb)?;
 
         if !matcher_main.quiet() {
-            eprintln!("Removed recipient: {}", key);
+            eprintln!("Removed recipient: {key}");
         }
 
         Ok(())

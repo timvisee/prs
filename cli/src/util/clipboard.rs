@@ -319,8 +319,7 @@ impl TempClip {
                 Err(err) if err.kind() == IoErrorKind::InvalidInput => {}
                 Err(err) => {
                     error::print_warning(format!(
-                        "failed to kill clipboard subprocess, may cause weird behavior: {}",
-                        err
+                        "failed to kill clipboard subprocess, may cause weird behavior: {err}",
                     ));
                 }
             }
@@ -469,8 +468,7 @@ fn x11_set_blocking(data: &Plaintext) -> Result<()> {
         clip.getter.atoms.property,
     ) {
         error::print_warning(format!(
-            "failed wait for X11 clipboard change, may cause weird behavior: {}",
-            err
+            "failed wait for X11 clipboard change, may cause weird behavior: {err}",
         ));
     }
 
@@ -516,7 +514,7 @@ fn spawn_process_copy_revert(
         .arg_if("--verbose", verbose)
         .args(["internal", "clip-revert"])
         .arg("--timeout")
-        .arg(&format!("{}", timeout_sec))
+        .arg(&format!("{timeout_sec}"))
         .stdin(Stdio::piped())
         .spawn()
         .map_err(Err::SpawnProcess)?;

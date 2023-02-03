@@ -107,7 +107,7 @@ fn find_gpg_bin() -> Result<Config> {
 /// Test gpg binary compatibility.
 fn test_gpg_compat(config: &Config) -> Result<()> {
     // Strip stdout to just the version number
-    let stdout = gpg_stdout_ok(config, &["--version"])?;
+    let stdout = gpg_stdout_ok(config, ["--version"])?;
     let stdout = stdout
         .trim_start()
         .lines()

@@ -58,7 +58,7 @@ pub(crate) fn sudo_chown(path: &Path, uid: u32, gid: u32, recursive: bool) -> Re
     if recursive {
         cmd.arg("--recursive");
     }
-    cmd.arg(format!("{}:{}", uid, gid));
+    cmd.arg(format!("{uid}:{gid}"));
     cmd.arg(path);
 
     // Invoke and handle status

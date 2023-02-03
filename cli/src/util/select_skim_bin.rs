@@ -45,7 +45,7 @@ fn select_item<'a, S: AsRef<str>>(prompt: &'a str, items: &'a [S]) -> Option<Str
     // Spawn skim
     let mut child = Command::new(BIN_NAME)
         .arg("--prompt")
-        .arg(format!("{}: ", prompt))
+        .arg(format!("{prompt}: "))
         .arg("--no-multi")
         // Disabled becayse of: https://github.com/lotabout/skim/issues/494
         // .arg("--height")

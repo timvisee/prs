@@ -71,10 +71,7 @@ impl<'a> Init<'a> {
                 let bin = crate::util::bin_name();
                 eprintln!();
                 eprintln!("Sync remote not configured, to configure a remote use:");
-                eprintln!(
-                    "    {}",
-                    highlight(&format!("{} sync remote <GIT_URL>", bin))
-                );
+                eprintln!("    {}", highlight(&format!("{bin} sync remote <GIT_URL>")));
             }
         }
 

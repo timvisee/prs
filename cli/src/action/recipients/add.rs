@@ -102,11 +102,11 @@ pub(crate) fn cannot_decrypt_show_recrypt_hints() {
     println!("Run this on another machine to re-encrypt secrets:");
     println!(
         "    {}",
-        style::highlight(&format!("{bin} housekeeping recrypt --all"))
+        style::highlight(format!("{bin} housekeeping recrypt --all"))
     );
     println!();
     println!("When done, pull in the re-encrypted secrets here with:");
-    println!("    {}", style::highlight(&format!("{bin} sync")));
+    println!("    {}", style::highlight(format!("{bin} sync")));
     println!();
 }
 

@@ -85,40 +85,40 @@ impl<'a> Status<'a> {
             if readyness == Readyness::NoSync {
                 eprintln!(
                     "Use '{}' to initialize sync for your password store",
-                    highlight(&format!("{bin} sync init"))
+                    highlight(format!("{bin} sync init"))
                 );
             } else {
                 if readyness == Readyness::Dirty {
                     eprintln!(
                         "Use '{}' to commit dirty changes in your password store",
-                        highlight(&format!("{bin} sync commit"))
+                        highlight(format!("{bin} sync commit"))
                     );
                     eprintln!(
                         "Use '{}' to reset dirty changes in your password store",
-                        highlight(&format!("{bin} sync reset"))
+                        highlight(format!("{bin} sync reset"))
                     );
                 }
                 if show_changes {
                     eprintln!(
                         "Use '{}' to view changed files in detail",
-                        highlight(&format!("{bin} git status"))
+                        highlight(format!("{bin} git status"))
                     );
                 }
                 if readyness != Readyness::Ready {
                     eprintln!(
                         "Use '{}' to inspect or resolve sync repository issues using git",
-                        highlight(&format!("{bin} git"))
+                        highlight(format!("{bin} git"))
                     );
                 }
                 if !has_remote {
                     eprintln!(
                         "Use '{}' to configure a remote",
-                        highlight(&format!("{bin} sync remote <GIT_URL>"))
+                        highlight(format!("{bin} sync remote <GIT_URL>"))
                     );
                 }
                 eprintln!(
                     "Use '{}' to sync your password store",
-                    highlight(&format!("{bin} sync"))
+                    highlight(format!("{bin} sync"))
                 );
             }
         }

@@ -146,31 +146,31 @@ impl ErrorHints {
         if self.sync {
             eprintln!(
                 "To sync your password store use '{}'",
-                highlight(&format!("{bin} sync"))
+                highlight(format!("{bin} sync"))
             );
         }
         if self.sync_init {
             eprintln!(
                 "To initialize sync for your password store use '{}'",
-                highlight(&format!("{bin} sync init"))
+                highlight(format!("{bin} sync init"))
             );
         }
         if self.sync_remote {
             eprintln!(
                 "Use '{}' to get or set a remote sync URL",
-                highlight(&format!("{bin} sync remote [GIT_URL]"))
+                highlight(format!("{bin} sync remote [GIT_URL]"))
             );
         }
         if self.git || self.allow_dirty {
             eprintln!(
                 "Use '{}' to show sync status, uncommitted changes and help",
-                highlight(&format!("{bin} sync status"))
+                highlight(format!("{bin} sync status"))
             );
         }
         if self.git {
             eprintln!(
                 "Use '{}' to inspect or resolve this issue using git",
-                highlight(&format!("{bin} git"))
+                highlight(format!("{bin} git"))
             );
         }
         if self.allow_dirty {

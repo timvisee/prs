@@ -142,7 +142,7 @@ pub fn recrypt(store: &Store, secrets: &[Secret], matcher_main: &MainMatcher) ->
         if !matcher_main.quiet() {
             eprintln!(
                 "Use '{}' to try again",
-                style::highlight(&format!(
+                style::highlight(format!(
                     "{} housekeeping recrypt{}",
                     util::bin_name(),
                     &if all {

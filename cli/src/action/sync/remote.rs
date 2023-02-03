@@ -80,7 +80,7 @@ impl<'a> Remote<'a> {
                     eprintln!("To sync with the remote now use:");
                     eprintln!(
                         "    {}",
-                        style::highlight(&format!("{} sync", util::bin_name()))
+                        style::highlight(format!("{} sync", util::bin_name()))
                     );
                     eprintln!();
                 }

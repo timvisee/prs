@@ -93,7 +93,7 @@ impl<'a> Open<'a> {
             eprintln!("To close the Tomb, use:");
             eprintln!(
                 "    {}",
-                style::highlight(&format!("{} tomb close", util::bin_name()))
+                style::highlight(format!("{} tomb close", util::bin_name()))
             );
         }
 

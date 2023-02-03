@@ -33,7 +33,7 @@ pub fn finalize_tomb(tomb: &mut Tomb, matcher_main: &MainMatcher, changed: bool)
                 );
                 error::print_warning(format!(
                     "use '{}' to make your Tomb larger",
-                    style::highlight(&format!("{bin} tomb resize"))
+                    style::highlight(format!("{bin} tomb resize"))
                 ));
             }
         }

@@ -514,7 +514,7 @@ fn spawn_process_copy_revert(
         .arg_if("--verbose", verbose)
         .args(["internal", "clip-revert"])
         .arg("--timeout")
-        .arg(&format!("{timeout_sec}"))
+        .arg(format!("{timeout_sec}"))
         .stdin(Stdio::piped())
         .spawn()
         .map_err(Err::SpawnProcess)?;

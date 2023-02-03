@@ -180,7 +180,7 @@ pub(crate) fn spawn_process_totp_recopy(totp: &Totp, timeout_sec: u64) -> Result
         .ok_or(Err::NoSubProcess)?
         .args(["internal", "totp-recopy"])
         .arg("--timeout")
-        .arg(&format!("{timeout_sec}"))
+        .arg(format!("{timeout_sec}"))
         .stdin(Stdio::piped())
         .spawn()
         .map_err(Err::SpawnProcess)?;

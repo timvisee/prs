@@ -1,3 +1,5 @@
+// TODO: support PRS_PAGER
+
 use std::io::{stdin, stdout, Write};
 use std::time::{Duration, Instant};
 
@@ -73,7 +75,7 @@ pub(crate) fn viewer(
     let timeout_at = timeout.map(|t| Instant::now() + t);
     let mut scroll_pos: (u16, u16) = (0, 0);
     let text_size = {
-        let text = plaintext.unsecure_to_str().unwrap();
+        let text = plaintext.unsecure_to_str().map_err(Err::Utf8)?;
         (
             text.lines().map(|l| l.len()).max().unwrap_or(0),
             text.lines().count(),
@@ -86,11 +88,11 @@ pub(crate) fn viewer(
         let tty_size = terminal::size().map_err(Err::Size)?;
 
         // Paint window border
-        paint_border(tty_size, &title, timeout_at, matcher_main)?;
+        paint_border(tty_size, &title, timeout_at, matcher_main).map_err(Err::Render)?;
 
         loop {
             // Painte plaintext
-            paint_content(&plaintext, tty_size, scroll_pos, matcher_main)?;
+            paint_content(&plaintext, tty_size, scroll_pos, matcher_main).map_err(Err::Render)?;
 
             // Get actions from input, stop on quit or timeout
             let action = match timeout_at {
@@ -188,7 +190,7 @@ fn paint_content(
 
     // Get line count and lines iterator
     let (line_count, mut line_iter) = {
-        let content = plaintext.unsecure_to_str().unwrap();
+        let content = plaintext.unsecure_to_str().map_err(Err::Utf8)?;
         (
             content.lines().count(),
             content.lines().skip(scroll_pos.1 as usize),
@@ -361,12 +363,15 @@ fn banner_text<S: AsRef<str>>(text: S, width: u16) -> String {
 
 #[derive(Debug, Error)]
 pub enum Err {
+    #[error("failed to parse secret contents as UTF-8, required when using viewer")]
+    Utf8(#[source] std::str::Utf8Error),
+
     #[error("failed to manage raw terminal")]
     RawTerminal(#[source] std::io::Error),
 
     #[error("failed to determine terminal size")]
     Size(#[source] std::io::Error),
 
-    #[error("failed to print secret to viewer")]
-    Print(#[source] std::io::Error),
+    #[error("failed to render secret viewer")]
+    Render(#[source] anyhow::Error),
 }

@@ -76,6 +76,7 @@ rand = { version = "0.8", default-features = false, features = ["std"] }
 regex = { version = "1.7", default-features = false, features = ["std", "unicode-perl"] }
 shellexpand = "3.0"
 shlex = "1.1"
+substring = "1.4.5"
 text_trees = "0.1"
 thiserror = "1.0"
 walkdir = "2.3"

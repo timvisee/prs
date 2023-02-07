@@ -14,6 +14,7 @@ impl CmdArg for ArgViewer {
         Arg::new("viewer")
             .long("viewer")
             .short('V')
+            .alias("pager")
             .num_args(0)
             .global(true)
             .help("Show output in secure viewer")

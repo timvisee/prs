@@ -1,6 +1,5 @@
-// TODO: support PRS_PAGER
-
 use std::io::{stdin, stdout, Write};
+use std::process::{Command, Stdio};
 use std::time::{Duration, Instant};
 
 use anyhow::Result;
@@ -12,7 +11,7 @@ use crossterm::{
     terminal,
     tty::IsTty,
 };
-use prs_lib::{Plaintext, Secret, Store};
+use prs_lib::{util::env, Plaintext, Secret, Store};
 use substring::Substring;
 use thiserror::Error;
 
@@ -21,6 +20,9 @@ use crate::util::{
     error::{self, ErrorHintsBuilder},
     secret,
 };
+
+/// Environment variable to set custom viewer/pager.
+const ENV_VAR_PAGER: &str = "PRS_PAGER";
 
 /// Scroll speed when using the mouse wheel.
 const SCROLL_SPEED: i16 = 3;
@@ -39,6 +41,11 @@ pub(crate) fn viewer(
     matcher_main: &MainMatcher,
     query: Option<String>,
 ) -> Result<()> {
+    // Use custom viewer when prs pager is configured
+    if env::has_non_empty_env(ENV_VAR_PAGER) {
+        return pager(plaintext, timeout, matcher_main);
+    }
+
     // Don't show anything if empty
     if plaintext.is_empty() & !matcher_main.force() {
         if matcher_main.verbose() {
@@ -361,6 +368,40 @@ fn banner_text<S: AsRef<str>>(text: S, width: u16) -> String {
     format!("{start}{text}{end}")
 }
 
+/// Use custom viewer/pager from `PRS_PAGER`.
+fn pager(
+    plaintext: Plaintext,
+    timeout: Option<Duration>,
+    matcher_main: &MainMatcher,
+) -> Result<()> {
+    // Parse pager arguments, build command
+    let args = shlex::split(&std::env::var(ENV_VAR_PAGER).map_err(Err::PagerEnvUtf8)?).unwrap();
+    let mut pager = Command::new(&args[0])
+        .args(&args[1..])
+        .stdin(Stdio::piped())
+        .spawn()
+        .map_err(Err::PagerSpawn)?;
+    pager
+        .stdin
+        .as_mut()
+        .unwrap()
+        .write_all(plaintext.unsecure_ref())
+        .map_err(Err::PagerPipe)?;
+
+    // Wait for pager to quit
+    let status = pager.wait().map_err(Err::PagerSpawn)?;
+    if !status.success() {
+        return Err(Err::PagerStatus(status).into());
+    }
+
+    // Warn if timeout is configured
+    if timeout.is_some() && !matcher_main.quiet() {
+        error::print_warning("timeout is not supported with custom pager (env: PRS_PAGER)");
+    }
+
+    Ok(())
+}
+
 #[derive(Debug, Error)]
 pub enum Err {
     #[error("failed to parse secret contents as UTF-8, required when using viewer")]
@@ -374,4 +415,16 @@ pub enum Err {
 
     #[error("failed to render secret viewer")]
     Render(#[source] anyhow::Error),
+
+    #[error("failed to parse PRS_PAGER env as UTF-8")]
+    PagerEnvUtf8(#[source] std::env::VarError),
+
+    #[error("failed to invoke pager from PRS_PAGER")]
+    PagerSpawn(#[source] std::io::Error),
+
+    #[error("failed to pipe secret contents to pager")]
+    PagerPipe(#[source] std::io::Error),
+
+    #[error("pager exited with non-zero status code: {0}")]
+    PagerStatus(std::process::ExitStatus),
 }

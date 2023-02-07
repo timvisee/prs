@@ -9,12 +9,13 @@ use thiserror::Error;
 use crate::util::clipboard;
 #[cfg(all(feature = "tomb", target_os = "linux"))]
 use crate::util::tomb;
+use crate::viewer;
 use crate::{
     cmd::matcher::{
         totp::{show::ShowMatcher, TotpMatcher},
         MainMatcher, Matcher,
     },
-    util::{secret, select, totp, viewer},
+    util::{secret, select, totp},
 };
 
 /// A TOTP show action.

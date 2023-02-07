@@ -10,7 +10,8 @@ use crate::cmd::matcher::{show::ShowMatcher, MainMatcher, Matcher};
 use crate::util::clipboard;
 #[cfg(all(feature = "tomb", target_os = "linux"))]
 use crate::util::tomb;
-use crate::util::{secret, select, viewer};
+use crate::util::{secret, select};
+use crate::viewer;
 
 /// Show secret action.
 pub struct Show<'a> {

@@ -81,7 +81,7 @@ impl<'a> Sync<'a> {
         let repo = self.path();
         if git::git_branch_upstream(repo, "HEAD")?.is_none() {
             // Get remotes, we cannot decide upstream if we don't have exactly one
-            let remotes = git::git_remote(repo)?;
+            let remotes = self.tracked_remote_or_remotes()?;
             if remotes.len() != 1 {
                 return Ok(());
             }

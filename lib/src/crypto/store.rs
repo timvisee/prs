@@ -50,8 +50,14 @@ fn read_fingerprints<P: AsRef<Path>>(path: P) -> Result<Vec<String>> {
     Ok(fs::read_to_string(path)
         .map_err(Err::ReadFile)?
         .lines()
-        .filter(|fp| !fp.trim().is_empty())
-        .map(|fp| fp.into())
+        // Strip comments
+        .map(|fp| match fp.split_once('#') {
+            Some((fp, _)) => fp,
+            None => fp,
+        })
+        .map(|fp| fp.trim())
+        .filter(|fp| !fp.is_empty())
+        .map(Into::into)
         .collect())
 }
 

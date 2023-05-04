@@ -166,7 +166,7 @@ impl From<TOTP> for Totp {
 pub fn is_base32(material: &str) -> bool {
     material
         .chars()
-        .all(|c| ('A'..='Z').contains(&c) || ('2'..='7').contains(&c))
+        .all(|c| c.is_ascii_uppercase() || ('2'..='7').contains(&c))
 }
 
 /// Copy the given data to the clipboard in a subprocess.

@@ -14,7 +14,7 @@ pub fn format_fingerprint<S: AsRef<str>>(fingerprint: S) -> String {
 /// Check whether two fingerprints match.
 pub fn fingerprints_equal<S: AsRef<str>, T: AsRef<str>>(a: S, b: T) -> bool {
     !a.as_ref().trim().is_empty()
-        && a.as_ref().trim().to_uppercase() == b.as_ref().trim().to_uppercase()
+        && a.as_ref().trim().to_uppercase().contains(&b.as_ref().trim().to_uppercase())
 }
 
 /// Check whether a list of keys contains the given fingerprint.

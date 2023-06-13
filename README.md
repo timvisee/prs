@@ -383,7 +383,7 @@ mv ./prs /usr/local/bin/prs
 
 To build and install `prs` yourself, you need the following:
 
-- Rust 1.64 or newer (MSRV)
+- Rust 1.65 or newer (MSRV)
 - The 'Build' [requirements](#requirements).
 
 _Not all features are supported on macOS or Windows. The default configuration

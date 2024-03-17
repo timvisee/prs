@@ -84,7 +84,6 @@ pub fn can_decrypt(context: &mut Context, ciphertext: Ciphertext) -> Result<bool
 pub fn public_keys(context: &mut Context) -> Result<Vec<KeyId>> {
     Ok(context
         .keys()?
-        .into_iter()
         .filter_map(|k| k.ok())
         .filter(|k| k.can_encrypt())
         .map(|k| k.into())
@@ -97,7 +96,6 @@ pub fn public_keys(context: &mut Context) -> Result<Vec<KeyId>> {
 pub fn private_keys(context: &mut Context) -> Result<Vec<KeyId>> {
     Ok(context
         .secret_keys()?
-        .into_iter()
         .filter_map(|k| k.ok())
         .filter(|k| k.can_encrypt())
         .map(|k| k.into())

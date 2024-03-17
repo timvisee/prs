@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.5.1 (2024-03-17)
+- Add `--pager` alias for `--viewer`
+- Add `PRS_PAGER` variable to set custom pager as viewer
+- Add scroll support to built-in secure viewer
+- Enforce use of TTY when using built-in secure viewer
+- Fix errors when `.gpg-id` contains comments
+- Fix prs not using existing remote on git repository
+- Fix current git branch not using newly configured remote
+- Fix auto completion of secrets for bash
+- Fix panic on `internal completions` command
+- Update dependencies
+
 ## 0.5.0 (2023-01-19)
 - Add `prs` homebrew package for macOS
 - Add `sync status` command to show sync status, changed files and sync command

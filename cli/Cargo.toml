@@ -67,8 +67,8 @@ chbs = "0.1"
 clap = { version = "4.1", default-features = false, features = ["std", "help", "suggestions", "color", "usage", "cargo", "env"] }
 clap_complete = "4.1"
 colored = "2.0"
-crossterm = { version = "0.25", default-features = false }
-derive_builder = "0.12"
+crossterm = { version = "0.26", default-features = false }
+derive_builder = "0.20"
 edit = "0.1"
 indicatif = "0.17"
 lazy_static = "1.4"
@@ -81,7 +81,7 @@ substring = "1.4.5"
 text_trees = "0.1"
 thiserror = "1.0"
 walkdir = "2.3"
-which = "4.3"
+which = "6.0"
 
 # Notification support
 notify-rust = { version = "4.7", optional = true }
@@ -91,12 +91,12 @@ bytesize = { version = "1.1", optional = true }
 fs_extra = { version = "1.2", optional = true }
 
 # TOTP support
-totp-rs = { version = "4.2", optional = true, default-features = false, features = ["otpauth", "steam"] }
-linkify = { version = "0.9", optional = true }
+totp-rs = { version = "5.5", optional = true, default-features = false, features = ["otpauth", "steam"] }
+linkify = { version = "0.10", optional = true }
 qr2term = { version = "0.3", optional = true }
 
 # Clipboard support
-base64 = { version = "0.21", optional = true }
+base64 = { version = "0.22", optional = true }
 
 # Clipboard support for non-X11/Wayland
 [target.'cfg(not(all(unix, not(any(target_os="macos", target_os="android", target_os="emscripten")))))'.dependencies]

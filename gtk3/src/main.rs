@@ -3,6 +3,7 @@ use std::sync::{Arc, Mutex};
 use gio::prelude::*;
 #[cfg(all(feature = "notify", not(target_env = "musl")))]
 use glib::clone;
+use glib::{ControlFlow, Propagation};
 use gtk::prelude::*;
 #[cfg(all(feature = "notify", target_os = "linux", not(target_env = "musl")))]
 use notify_rust::Hint;
@@ -150,7 +151,7 @@ fn build_ui(application: &gtk::Application) {
     let input_field_signal = input_field.clone();
     completion.connect_match_selected(move |_self, _model, _iter| {
         input_field_signal.emit_activate();
-        Inhibit(false)
+        Propagation::Stop
     });
 
     let window_ref = window.clone();
@@ -263,7 +264,7 @@ fn selected(secret: Secret, window: gtk::ApplicationWindow, input: gtk::SearchEn
     // TODO: wait for clipboard revert instead, do not use own timeout
     glib::timeout_add_seconds_local(CLIPBOARD_TIMEOUT + 1, move || {
         window.close();
-        Continue(false)
+        ControlFlow::Continue
     });
 }
 
@@ -308,7 +309,7 @@ fn copy(text: String, timeout: u32) {
             notify_cleared();
         });
 
-        Continue(false)
+        ControlFlow::Continue
     });
 }
 

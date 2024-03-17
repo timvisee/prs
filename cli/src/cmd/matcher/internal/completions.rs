@@ -75,6 +75,7 @@ impl<'a> Matcher<'a> for CompletionsMatcher<'a> {
 
 /// Available shells.
 #[derive(Copy, Clone)]
+#[allow(clippy::enum_variant_names)]
 pub(crate) enum Shell {
     Bash,
     Elvish,

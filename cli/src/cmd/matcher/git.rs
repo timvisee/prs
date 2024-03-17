@@ -13,7 +13,7 @@ impl<'a: 'b, 'b> GitMatcher<'a> {
         self.matches
             .get_many("COMMAND")
             .map(|c: ValuesRef<String>| c.map(|s| s.as_str()).collect::<Vec<_>>().join(" "))
-            .unwrap_or_else(String::default)
+            .unwrap_or_default()
     }
 }
 

@@ -7,7 +7,7 @@ use prs_lib::{Key, Secret};
 pub fn select_secret(secrets: &[Secret]) -> Option<&Secret> {
     // Return if theres just one to choose
     if secrets.len() == 1 {
-        return secrets.get(0);
+        return secrets.first();
     }
 
     let map: HashMap<_, _> = secrets

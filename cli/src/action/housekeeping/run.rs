@@ -124,11 +124,7 @@ fn set_git_ignore(store: &Store) -> Result<(), std::io::Error> {
     }
 
     // Open and read file
-    let mut file = OpenOptions::new()
-        .append(true)
-        .read(true)
-        .write(true)
-        .open(file)?;
+    let mut file = OpenOptions::new().append(true).read(true).open(file)?;
     let mut contents = String::new();
     file.read_to_string(&mut contents)?;
 
@@ -156,11 +152,7 @@ fn set_git_attributes(store: &Store) -> Result<(), std::io::Error> {
     }
 
     // Open and read file
-    let mut file = OpenOptions::new()
-        .append(true)
-        .read(true)
-        .write(true)
-        .open(file)?;
+    let mut file = OpenOptions::new().append(true).read(true).open(file)?;
     let mut contents = String::new();
     file.read_to_string(&mut contents)?;
 

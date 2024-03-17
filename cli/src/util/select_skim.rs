@@ -27,7 +27,10 @@ fn skim_select(items: SkimItemReceiver, prompt: &str) -> Option<String> {
     }
 
     // Get the first selected, and return
-    output.selected_items.get(0).map(|i| i.output().to_string())
+    output
+        .selected_items
+        .first()
+        .map(|i| i.output().to_string())
 }
 
 /// Wrapped store secret item for skim.
@@ -57,7 +60,7 @@ impl SkimItem for SkimSecret {
 pub fn select_secret(secrets: &[Secret]) -> Option<&Secret> {
     // Return if theres just one to choose
     if secrets.len() == 1 {
-        return secrets.get(0);
+        return secrets.first();
     }
 
     // Let user select secret

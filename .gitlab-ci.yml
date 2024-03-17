@@ -108,6 +108,7 @@ build-x86_64-linux-musl:
   variables:
     TARGET: x86_64-unknown-linux-musl
     FEATURES_CLI_UNIX: backend-gnupg-bin,alias,clipboard,notify,select-skim,tomb,totp
+    FEATURES_GTK3_UNIX: backend-gnupg-bin
   before_script: []
   script:
     - apk add rustup alpine-sdk libxcb-dev gtk+3.0-dev
@@ -116,15 +117,19 @@ build-x86_64-linux-musl:
     - source $HOME/.cargo/env
 
     - cd cli; cargo build --target=$TARGET --release --no-default-features --features $FEATURES_CLI_UNIX --locked --verbose; cd ..
+    - cd gtk3; cargo build --target=$TARGET --release --no-default-features --features $FEATURES_GTK3_UNIX --locked --verbose; cd ..
 
     # Prepare the release artifact, strip it
     - find . -name prs -exec ls -lah {} \;
     - mv target/$TARGET/release/prs ./prs-$TARGET
+    - mv target/$TARGET/release/prs-gtk3-copy ./prs-gtk3-copy-$TARGET
     - strip -g ./prs-$TARGET
+    - strip -g ./prs-gtk3-copy-$TARGET
   artifacts:
     name: prs-x86_64-linux-musl
     paths:
       - prs-$TARGET
+      - prs-gtk3-copy-$TARGET
     expire_in: 1 month
 
 # Build using Rust stable on Windows
@@ -252,6 +257,7 @@ release-gitlab-generic-package:
     LINUX_GNU_BIN: "prs-x86_64-unknown-linux-gnu"
     LINUX_GNU_BIN_GTK_COPY: "prs-gtk3-copy-x86_64-unknown-linux-gnu"
     LINUX_MUSL_BIN: "prs-x86_64-unknown-linux-musl"
+    LINUX_MUSL_BIN_GTK_COPY: "prs-gtk3-copy-x86_64-unknown-linux-musl"
     WINDOWS_BIN: "prs-x86_64-pc-windows-msvc.exe"
   before_script: []
   script:
@@ -267,6 +273,8 @@ release-gitlab-generic-package:
     - |
       curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file ${LINUX_MUSL_BIN} ${PACKAGE_REGISTRY_URL}/${LINUX_MUSL_BIN}
     - |
+      curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file ${LINUX_MUSL_BIN_GTK_COPY} ${PACKAGE_REGISTRY_URL}/${LINUX_MUSL_BIN_GTK_COPY}
+    - |
       curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file ${WINDOWS_BIN} ${PACKAGE_REGISTRY_URL}/${WINDOWS_BIN}
 
 # Publish GitLab release
@@ -279,6 +287,7 @@ release-gitlab-release:
     LINUX_GNU_BIN: "prs-x86_64-unknown-linux-gnu"
     LINUX_GNU_BIN_GTK_COPY: "prs-gtk3-copy-x86_64-unknown-linux-gnu"
     LINUX_MUSL_BIN: "prs-x86_64-unknown-linux-musl"
+    LINUX_MUSL_BIN_GTK_COPY: "prs-gtk3-copy-x86_64-unknown-linux-musl"
     WINDOWS_BIN: "prs-x86_64-pc-windows-msvc.exe"
   before_script: []
   script:
@@ -292,6 +301,7 @@ release-gitlab-release:
         --assets-link "{\"name\":\"${LINUX_GNU_BIN}\",\"url\":\"${PACKAGE_REGISTRY_URL}/${LINUX_GNU_BIN}\"}" \
         --assets-link "{\"name\":\"${LINUX_GNU_BIN_GTK_COPY}\",\"url\":\"${PACKAGE_REGISTRY_URL}/${LINUX_GNU_BIN_GTK_COPY}\"}" \
         --assets-link "{\"name\":\"${LINUX_MUSL_BIN}\",\"url\":\"${PACKAGE_REGISTRY_URL}/${LINUX_MUSL_BIN}\"}" \
+        --assets-link "{\"name\":\"${LINUX_MUSL_BIN_GTK_COPY}\",\"url\":\"${PACKAGE_REGISTRY_URL}/${LINUX_MUSL_BIN_GTK_COPY}\"}" \
         --assets-link "{\"name\":\"${WINDOWS_BIN}\",\"url\":\"${PACKAGE_REGISTRY_URL}/${WINDOWS_BIN}\"}"
 
 # Publish GitHub release
@@ -319,6 +329,7 @@ release-github:
     - ./github-release upload --token "$GITHUB_TOKEN" --owner timvisee --repo prs --tag "$CI_COMMIT_REF_NAME" --file ./prs-x86_64-unknown-linux-gnu --name prs-$CI_COMMIT_REF_NAME-linux-x64
     - ./github-release upload --token "$GITHUB_TOKEN" --owner timvisee --repo prs --tag "$CI_COMMIT_REF_NAME" --file ./prs-gtk3-copy-x86_64-unknown-linux-gnu --name prs-gtk3-copy-$CI_COMMIT_REF_NAME-linux-x64
     - ./github-release upload --token "$GITHUB_TOKEN" --owner timvisee --repo prs --tag "$CI_COMMIT_REF_NAME" --file ./prs-x86_64-unknown-linux-musl --name prs-$CI_COMMIT_REF_NAME-linux-x64-static
+    - ./github-release upload --token "$GITHUB_TOKEN" --owner timvisee --repo prs --tag "$CI_COMMIT_REF_NAME" --file ./prs-gtk3-copy-x86_64-unknown-linux-musl --name prs-gtk3-copy-$CI_COMMIT_REF_NAME-linux-x64-static
     - ./github-release upload --token "$GITHUB_TOKEN" --owner timvisee --repo prs --tag "$CI_COMMIT_REF_NAME" --file ./prs-x86_64-pc-windows-msvc.exe --name prs-$CI_COMMIT_REF_NAME-windows.exe
 
 # Cargo crate release

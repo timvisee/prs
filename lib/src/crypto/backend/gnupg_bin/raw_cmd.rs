@@ -156,29 +156,33 @@ fn log_cmd(cmd: &Command) {
     sh_cmd.extend(cmd.get_envs().map(|(k, v)| {
         format!(
             "{}={}",
-            shlex::quote(k.to_str().expect("gpg env key is not valid UTF-8")),
-            shlex::quote(
+            shlex::try_quote(k.to_str().expect("gpg env key is not valid UTF-8"))
+                .expect("failed to quite gpg env key"),
+            shlex::try_quote(
                 v.map(|v| v.to_str().expect("gpg env value is not valid UTF-8"))
                     .unwrap_or("")
-            ),
+            )
+            .expect("failed to quite gpg env value"),
         )
     }));
 
-    // Add program name
+    // Add binary name
     sh_cmd.push(
-        shlex::quote(
+        shlex::try_quote(
             cmd.get_program()
                 .to_str()
-                .expect("gpg program is not valid UTF-8"),
+                .expect("gpg command binary is not valid UTF-8"),
         )
+        .expect("failed to quote gpg command binary")
         .into(),
     );
 
     // Add program arguments
-    sh_cmd.extend(
-        cmd.get_args()
-            .map(|a| shlex::quote(a.to_str().expect("gpg argument is not valid UTF-8")).into()),
-    );
+    sh_cmd.extend(cmd.get_args().map(|a| {
+        shlex::try_quote(a.to_str().expect("gpg argument is not valid UTF-8"))
+            .expect("failed to quote gpg command argument")
+            .into()
+    }));
 
     // Join invoked command into single string, and print
     let sh_cmd = sh_cmd

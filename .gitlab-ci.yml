@@ -127,26 +127,26 @@ build-x86_64-linux-musl:
       - prs-$TARGET
     expire_in: 1 month
 
-# Build using Rust stable on Windows
-build-x86_64-windows:
-  stage: build
-  tags:
-    - windows
-  only:
-    - master
-    - /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
-  needs: []
-  variables:
-    TARGET: x86_64-pc-windows-msvc
-  <<: *before_script-windows
-  script:
-    - cd cli; cargo build --target=$TARGET --release --no-default-features --features $FEATURES_CLI_WINDOWS --locked --verbose; cd ..
-    - mv target\$env:TARGET\release\prs.exe .\prs-$env:TARGET.exe
-  artifacts:
-    name: prs-x86_64-windows
-    paths:
-      - prs-$TARGET.exe
-    expire_in: 1 month
+# # Build using Rust stable on Windows
+# build-x86_64-windows:
+#   stage: build
+#   tags:
+#     - windows
+#   only:
+#     - master
+#     - /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
+#   needs: []
+#   variables:
+#     TARGET: x86_64-pc-windows-msvc
+#   <<: *before_script-windows
+#   script:
+#     - cd cli; cargo build --target=$TARGET --release --no-default-features --features $FEATURES_CLI_WINDOWS --locked --verbose; cd ..
+#     - mv target\$env:TARGET\release\prs.exe .\prs-$env:TARGET.exe
+#   artifacts:
+#     name: prs-x86_64-windows
+#     paths:
+#       - prs-$TARGET.exe
+#     expire_in: 1 month
 
 # Run the unit tests through Cargo on Linux
 test-cargo-x86_64-linux-gnu:
@@ -156,20 +156,20 @@ test-cargo-x86_64-linux-gnu:
   script:
     - cargo test --locked --verbose
 
-# Run the unit tests through Cargo on Windows
-test-cargo-x86_64-windows:
-  stage: test
-  tags:
-    - windows
-  only:
-    - master
-  needs: []
-  dependencies: []
-  cache: {}
-  <<: *before_script-windows
-  script:
-    - cd lib; cargo test --locked --verbose; cd ..
-    - cd cli; cargo test --locked --verbose; cd ..
+# # Run the unit tests through Cargo on Windows
+# test-cargo-x86_64-windows:
+#   stage: test
+#   tags:
+#     - windows
+#   only:
+#     - master
+#   needs: []
+#   dependencies: []
+#   cache: {}
+#   <<: *before_script-windows
+#   script:
+#     - cd lib; cargo test --locked --verbose; cd ..
+#     - cd cli; cargo test --locked --verbose; cd ..
 
 # Run basic integration test with prs
 test-integration:
@@ -202,7 +202,7 @@ package-docker:
   stage: package
   tags:
     - linux
-    - docker
+    # - docker
   needs:
     - build-x86_64-linux-musl
   dependencies:
@@ -245,14 +245,14 @@ release-gitlab-generic-package:
   dependencies:
     - build-x86_64-linux-gnu
     - build-x86_64-linux-musl
-    - build-x86_64-windows
+    # - build-x86_64-windows
   only:
     - /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
   variables:
     LINUX_GNU_BIN: "prs-x86_64-unknown-linux-gnu"
     LINUX_GNU_BIN_GTK_COPY: "prs-gtk3-copy-x86_64-unknown-linux-gnu"
     LINUX_MUSL_BIN: "prs-x86_64-unknown-linux-musl"
-    WINDOWS_BIN: "prs-x86_64-pc-windows-msvc.exe"
+    # WINDOWS_BIN: "prs-x86_64-pc-windows-msvc.exe"
   before_script: []
   script:
     # Get version based on tag, determine registry URL
@@ -266,8 +266,8 @@ release-gitlab-generic-package:
       curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file ${LINUX_GNU_BIN_GTK_COPY} ${PACKAGE_REGISTRY_URL}/${LINUX_GNU_BIN_GTK_COPY}
     - |
       curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file ${LINUX_MUSL_BIN} ${PACKAGE_REGISTRY_URL}/${LINUX_MUSL_BIN}
-    - |
-      curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file ${WINDOWS_BIN} ${PACKAGE_REGISTRY_URL}/${WINDOWS_BIN}
+    # - |
+    #   curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file ${WINDOWS_BIN} ${PACKAGE_REGISTRY_URL}/${WINDOWS_BIN}
 
 # Publish GitLab release
 release-gitlab-release:
@@ -279,7 +279,7 @@ release-gitlab-release:
     LINUX_GNU_BIN: "prs-x86_64-unknown-linux-gnu"
     LINUX_GNU_BIN_GTK_COPY: "prs-gtk3-copy-x86_64-unknown-linux-gnu"
     LINUX_MUSL_BIN: "prs-x86_64-unknown-linux-musl"
-    WINDOWS_BIN: "prs-x86_64-pc-windows-msvc.exe"
+    # WINDOWS_BIN: "prs-x86_64-pc-windows-msvc.exe"
   before_script: []
   script:
     # Get version based on tag, determine registry URL
@@ -291,8 +291,8 @@ release-gitlab-release:
       release-cli create --name "prs $CI_COMMIT_TAG" --tag-name $CI_COMMIT_TAG \
         --assets-link "{\"name\":\"${LINUX_GNU_BIN}\",\"url\":\"${PACKAGE_REGISTRY_URL}/${LINUX_GNU_BIN}\"}" \
         --assets-link "{\"name\":\"${LINUX_GNU_BIN_GTK_COPY}\",\"url\":\"${PACKAGE_REGISTRY_URL}/${LINUX_GNU_BIN_GTK_COPY}\"}" \
-        --assets-link "{\"name\":\"${LINUX_MUSL_BIN}\",\"url\":\"${PACKAGE_REGISTRY_URL}/${LINUX_MUSL_BIN}\"}" \
-        --assets-link "{\"name\":\"${WINDOWS_BIN}\",\"url\":\"${PACKAGE_REGISTRY_URL}/${WINDOWS_BIN}\"}"
+        --assets-link "{\"name\":\"${LINUX_MUSL_BIN}\",\"url\":\"${PACKAGE_REGISTRY_URL}/${LINUX_MUSL_BIN}\"}"
+        # --assets-link "{\"name\":\"${WINDOWS_BIN}\",\"url\":\"${PACKAGE_REGISTRY_URL}/${WINDOWS_BIN}\"}"
 
 # Publish GitHub release
 release-github:
@@ -302,7 +302,7 @@ release-github:
   dependencies:
     - build-x86_64-linux-gnu
     - build-x86_64-linux-musl
-    - build-x86_64-windows
+    # - build-x86_64-windows
   before_script: []
   script:
     # Install dependencies
@@ -319,7 +319,7 @@ release-github:
     - ./github-release upload --token "$GITHUB_TOKEN" --owner timvisee --repo prs --tag "$CI_COMMIT_REF_NAME" --file ./prs-x86_64-unknown-linux-gnu --name prs-$CI_COMMIT_REF_NAME-linux-x64
     - ./github-release upload --token "$GITHUB_TOKEN" --owner timvisee --repo prs --tag "$CI_COMMIT_REF_NAME" --file ./prs-gtk3-copy-x86_64-unknown-linux-gnu --name prs-gtk3-copy-$CI_COMMIT_REF_NAME-linux-x64
     - ./github-release upload --token "$GITHUB_TOKEN" --owner timvisee --repo prs --tag "$CI_COMMIT_REF_NAME" --file ./prs-x86_64-unknown-linux-musl --name prs-$CI_COMMIT_REF_NAME-linux-x64-static
-    - ./github-release upload --token "$GITHUB_TOKEN" --owner timvisee --repo prs --tag "$CI_COMMIT_REF_NAME" --file ./prs-x86_64-pc-windows-msvc.exe --name prs-$CI_COMMIT_REF_NAME-windows.exe
+    # - ./github-release upload --token "$GITHUB_TOKEN" --owner timvisee --repo prs --tag "$CI_COMMIT_REF_NAME" --file ./prs-x86_64-pc-windows-msvc.exe --name prs-$CI_COMMIT_REF_NAME-windows.exe
 
 # Cargo crate release
 release-crate:

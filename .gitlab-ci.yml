@@ -200,9 +200,6 @@ test-integration:
 package-docker:
   image: docker:latest
   stage: package
-  tags:
-    - linux
-    # - docker
   needs:
     - build-x86_64-linux-musl
   dependencies:
@@ -344,9 +341,6 @@ release-crate:
 release-docker:
   image: docker:latest
   stage: release
-  tags:
-    - linux
-    - docker
   only:
     - /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
   dependencies:
@@ -378,9 +372,6 @@ release-docker:
 release-docker-hub:
   image: docker:latest
   stage: release
-  tags:
-    - linux
-    - docker
   only:
     - /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
   dependencies:

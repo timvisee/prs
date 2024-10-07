@@ -488,7 +488,7 @@ Secrets are/use:
 
 - Zeroed on drop
 - Locked to physical memory, cannot leak to swap/disk ([`mlock`][security-mlock])
-- Locked into memory, cannot be dumped/not included in core ([`madvice`][security-mlock])
+- Locked into memory, cannot be dumped/not included in core ([`madvice`][security-madvice])
 - Not written to disk to edit (if possible)
 - String formatting is blocked
 - Constant time comparison to prevent time based attacks

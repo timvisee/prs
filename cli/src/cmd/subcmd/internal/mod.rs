@@ -13,7 +13,7 @@ pub struct CmdInternal;
 
 impl CmdInternal {
     pub fn build() -> Command {
-        #[allow(unused_mut)]
+        #[cfg_attr(not(feature = "clipboard"), expect(unused_mut))]
         let mut cmd = Command::new("internal")
             .about("Commands used by prs internally")
             .hide(true)

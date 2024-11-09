@@ -31,7 +31,6 @@ impl<'a> Slam<'a> {
         let _matcher_slam = SlamMatcher::with(self.cmd_matches).unwrap();
 
         // Attempt to open store for some locking operations
-        #[allow(unused_variables)]
         let store = match Store::open(matcher_main.store()) {
             Ok(store) => Some(store),
             Err(err) => {

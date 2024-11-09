@@ -9,7 +9,7 @@ pub struct CmdGenerate;
 
 impl CmdGenerate {
     pub fn build() -> Command {
-        #[allow(clippy::let_and_return)]
+        #[cfg_attr(not(feature = "clipboard"), expect(clippy::let_and_return))]
         let cmd = Command::new("generate")
             .alias("gen")
             .alias("g")

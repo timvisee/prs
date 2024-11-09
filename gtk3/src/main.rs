@@ -335,7 +335,10 @@ fn notify_cleared() {
     }
 
     // Fallback if we cannot notify
-    #[allow(unreachable_code)]
+    #[cfg_attr(
+        all(feature = "notify", not(target_env = "musl")),
+        expect(unreachable_code)
+    )]
     {
         eprintln!("Secret cleared from clipboard");
     }

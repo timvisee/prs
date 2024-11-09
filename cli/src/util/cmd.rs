@@ -1,8 +1,9 @@
+#![cfg(feature = "clipboard")]
+
 use std::ffi::OsStr;
 use std::process::Command;
 
 /// Get the current command to spawn a subprocess.
-#[cfg(feature = "clipboard")]
 pub(crate) fn current_cmd() -> Option<Command> {
     let current_exe = match std::env::current_exe() {
         Ok(exe) => exe,

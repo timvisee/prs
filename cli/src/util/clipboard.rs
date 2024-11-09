@@ -131,7 +131,11 @@ impl SharedContext {
     }
 
     /// Get clipboard context display server.
-    #[allow(unused)]
+    #[cfg(all(
+        unix,
+        not(any(target_os = "macos", target_os = "android", target_os = "emscripten")),
+        not(target_env = "musl")
+    ))]
     pub fn display_server(&self) -> Result<Option<DisplayServer>> {
         self.ensure_context()?;
         Ok(self
@@ -638,7 +642,10 @@ pub(crate) fn notify_cleared(changed: bool, restored: bool) -> Result<()> {
     }
 
     // Fallback if we cannot notify
-    #[allow(unreachable_code)]
+    #[cfg_attr(
+        all(feature = "notify", not(target_env = "musl")),
+        expect(unreachable_code)
+    )]
     {
         eprintln!("Secret wiped from clipboard");
         Ok(())

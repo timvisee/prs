@@ -5,12 +5,15 @@ use thiserror::Error;
 /// This method parses a string of time components to represent the given duration.
 ///
 /// The following time units are used:
+///
 /// - `w`: weeks
 /// - `d`: days
 /// - `h`: hours
 /// - `m`: minutes
 /// - `s`: seconds
+///
 /// The following time strings can be parsed:
+///
 /// - `8w6d`
 /// - `23h14m`
 /// - `9m55s`

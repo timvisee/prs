@@ -59,7 +59,7 @@ impl<'a: 'b, 'b> CompletionsMatcher<'a> {
     pub fn name(&'a self) -> String {
         self.matches
             .get_one("name")
-            .map(String::clone)
+            .cloned()
             .unwrap_or_else(util::bin_name)
     }
 }

@@ -191,7 +191,7 @@ pub fn kill_ssh_by_session(store: &Store) {
                 // Only handle ssh clients
                 fs::read_to_string(format!("/proc/{pid}/cmdline"))
                     .map(|cmdline| {
-                        let cmd = cmdline.split(|b| b == ' ' || b == ':').next().unwrap();
+                        let cmd = cmdline.split([' ', ':']).next().unwrap();
                         cmd.starts_with("ssh")
                     })
                     .unwrap_or(true)

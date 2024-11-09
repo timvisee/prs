@@ -14,7 +14,7 @@ pub fn print(plaintext: Plaintext) -> Result<(), std::io::Error> {
     // Always finish with newline
     if let Some(&last) = plaintext.unsecure_ref().last() {
         if last != b'\n' {
-            stdout.write_all(&[b'\n'])?;
+            stdout.write_all(b"\n")?;
         }
     }
 

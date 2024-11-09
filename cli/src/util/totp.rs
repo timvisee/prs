@@ -21,19 +21,17 @@ const PROPERTY_NAMES: [&str; 2] = ["totp", "2fa"];
 /// Returns `None` if no TOTP is found.
 pub fn find_token(plaintext: &Plaintext) -> Option<Result<Totp>> {
     // Find first TOTP URL globally
-    match find_otpauth_url(plaintext) {
-        totp @ Some(_) => return totp,
-        None => {}
+    if let totp @ Some(_) = find_otpauth_url(plaintext) {
+        return totp;
     }
 
     // Find first TOTP in common properties
-    match PROPERTY_NAMES
+    if let totp @ Some(_) = PROPERTY_NAMES
         .iter()
         .flat_map(|p| plaintext.property(p))
         .find_map(|p| find_token(&p))
     {
-        totp @ Some(_) => return totp,
-        None => {}
+        return totp;
     }
 
     // Try to parse full secret as encoded TOTP secret

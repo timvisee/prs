@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.2 (2024-11-09)
+- Autocomplete secret names in zsh
+- Update dependencies
+
 ## 0.5.1 (2024-03-17)
 - Add `--pager` alias for `--viewer`
 - Add `PRS_PAGER` variable to set custom pager as viewer

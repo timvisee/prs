@@ -5,7 +5,7 @@ pub struct CmdExport;
 
 impl CmdExport {
     pub fn build() -> Command {
-        #[allow(clippy::let_and_return)]
+        #[cfg_attr(not(feature = "clipboard"), expect(clippy::let_and_return))]
         let cmd = Command::new("export")
             .alias("exp")
             .alias("ex")

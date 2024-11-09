@@ -115,17 +115,8 @@ impl<'a> Handler {
         #[cfg(all(feature = "tomb", target_os = "linux"))]
         let app = app.subcommand(subcmd::CmdTomb::build());
 
-        #[allow(clippy::let_and_return)]
-        let app = app
-            .subcommand(subcmd::CmdHousekeeping::build())
-            .subcommand(subcmd::CmdInternal::build());
-
-        // Disable color usage if compiled without color support
-        // TODO: do not use feature, pull from env var instead
-        #[cfg(feature = "no-color")]
-        let app = app.global_setting(AppSettings::ColorNever);
-
-        app
+        app.subcommand(subcmd::CmdHousekeeping::build())
+            .subcommand(subcmd::CmdInternal::build())
     }
 
     /// Parse CLI arguments.

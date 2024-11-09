@@ -184,7 +184,7 @@ impl<'a> Generate<'a> {
         tomb::finalize_tomb(&mut tomb, &matcher_main, true).map_err(Err::Tomb)?;
 
         // Determine whehter we outputted anything to stdout/stderr
-        #[allow(unused_mut)]
+        #[cfg_attr(not(feature = "clipboard"), expect(unused_mut))]
         let mut output_any = matcher_generate.show();
         #[cfg(feature = "clipboard")]
         {

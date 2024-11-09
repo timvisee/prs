@@ -14,7 +14,7 @@ categories = [
     "cryptography",
 ]
 edition = "2018"
-rust-version = "1.74.1"
+rust-version = "1.81.0"
 
 [features]
 default = ["backend-gnupg-bin"]

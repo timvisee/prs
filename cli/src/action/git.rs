@@ -54,7 +54,10 @@ impl<'a> Git<'a> {
             util::error::print_warning("sync not configured, store is not a git repository");
         }
 
-        #[allow(clippy::let_and_return)]
+        #[cfg_attr(
+            not(all(feature = "tomb", target_os = "linux")),
+            expect(clippy::let_and_return)
+        )]
         let result = git(&store, matcher_git.command(), matcher_main.verbose());
 
         // Finalize tomb

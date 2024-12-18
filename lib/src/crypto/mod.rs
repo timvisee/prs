@@ -137,6 +137,11 @@ pub fn context(config: &Config) -> Result<Context, Err> {
                 backend::gnupg_bin::context::context(config)
                     .map_err(|err| Err::Context(err.into()))?,
             )));
+            #[cfg(feature = "backend-rpgpie")]
+            return Ok(Context::from(Box::new(
+                backend::rpgpie::context::context(config)
+                    .map_err(|err| Err::Context(err.into()))?,
+            )));
         }
     }
 

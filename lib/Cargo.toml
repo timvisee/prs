@@ -28,7 +28,7 @@ backend-gpgme = ["gpgme"]
 # Option (default): GnuPG cryptography backend using gpg binary
 backend-gnupg-bin = ["regex", "shlex", "version-compare"]
 
-# Option: Use backend
+# Option: Use backend rpgpie for a rust-based pgp implementation
 backend-rpgpie = [
     "chrono",
     "pgp",

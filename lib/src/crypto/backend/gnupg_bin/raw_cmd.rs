@@ -31,8 +31,12 @@ where
     let mut cmd = cmd_gpg(config, args);
 
     // Pass stdin to child process
+    #[allow(clippy::zombie_processes)]
     let mut child = cmd.spawn().unwrap();
     if let Err(err) = child.stdin.as_mut().unwrap().write_all(stdin) {
+        if let Err(err) = child.kill() {
+            eprintln!("failed to kill gpg process: {err}");
+        }
         return Err(Err::System(err).into());
     }
 

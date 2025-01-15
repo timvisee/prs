@@ -9,7 +9,7 @@ pub struct ResizeMatcher<'a> {
     matches: &'a ArgMatches,
 }
 
-impl<'a: 'b, 'b> ResizeMatcher<'a> {
+impl ResizeMatcher<'_> {
     /// The size in megabytes.
     pub fn size(&self) -> Option<u32> {
         let size: &String = self.matches.get_one("size")?;

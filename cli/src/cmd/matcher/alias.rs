@@ -8,7 +8,7 @@ pub struct AliasMatcher<'a> {
     matches: &'a ArgMatches,
 }
 
-impl<'a: 'b, 'b> AliasMatcher<'a> {
+impl AliasMatcher<'_> {
     /// The secret query.
     pub fn query(&self) -> Option<String> {
         ArgQuery::value(self.matches)

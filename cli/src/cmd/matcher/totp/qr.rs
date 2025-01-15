@@ -8,7 +8,7 @@ pub struct QrMatcher<'a> {
     matches: &'a ArgMatches,
 }
 
-impl<'a: 'b, 'b> QrMatcher<'a> {
+impl QrMatcher<'_> {
     /// The secret query.
     pub fn query(&self) -> Option<String> {
         ArgQuery::value(self.matches)

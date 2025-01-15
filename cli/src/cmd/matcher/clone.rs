@@ -7,7 +7,7 @@ pub struct CloneMatcher<'a> {
     matches: &'a ArgMatches,
 }
 
-impl<'a: 'b, 'b> CloneMatcher<'a> {
+impl CloneMatcher<'_> {
     /// The git URL to clone from.
     pub fn git_url(&self) -> &String {
         self.matches.get_one("GIT_URL").unwrap()

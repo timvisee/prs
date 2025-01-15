@@ -8,7 +8,7 @@ pub struct RunMatcher<'a> {
     matches: &'a ArgMatches,
 }
 
-impl<'a: 'b, 'b> RunMatcher<'a> {
+impl RunMatcher<'_> {
     /// Whether to allow a dirty repository for syncing.
     pub fn allow_dirty(&self) -> bool {
         ArgAllowDirty::is_present(self.matches)

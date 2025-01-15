@@ -7,7 +7,7 @@ pub struct ListMatcher<'a> {
     _matches: &'a ArgMatches,
 }
 
-impl<'a: 'b, 'b> ListMatcher<'a> {}
+impl ListMatcher<'_> {}
 
 impl<'a> Matcher<'a> for ListMatcher<'a> {
     fn with(matches: &'a ArgMatches) -> Option<Self> {

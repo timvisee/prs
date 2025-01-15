@@ -8,7 +8,7 @@ pub struct MoveMatcher<'a> {
     matches: &'a ArgMatches,
 }
 
-impl<'a: 'b, 'b> MoveMatcher<'a> {
+impl MoveMatcher<'_> {
     /// The secret query.
     pub fn query(&self) -> Option<String> {
         ArgQuery::value(self.matches)

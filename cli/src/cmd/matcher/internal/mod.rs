@@ -16,27 +16,27 @@ pub struct InternalMatcher<'a> {
     _matches: &'a ArgMatches,
 }
 
-impl<'a: 'b, 'b> InternalMatcher<'a> {
+impl<'a> InternalMatcher<'a> {
     /// Get the internal clipboard sub command, if matched.
     #[cfg(feature = "clipboard")]
-    pub fn clip(&'a self) -> Option<clip::ClipMatcher> {
+    pub fn clip(&'a self) -> Option<clip::ClipMatcher<'a>> {
         clip::ClipMatcher::with(self.root)
     }
 
     /// Get the internal clipboard revert sub command, if matched.
     #[cfg(feature = "clipboard")]
-    pub fn clip_revert(&'a self) -> Option<clip_revert::ClipRevertMatcher> {
+    pub fn clip_revert(&'a self) -> Option<clip_revert::ClipRevertMatcher<'a>> {
         clip_revert::ClipRevertMatcher::with(self.root)
     }
 
     /// Get the internal completions generator sub command, if matched.
-    pub fn completions(&'a self) -> Option<completions::CompletionsMatcher> {
+    pub fn completions(&'a self) -> Option<completions::CompletionsMatcher<'a>> {
         completions::CompletionsMatcher::with(self.root)
     }
 
     /// Get the internal clipboard revert sub command, if matched.
     #[cfg(all(feature = "clipboard", feature = "totp"))]
-    pub fn totp_recopy(&'a self) -> Option<totp_recopy::TotpRecopyMatcher> {
+    pub fn totp_recopy(&'a self) -> Option<totp_recopy::TotpRecopyMatcher<'a>> {
         totp_recopy::TotpRecopyMatcher::with(self.root)
     }
 }

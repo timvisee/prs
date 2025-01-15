@@ -8,7 +8,7 @@ pub struct ResetMatcher<'a> {
     matches: &'a ArgMatches,
 }
 
-impl<'a: 'b, 'b> ResetMatcher<'a> {
+impl ResetMatcher<'_> {
     /// Whether to not sync.
     pub fn no_sync(&self) -> bool {
         ArgNoSync::is_present(self.matches)

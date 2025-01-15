@@ -7,7 +7,7 @@ pub struct GitMatcher<'a> {
     matches: &'a ArgMatches,
 }
 
-impl<'a: 'b, 'b> GitMatcher<'a> {
+impl GitMatcher<'_> {
     /// Get the git command to invoke.
     pub fn command(&self) -> String {
         self.matches

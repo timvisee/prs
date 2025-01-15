@@ -9,7 +9,7 @@ pub struct TotpRecopyMatcher<'a> {
     matches: &'a ArgMatches,
 }
 
-impl<'a: 'b, 'b> TotpRecopyMatcher<'a> {
+impl TotpRecopyMatcher<'_> {
     /// Clipboard timeout in seconds.
     pub fn timeout(&self) -> Result<u64> {
         ArgTimeout::value_or_default(self.matches)

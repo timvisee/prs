@@ -8,7 +8,7 @@ pub struct DeleteMatcher<'a> {
     matches: &'a ArgMatches,
 }
 
-impl<'a: 'b, 'b> DeleteMatcher<'a> {
+impl DeleteMatcher<'_> {
     /// The secret query.
     pub fn query(&self) -> Option<String> {
         ArgQuery::value(self.matches)

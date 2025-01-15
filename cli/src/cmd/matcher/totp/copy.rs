@@ -9,7 +9,7 @@ pub struct CopyMatcher<'a> {
     matches: &'a ArgMatches,
 }
 
-impl<'a: 'b, 'b> CopyMatcher<'a> {
+impl CopyMatcher<'_> {
     /// Don't recopy if the token changes within the timeout.
     pub fn no_recopy(&self) -> bool {
         self.matches.get_flag("no-recopy")

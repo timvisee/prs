@@ -11,7 +11,7 @@ pub struct CompletionsMatcher<'a> {
     matches: &'a ArgMatches,
 }
 
-impl<'a: 'b, 'b> CompletionsMatcher<'a> {
+impl<'a> CompletionsMatcher<'a> {
     /// Get the shells to generate completions for.
     pub(crate) fn shells(&'a self) -> Vec<Shell> {
         // Get the raw list of shells

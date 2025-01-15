@@ -8,7 +8,7 @@ pub struct SyncKeysMatcher<'a> {
     matches: &'a ArgMatches,
 }
 
-impl<'a: 'b, 'b> SyncKeysMatcher<'a> {
+impl SyncKeysMatcher<'_> {
     /// Check whether to not import missing keys.
     pub fn no_import(&self) -> bool {
         self.matches.get_flag("no-import")

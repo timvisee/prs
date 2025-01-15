@@ -15,29 +15,29 @@ pub struct SyncMatcher<'a> {
     matches: &'a ArgMatches,
 }
 
-impl<'a: 'b, 'b> SyncMatcher<'a> {
+impl<'a> SyncMatcher<'a> {
     /// Get the sync commit sub command, if matched.
-    pub fn cmd_commit(&'a self) -> Option<commit::CommitMatcher> {
+    pub fn cmd_commit(&'a self) -> Option<commit::CommitMatcher<'a>> {
         commit::CommitMatcher::with(self.root)
     }
 
     /// Get the sync init sub command, if matched.
-    pub fn cmd_init(&'a self) -> Option<init::InitMatcher> {
+    pub fn cmd_init(&'a self) -> Option<init::InitMatcher<'a>> {
         init::InitMatcher::with(self.root)
     }
 
     /// Get the sync remote sub command, if matched.
-    pub fn cmd_remote(&'a self) -> Option<remote::RemoteMatcher> {
+    pub fn cmd_remote(&'a self) -> Option<remote::RemoteMatcher<'a>> {
         remote::RemoteMatcher::with(self.root)
     }
 
     /// Get the sync reset sub command, if matched.
-    pub fn cmd_reset(&'a self) -> Option<reset::ResetMatcher> {
+    pub fn cmd_reset(&'a self) -> Option<reset::ResetMatcher<'a>> {
         reset::ResetMatcher::with(self.root)
     }
 
     /// Get the sync status sub command, if matched.
-    pub fn cmd_status(&'a self) -> Option<status::StatusMatcher> {
+    pub fn cmd_status(&'a self) -> Option<status::StatusMatcher<'a>> {
         status::StatusMatcher::with(self.root)
     }
 

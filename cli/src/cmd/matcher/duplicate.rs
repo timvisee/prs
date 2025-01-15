@@ -8,7 +8,7 @@ pub struct DuplicateMatcher<'a> {
     matches: &'a ArgMatches,
 }
 
-impl<'a: 'b, 'b> DuplicateMatcher<'a> {
+impl DuplicateMatcher<'_> {
     /// The secret query.
     pub fn query(&self) -> Option<String> {
         ArgQuery::value(self.matches)

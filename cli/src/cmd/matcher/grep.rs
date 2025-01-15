@@ -7,7 +7,7 @@ pub struct GrepMatcher<'a> {
     matches: &'a ArgMatches,
 }
 
-impl<'a: 'b, 'b> GrepMatcher<'a> {
+impl GrepMatcher<'_> {
     /// The grep pattern.
     pub fn pattern(&self) -> String {
         self.matches.get_one("PATTERN").cloned().unwrap()

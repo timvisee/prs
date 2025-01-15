@@ -9,7 +9,7 @@ pub struct ShowMatcher<'a> {
     matches: &'a ArgMatches,
 }
 
-impl<'a: 'b, 'b> ShowMatcher<'a> {
+impl ShowMatcher<'_> {
     /// Check whether to just show the first line of the secret.
     pub fn first_line(&self) -> bool {
         self.matches.get_flag("first")

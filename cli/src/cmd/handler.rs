@@ -132,111 +132,111 @@ impl<'a> Handler {
     }
 
     /// Get the add sub command, if matched.
-    pub fn add(&'a self) -> Option<matcher::AddMatcher> {
+    pub fn add(&'a self) -> Option<matcher::AddMatcher<'a>> {
         matcher::AddMatcher::with(&self.matches)
     }
 
     /// Get the alias sub command, if matched.
     #[cfg(feature = "alias")]
-    pub fn alias(&'a self) -> Option<matcher::AliasMatcher> {
+    pub fn alias(&'a self) -> Option<matcher::AliasMatcher<'a>> {
         matcher::AliasMatcher::with(&self.matches)
     }
 
     /// Get the clone sub command, if matched.
-    pub fn clone(&'a self) -> Option<matcher::CloneMatcher> {
+    pub fn clone(&'a self) -> Option<matcher::CloneMatcher<'a>> {
         matcher::CloneMatcher::with(&self.matches)
     }
 
     /// Get the copy sub command, if matched.
     #[cfg(feature = "clipboard")]
-    pub fn copy(&'a self) -> Option<matcher::CopyMatcher> {
+    pub fn copy(&'a self) -> Option<matcher::CopyMatcher<'a>> {
         matcher::CopyMatcher::with(&self.matches)
     }
 
     /// Get the duplicate sub command, if matched.
-    pub fn duplicate(&'a self) -> Option<matcher::DuplicateMatcher> {
+    pub fn duplicate(&'a self) -> Option<matcher::DuplicateMatcher<'a>> {
         matcher::DuplicateMatcher::with(&self.matches)
     }
 
     /// Get the edit sub command, if matched.
-    pub fn edit(&'a self) -> Option<matcher::EditMatcher> {
+    pub fn edit(&'a self) -> Option<matcher::EditMatcher<'a>> {
         matcher::EditMatcher::with(&self.matches)
     }
 
     /// Get the generate sub command, if matched.
-    pub fn generate(&'a self) -> Option<matcher::GenerateMatcher> {
+    pub fn generate(&'a self) -> Option<matcher::GenerateMatcher<'a>> {
         matcher::GenerateMatcher::with(&self.matches)
     }
 
     /// Get the git sub command, if matched.
-    pub fn git(&'a self) -> Option<matcher::GitMatcher> {
+    pub fn git(&'a self) -> Option<matcher::GitMatcher<'a>> {
         matcher::GitMatcher::with(&self.matches)
     }
 
     /// Get the grep sub command, if matched.
-    pub fn grep(&'a self) -> Option<matcher::GrepMatcher> {
+    pub fn grep(&'a self) -> Option<matcher::GrepMatcher<'a>> {
         matcher::GrepMatcher::with(&self.matches)
     }
 
     /// Get the housekeeping sub command, if matched.
-    pub fn housekeeping(&'a self) -> Option<matcher::HousekeepingMatcher> {
+    pub fn housekeeping(&'a self) -> Option<matcher::HousekeepingMatcher<'a>> {
         matcher::HousekeepingMatcher::with(&self.matches)
     }
 
     /// Get the init sub command, if matched.
-    pub fn init(&'a self) -> Option<matcher::InitMatcher> {
+    pub fn init(&'a self) -> Option<matcher::InitMatcher<'a>> {
         matcher::InitMatcher::with(&self.matches)
     }
 
     /// Get the internal sub command, if matched.
-    pub fn internal(&'a self) -> Option<matcher::InternalMatcher> {
+    pub fn internal(&'a self) -> Option<matcher::InternalMatcher<'a>> {
         matcher::InternalMatcher::with(&self.matches)
     }
 
     /// Get the list sub command, if matched.
-    pub fn list(&'a self) -> Option<matcher::ListMatcher> {
+    pub fn list(&'a self) -> Option<matcher::ListMatcher<'a>> {
         matcher::ListMatcher::with(&self.matches)
     }
 
     /// Get the slam sub command, if matched.
-    pub fn slam(&'a self) -> Option<matcher::SlamMatcher> {
+    pub fn slam(&'a self) -> Option<matcher::SlamMatcher<'a>> {
         matcher::SlamMatcher::with(&self.matches)
     }
 
     /// Get the move sub command, if matched.
-    pub fn r#move(&'a self) -> Option<matcher::MoveMatcher> {
+    pub fn r#move(&'a self) -> Option<matcher::MoveMatcher<'a>> {
         matcher::MoveMatcher::with(&self.matches)
     }
 
     /// Get the recipients sub command, if matched.
-    pub fn recipients(&'a self) -> Option<matcher::RecipientsMatcher> {
+    pub fn recipients(&'a self) -> Option<matcher::RecipientsMatcher<'a>> {
         matcher::RecipientsMatcher::with(&self.matches)
     }
 
     /// Get the remove sub command, if matched.
-    pub fn remove(&'a self) -> Option<matcher::RemoveMatcher> {
+    pub fn remove(&'a self) -> Option<matcher::RemoveMatcher<'a>> {
         matcher::RemoveMatcher::with(&self.matches)
     }
 
     /// Get the show sub command, if matched.
-    pub fn show(&'a self) -> Option<matcher::ShowMatcher> {
+    pub fn show(&'a self) -> Option<matcher::ShowMatcher<'a>> {
         matcher::ShowMatcher::with(&self.matches)
     }
 
     /// Get the sync sub command, if matched.
-    pub fn sync(&'a self) -> Option<matcher::SyncMatcher> {
+    pub fn sync(&'a self) -> Option<matcher::SyncMatcher<'a>> {
         matcher::SyncMatcher::with(&self.matches)
     }
 
     /// Get the tomb sub command, if matched.
     #[cfg(all(feature = "tomb", target_os = "linux"))]
-    pub fn tomb(&'a self) -> Option<matcher::TombMatcher> {
+    pub fn tomb(&'a self) -> Option<matcher::TombMatcher<'a>> {
         matcher::TombMatcher::with(&self.matches)
     }
 
     /// Get the TOTP sub command, if matched.
     #[cfg(feature = "totp")]
-    pub fn totp(&'a self) -> Option<matcher::TotpMatcher> {
+    pub fn totp(&'a self) -> Option<matcher::TotpMatcher<'a>> {
         matcher::TotpMatcher::with(&self.matches)
     }
 }

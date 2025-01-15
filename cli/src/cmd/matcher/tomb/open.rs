@@ -8,7 +8,7 @@ pub struct OpenMatcher<'a> {
     matches: &'a ArgMatches,
 }
 
-impl<'a: 'b, 'b> OpenMatcher<'a> {
+impl OpenMatcher<'_> {
     /// The time to automatically close.
     pub fn timer(&self) -> Option<u32> {
         let time: &String = self.matches.get_one("timer")?;

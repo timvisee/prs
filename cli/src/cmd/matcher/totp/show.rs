@@ -9,7 +9,7 @@ pub struct ShowMatcher<'a> {
     matches: &'a ArgMatches,
 }
 
-impl<'a: 'b, 'b> ShowMatcher<'a> {
+impl ShowMatcher<'_> {
     /// The secret query.
     pub fn query(&self) -> Option<String> {
         ArgQuery::value(self.matches)

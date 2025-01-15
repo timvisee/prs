@@ -8,7 +8,7 @@ pub struct AddMatcher<'a> {
     matches: &'a ArgMatches,
 }
 
-impl<'a: 'b, 'b> AddMatcher<'a> {
+impl AddMatcher<'_> {
     /// Secret destination.
     pub fn name(&self) -> &String {
         self.matches.get_one("NAME").unwrap()

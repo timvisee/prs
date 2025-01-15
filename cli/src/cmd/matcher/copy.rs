@@ -9,7 +9,7 @@ pub struct CopyMatcher<'a> {
     matches: &'a ArgMatches,
 }
 
-impl<'a: 'b, 'b> CopyMatcher<'a> {
+impl CopyMatcher<'_> {
     /// Check whether to copy all of the secret.
     pub fn all(&self) -> bool {
         self.matches.get_flag("all")

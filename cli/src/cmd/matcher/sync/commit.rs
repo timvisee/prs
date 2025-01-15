@@ -8,7 +8,7 @@ pub struct CommitMatcher<'a> {
     matches: &'a ArgMatches,
 }
 
-impl<'a: 'b, 'b> CommitMatcher<'a> {
+impl CommitMatcher<'_> {
     /// Whether to not sync.
     pub fn no_sync(&self) -> bool {
         ArgNoSync::is_present(self.matches)

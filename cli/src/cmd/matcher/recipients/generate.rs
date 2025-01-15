@@ -8,7 +8,7 @@ pub struct GenerateMatcher<'a> {
     matches: &'a ArgMatches,
 }
 
-impl<'a: 'b, 'b> GenerateMatcher<'a> {
+impl GenerateMatcher<'_> {
     /// Check whether to skip adding key to store.
     pub fn no_add(&self) -> bool {
         self.matches.get_flag("no-add")

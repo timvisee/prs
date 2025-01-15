@@ -9,7 +9,7 @@ pub struct ClipRevertMatcher<'a> {
     matches: &'a ArgMatches,
 }
 
-impl<'a: 'b, 'b> ClipRevertMatcher<'a> {
+impl ClipRevertMatcher<'_> {
     /// Clipboard timeout in seconds.
     pub fn timeout(&self) -> Result<u64> {
         ArgTimeout::value_or_default(self.matches)

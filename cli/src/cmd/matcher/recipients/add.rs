@@ -8,7 +8,7 @@ pub struct AddMatcher<'a> {
     matches: &'a ArgMatches,
 }
 
-impl<'a: 'b, 'b> AddMatcher<'a> {
+impl AddMatcher<'_> {
     /// Check whether to skip re-encrypting secrets.
     pub fn no_recrypt(&self) -> bool {
         self.matches.get_flag("no-recrypt")

@@ -18,7 +18,7 @@ pub struct GenerateMatcher<'a> {
     matches: &'a ArgMatches,
 }
 
-impl<'a: 'b, 'b> GenerateMatcher<'a> {
+impl GenerateMatcher<'_> {
     /// Secret name.
     pub fn name(&self) -> Option<&String> {
         self.matches.get_one("NAME")

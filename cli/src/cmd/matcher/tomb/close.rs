@@ -7,7 +7,7 @@ pub struct CloseMatcher<'a> {
     matches: &'a ArgMatches,
 }
 
-impl<'a: 'b, 'b> CloseMatcher<'a> {
+impl CloseMatcher<'_> {
     /// Whether to try to close.
     pub fn do_try(&self) -> bool {
         self.matches.get_flag("try")

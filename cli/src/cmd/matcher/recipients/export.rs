@@ -7,7 +7,7 @@ pub struct ExportMatcher<'a> {
     matches: &'a ArgMatches,
 }
 
-impl<'a: 'b, 'b> ExportMatcher<'a> {
+impl ExportMatcher<'_> {
     /// File to output to.
     pub fn output_file(&self) -> Option<&String> {
         self.matches.get_one("output-file")

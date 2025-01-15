@@ -8,7 +8,7 @@ pub struct LiveMatcher<'a> {
     matches: &'a ArgMatches,
 }
 
-impl<'a: 'b, 'b> LiveMatcher<'a> {
+impl LiveMatcher<'_> {
     /// Check whether to follow.
     pub fn follow(&self) -> bool {
         self.matches.get_flag("follow")

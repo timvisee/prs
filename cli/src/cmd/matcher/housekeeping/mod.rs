@@ -12,19 +12,19 @@ pub struct HousekeepingMatcher<'a> {
     _matches: &'a ArgMatches,
 }
 
-impl<'a: 'b, 'b> HousekeepingMatcher<'a> {
+impl<'a> HousekeepingMatcher<'a> {
     /// Get the housekepeing recrypt sub command, if matched.
-    pub fn recrypt(&'a self) -> Option<recrypt::RecryptMatcher> {
+    pub fn recrypt(&'a self) -> Option<recrypt::RecryptMatcher<'a>> {
         recrypt::RecryptMatcher::with(self.root)
     }
 
     /// Get the housekepeing run sub command, if matched.
-    pub fn run(&'a self) -> Option<run::RunMatcher> {
+    pub fn run(&'a self) -> Option<run::RunMatcher<'a>> {
         run::RunMatcher::with(self.root)
     }
 
     /// Get the housekepeing sync-keys sub command, if matched.
-    pub fn sync_keys(&'a self) -> Option<sync_keys::SyncKeysMatcher> {
+    pub fn sync_keys(&'a self) -> Option<sync_keys::SyncKeysMatcher<'a>> {
         sync_keys::SyncKeysMatcher::with(self.root)
     }
 }

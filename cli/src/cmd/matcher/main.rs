@@ -8,7 +8,7 @@ pub struct MainMatcher<'a> {
     matches: &'a ArgMatches,
 }
 
-impl<'a: 'b, 'b> MainMatcher<'a> {
+impl MainMatcher<'_> {
     /// Check whether to force.
     pub fn force(&self) -> bool {
         self.matches.get_flag("force")

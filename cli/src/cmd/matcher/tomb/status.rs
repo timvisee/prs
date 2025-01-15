@@ -7,7 +7,7 @@ pub struct StatusMatcher<'a> {
     matches: &'a ArgMatches,
 }
 
-impl<'a: 'b, 'b> StatusMatcher<'a> {
+impl StatusMatcher<'_> {
     /// Check whether to open the tomb.
     pub fn open(&self) -> bool {
         self.matches.get_flag("open")

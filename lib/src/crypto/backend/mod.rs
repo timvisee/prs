@@ -6,3 +6,5 @@
 pub mod gnupg_bin;
 #[cfg(feature = "backend-gpgme")]
 pub mod gpgme;
+#[cfg(feature = "backend-rpgpie")]
+pub mod rpgpie;

@@ -19,7 +19,11 @@ impl CmdGenerate {
             .arg(
                 Arg::new("NAME")
                     .help("Secret name and path")
-                    .required_unless_present_any(["show", "copy"]),
+                    .required_unless_present_any([
+                        "show",
+                        #[cfg(feature = "clipboard")]
+                        "copy",
+                    ]),
             )
             .arg(
                 Arg::new("passphrase")

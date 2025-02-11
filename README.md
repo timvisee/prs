@@ -675,9 +675,11 @@ Simply run `prs tomb init` on machines you don't use a Tomb on yet, and after
 cloning your password store on a new machine.
 
 #### Is `prs` compatible with `pass`?
-Yes, we're hoping to make it fully compatible. There might be some subtle 
-differences, for exmaple `.gpg-id` files in subfolders are currently [not 
-supported](https://gitlab.com/timvisee/prs/-/issues/57).
+Yes
+
+With the exception of some outstanding incompatibilities:
+
+- <https://gitlab.com/timvisee/prs/-/issues/57> - `.gpg-id` files in subfolders are not yet supported
 
 `prs` uses the same file structure as [`pass`][pass]. Other `pass` clients
 should be able to view and edit your secrets.

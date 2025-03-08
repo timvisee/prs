@@ -11,9 +11,8 @@ use skim::{
 /// Show an interactive selection view for the given list of `items`.
 /// The selected item is returned.  If no item is selected, `None` is returned instead.
 fn skim_select(items: SkimItemReceiver, prompt: &str) -> Option<String> {
-    let prompt = format!("{prompt}: ");
     let options = SkimOptionsBuilder::default()
-        .prompt(Some(&prompt))
+        .prompt(format!("{prompt}: "))
         .multi(false)
         // Disabled becayse of: https://github.com/lotabout/skim/issues/494
         // .height(Some("50%"))

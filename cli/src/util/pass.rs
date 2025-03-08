@@ -40,14 +40,14 @@ pub fn generate_password(len: u16) -> Plaintext {
     }
 
     // Obtain secure random source, build char dictionary
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
     let chars = PASSWORD_CHAR_SETS.join("");
 
     // Build password until we have an accepted one
     let mut pass = String::with_capacity(len as usize);
     loop {
         for _ in 0..len {
-            let c = rng.gen_range(0..chars.len());
+            let c = rng.random_range(0..chars.len());
             let c = chars.chars().nth(c).unwrap();
             pass.push(c);
         }

@@ -3802,7 +3802,7 @@ dependencies = [
  "notify-rust",
  "prs-lib",
  "qr2term",
- "rand 0.8.5",
+ "rand 0.9.0",
  "regex",
  "shellexpand",
  "shlex",

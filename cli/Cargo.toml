@@ -92,7 +92,7 @@ edit = "0.1"
 indicatif = "0.17"
 lazy_static = "1.4"
 prs-lib = { version = "=0.5.2", path = "../lib", default-features = false }
-rand = { version = "0.8", default-features = false, features = ["std"] }
+rand = { version = "0.9", default-features = false, features = ["std"] }
 regex = { version = "1.7", default-features = false, features = [
     "std",
     "unicode-perl",

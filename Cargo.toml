@@ -4,3 +4,4 @@ members = [
     "./cli",
     "./gtk3",
 ]
+resolver = "3"

@@ -13,8 +13,8 @@ categories = [
     "command-line-utilities",
     "cryptography",
 ]
-edition = "2018"
-rust-version = "1.81.0"
+edition = "2024"
+rust-version = "1.85.0"
 
 [features]
 default = ["backend-gnupg-bin", "notify", "tomb"]

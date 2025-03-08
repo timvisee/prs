@@ -1,3 +1,5 @@
+use std::fmt::Write;
+
 use pgp::{
     crypto::{aead::AeadAlgorithm, sym::SymmetricKeyAlgorithm},
     Deserializable,
@@ -21,9 +23,11 @@ pub fn cards() -> Result<Vec<openpgp_card::Card<openpgp_card::state::Open>>> {
 pub(super) fn format_fingerprint(fingerprint: pgp::types::Fingerprint) -> String {
     fingerprint
         .as_bytes()
-        .into_iter()
-        .map(|byte| format!("{:02x}", byte))
-        .collect()
+        .iter()
+        .fold(String::new(), |mut fp, byte| {
+            write!(fp, "{:02x}", byte).unwrap();
+            fp
+        })
 }
 
 pub(super) fn metadata_for_cert(cert: &rpgpie::certificate::Certificate) -> Key {
@@ -32,7 +36,7 @@ pub(super) fn metadata_for_cert(cert: &rpgpie::certificate::Certificate) -> Key 
     let first = ccert.primary_user_id();
     let user_ids = first
         .into_iter()
-        .chain(ccert.user_ids().into_iter().filter(|u| Some(*u) != first))
+        .chain(ccert.user_ids().iter().filter(|u| Some(*u) != first))
         .map(|u| u.id.to_string())
         .collect();
 
@@ -55,12 +59,14 @@ fn unlock_pin(card: &mut openpgp_card::Card<openpgp_card::state::Transaction>) -
                 openpgp_card_state::drop_pin(&ident)?;
                 Err(anyhow::Error::msg(
                     format!("The stored user pin was rejected by the card '{}'. Dropping the pin from storage. {}", ident, err),
-                )
-                .into())
+                ))
             }
         }
     } else {
-        Err(anyhow::Error::msg(format!("No user PIN configured for card '{}'", ident,)).into())
+        Err(anyhow::Error::msg(format!(
+            "No user PIN configured for card '{}'",
+            ident,
+        )))
     }
 }
 

@@ -33,10 +33,10 @@ impl IsContext for Context {
     fn encrypt(&mut self, recipients: &Recipients, plaintext: Plaintext) -> Result<Ciphertext> {
         let fps = recipients
             .keys()
-            .into_iter()
+            .iter()
             .map(|k| k.fingerprint(false))
             .collect::<Vec<_>>();
-        raw::encrypt(&mut *self, &fps.deref(), plaintext.unsecure_ref())
+        raw::encrypt(&mut *self, fps.deref(), plaintext.unsecure_ref())
     }
 
     fn decrypt(&mut self, ciphertext: Ciphertext) -> Result<Plaintext> {
@@ -47,7 +47,7 @@ impl IsContext for Context {
         let res = raw::decrypt(&mut *self, ciphertext.unsecure_ref());
         match res {
             Ok(_) => Ok(true),
-            Err(err) if matches!(err, Error::NoSecretKey) => Ok(false),
+            Err(Error::NoSecretKey) => Ok(false),
             Err(err) => Err(err.into()),
         }
     }

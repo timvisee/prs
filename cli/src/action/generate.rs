@@ -183,7 +183,7 @@ impl<'a> Generate<'a> {
         #[cfg(all(feature = "tomb", target_os = "linux"))]
         tomb::finalize_tomb(&mut tomb, &matcher_main, true).map_err(Err::Tomb)?;
 
-        // Determine whehter we outputted anything to stdout/stderr
+        // Determine whether we outputted anything to stdout/stderr
         #[cfg_attr(not(feature = "clipboard"), expect(unused_mut))]
         let mut output_any = matcher_generate.show();
         #[cfg(feature = "clipboard")]

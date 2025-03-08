@@ -353,7 +353,7 @@ You can use `prs` from the command line in the same directory:
 .\prs.exe
 ```
 
-To make it globally invokable as `prs`, you must make the binary available in
+To make it globally invocable as `prs`, you must make the binary available in
 your systems `PATH`.
 
 #### Other
@@ -596,7 +596,7 @@ This may take a while. Once done, sync on your new machine to pull in the
 updated secrets:
 
 ```bash
-# On new machine: pull in all re-crypted secrets
+# On new machine: pull in all re-encrypted secrets
 prs sync
 
 # You're done!

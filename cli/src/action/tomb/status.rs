@@ -40,7 +40,7 @@ impl<'a> Status<'a> {
             return Ok(());
         }
 
-        // Open tomb on requet
+        // Open tomb on request
         let mut is_open = tomb.is_open().map_err(Err::Status)?;
         if matcher_status.open() && !is_open {
             if !matcher_main.quiet() {

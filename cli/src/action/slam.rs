@@ -366,7 +366,7 @@ fn drop_persistent_ssh(store: &Store, matcher_main: &MainMatcher) {
     }
 }
 
-/// Check if the given binary is found and is invokable.
+/// Check if the given binary is found and is invocable.
 fn has_bin(bin: &str) -> Result<bool> {
     match which::which(bin) {
         Ok(_) => Ok(true),

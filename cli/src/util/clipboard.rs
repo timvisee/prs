@@ -442,7 +442,7 @@ fn set_blocking(data: &Plaintext, quiet: bool, verbose: bool) -> Result<()> {
             return Ok(());
         }
 
-        // Increas edelay
+        // Increase edelay
         delay = (delay + BASE).min(MAX_DELAY);
     }
 }

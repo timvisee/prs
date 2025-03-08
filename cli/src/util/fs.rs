@@ -9,7 +9,7 @@ use crate::util::error::{self, ErrorHints};
 
 /// Ensure the given path is a free directory.
 ///
-/// Checks whether the given path is not a directory, or whehter the directory is empty.
+/// Checks whether the given path is not a directory, or whether the directory is empty.
 /// Quits on error.
 pub fn ensure_dir_free(path: &Path) -> Result<(), std::io::Error> {
     // Fine if not a directory

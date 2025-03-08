@@ -38,7 +38,7 @@ impl<'a> TotpRecopy<'a> {
         let timeout = matcher_totp_recopy.timeout().unwrap();
         let until = Instant::now() + Duration::from_secs(timeout);
 
-        // Keep recopying chaning token until the copy timeout is reached
+        // Keep recopying chaining token until the copy timeout is reached
         while until > Instant::now() {
             // Calculate remaining timeout time, get current TOTP TTL
             let remaining_timeout = until.duration_since(std::time::Instant::now());

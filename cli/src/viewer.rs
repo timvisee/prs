@@ -281,7 +281,7 @@ enum Action {
     ScrollY(i16),
 }
 
-/// Wait for an action based on a terminal event indefinately.
+/// Wait for an action based on a terminal event indefinitely.
 fn wait_action() -> Option<Action> {
     match event::read() {
         // Quit with Q, Esc or <c-C>

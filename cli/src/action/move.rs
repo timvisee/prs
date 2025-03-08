@@ -110,7 +110,7 @@ impl<'a> Move<'a> {
 /// This updates the secret if it is an alias, to update its relative alias path to point to the
 /// same target when it is moved.
 ///
-/// `secret` is the secret to update the realtive path for, `future_secret` is the future path
+/// `secret` is the secret to update the relative path for, `future_secret` is the future path
 /// `secret` will be moved to. This does not move `secret`, it just updates its relative target
 /// path for when it is moved afterwards.
 ///
@@ -150,7 +150,7 @@ fn update_secret_alias_target(
 /// Update the aliases for a secret that is moved.
 ///
 /// The `secret` is the old secret location, the `new_secret` is the location it is moved to.
-/// Aliases targetting `secret` will be updated to point to `new_secret`.
+/// Aliases targeting `secret` will be updated to point to `new_secret`.
 #[cfg(feature = "alias")]
 fn update_alias_for_secret_to(store: &Store, secret: &Secret, new_secret: &Secret) {
     for secret in super::remove::find_symlinks_to(store, secret) {

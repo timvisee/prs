@@ -83,7 +83,7 @@
 - Fix Tomb's not closing due to persistent SSH connections, these connections
   are now dropped automatically
 - Make interactive selection through skim full screen
-- Fix password generator panicing on very short/long lengths
+- Fix password generator panicking on very short/long lengths
 - Improve various error messages making them more descriptive
 - Use GnuPG binary backend by default now, rather than GPGME
 - Improve GNU and musl CI builds

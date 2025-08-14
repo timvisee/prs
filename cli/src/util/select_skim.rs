@@ -42,15 +42,15 @@ impl From<Secret> for SkimSecret {
 }
 
 impl SkimItem for SkimSecret {
-    fn display(&self, _: DisplayContext) -> AnsiString {
+    fn display(&self, _: DisplayContext) -> AnsiString<'_> {
         self.0.name.clone().into()
     }
 
-    fn text(&self) -> Cow<str> {
+    fn text(&self) -> Cow<'_, str> {
         (&self.0.name).into()
     }
 
-    fn output(&self) -> Cow<str> {
+    fn output(&self) -> Cow<'_, str> {
         self.0.path.to_string_lossy()
     }
 }
@@ -128,15 +128,15 @@ impl From<Key> for SkimKey {
 }
 
 impl SkimItem for SkimKey {
-    fn display(&self, _: DisplayContext) -> AnsiString {
+    fn display(&self, _: DisplayContext) -> AnsiString<'_> {
         format!("{}", self.0).into()
     }
 
-    fn text(&self) -> Cow<str> {
+    fn text(&self) -> Cow<'_, str> {
         format!("{}", self.0).into()
     }
 
-    fn output(&self) -> Cow<str> {
+    fn output(&self) -> Cow<'_, str> {
         self.0.fingerprint(false).into()
     }
 }

@@ -51,13 +51,13 @@ impl Store {
     }
 
     /// Get a sync helper for this store.
-    pub fn sync(&self) -> Sync {
+    pub fn sync(&self) -> Sync<'_> {
         Sync::new(self)
     }
 
     /// Get a tomb helper for this store.
     #[cfg(all(feature = "tomb", target_os = "linux"))]
-    pub fn tomb(&self, quiet: bool, verbose: bool, force: bool) -> Tomb {
+    pub fn tomb(&self, quiet: bool, verbose: bool, force: bool) -> Tomb<'_> {
         Tomb::new(self, quiet, verbose, force)
     }
 

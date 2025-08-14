@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.3 (2025-08-14)
+- Prompt user whether to add new recipient keys to keychain
+- Don't delete recipient keys from store if listed in `.gpg-id` file
+- Update dependencies
+
 ## 0.5.2 (2024-11-09)
 - Autocomplete secret names in zsh
 - Update dependencies

@@ -3878,7 +3878,7 @@ dependencies = [
 
 [[package]]
 name = "prs-cli"
-version = "0.5.2"
+version = "0.5.3"
 dependencies = [
  "ansi-escapes",
  "anyhow",
@@ -3916,7 +3916,7 @@ dependencies = [
 
 [[package]]
 name = "prs-gtk3"
-version = "0.5.2"
+version = "0.5.3"
 dependencies = [
  "anyhow",
  "gdk",
@@ -3930,7 +3930,7 @@ dependencies = [
 
 [[package]]
 name = "prs-lib"
-version = "0.5.2"
+version = "0.5.3"
 dependencies = [
  "anyhow",
  "card-backend-pcsc",

@@ -4,8 +4,8 @@ use std::sync::Arc;
 
 use prs_lib::{Key, Secret};
 use skim::{
-    prelude::{SkimItemReceiver, SkimItemSender, SkimOptionsBuilder},
     AnsiString, DisplayContext, Skim, SkimItem,
+    prelude::{SkimItemReceiver, SkimItemSender, SkimOptionsBuilder},
 };
 
 /// Show an interactive selection view for the given list of `items`.

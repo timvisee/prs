@@ -329,5 +329,5 @@ pub enum Err {
 
 /// Prelude for common crypto traits.
 pub mod prelude {
-    pub use super::{store::StoreRecipients, IsContext};
+    pub use super::{IsContext, store::StoreRecipients};
 }

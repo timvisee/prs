@@ -1,8 +1,8 @@
 use anyhow::Result;
 use clap::ArgMatches;
 use prs_lib::{
-    crypto::{self, store::ImportResult},
     Store,
+    crypto::{self, store::ImportResult},
 };
 use thiserror::Error;
 
@@ -10,8 +10,8 @@ use thiserror::Error;
 use crate::util::tomb;
 use crate::{
     cmd::matcher::{
-        housekeeping::{sync_keys::SyncKeysMatcher, HousekeepingMatcher},
         MainMatcher, Matcher,
+        housekeeping::{HousekeepingMatcher, sync_keys::SyncKeysMatcher},
     },
     util::{cli, sync},
 };

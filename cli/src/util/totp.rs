@@ -200,7 +200,9 @@ pub enum Err {
     Url(#[source] totp_rs::TotpUrlError),
 
     #[cfg(feature = "clipboard")]
-    #[error("failed to use clipboard, no way to spawn subprocess for clipboard manager, must run as standalone binary")]
+    #[error(
+        "failed to use clipboard, no way to spawn subprocess for clipboard manager, must run as standalone binary"
+    )]
     NoSubProcess,
 
     #[cfg(feature = "clipboard")]

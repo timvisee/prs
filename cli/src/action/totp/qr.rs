@@ -1,14 +1,14 @@
 use anyhow::Result;
 use clap::ArgMatches;
-use prs_lib::{crypto::prelude::*, Store};
+use prs_lib::{Store, crypto::prelude::*};
 use thiserror::Error;
 
 #[cfg(all(feature = "tomb", target_os = "linux"))]
 use crate::util::tomb;
 use crate::{
     cmd::matcher::{
-        totp::{qr::QrMatcher, TotpMatcher},
         MainMatcher, Matcher,
+        totp::{TotpMatcher, qr::QrMatcher},
     },
     util::{secret, select, totp},
 };

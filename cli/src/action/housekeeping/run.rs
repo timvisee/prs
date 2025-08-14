@@ -17,8 +17,8 @@ const LINE_ENDING: &str = "\r\n";
 
 use crate::{
     cmd::matcher::{
-        housekeeping::{run::RunMatcher, HousekeepingMatcher},
         MainMatcher, Matcher,
+        housekeeping::{HousekeepingMatcher, run::RunMatcher},
     },
     util::sync,
 };

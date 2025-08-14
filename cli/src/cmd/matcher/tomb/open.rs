@@ -1,7 +1,7 @@
 use clap::ArgMatches;
 
 use super::Matcher;
-use crate::util::error::{quit_error, ErrorHints};
+use crate::util::error::{ErrorHints, quit_error};
 
 /// The tomb open command matcher.
 pub struct OpenMatcher<'a> {

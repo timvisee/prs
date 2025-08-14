@@ -1,4 +1,4 @@
-use clap::{parser::ValuesRef, ArgMatches};
+use clap::{ArgMatches, parser::ValuesRef};
 
 use super::Matcher;
 

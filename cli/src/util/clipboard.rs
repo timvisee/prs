@@ -4,7 +4,7 @@ use std::sync::Mutex;
 use std::thread;
 use std::time::{Duration, Instant};
 
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 use copypasta_ext::display::DisplayServer;
 use copypasta_ext::prelude::*;
 #[cfg(all(feature = "notify", target_os = "linux", not(target_env = "musl")))]
@@ -667,7 +667,9 @@ pub enum Err {
     #[error("failed to prepare prs clipboard manager")]
     ClipMan(#[source] anyhow::Error),
 
-    #[error("failed to use clipboard, no way to spawn subprocess for clipboard manager, must run as standalone binary")]
+    #[error(
+        "failed to use clipboard, no way to spawn subprocess for clipboard manager, must run as standalone binary"
+    )]
     NoSubProcess,
 
     #[error("failed to spawn subprocess for clipboard manager")]

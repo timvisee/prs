@@ -2,7 +2,7 @@ use anyhow::anyhow;
 use clap::ArgMatches;
 
 use super::Matcher;
-use crate::util::error::{quit_error, quit_error_msg, ErrorHints};
+use crate::util::error::{ErrorHints, quit_error, quit_error_msg};
 
 /// The tomb resize command matcher.
 pub struct ResizeMatcher<'a> {

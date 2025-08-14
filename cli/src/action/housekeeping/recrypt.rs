@@ -3,16 +3,16 @@ use clap::ArgMatches;
 use thiserror::Error;
 
 use prs_lib::{
-    crypto::{self, prelude::*, Context},
     Recipients, Secret, Store,
+    crypto::{self, Context, prelude::*},
 };
 
 #[cfg(all(feature = "tomb", target_os = "linux"))]
 use crate::util::tomb;
 use crate::{
     cmd::matcher::{
-        housekeeping::{recrypt::RecryptMatcher, HousekeepingMatcher},
         MainMatcher, Matcher,
+        housekeeping::{HousekeepingMatcher, recrypt::RecryptMatcher},
     },
     util::{
         self, cli,

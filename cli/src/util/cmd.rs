@@ -23,10 +23,6 @@ pub(crate) trait CommandExt {
 
 impl CommandExt for Command {
     fn arg_if<S: AsRef<OsStr>>(&mut self, arg: S, condition: bool) -> &mut Command {
-        if condition {
-            self.arg(arg)
-        } else {
-            self
-        }
+        if condition { self.arg(arg) } else { self }
     }
 }

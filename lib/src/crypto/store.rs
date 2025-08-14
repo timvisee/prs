@@ -6,7 +6,7 @@ use std::path::{Path, PathBuf};
 use anyhow::{Context, Result};
 use thiserror::Error;
 
-use super::{prelude::*, recipients::Recipients, util, Config, ContextPool, Key, Proto};
+use super::{Config, ContextPool, Key, Proto, prelude::*, recipients::Recipients, util};
 use crate::Store;
 
 /// Password store GPG IDs file.

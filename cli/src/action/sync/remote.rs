@@ -10,8 +10,8 @@ const DEFAULT_GIT_REMOTE_NAME: &str = "origin";
 use crate::util::tomb;
 use crate::{
     cmd::matcher::{
-        sync::{remote::RemoteMatcher, SyncMatcher},
         MainMatcher, Matcher,
+        sync::{SyncMatcher, remote::RemoteMatcher},
     },
     util::{
         self,

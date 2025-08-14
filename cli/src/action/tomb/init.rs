@@ -1,12 +1,12 @@
 use anyhow::Result;
 use clap::ArgMatches;
-use prs_lib::{crypto::prelude::*, Recipients, Store};
+use prs_lib::{Recipients, Store, crypto::prelude::*};
 use thiserror::Error;
 
 use crate::{
     cmd::matcher::{
-        tomb::{init::InitMatcher, TombMatcher},
         MainMatcher, Matcher,
+        tomb::{TombMatcher, init::InitMatcher},
     },
     util::{
         self, cli,

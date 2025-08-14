@@ -1,4 +1,4 @@
-use std::io::{stdin, stdout, Write};
+use std::io::{Write, stdin, stdout};
 use std::process::{Command, Stdio};
 use std::time::{Duration, Instant};
 
@@ -11,7 +11,7 @@ use crossterm::{
     terminal,
     tty::IsTty,
 };
-use prs_lib::{util::env, Plaintext, Secret, Store};
+use prs_lib::{Plaintext, Secret, Store, util::env};
 use substring::Substring;
 use thiserror::Error;
 

@@ -3,7 +3,7 @@ use clap::ArgMatches;
 use prs_lib::Store;
 use thiserror::Error;
 
-use crate::cmd::matcher::{recipients::RecipientsMatcher, MainMatcher, Matcher};
+use crate::cmd::matcher::{MainMatcher, Matcher, recipients::RecipientsMatcher};
 #[cfg(all(feature = "tomb", target_os = "linux"))]
 use crate::util::tomb;
 

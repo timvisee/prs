@@ -5,8 +5,8 @@ use thiserror::Error;
 use version_compare::Version;
 
 use super::raw_cmd::gpg_stdout_ok;
-use super::{raw, Config};
-use crate::crypto::{proto, Config as CryptoConfig, IsContext, Key, Proto};
+use super::{Config, raw};
+use crate::crypto::{Config as CryptoConfig, IsContext, Key, Proto, proto};
 use crate::{Ciphertext, Plaintext, Recipients};
 
 /// Binary name.

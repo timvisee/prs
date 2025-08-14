@@ -1,9 +1,9 @@
 use anyhow::Result;
 use clap::ArgMatches;
-use prs_lib::{crypto::prelude::*, Plaintext, Secret, Store};
+use prs_lib::{Plaintext, Secret, Store, crypto::prelude::*};
 use thiserror::Error;
 
-use crate::cmd::matcher::{add::AddMatcher, MainMatcher, Matcher};
+use crate::cmd::matcher::{MainMatcher, Matcher, add::AddMatcher};
 #[cfg(all(feature = "tomb", target_os = "linux"))]
 use crate::util::tomb;
 use crate::util::{cli, edit, error, stdin, sync};

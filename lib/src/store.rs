@@ -4,16 +4,16 @@ use std::ffi::OsString;
 use std::fs;
 use std::path::{self, Path, PathBuf};
 
-use anyhow::{ensure, Result};
+use anyhow::{Result, ensure};
 use thiserror::Error;
 use walkdir::{DirEntry, WalkDir};
 
 #[cfg(all(feature = "tomb", target_os = "linux"))]
 use crate::tomb::Tomb;
 use crate::{
+    Recipients,
     crypto::{self, prelude::*},
     sync::Sync,
-    Recipients,
 };
 
 /// Password store secret file suffix.

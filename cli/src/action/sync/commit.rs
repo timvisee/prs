@@ -1,14 +1,14 @@
 use anyhow::Result;
 use clap::ArgMatches;
-use prs_lib::{sync::Readyness, Store};
+use prs_lib::{Store, sync::Readyness};
 use thiserror::Error;
 
 #[cfg(all(feature = "tomb", target_os = "linux"))]
 use crate::util::tomb;
 use crate::{
     cmd::matcher::{
-        sync::{commit::CommitMatcher, SyncMatcher},
         MainMatcher, Matcher,
+        sync::{SyncMatcher, commit::CommitMatcher},
     },
     util::{
         cli,
@@ -86,7 +86,9 @@ impl<'a> Commit<'a> {
 
         // Confirm
         eprintln!("Password store got into a dirty state unexpectedly.");
-        eprintln!("Committing the above changes may break your password store and may cause unexpected results.");
+        eprintln!(
+            "Committing the above changes may break your password store and may cause unexpected results."
+        );
         if !cli::prompt_yes("Commit above changes?", Some(false), &matcher_main) {
             if matcher_main.verbose() {
                 eprintln!("Commit cancelled");

@@ -4,8 +4,8 @@ use prs_lib::Store;
 use thiserror::Error;
 
 use crate::cmd::matcher::{
-    tomb::{resize::ResizeMatcher, TombMatcher},
     MainMatcher, Matcher,
+    tomb::{TombMatcher, resize::ResizeMatcher},
 };
 use crate::util::{
     error,

@@ -9,7 +9,7 @@ use thiserror::Error;
 use crate::util;
 
 // Re-exports
-pub use git_state::{git_state, RepositoryState};
+pub use git_state::{RepositoryState, git_state};
 
 /// Binary name.
 #[cfg(not(windows))]

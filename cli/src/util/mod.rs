@@ -32,7 +32,7 @@ use std::env;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-use crate::util::error::{quit_error_msg, ErrorHints};
+use crate::util::error::{ErrorHints, quit_error_msg};
 
 /// Invoke a command.
 ///

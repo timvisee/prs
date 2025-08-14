@@ -1,13 +1,13 @@
 use std::fmt::Write;
 
 use pgp::{
-    crypto::{aead::AeadAlgorithm, sym::SymmetricKeyAlgorithm},
     Deserializable,
+    crypto::{aead::AeadAlgorithm, sym::SymmetricKeyAlgorithm},
 };
 use rpgpie::policy::Seipd;
 
 use super::context::{Context, Error};
-use crate::{crypto::proto, Ciphertext, Key, Plaintext};
+use crate::{Ciphertext, Key, Plaintext, crypto::proto};
 use anyhow::Result;
 
 pub fn cards() -> Result<Vec<openpgp_card::Card<openpgp_card::state::Open>>> {
@@ -57,9 +57,10 @@ fn unlock_pin(card: &mut openpgp_card::Card<openpgp_card::state::Transaction>) -
             Ok(_) => Ok(()),
             Err(err) => {
                 openpgp_card_state::drop_pin(&ident)?;
-                Err(anyhow::Error::msg(
-                    format!("The stored user pin was rejected by the card '{}'. Dropping the pin from storage. {}", ident, err),
-                ))
+                Err(anyhow::Error::msg(format!(
+                    "The stored user pin was rejected by the card '{}'. Dropping the pin from storage. {}",
+                    ident, err
+                )))
             }
         }
     } else {

@@ -12,13 +12,12 @@ use thiserror::Error;
 use crate::util::tomb;
 
 use prs_lib::{
-    crypto,
+    Store, crypto,
     sync::{Readyness, Sync as StoreSync},
-    Store,
 };
 
 use crate::{
-    cmd::matcher::{sync::SyncMatcher, MainMatcher, Matcher},
+    cmd::matcher::{MainMatcher, Matcher, sync::SyncMatcher},
     util::{
         cli,
         error::{self, ErrorHintsBuilder},

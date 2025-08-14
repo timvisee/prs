@@ -1,11 +1,11 @@
 use anyhow::Result;
 use clap::ArgMatches;
-use prs_lib::{crypto::prelude::*, Recipients, Store};
+use prs_lib::{Recipients, Store, crypto::prelude::*};
 use thiserror::Error;
 
 use crate::cmd::matcher::{
-    recipients::{add::AddMatcher, RecipientsMatcher},
     MainMatcher, Matcher,
+    recipients::{RecipientsMatcher, add::AddMatcher},
 };
 #[cfg(all(feature = "tomb", target_os = "linux"))]
 use crate::util::tomb;

@@ -2,10 +2,10 @@ use std::time::Duration;
 
 use anyhow::Result;
 use clap::ArgMatches;
-use prs_lib::{crypto::prelude::*, Store};
+use prs_lib::{Store, crypto::prelude::*};
 use thiserror::Error;
 
-use crate::cmd::matcher::{show::ShowMatcher, MainMatcher, Matcher};
+use crate::cmd::matcher::{MainMatcher, Matcher, show::ShowMatcher};
 #[cfg(feature = "clipboard")]
 use crate::util::clipboard;
 #[cfg(all(feature = "tomb", target_os = "linux"))]

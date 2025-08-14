@@ -1,8 +1,8 @@
 use anyhow::Result;
 use clap::ArgMatches;
 use prs_lib::{
-    sync::{Readyness, Sync},
     Store,
+    sync::{Readyness, Sync},
 };
 use thiserror::Error;
 
@@ -10,8 +10,8 @@ use thiserror::Error;
 use crate::util::tomb;
 use crate::{
     cmd::matcher::{
-        sync::{status::StatusMatcher, SyncMatcher},
         MainMatcher, Matcher,
+        sync::{SyncMatcher, status::StatusMatcher},
     },
     util::style::highlight,
 };

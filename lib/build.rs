@@ -6,7 +6,9 @@ fn main() {
         feature = "backend-rpgpie"
     )))]
     {
-        compile_error!("no crypto backend selected, must set any of these features: backend-gnupg-bin, backend-gpgme, backend-rpgpie");
+        compile_error!(
+            "no crypto backend selected, must set any of these features: backend-gnupg-bin, backend-gpgme, backend-rpgpie"
+        );
     }
 
     // GPG cryptography

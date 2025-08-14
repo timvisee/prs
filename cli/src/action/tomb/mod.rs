@@ -7,7 +7,7 @@ pub mod status;
 use anyhow::Result;
 use clap::ArgMatches;
 
-use crate::cmd::matcher::{tomb::TombMatcher, Matcher};
+use crate::cmd::matcher::{Matcher, tomb::TombMatcher};
 
 /// Tomb management action.
 pub struct Tomb<'a> {

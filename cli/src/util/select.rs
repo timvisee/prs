@@ -1,4 +1,4 @@
-use prs_lib::{store::FindSecret, Key, Secret, Store};
+use prs_lib::{Key, Secret, Store, store::FindSecret};
 
 /// Find and select a secret in the given store.
 ///

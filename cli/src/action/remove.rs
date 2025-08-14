@@ -2,7 +2,7 @@ use std::fs;
 use std::io;
 use std::path::{Path, PathBuf};
 
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 use clap::ArgMatches;
 #[cfg(feature = "alias")]
 use prs_lib::store::SecretIterConfig;
@@ -10,7 +10,7 @@ use prs_lib::{Secret, Store};
 use thiserror::Error;
 use walkdir::WalkDir;
 
-use crate::cmd::matcher::{remove::RemoveMatcher, MainMatcher, Matcher};
+use crate::cmd::matcher::{MainMatcher, Matcher, remove::RemoveMatcher};
 #[cfg(all(feature = "tomb", target_os = "linux"))]
 use crate::util::tomb;
 use crate::util::{cli, error, select, sync};

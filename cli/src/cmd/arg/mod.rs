@@ -6,7 +6,7 @@ pub mod store;
 pub mod timeout;
 pub mod viewer;
 
-use clap::{parser::ValuesRef, Arg, ArgMatches};
+use clap::{Arg, ArgMatches, parser::ValuesRef};
 
 // Re-export to arg module
 pub use self::allow_dirty::ArgAllowDirty;

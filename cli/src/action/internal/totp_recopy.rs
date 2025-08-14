@@ -1,12 +1,12 @@
 use std::io;
 use std::time::{Duration, Instant};
 
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 use clap::ArgMatches;
 use prs_lib::Plaintext;
 use thiserror::Error;
 
-use crate::cmd::matcher::{internal::totp_recopy::TotpRecopyMatcher, MainMatcher, Matcher};
+use crate::cmd::matcher::{MainMatcher, Matcher, internal::totp_recopy::TotpRecopyMatcher};
 use crate::util::{base64, clipboard, totp::Totp};
 
 /// A internal TOTP recopy action.

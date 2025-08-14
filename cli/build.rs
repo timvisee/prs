@@ -6,7 +6,9 @@ fn main() {
         not(feature = "select-fzf-bin"),
     ))]
     {
-        println!("cargo:warning=no interactive select mode features configured, falling back to basic mode");
+        println!(
+            "cargo:warning=no interactive select mode features configured, falling back to basic mode"
+        );
         println!("cargo:warning=use any of: select-skim, select-skim-bin, select-fzf-bin");
     }
 }

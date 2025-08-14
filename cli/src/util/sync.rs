@@ -1,6 +1,6 @@
 use prs_lib::sync::{Readyness, Sync};
 
-use crate::util::error::{quit_error, quit_error_msg, ErrorHintsBuilder};
+use crate::util::error::{ErrorHintsBuilder, quit_error, quit_error_msg};
 
 /// Ensure the store is ready, otherwise quit.
 pub fn ensure_ready(sync: &Sync, allow_dirty: bool) {

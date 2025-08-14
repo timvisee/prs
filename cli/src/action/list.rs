@@ -2,11 +2,11 @@ use std::io;
 
 use anyhow::Result;
 use clap::ArgMatches;
-use prs_lib::{store::SecretIterConfig, Secret, Store};
+use prs_lib::{Secret, Store, store::SecretIterConfig};
 use text_trees::{FormatCharacters, StringTreeNode, TreeFormatting};
 use thiserror::Error;
 
-use crate::cmd::matcher::{list::ListMatcher, MainMatcher, Matcher};
+use crate::cmd::matcher::{MainMatcher, Matcher, list::ListMatcher};
 #[cfg(all(feature = "tomb", target_os = "linux"))]
 use crate::util::tomb;
 

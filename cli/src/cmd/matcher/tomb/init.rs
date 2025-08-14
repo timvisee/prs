@@ -2,7 +2,7 @@ use clap::ArgMatches;
 
 use super::Matcher;
 use crate::cmd::arg::{ArgAllowDirty, ArgNoSync, CmdArgFlag};
-use crate::util::error::{quit_error, ErrorHints};
+use crate::util::error::{ErrorHints, quit_error};
 
 /// The tomb init command matcher.
 pub struct InitMatcher<'a> {

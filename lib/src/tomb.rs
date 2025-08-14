@@ -4,13 +4,13 @@ use std::env;
 use std::os::linux::fs::MetadataExt;
 use std::path::{Path, PathBuf};
 
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 use thiserror::Error;
 
 use crate::crypto::Proto;
 pub use crate::tomb_bin::TombSettings;
 use crate::util;
-use crate::{systemd_bin, tomb_bin, Key, Store};
+use crate::{Key, Store, systemd_bin, tomb_bin};
 
 /// Default time after which to automatically close the password tomb.
 pub const TOMB_AUTO_CLOSE_SEC: u32 = 5 * 60;

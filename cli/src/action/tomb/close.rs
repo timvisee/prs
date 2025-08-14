@@ -5,8 +5,8 @@ use thiserror::Error;
 
 use crate::{
     cmd::matcher::{
-        tomb::{close::CloseMatcher, TombMatcher},
         MainMatcher, Matcher,
+        tomb::{TombMatcher, close::CloseMatcher},
     },
     util::error::{self, ErrorHintsBuilder},
 };

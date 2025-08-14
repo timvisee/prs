@@ -7,8 +7,8 @@ use gpgme::{Context as GpgmeContext, PinentryMode, Protocol};
 use thiserror::Error;
 
 use super::raw;
-use crate::crypto::{proto, Config, IsContext, Key, Proto};
-use crate::{util, Ciphertext, Plaintext, Recipients};
+use crate::crypto::{Config, IsContext, Key, Proto, proto};
+use crate::{Ciphertext, Plaintext, Recipients, util};
 
 /// Protocol to use.
 const PROTO: Protocol = Protocol::OpenPgp;

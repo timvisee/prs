@@ -3,12 +3,12 @@ use std::io::Write;
 
 use anyhow::Result;
 use clap::ArgMatches;
-use prs_lib::{crypto::prelude::*, Plaintext, Store};
+use prs_lib::{Plaintext, Store, crypto::prelude::*};
 use thiserror::Error;
 
 use crate::cmd::matcher::{
-    recipients::{export::ExportMatcher, RecipientsMatcher},
     MainMatcher, Matcher,
+    recipients::{RecipientsMatcher, export::ExportMatcher},
 };
 #[cfg(feature = "clipboard")]
 use crate::util::clipboard;

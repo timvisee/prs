@@ -1,14 +1,14 @@
 use anyhow::Result;
 use clap::ArgMatches;
 use prs_lib::{
-    crypto::{prelude::*, Context},
-    store::SecretIterConfig,
     Plaintext, Secret, Store,
+    crypto::{Context, prelude::*},
+    store::SecretIterConfig,
 };
 use regex::Regex;
 use thiserror::Error;
 
-use crate::cmd::matcher::{grep::GrepMatcher, MainMatcher, Matcher};
+use crate::cmd::matcher::{MainMatcher, Matcher, grep::GrepMatcher};
 #[cfg(all(feature = "tomb", target_os = "linux"))]
 use crate::util::tomb;
 use crate::util::{

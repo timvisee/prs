@@ -1,10 +1,10 @@
 use anyhow::Result;
 use clap::ArgMatches;
-use prs_lib::sync::{Readyness, Sync as StoreSync};
 use prs_lib::Store;
+use prs_lib::sync::{Readyness, Sync as StoreSync};
 use thiserror::Error;
 
-use crate::cmd::matcher::{git::GitMatcher, MainMatcher, Matcher};
+use crate::cmd::matcher::{MainMatcher, Matcher, git::GitMatcher};
 use crate::util;
 #[cfg(all(feature = "tomb", target_os = "linux"))]
 use crate::util::tomb;

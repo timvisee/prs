@@ -1,13 +1,13 @@
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 use clap::ArgMatches;
-use prs_lib::tomb::Tomb;
 use prs_lib::Store;
+use prs_lib::tomb::Tomb;
 use thiserror::Error;
 
 use crate::{
     cmd::matcher::{
-        tomb::{open::OpenMatcher, TombMatcher},
         MainMatcher, Matcher,
+        tomb::{TombMatcher, open::OpenMatcher},
     },
     util::{
         self,

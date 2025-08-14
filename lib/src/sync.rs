@@ -6,8 +6,8 @@ use std::time::Duration;
 use anyhow::Result;
 
 use crate::{
-    git::{self, RepositoryState},
     Store,
+    git::{self, RepositoryState},
 };
 
 /// Store git directory.

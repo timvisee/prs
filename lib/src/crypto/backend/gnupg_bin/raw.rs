@@ -8,8 +8,8 @@ use anyhow::Result;
 use regex::Regex;
 use thiserror::Error;
 
-use super::raw_cmd::{gpg_stdin_output, gpg_stdin_stdout_ok_bin, gpg_stdout_ok, gpg_stdout_ok_bin};
 use super::Config;
+use super::raw_cmd::{gpg_stdin_output, gpg_stdin_stdout_ok_bin, gpg_stdout_ok, gpg_stdout_ok_bin};
 use crate::crypto::util;
 use crate::{Ciphertext, Plaintext};
 

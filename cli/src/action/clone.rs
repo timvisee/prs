@@ -3,10 +3,10 @@ use std::path::Path;
 
 use anyhow::Result;
 use clap::ArgMatches;
-use prs_lib::{crypto, Store};
+use prs_lib::{Store, crypto};
 use thiserror::Error;
 
-use crate::cmd::matcher::{clone::CloneMatcher, MainMatcher, Matcher};
+use crate::cmd::matcher::{MainMatcher, Matcher, clone::CloneMatcher};
 use crate::util::{self, cli, style};
 
 /// Clone store action.

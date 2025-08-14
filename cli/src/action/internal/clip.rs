@@ -5,7 +5,7 @@ use clap::ArgMatches;
 use prs_lib::Plaintext;
 use thiserror::Error;
 
-use crate::cmd::matcher::{internal::clip::ClipMatcher, MainMatcher, Matcher};
+use crate::cmd::matcher::{MainMatcher, Matcher, internal::clip::ClipMatcher};
 use crate::util::{base64, clipboard};
 
 /// A internal clipboard action.

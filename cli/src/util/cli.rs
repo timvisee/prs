@@ -1,8 +1,8 @@
-use std::io::{stderr, stdin, Write};
+use std::io::{Write, stderr, stdin};
 
 use crate::cmd::matcher::MainMatcher;
 
-use crate::util::error::{quit_error, quit_error_msg, ErrorHints};
+use crate::util::error::{ErrorHints, quit_error, quit_error_msg};
 
 /// Prompt the user to enter some value.
 /// The prompt that is shown should be passed to `msg`,

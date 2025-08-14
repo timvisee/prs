@@ -7,7 +7,7 @@ pub mod show;
 use anyhow::Result;
 use clap::ArgMatches;
 
-use crate::cmd::matcher::{totp::TotpMatcher, Matcher};
+use crate::cmd::matcher::{Matcher, totp::TotpMatcher};
 
 /// TOTP action.
 pub struct Totp<'a> {

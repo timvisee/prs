@@ -1,13 +1,13 @@
 use std::process::Command;
 
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 use clap::ArgMatches;
+use prs_lib::Store;
 #[cfg(unix)]
 use prs_lib::util::git;
-use prs_lib::Store;
 use thiserror::Error;
 
-use crate::cmd::matcher::{slam::SlamMatcher, MainMatcher, Matcher};
+use crate::cmd::matcher::{MainMatcher, Matcher, slam::SlamMatcher};
 use crate::util::error;
 
 #[cfg(all(feature = "tomb", target_os = "linux"))]

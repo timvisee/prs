@@ -2,7 +2,7 @@
 
 use anyhow::Result;
 
-use super::{prelude::*, Config, Key};
+use super::{Config, Key, prelude::*};
 
 /// Format fingerprint in consistent format.
 ///

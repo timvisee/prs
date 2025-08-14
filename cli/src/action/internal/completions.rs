@@ -7,9 +7,9 @@ use clap_complete::shells;
 use thiserror::Error;
 
 use crate::cmd::matcher::{
+    Matcher,
     internal::completions::{CompletionsMatcher, Shell},
     main::MainMatcher,
-    Matcher,
 };
 
 /// A file completions action.

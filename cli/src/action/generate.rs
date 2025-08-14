@@ -3,10 +3,10 @@ use std::path::PathBuf;
 use anyhow::Result;
 use chbs::{config::BasicConfig, prelude::*};
 use clap::ArgMatches;
-use prs_lib::{crypto::prelude::*, Plaintext, Secret, Store};
+use prs_lib::{Plaintext, Secret, Store, crypto::prelude::*};
 use thiserror::Error;
 
-use crate::cmd::matcher::{generate::GenerateMatcher, MainMatcher, Matcher};
+use crate::cmd::matcher::{MainMatcher, Matcher, generate::GenerateMatcher};
 #[cfg(feature = "clipboard")]
 use crate::util::clipboard;
 #[cfg(all(feature = "tomb", target_os = "linux"))]

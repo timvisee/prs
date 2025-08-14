@@ -8,9 +8,9 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::sync::Mutex;
 
-use crate::git;
 #[cfg(unix)]
 use crate::Store;
+use crate::git;
 
 #[cfg(unix)]
 use ofiles::opath;
@@ -141,11 +141,7 @@ fn ssh_uri_host(mut uri: &str) -> Option<&str> {
     let uri = before_collon.trim();
 
     // Ensure the host is at least 3 characters long
-    if uri.len() >= 3 {
-        Some(uri)
-    } else {
-        None
-    }
+    if uri.len() >= 3 { Some(uri) } else { None }
 }
 
 /// Kill SSH clients that have an opened persistent session on a password store.

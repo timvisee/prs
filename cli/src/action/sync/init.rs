@@ -6,7 +6,7 @@ use thiserror::Error;
 #[cfg(all(feature = "tomb", target_os = "linux"))]
 use crate::util::tomb;
 use crate::{
-    cmd::matcher::{sync::SyncMatcher, MainMatcher, Matcher},
+    cmd::matcher::{MainMatcher, Matcher, sync::SyncMatcher},
     util::{
         error::{self, ErrorHintsBuilder},
         style::highlight,

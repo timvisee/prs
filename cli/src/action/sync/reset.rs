@@ -1,14 +1,14 @@
 use anyhow::Result;
 use clap::ArgMatches;
-use prs_lib::{sync::Readyness, Store};
+use prs_lib::{Store, sync::Readyness};
 use thiserror::Error;
 
 #[cfg(all(feature = "tomb", target_os = "linux"))]
 use crate::util::tomb;
 use crate::{
     cmd::matcher::{
-        sync::{reset::ResetMatcher, SyncMatcher},
         MainMatcher, Matcher,
+        sync::{SyncMatcher, reset::ResetMatcher},
     },
     util::{
         cli,

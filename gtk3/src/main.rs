@@ -11,9 +11,9 @@ use notify_rust::Hint;
 use notify_rust::Notification;
 
 use prs_lib::{
-    crypto::{self, prelude::*, Config, Proto},
-    store::FindSecret,
     Secret, Store,
+    crypto::{self, Config, Proto, prelude::*},
+    store::FindSecret,
 };
 
 /// Application ID.

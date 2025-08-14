@@ -6,7 +6,7 @@ use clap::ArgMatches;
 use prs_lib::Plaintext;
 use thiserror::Error;
 
-use crate::cmd::matcher::{internal::clip_revert::ClipRevertMatcher, MainMatcher, Matcher};
+use crate::cmd::matcher::{MainMatcher, Matcher, internal::clip_revert::ClipRevertMatcher};
 use crate::util::{base64, clipboard};
 
 /// A internal clipboard revert action.

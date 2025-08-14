@@ -16,10 +16,10 @@ use anyhow::Result;
 use prs_lib::Store;
 
 use crate::{
-    cmd::matcher::{MainMatcher, Matcher},
     cmd::Handler,
+    cmd::matcher::{MainMatcher, Matcher},
     util::{
-        error::{quit, quit_error, ErrorHints},
+        error::{ErrorHints, quit, quit_error},
         style,
     },
 };

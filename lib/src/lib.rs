@@ -20,7 +20,7 @@ extern crate quickcheck_macros;
 extern crate lazy_static;
 
 // Re-exports
-pub use crypto::{recipients::Recipients, Key};
+pub use crypto::{Key, recipients::Recipients};
 pub use store::{Secret, Store};
 pub use types::{Ciphertext, Plaintext};
 

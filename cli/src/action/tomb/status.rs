@@ -5,8 +5,8 @@ use prs_lib::Store;
 use thiserror::Error;
 
 use crate::cmd::matcher::{
-    tomb::{status::StatusMatcher, TombMatcher},
     MainMatcher, Matcher,
+    tomb::{TombMatcher, status::StatusMatcher},
 };
 
 /// A tomb status action.

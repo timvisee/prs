@@ -3,7 +3,7 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use anyhow::Result;
+use anyhow::{Context, Result};
 use thiserror::Error;
 
 use super::{prelude::*, recipients::Recipients, util, Config, ContextPool, Key, Proto};
@@ -159,11 +159,20 @@ pub fn store_sync_public_key_files(store: &Store, keys: &[Key]) -> Result<()> {
         })
         .collect();
 
+    // List finger prints in .gpg-id file
+    let store_gpg_fingerprints =
+        store_read_gpg_fingerprints(store).context("failed to read .gpg-id file")?;
+
     // Remove unused keys
-    for (path, _) in files
-        .iter()
-        .filter(|(_, fp)| !util::keys_contain_fingerprint(keys, fp))
-    {
+    for (path, _) in files.iter().filter(|(_, fp)| {
+        // Don't delete if key is in keychain
+        if !util::keys_contain_fingerprint(keys, fp) {
+            return false;
+        }
+
+        // Don't delete if key is in store fingerprints file
+        !store_gpg_fingerprints.contains(fp)
+    }) {
         fs::remove_file(path).map_err(Err::SyncKeyFiles)?;
     }
 

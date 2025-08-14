@@ -15,7 +15,7 @@ use crate::{
         MainMatcher, Matcher,
     },
     util::{
-        self,
+        self, cli,
         error::{self, ErrorHintsBuilder},
         progress::{self, ProgressBarExt},
         style, sync,
@@ -63,7 +63,16 @@ impl<'a> Recrypt<'a> {
         }
 
         // Import new keys
-        crypto::store::import_missing_keys_from_store(&store).map_err(Err::ImportRecipients)?;
+        let confirm_callback = |fingerprint| {
+            matcher_main.force()
+                || cli::prompt_yes(
+                    &format!("Import recipient key {fingerprint} into keychain?"),
+                    Some(true),
+                    &matcher_main,
+                )
+        };
+        crypto::store::import_missing_keys_from_store(&store, confirm_callback)
+            .map_err(Err::ImportRecipients)?;
 
         let secrets = store.secrets(matcher_recrypt.query());
 

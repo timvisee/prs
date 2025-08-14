@@ -7,7 +7,7 @@ use prs_lib::{crypto, Store};
 use thiserror::Error;
 
 use crate::cmd::matcher::{clone::CloneMatcher, MainMatcher, Matcher};
-use crate::util::{self, style};
+use crate::util::{self, cli, style};
 
 /// Clone store action.
 pub struct Clone<'a> {
@@ -39,7 +39,16 @@ impl<'a> Clone<'a> {
             .map_err(Err::Clone)?;
 
         // Import repo recipients missing in keychain
-        crypto::store::import_missing_keys_from_store(&store).map_err(Err::ImportRecipients)?;
+        let confirm_callback = |fingerprint| {
+            matcher_main.force()
+                || cli::prompt_yes(
+                    &format!("Import recipient key {fingerprint} into keychain?"),
+                    Some(true),
+                    &matcher_main,
+                )
+        };
+        crypto::store::import_missing_keys_from_store(&store, confirm_callback)
+            .map_err(Err::ImportRecipients)?;
 
         // Run housekeeping
         crate::action::housekeeping::run::housekeeping(&store, true, false)

@@ -20,6 +20,7 @@ use prs_lib::{
 use crate::{
     cmd::matcher::{sync::SyncMatcher, MainMatcher, Matcher},
     util::{
+        cli,
         error::{self, ErrorHintsBuilder},
         sync,
     },
@@ -113,7 +114,16 @@ impl<'a> Sync<'a> {
         }
 
         // Import new keys
-        crypto::store::import_missing_keys_from_store(&store).map_err(Err::ImportRecipients)?;
+        let confirm_callback = |fingerprint| {
+            matcher_main.force()
+                || cli::prompt_yes(
+                    &format!("Import recipient key {fingerprint} into keychain?"),
+                    Some(true),
+                    &matcher_main,
+                )
+        };
+        crypto::store::import_missing_keys_from_store(&store, confirm_callback)
+            .map_err(Err::ImportRecipients)?;
 
         // TODO: assert not-dirty state?
 

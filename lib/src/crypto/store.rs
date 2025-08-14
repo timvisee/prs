@@ -190,7 +190,10 @@ pub fn store_sync_public_key_files(store: &Store, keys: &[Key]) -> Result<()> {
 }
 
 /// Import keys from store that are missing in the keychain.
-pub fn import_missing_keys_from_store(store: &Store) -> Result<Vec<ImportResult>> {
+pub fn import_missing_keys_from_store(
+    store: &Store,
+    confirm_callback: impl Fn(String) -> bool,
+) -> Result<Vec<ImportResult>> {
     // Get public keys directory, ensure it exists
     let dir = store_public_keys_dir(store);
     if !dir.is_dir() {
@@ -208,8 +211,12 @@ pub fn import_missing_keys_from_store(store: &Store) -> Result<Vec<ImportResult>
         if context.get_public_key(&fingerprint).is_err() {
             let path = &store_public_keys_dir(store).join(&fingerprint);
             if path.is_file() {
-                context.import_key_file(path)?;
-                results.push(ImportResult::Imported(fingerprint));
+                if confirm_callback(fingerprint.clone()) {
+                    context.import_key_file(path)?;
+                    results.push(ImportResult::Imported(fingerprint));
+                } else {
+                    results.push(ImportResult::Rejected(fingerprint));
+                }
             } else {
                 results.push(ImportResult::Unavailable(fingerprint));
             }
@@ -228,6 +235,9 @@ pub enum ImportResult {
 
     /// Key with given fingerprint was not found and was not imported in keychain.
     Unavailable(String),
+
+    /// Key with given fingerprint was rejected by the user.
+    Rejected(String),
 }
 
 /// Recipients extension for store functionality.

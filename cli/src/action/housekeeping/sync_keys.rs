@@ -13,7 +13,7 @@ use crate::{
         housekeeping::{sync_keys::SyncKeysMatcher, HousekeepingMatcher},
         MainMatcher, Matcher,
     },
-    util::sync,
+    util::{cli, sync},
 };
 
 /// A housekeeping sync-keys action.
@@ -59,8 +59,7 @@ impl<'a> SyncKeys<'a> {
 
         // Import missing keys into keychain
         if !matcher_sync_keys.no_import() {
-            import_missing_keys(&store, matcher_main.quiet(), matcher_main.verbose())
-                .map_err(Err::ImportKeys)?;
+            import_missing_keys(&store, &matcher_main).map_err(Err::ImportKeys)?;
         }
 
         // Sync public key files in store
@@ -85,21 +84,32 @@ impl<'a> SyncKeys<'a> {
 }
 
 /// Import missing keys from store to keychain.
-fn import_missing_keys(store: &Store, quiet: bool, verbose: bool) -> Result<()> {
-    if verbose {
+fn import_missing_keys(store: &Store, matcher_main: &MainMatcher<'_>) -> Result<()> {
+    if matcher_main.verbose() {
         eprintln!("Importing missing public keys from recipients...");
     }
 
     // Import keys, report results
-    for result in crypto::store::import_missing_keys_from_store(store)? {
+    let confirm_callback = |fingerprint| {
+        matcher_main.force()
+            || cli::prompt_yes(
+                &format!("Import recipient key {fingerprint} into keychain?"),
+                Some(true),
+                matcher_main,
+            )
+    };
+    for result in crypto::store::import_missing_keys_from_store(store, confirm_callback)? {
         match result {
             ImportResult::Imported(fingerprint) => {
-                if !quiet {
+                if !matcher_main.quiet() {
                     eprintln!("Imported key to keychain: {fingerprint}");
                 }
             }
             ImportResult::Unavailable(fingerprint) => {
                 eprintln!("Cannot import missing public key, not available in store: {fingerprint}",)
+            }
+            ImportResult::Rejected(fingerprint) => {
+                eprintln!("Did not import missing public key, rejected by user: {fingerprint}",)
             }
         }
     }

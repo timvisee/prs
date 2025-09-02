@@ -28,6 +28,12 @@ impl MoveMatcher<'_> {
     pub fn no_sync(&self) -> bool {
         ArgNoSync::is_present(self.matches)
     }
+
+    /// Check whether to create an alias from source to destination after moving.
+    #[cfg(feature = "alias")]
+    pub fn alias(&self) -> bool {
+        self.matches.get_flag("alias")
+    }
 }
 
 impl<'a> Matcher<'a> for MoveMatcher<'a> {

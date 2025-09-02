@@ -7,7 +7,8 @@ pub struct CmdMove;
 
 impl CmdMove {
     pub fn build() -> Command {
-        Command::new("move")
+        #[cfg_attr(not(feature = "alias"), expect(clippy::let_and_return))]
+        let cmd = Command::new("move")
             .alias("mov")
             .alias("mv")
             .alias("rename")
@@ -20,6 +21,17 @@ impl CmdMove {
                     .required(true),
             )
             .arg(ArgAllowDirty::build())
-            .arg(ArgNoSync::build())
+            .arg(ArgNoSync::build());
+
+        #[cfg(feature = "alias")]
+        let cmd = cmd.arg(
+            Arg::new("alias")
+                .long("alias")
+                .short('A')
+                .num_args(0)
+                .help("Create alias/symlink at old path pointing to new location"),
+        );
+
+        cmd
     }
 }

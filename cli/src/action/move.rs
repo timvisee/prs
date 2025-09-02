@@ -88,6 +88,12 @@ impl<'a> Move<'a> {
 
         super::remove::remove_empty_secret_dir(&secret);
 
+        // Optionally create alias from old location to new location
+        #[cfg(feature = "alias")]
+        if matcher_move.alias() {
+            super::alias::create_alias(&store, &new_secret, &secret.path, &secret.path)?;
+        }
+
         // Finalize sync
         if !matcher_move.no_sync() {
             sync.finalize(format!("Move from {} to {}", secret.name, new_secret.name))?;

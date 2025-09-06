@@ -45,7 +45,7 @@ prs-lib = { version = "=0.5.3", path = "../lib", default-features = false }
 thiserror = "2.0"
 
 # Notification support
-notify-rust = { version = "4.6", optional = true }
+notify-rust = { version = "4.11.7", optional = true }
 
 [[bin]]
 name = "prs-gtk3-copy"

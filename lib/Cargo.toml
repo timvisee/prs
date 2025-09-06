@@ -10,7 +10,7 @@ description = "Secure, fast & convenient password manager CLI with GPG & git syn
 keywords = ["pass", "passwordstore"]
 categories = ["authentication", "command-line-utilities", "cryptography"]
 edition = "2024"
-rust-version = "1.85.0"
+rust-version = "1.88.0"
 
 [features]
 default = ["backend-gnupg-bin"]

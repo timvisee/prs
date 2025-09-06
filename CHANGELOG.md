@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.4 (2025-09-06)
+- Add `--alias` flag to move command, create alias pointing old path to new
+- Update dependencies
+
 ## 0.5.3 (2025-08-14)
 - Prompt user whether to add new recipient keys to keychain
 - Don't delete recipient keys from store if listed in `.gpg-id` file

@@ -1,6 +1,6 @@
 [package]
 name = "prs-gtk3"
-version = "0.5.3"
+version = "0.5.4"
 authors = ["Tim Visee <3a4fb3964f@sinenomine.email>"]
 license = "GPL-3.0"
 readme = "../README.md"
@@ -41,7 +41,7 @@ gdk = "0.18"
 gio = { version = "0.18", features = ["v2_72"] }
 glib = "0.18"
 gtk = { version = "0.18", features = ["v3_24"] }
-prs-lib = { version = "=0.5.3", path = "../lib", default-features = false }
+prs-lib = { version = "=0.5.4", path = "../lib", default-features = false }
 thiserror = "2.0"
 
 # Notification support

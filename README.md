@@ -697,7 +697,7 @@ See a list of compatible `pass` clients [here][pass-compatible-clients].
 ```
 $ prs help
 
-prs 0.5.3
+prs 0.5.4
 Tim Visee <3a4fb3964f@sinenomine.email>
 Secure, fast & convenient password manager CLI with GPG & git sync
 

@@ -1,6 +1,6 @@
 [package]
 name = "prs-lib"
-version = "0.5.3"
+version = "0.5.4"
 authors = ["Tim Visee <3a4fb3964f@sinenomine.email>"]
 license = "LGPL-3.0"
 readme = "../README.md"

@@ -2,6 +2,7 @@
 
 ## 0.5.4 (2025-09-06)
 - Add `--alias` flag to move command, create alias pointing old path to new
+- Update MSRV to 1.88
 - Update dependencies
 
 ## 0.5.3 (2025-08-14)

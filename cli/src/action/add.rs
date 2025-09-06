@@ -55,10 +55,10 @@ impl<'a> Add<'a> {
 
         if matcher_add.stdin() {
             plaintext = stdin::read_plaintext(!matcher_main.quiet())?;
-        } else if !matcher_add.empty() {
-            if let Some(changed) = edit::edit(&plaintext).map_err(Err::Edit)? {
-                plaintext = changed;
-            }
+        } else if !matcher_add.empty()
+            && let Some(changed) = edit::edit(&plaintext).map_err(Err::Edit)?
+        {
+            plaintext = changed;
         }
 
         // Check if destination already exists if not forcing

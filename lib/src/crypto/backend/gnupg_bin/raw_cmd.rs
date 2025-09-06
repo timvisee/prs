@@ -100,10 +100,10 @@ where
         .env("LANGUAGE", "en_US.UTF-8");
     if config.gpg_tty {
         cmd.arg("--pinentry-mode").arg("loopback");
-        if !util::env::has_gpg_tty() {
-            if let Some(tty) = util::tty::get_tty() {
-                cmd.env("GPG_TTY", tty);
-            }
+        if !util::env::has_gpg_tty()
+            && let Some(tty) = util::tty::get_tty()
+        {
+            cmd.env("GPG_TTY", tty);
         }
     }
     cmd.args(args);

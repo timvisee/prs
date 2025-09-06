@@ -12,10 +12,10 @@ pub fn print(plaintext: Plaintext) -> Result<(), std::io::Error> {
     stdout.write_all(plaintext.unsecure_ref())?;
 
     // Always finish with newline
-    if let Some(&last) = plaintext.unsecure_ref().last() {
-        if last != b'\n' {
-            stdout.write_all(b"\n")?;
-        }
+    if let Some(&last) = plaintext.unsecure_ref().last()
+        && last != b'\n'
+    {
+        stdout.write_all(b"\n")?;
     }
 
     let _ = stdout.flush();

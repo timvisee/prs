@@ -207,12 +207,12 @@ impl ClipManager {
         }
 
         // If the temporary clipboard is still active, we should replace it
-        if let Some(clip) = &mut *clip_guard {
-            if clip.is_active() {
-                clip.replace(data, timeout, quiet, verbose)
-                    .map_err(Err::ClipMan)?;
-                return Ok(());
-            }
+        if let Some(clip) = &mut *clip_guard
+            && clip.is_active()
+        {
+            clip.replace(data, timeout, quiet, verbose)
+                .map_err(Err::ClipMan)?;
+            return Ok(());
         }
 
         // Create new clip session

@@ -173,10 +173,10 @@ impl<'a> Generate<'a> {
         }
 
         // Finalize store sync if we saved the secret
-        if let Some(dest) = &dest {
-            if !matcher_generate.no_sync() {
-                sync.finalize(format!("Generate secret to {}", dest.1.name))?;
-            }
+        if let Some(dest) = &dest
+            && !matcher_generate.no_sync()
+        {
+            sync.finalize(format!("Generate secret to {}", dest.1.name))?;
         }
 
         // Finalize tomb

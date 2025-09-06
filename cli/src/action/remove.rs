@@ -218,10 +218,8 @@ fn remove_empty_dir(path: &Path, remove_empty_parents: bool) -> Result<(), io::E
     fs::remove_dir_all(path)?;
 
     // Remove empty parents
-    if remove_empty_parents {
-        if let Some(parent) = path.parent() {
-            return remove_empty_dir(parent, true);
-        }
+    if remove_empty_parents && let Some(parent) = path.parent() {
+        return remove_empty_dir(parent, true);
     }
 
     Ok(())

@@ -174,20 +174,20 @@ impl From<Key> for KeyId {
             key.user_ids()
                 .map(|user| {
                     let mut parts = vec![];
-                    if let Ok(name) = user.name() {
-                        if !name.trim().is_empty() {
-                            parts.push(name.into());
-                        }
+                    if let Ok(name) = user.name()
+                        && !name.trim().is_empty()
+                    {
+                        parts.push(name.into());
                     }
-                    if let Ok(comment) = user.comment() {
-                        if !comment.trim().is_empty() {
-                            parts.push(format!("({comment})"));
-                        }
+                    if let Ok(comment) = user.comment()
+                        && !comment.trim().is_empty()
+                    {
+                        parts.push(format!("({comment})"));
                     }
-                    if let Ok(email) = user.email() {
-                        if !email.trim().is_empty() {
-                            parts.push(format!("<{email}>"));
-                        }
+                    if let Ok(email) = user.email()
+                        && !email.trim().is_empty()
+                    {
+                        parts.push(format!("<{email}>"));
                     }
                     parts.join(" ")
                 })

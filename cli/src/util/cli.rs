@@ -78,10 +78,10 @@ pub fn prompt_yes(msg: &str, def: Option<bool>, main_matcher: &MainMatcher) -> b
     let answer = prompt(&format!("{msg} {options}"), main_matcher);
 
     // Assume the default if the answer is empty
-    if answer.is_empty() {
-        if let Some(def) = def {
-            return def;
-        }
+    if answer.is_empty()
+        && let Some(def) = def
+    {
+        return def;
     }
 
     // Derive a boolean and return

@@ -44,10 +44,10 @@ impl<'a> Slam<'a> {
 
         // Attempt to lock Tomb
         #[cfg(all(feature = "tomb", target_os = "linux"))]
-        if let Some(store) = &store {
-            if let Err(err) = tomb_lock(store, &matcher_main) {
-                error::print_error(Err::Close(err).into());
-            }
+        if let Some(store) = &store
+            && let Err(err) = tomb_lock(store, &matcher_main)
+        {
+            error::print_error(Err::Close(err).into());
         }
 
         // Attempt to invalidate cached sudo credentials

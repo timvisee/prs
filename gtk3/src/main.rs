@@ -296,12 +296,12 @@ fn copy(text: String, timeout: u32) {
             }
 
             // Set to previous if secret is still in
-            if let Ok(previous) = previous.lock() {
-                if let Some(ref previous) = *previous {
-                    clipboard.set_text(previous);
-                    notify_cleared();
-                    return;
-                }
+            if let Ok(previous) = previous.lock()
+                && let Some(ref previous) = *previous
+            {
+                clipboard.set_text(previous);
+                notify_cleared();
+                return;
             }
 
             // Fallback

@@ -76,10 +76,10 @@ pub(crate) fn guess_ssh_persist_support(repo: &Path) -> bool {
     }
 
     // Get cached result
-    if let Ok(guard) = (*SSH_PERSIST_GUESS_CACHE).lock() {
-        if let Some(supported) = guard.get(repo) {
-            return *supported;
-        }
+    if let Ok(guard) = (*SSH_PERSIST_GUESS_CACHE).lock()
+        && let Some(supported) = guard.get(repo)
+    {
+        return *supported;
     }
 
     // Gather git remotes, assume not supported if no remote or error

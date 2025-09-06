@@ -174,10 +174,11 @@ where
     // Explicitly set GPG_TTY on Wayland to current stdin if not set
     // Fixed GPG not showing pinentry prompt properly on Wayland
     // Issue: https://github.com/timvisee/prs/issues/8#issuecomment-871090949
-    if util::env::is_wayland() && !util::env::has_gpg_tty() {
-        if let Some(tty) = util::tty::get_tty() {
-            cmd.env("GPG_TTY", tty);
-        }
+    if util::env::is_wayland()
+        && !util::env::has_gpg_tty()
+        && let Some(tty) = util::tty::get_tty()
+    {
+        cmd.env("GPG_TTY", tty);
     }
 
     // Set global flags, add arguments

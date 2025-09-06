@@ -103,10 +103,10 @@ impl Store {
     /// Otherwise any number of closely matching secrets is returned as `FindSecret::Many`.
     pub fn find(&self, query: Option<String>) -> FindSecret {
         // Try to find exact secret match
-        if let Some(query) = &query {
-            if let Some(secret) = self.find_at(query) {
-                return FindSecret::Exact(secret);
-            }
+        if let Some(query) = &query
+            && let Some(secret) = self.find_at(query)
+        {
+            return FindSecret::Exact(secret);
         }
 
         // Find all closely matching

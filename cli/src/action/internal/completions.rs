@@ -108,6 +108,9 @@ where
         // TODO: patch other completion scripts to complete secret names
         Shell::Elvish => clap_complete::generate(shells::Elvish, app, bin_name, buf),
         Shell::Fish => clap_complete::generate(shells::Fish, app, bin_name, buf),
+        Shell::Nushell => {
+            clap_complete::generate(clap_complete_nushell::Nushell, app, bin_name, buf)
+        }
         Shell::PowerShell => clap_complete::generate(shells::PowerShell, app, bin_name, buf),
     }
 }

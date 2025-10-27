@@ -22,7 +22,15 @@ impl CmdCompletions {
                     // TODO: replace this by a runtime list
                     // Issue: https://github.com/clap-rs/clap/issues/4504#issuecomment-1326379595
                     // .value_parser(shell_variants)
-                    .value_parser(["all", "bash", "zsh", "fish", "elvish", "powershell"])
+                    .value_parser([
+                        "all",
+                        "bash",
+                        "zsh",
+                        "fish",
+                        "elvish",
+                        "powershell",
+                        "nushell",
+                    ])
                     .ignore_case(true),
             )
             .arg(

@@ -80,6 +80,7 @@ pub(crate) enum Shell {
     Bash,
     Elvish,
     Fish,
+    Nushell,
     PowerShell,
     Zsh,
 }
@@ -91,6 +92,7 @@ impl Shell {
             Shell::Bash,
             Shell::Elvish,
             Shell::Fish,
+            Shell::Nushell,
             Shell::PowerShell,
             Shell::Zsh,
         ]
@@ -102,6 +104,7 @@ impl Shell {
             "bash" => Some(Shell::Bash),
             "elvish" => Some(Shell::Elvish),
             "fish" => Some(Shell::Fish),
+            "nushell" | "nu" => Some(Shell::Nushell),
             "powershell" | "ps" => Some(Shell::PowerShell),
             "zsh" => Some(Shell::Zsh),
             _ => None,
@@ -114,6 +117,7 @@ impl Shell {
             Shell::Bash => "bash",
             Shell::Elvish => "elvish",
             Shell::Fish => "fish",
+            Shell::Nushell => "nushell",
             Shell::PowerShell => "powershell",
             Shell::Zsh => "zsh",
         }
@@ -125,6 +129,7 @@ impl Shell {
             Shell::Bash => format!("{bin_name}.bash"),
             Shell::Elvish => format!("{bin_name}.elv"),
             Shell::Fish => format!("{bin_name}.fish"),
+            Shell::Nushell => format!("{bin_name}.nu"),
             Shell::PowerShell => format!("_{bin_name}.ps1"),
             Shell::Zsh => format!("_{bin_name}"),
         }

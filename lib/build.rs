@@ -12,6 +12,10 @@ fn main() {
     }
 
     // GPG cryptography
-    #[cfg(any(feature = "backend-gpgme", feature = "backend-gnupg-bin",))]
+    #[cfg(any(
+        feature = "backend-gpgme",
+        feature = "backend-gnupg-bin",
+        feature = "backend-rpgpie",
+    ))]
     println!("cargo:rustc-cfg=feature=\"_crypto-gpg\"");
 }

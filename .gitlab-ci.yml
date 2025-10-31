@@ -399,14 +399,14 @@ release-docker-hub:
     - docker push timvisee/prs:$VERSION
     - docker push timvisee/prs:latest
 
-# AUR packages release
-release-aur:
-  image: archlinux
-  stage: release
-  only:
-    - /^v(\d+\.)*\d+$/
-  timeout: 1h 30m
-  before_script: []
-  script:
-    - cd ./pkg/aur
-    - ./publish
+# # AUR packages release
+# release-aur:
+#   image: archlinux
+#   stage: release
+#   only:
+#     - /^v(\d+\.)*\d+$/
+#   timeout: 1h 30m
+#   before_script: []
+#   script:
+#     - cd ./pkg/aur
+#     - ./publish

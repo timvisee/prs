@@ -1,15 +1,18 @@
 use anyhow::Result;
 use clap::ArgMatches;
-use prs_lib::{Store, crypto::prelude::*};
+use prs_lib::{crypto::prelude::*, Store};
 use thiserror::Error;
 
-use crate::cmd::matcher::{
-    MainMatcher, Matcher,
-    recipients::{RecipientsMatcher, remove::RemoveMatcher},
-};
 #[cfg(all(feature = "tomb", target_os = "linux"))]
 use crate::util::tomb;
 use crate::util::{cli, error, select, sync};
+use crate::{
+    cmd::matcher::{
+        recipients::{remove::RemoveMatcher, RecipientsMatcher},
+        MainMatcher, Matcher,
+    },
+    util::error::{quit_error_msg, ErrorHintsBuilder},
+};
 
 /// A recipients remove action.
 pub struct Remove<'a> {
@@ -37,6 +40,23 @@ impl<'a> Remove<'a> {
             matcher_main.force(),
         );
         let sync = store.sync();
+
+        // Disallow non-interactive mode
+        if matcher_main.no_interact() {
+            quit_error_msg(
+                "cannot remove recipient in non interactive mode",
+                ErrorHintsBuilder::from_matcher(&matcher_main)
+                    .add_info(format!(
+                        "remove '{}' ('{}') to enable interactive mode",
+                        crate::util::style::highlight("--no-interact"),
+                        crate::util::style::highlight("-I"),
+                    ))
+                    .verbose(false)
+                    .help(true)
+                    .build()
+                    .unwrap(),
+            );
+        }
 
         // Prepare tomb
         #[cfg(all(feature = "tomb", target_os = "linux"))]

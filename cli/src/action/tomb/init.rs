@@ -1,16 +1,16 @@
 use anyhow::Result;
 use clap::ArgMatches;
-use prs_lib::{Recipients, Store, crypto::prelude::*};
+use prs_lib::{crypto::prelude::*, Recipients, Store};
 use thiserror::Error;
 
 use crate::{
     cmd::matcher::{
+        tomb::{init::InitMatcher, TombMatcher},
         MainMatcher, Matcher,
-        tomb::{TombMatcher, init::InitMatcher},
     },
     util::{
         self, cli,
-        error::{self, ErrorHintsBuilder},
+        error::{self, quit_error_msg, ErrorHintsBuilder},
         select, style, sync,
     },
 };
@@ -48,6 +48,23 @@ impl<'a> Init<'a> {
                 "password store already is a tomb",
                 ErrorHintsBuilder::from_matcher(&matcher_main)
                     .force(true)
+                    .build()
+                    .unwrap(),
+            );
+        }
+
+        // Disallow non-interactive mode
+        if matcher_main.no_interact() {
+            quit_error_msg(
+                "cannot initialize tomb in in non interactive mode",
+                ErrorHintsBuilder::from_matcher(&matcher_main)
+                    .add_info(format!(
+                        "remove '{}' ('{}') to enable interactive mode",
+                        crate::util::style::highlight("--no-interact"),
+                        crate::util::style::highlight("-I"),
+                    ))
+                    .verbose(false)
+                    .help(true)
                     .build()
                     .unwrap(),
             );

@@ -1,15 +1,18 @@
 use anyhow::Result;
 use clap::ArgMatches;
-use prs_lib::{Recipients, Store, crypto::prelude::*};
+use prs_lib::{crypto::prelude::*, Recipients, Store};
 use thiserror::Error;
 
-use crate::cmd::matcher::{
-    MainMatcher, Matcher,
-    recipients::{RecipientsMatcher, add::AddMatcher},
-};
 #[cfg(all(feature = "tomb", target_os = "linux"))]
 use crate::util::tomb;
 use crate::util::{self, error, select, style, sync};
+use crate::{
+    cmd::matcher::{
+        recipients::{add::AddMatcher, RecipientsMatcher},
+        MainMatcher, Matcher,
+    },
+    util::error::{quit_error_msg, ErrorHintsBuilder},
+};
 
 /// A recipients add action.
 pub struct Add<'a> {
@@ -37,6 +40,23 @@ impl<'a> Add<'a> {
             matcher_main.force(),
         );
         let sync = store.sync();
+
+        // Disallow non-interactive mode
+        if matcher_main.no_interact() {
+            quit_error_msg(
+                "cannot add recipient in non interactive mode",
+                ErrorHintsBuilder::from_matcher(&matcher_main)
+                    .add_info(format!(
+                        "remove '{}' ('{}') to enable interactive mode",
+                        crate::util::style::highlight("--no-interact"),
+                        crate::util::style::highlight("-I"),
+                    ))
+                    .verbose(false)
+                    .help(true)
+                    .build()
+                    .unwrap(),
+            );
+        }
 
         // Prepare tomb
         #[cfg(all(feature = "tomb", target_os = "linux"))]

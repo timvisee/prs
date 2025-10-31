@@ -6,7 +6,7 @@ use clap::ArgMatches;
 use prs_lib::{Secret, Store};
 use thiserror::Error;
 
-use crate::cmd::matcher::{MainMatcher, Matcher, alias::AliasMatcher};
+use crate::cmd::matcher::{alias::AliasMatcher, MainMatcher, Matcher};
 #[cfg(all(feature = "tomb", target_os = "linux"))]
 use crate::util::tomb;
 use crate::util::{cli, error, select, sync};
@@ -47,8 +47,8 @@ impl<'a> Alias<'a> {
             sync.prepare()?;
         }
 
-        let secret =
-            select::store_select_secret(&store, matcher_alias.query()).ok_or(Err::NoneSelected)?;
+        let secret = select::store_select_secret(&store, matcher_alias.query(), &matcher_main)
+            .ok_or(Err::NoneSelected)?;
         let dest = matcher_alias.destination();
 
         // TODO: show secret name if not equal to query, unless quiet?

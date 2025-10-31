@@ -3,18 +3,21 @@ use std::io::Write;
 
 use anyhow::Result;
 use clap::ArgMatches;
-use prs_lib::{Plaintext, Store, crypto::prelude::*};
+use prs_lib::{crypto::prelude::*, Plaintext, Store};
 use thiserror::Error;
 
-use crate::cmd::matcher::{
-    MainMatcher, Matcher,
-    recipients::{RecipientsMatcher, export::ExportMatcher},
-};
 #[cfg(feature = "clipboard")]
 use crate::util::clipboard;
-use crate::util::select;
 #[cfg(all(feature = "tomb", target_os = "linux"))]
 use crate::util::tomb;
+use crate::util::{error::ErrorHintsBuilder, select};
+use crate::{
+    cmd::matcher::{
+        recipients::{export::ExportMatcher, RecipientsMatcher},
+        MainMatcher, Matcher,
+    },
+    util::error::quit_error_msg,
+};
 
 /// A recipients export action.
 pub struct Export<'a> {
@@ -42,6 +45,23 @@ impl<'a> Export<'a> {
             matcher_main.force(),
         );
         let recipients = store.recipients().map_err(Err::Load)?;
+
+        // Disallow non-interactive mode
+        if matcher_main.no_interact() {
+            quit_error_msg(
+                "cannot export recipient in non interactive mode",
+                ErrorHintsBuilder::from_matcher(&matcher_main)
+                    .add_info(format!(
+                        "remove '{}' ('{}') to enable interactive mode",
+                        crate::util::style::highlight("--no-interact"),
+                        crate::util::style::highlight("-I"),
+                    ))
+                    .verbose(false)
+                    .help(true)
+                    .build()
+                    .unwrap(),
+            );
+        }
 
         // Prepare tomb
         #[cfg(all(feature = "tomb", target_os = "linux"))]

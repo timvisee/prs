@@ -7,7 +7,7 @@ use clap::ArgMatches;
 use prs_lib::{Secret, Store};
 use thiserror::Error;
 
-use crate::cmd::matcher::{MainMatcher, Matcher, r#move::MoveMatcher};
+use crate::cmd::matcher::{r#move::MoveMatcher, MainMatcher, Matcher};
 #[cfg(all(feature = "tomb", target_os = "linux"))]
 use crate::util::tomb;
 use crate::util::{cli, error, select, sync};
@@ -48,8 +48,8 @@ impl<'a> Move<'a> {
             sync.prepare()?;
         }
 
-        let secret =
-            select::store_select_secret(&store, matcher_move.query()).ok_or(Err::NoneSelected)?;
+        let secret = select::store_select_secret(&store, matcher_move.query(), &matcher_main)
+            .ok_or(Err::NoneSelected)?;
 
         // TODO: show secret name if not equal to query, unless quiet?
 

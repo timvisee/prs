@@ -53,7 +53,7 @@ impl<'a> Generate<'a> {
 
             // Select secret
             let secret =
-                select::store_select_secret(&store, matcher_generate.name().map(|s| s.to_owned()))
+                select::store_select_secret(&store, matcher_generate.name().map(|s| s.to_owned()), &matcher_main)
                     .ok_or(Err::NoneSelected)?;
 
             Some((secret.path.clone(), secret))

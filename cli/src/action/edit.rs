@@ -1,9 +1,9 @@
 use anyhow::Result;
 use clap::ArgMatches;
-use prs_lib::{Store, crypto::prelude::*};
+use prs_lib::{crypto::prelude::*, Store};
 use thiserror::Error;
 
-use crate::cmd::matcher::{MainMatcher, Matcher, edit::EditMatcher};
+use crate::cmd::matcher::{edit::EditMatcher, MainMatcher, Matcher};
 #[cfg(all(feature = "tomb", target_os = "linux"))]
 use crate::util::tomb;
 use crate::util::{cli, edit, error, secret, select, stdin, sync};
@@ -44,8 +44,8 @@ impl<'a> Edit<'a> {
             sync.prepare()?;
         }
 
-        let secret =
-            select::store_select_secret(&store, matcher_edit.query()).ok_or(Err::NoneSelected)?;
+        let secret = select::store_select_secret(&store, matcher_edit.query(), &matcher_main)
+            .ok_or(Err::NoneSelected)?;
 
         secret::print_name(matcher_edit.query(), &secret, &store, matcher_main.quiet());
 

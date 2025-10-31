@@ -1,14 +1,14 @@
 use anyhow::Result;
 use clap::ArgMatches;
-use prs_lib::{Store, crypto::prelude::*};
+use prs_lib::{crypto::prelude::*, Store};
 use thiserror::Error;
 
 #[cfg(all(feature = "tomb", target_os = "linux"))]
 use crate::util::tomb;
 use crate::{
     cmd::matcher::{
+        totp::{qr::QrMatcher, TotpMatcher},
         MainMatcher, Matcher,
-        totp::{TotpMatcher, qr::QrMatcher},
     },
     util::{secret, select, totp},
 };
@@ -43,8 +43,8 @@ impl<'a> Qr<'a> {
         #[cfg(all(feature = "tomb", target_os = "linux"))]
         tomb::prepare_tomb(&mut tomb, &matcher_main).map_err(Err::Tomb)?;
 
-        let secret =
-            select::store_select_secret(&store, matcher_qr.query()).ok_or(Err::NoneSelected)?;
+        let secret = select::store_select_secret(&store, matcher_qr.query(), &matcher_main)
+            .ok_or(Err::NoneSelected)?;
 
         secret::print_name(matcher_qr.query(), &secret, &store, matcher_main.quiet());
 

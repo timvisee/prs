@@ -238,17 +238,8 @@ impl ErrorHintsBuilder {
     }
 
     /// Add a single info entry.
-    pub fn add_info(mut self, info: String) -> Self {
-        // Initialize the info list
-        if self.info.is_none() {
-            self.info = Some(Vec::new());
-        }
-
-        // Add the item to the info list
-        if let Some(ref mut list) = self.info {
-            list.push(info);
-        }
-
+    pub fn add_info(mut self, info: impl Into<String>) -> Self {
+        self.info.get_or_insert_default().push(info.into());
         self
     }
 }

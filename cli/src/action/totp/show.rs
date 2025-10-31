@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use anyhow::Result;
 use clap::ArgMatches;
-use prs_lib::{Store, crypto::prelude::*};
+use prs_lib::{crypto::prelude::*, Store};
 use thiserror::Error;
 
 #[cfg(feature = "clipboard")]
@@ -12,8 +12,8 @@ use crate::util::tomb;
 use crate::viewer;
 use crate::{
     cmd::matcher::{
+        totp::{show::ShowMatcher, TotpMatcher},
         MainMatcher, Matcher,
-        totp::{TotpMatcher, show::ShowMatcher},
     },
     util::{secret, select, totp},
 };
@@ -48,8 +48,8 @@ impl<'a> Show<'a> {
         #[cfg(all(feature = "tomb", target_os = "linux"))]
         tomb::prepare_tomb(&mut tomb, &matcher_main).map_err(Err::Tomb)?;
 
-        let secret =
-            select::store_select_secret(&store, matcher_show.query()).ok_or(Err::NoneSelected)?;
+        let secret = select::store_select_secret(&store, matcher_show.query(), &matcher_main)
+            .ok_or(Err::NoneSelected)?;
 
         let mut plaintext = crate::crypto::context(&matcher_main)?
             .decrypt_file(&secret.path)

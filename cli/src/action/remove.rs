@@ -52,7 +52,7 @@ impl<'a> Remove<'a> {
         }
 
         let secret =
-            select::store_select_secret(&store, matcher_remove.query()).ok_or(Err::NoneSelected)?;
+            select::store_select_secret(&store, matcher_remove.query(), &matcher_main).ok_or(Err::NoneSelected)?;
 
         if !remove_confirm(&store, &secret, &matcher_main, &mut Vec::new())? {
             if matcher_main.verbose() {

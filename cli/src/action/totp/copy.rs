@@ -1,6 +1,6 @@
 use anyhow::Result;
 use clap::ArgMatches;
-use prs_lib::{Store, crypto::prelude::*};
+use prs_lib::{crypto::prelude::*, Store};
 use thiserror::Error;
 
 #[cfg(all(feature = "tomb", target_os = "linux"))]
@@ -8,8 +8,8 @@ use crate::util::tomb;
 use crate::util::{clipboard, error};
 use crate::{
     cmd::matcher::{
+        totp::{copy::CopyMatcher, TotpMatcher},
         MainMatcher, Matcher,
-        totp::{TotpMatcher, copy::CopyMatcher},
     },
     util::{secret, select, totp},
 };
@@ -44,8 +44,8 @@ impl<'a> Copy<'a> {
         #[cfg(all(feature = "tomb", target_os = "linux"))]
         tomb::prepare_tomb(&mut tomb, &matcher_main).map_err(Err::Tomb)?;
 
-        let secret =
-            select::store_select_secret(&store, matcher_copy.query()).ok_or(Err::NoneSelected)?;
+        let secret = select::store_select_secret(&store, matcher_copy.query(), &matcher_main)
+            .ok_or(Err::NoneSelected)?;
 
         secret::print_name(matcher_copy.query(), &secret, &store, matcher_main.quiet());
 

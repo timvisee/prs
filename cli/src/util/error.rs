@@ -116,21 +116,45 @@ pub struct ErrorHints {
 impl ErrorHints {
     /// Check whether any hint should be printed.
     pub fn any(&self) -> bool {
-        !self.info.is_empty()
-            || self.sync
-            || self.sync_init
-            || self.sync_remote
-            || self.git
-            || self.allow_dirty
-            || self.force
-            || self.verbose
-            || self.help
+        let Self {
+            info,
+            sync,
+            sync_init,
+            sync_remote,
+            git,
+            allow_dirty,
+            force,
+            verbose,
+            help,
+        } = self;
+
+        !info.is_empty()
+            || *sync
+            || *sync_init
+            || *sync_remote
+            || *git
+            || *allow_dirty
+            || *force
+            || *verbose
+            || *help
     }
 
     /// Print the error hints.
     pub fn print(&self, end_newline: bool) {
+        let Self {
+            info,
+            sync,
+            sync_init,
+            sync_remote,
+            git,
+            allow_dirty,
+            force,
+            verbose,
+            help,
+        } = self;
+
         // Print info messages
-        for msg in &self.info {
+        for msg in info {
             eprintln!("{} {}", highlight_info("info:"), msg);
         }
 
@@ -143,49 +167,49 @@ impl ErrorHints {
 
         // Print hints
         let bin = crate::util::bin_name();
-        if self.sync {
+        if *sync {
             eprintln!(
                 "To sync your password store use '{}'",
                 highlight(format!("{bin} sync"))
             );
         }
-        if self.sync_init {
+        if *sync_init {
             eprintln!(
                 "To initialize sync for your password store use '{}'",
                 highlight(format!("{bin} sync init"))
             );
         }
-        if self.sync_remote {
+        if *sync_remote {
             eprintln!(
                 "Use '{}' to get or set a remote sync URL",
                 highlight(format!("{bin} sync remote [GIT_URL]"))
             );
         }
-        if self.git || self.allow_dirty {
+        if *git || *allow_dirty {
             eprintln!(
                 "Use '{}' to show sync status, uncommitted changes and help",
                 highlight(format!("{bin} sync status"))
             );
         }
-        if self.git {
+        if *git {
             eprintln!(
                 "Use '{}' to inspect or resolve this issue using git",
                 highlight(format!("{bin} git"))
             );
         }
-        if self.allow_dirty {
+        if *allow_dirty {
             eprintln!(
                 "To make changes while the store repository is dirty add '{}'",
                 highlight("--allow-dirty")
             );
         }
-        if self.force {
+        if *force {
             eprintln!("Use '{}' to force", highlight("--force"));
         }
-        if self.verbose {
+        if *verbose {
             eprintln!("For a detailed log add '{}'", highlight("--verbose"));
         }
-        if self.help {
+        if *help {
             eprintln!("For more information add '{}'", highlight("--help"));
         }
 

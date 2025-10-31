@@ -15,6 +15,8 @@ pub fn store_select_secret(
     query: Option<String>,
     matcher_main: &MainMatcher,
 ) -> Option<Secret> {
+    let has_query = query.as_ref().is_some_and(|q| !q.trim().is_empty());
+
     #[allow(unreachable_code)]
     match store.find(query) {
         FindSecret::Exact(secret) => Some(secret),
@@ -32,9 +34,17 @@ pub fn store_select_secret(
             // Cannot choose out of many without interaction, error instead
             if matcher_main.no_interact() {
                 quit_error_msg(
-                    format!("query matched {} secrets", secrets.len()),
+                    if has_query {
+                        format!("query matched {} secrets", secrets.len())
+                    } else {
+                        format!("no query specified, store has {} secrets", secrets.len())
+                    },
                     ErrorHintsBuilder::from_matcher(matcher_main)
-                        .add_info("change query to match exactly one secret")
+                        .add_info(if has_query {
+                            "change query to match exactly one secret"
+                        } else {
+                            "add query to match exactly one secret"
+                        })
                         .add_info(format!(
                             "or remove '{}' ('{}') to use interactive selection",
                             crate::util::style::highlight("--no-interact"),

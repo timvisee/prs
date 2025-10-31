@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.5 (2025-10-31)
+- Add nushell completions
+- Disallow interactive secret selection when using `--no-interact`
+- Disallow recipient and tomb initialization actions in non interactive mode
+- Fix compilation with rpgpie bakend
+
 ## 0.5.4 (2025-09-06)
 - Add `--alias` flag to move command, create alias pointing old path to new
 - Update MSRV to 1.88

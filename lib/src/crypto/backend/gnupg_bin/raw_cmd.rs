@@ -219,7 +219,7 @@ fn parse_output(bytes: &[u8]) -> Result<String, std::str::Utf8Error> {
 /// Try to parse u8 slice as UTF-16 string.
 fn u8_as_utf16(bytes: &[u8]) -> Option<String> {
     // Bytes must be multiple of 2
-    if bytes.len() % 2 != 0 {
+    if !bytes.len().is_multiple_of(2) {
         return None;
     }
 

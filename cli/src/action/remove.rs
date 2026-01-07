@@ -51,8 +51,8 @@ impl<'a> Remove<'a> {
             sync.prepare()?;
         }
 
-        let secret =
-            select::store_select_secret(&store, matcher_remove.query(), &matcher_main).ok_or(Err::NoneSelected)?;
+        let secret = select::store_select_secret(&store, matcher_remove.query(), &matcher_main)
+            .ok_or(Err::NoneSelected)?;
 
         if !remove_confirm(&store, &secret, &matcher_main, &mut Vec::new())? {
             if matcher_main.verbose() {

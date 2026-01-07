@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use anyhow::Result;
 use clap::ArgMatches;
-use prs_lib::{crypto::prelude::*, Store};
+use prs_lib::{Store, crypto::prelude::*};
 use thiserror::Error;
 
 #[cfg(feature = "clipboard")]
@@ -12,8 +12,8 @@ use crate::util::tomb;
 use crate::viewer;
 use crate::{
     cmd::matcher::{
-        totp::{show::ShowMatcher, TotpMatcher},
         MainMatcher, Matcher,
+        totp::{TotpMatcher, show::ShowMatcher},
     },
     util::{secret, select, totp},
 };

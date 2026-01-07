@@ -1,6 +1,6 @@
 use anyhow::Result;
 use clap::ArgMatches;
-use prs_lib::{crypto::prelude::*, Store};
+use prs_lib::{Store, crypto::prelude::*};
 use thiserror::Error;
 
 #[cfg(all(feature = "tomb", target_os = "linux"))]
@@ -8,10 +8,10 @@ use crate::util::tomb;
 use crate::util::{cli, error, select, sync};
 use crate::{
     cmd::matcher::{
-        recipients::{remove::RemoveMatcher, RecipientsMatcher},
         MainMatcher, Matcher,
+        recipients::{RecipientsMatcher, remove::RemoveMatcher},
     },
-    util::error::{quit_error_msg, ErrorHintsBuilder},
+    util::error::{ErrorHintsBuilder, quit_error_msg},
 };
 
 /// A recipients remove action.

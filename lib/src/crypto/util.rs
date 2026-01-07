@@ -2,7 +2,7 @@
 
 use anyhow::Result;
 
-use super::{prelude::*, Config, Key};
+use super::{Config, Key, prelude::*};
 
 /// Minimum hexadecimal length for a fingerprint to be considered valid
 ///

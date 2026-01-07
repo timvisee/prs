@@ -6,7 +6,7 @@ use clap::ArgMatches;
 use prs_lib::{Secret, Store};
 use thiserror::Error;
 
-use crate::cmd::matcher::{alias::AliasMatcher, MainMatcher, Matcher};
+use crate::cmd::matcher::{MainMatcher, Matcher, alias::AliasMatcher};
 #[cfg(all(feature = "tomb", target_os = "linux"))]
 use crate::util::tomb;
 use crate::util::{cli, error, select, sync};

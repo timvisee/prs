@@ -1,6 +1,6 @@
 use anyhow::Result;
 use clap::ArgMatches;
-use prs_lib::{crypto::prelude::*, Store};
+use prs_lib::{Store, crypto::prelude::*};
 use thiserror::Error;
 
 #[cfg(all(feature = "tomb", target_os = "linux"))]
@@ -8,8 +8,8 @@ use crate::util::tomb;
 use crate::util::{clipboard, error};
 use crate::{
     cmd::matcher::{
-        totp::{copy::CopyMatcher, TotpMatcher},
         MainMatcher, Matcher,
+        totp::{TotpMatcher, copy::CopyMatcher},
     },
     util::{secret, select, totp},
 };

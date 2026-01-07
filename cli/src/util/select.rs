@@ -1,8 +1,8 @@
-use prs_lib::{store::FindSecret, Key, Secret, Store};
+use prs_lib::{Key, Secret, Store, store::FindSecret};
 
 use crate::{
     cmd::matcher::MainMatcher,
-    util::error::{quit_error_msg, ErrorHintsBuilder},
+    util::error::{ErrorHintsBuilder, quit_error_msg},
 };
 
 /// Find and select a secret in the given store.

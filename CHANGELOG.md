@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.6 (2026-01-07)
+- Improve GPG fingerprint handling and matching, support pass and gopass formats
+- Update dependencies
+
 ## 0.5.5 (2025-10-31)
 - Add nushell completions
 - Disallow interactive secret selection when using `--no-interact`

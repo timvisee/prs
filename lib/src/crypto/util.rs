@@ -4,6 +4,12 @@ use anyhow::Result;
 
 use super::{Config, Key, prelude::*};
 
+/// Minimum hexadecimal length for a fingerprint to be considered valid
+///
+/// GnuPG requires at least 8 hexadecimal characters. GnuPG 2.2+ still allows 8 characters, but
+/// emits a warning at least 16 characters are recommended.
+const FINGERPRINT_MIN_LEN: usize = 8;
+
 /// Format fingerprint in consistent format.
 ///
 /// Trims and uppercases.
@@ -37,10 +43,23 @@ pub fn normalize_fingerprint<S: AsRef<str>>(fingerprint: S) -> String {
     fp.trim().to_uppercase()
 }
 
-/// Check whether two fingerprints match.
+/// Check whether two fingerprints match
+///
+/// Normalizes both fingerprints using [`normalize_fingerprint`].
+///
+/// Returns true if `b` is a substring of `a`.
+/// Requires at least [`FINGERPRINT_MIN_LEN`] hexadecimal characters in both.
 pub fn fingerprints_equal<S: AsRef<str>, T: AsRef<str>>(a: S, b: T) -> bool {
-    !a.as_ref().trim().is_empty()
-        && a.as_ref().trim().to_uppercase().contains(&b.as_ref().trim().to_uppercase())
+    // Normalize both fingerprints
+    let a = normalize_fingerprint(a);
+    let b = normalize_fingerprint(b);
+
+    // Require at least 8 characters
+    if a.len() < FINGERPRINT_MIN_LEN || b.len() < FINGERPRINT_MIN_LEN {
+        return false;
+    }
+
+    a.contains(&b)
 }
 
 /// Check whether a list of keys contains the given fingerprint.

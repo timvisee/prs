@@ -8,7 +8,33 @@ use super::{Config, Key, prelude::*};
 ///
 /// Trims and uppercases.
 pub fn format_fingerprint<S: AsRef<str>>(fingerprint: S) -> String {
-    fingerprint.as_ref().trim().to_uppercase()
+    normalize_fingerprint(fingerprint)
+}
+
+/// Normalize a fingerprint to some consistent format
+///
+/// Does the following in order:
+/// - removes `0x` or `0X` prefix if present
+/// - removes comment suffix if present
+/// - trims whitespace
+/// - uppercases
+///
+/// Does not normalize the length of the fingerprint
+pub fn normalize_fingerprint<S: AsRef<str>>(fingerprint: S) -> String {
+    let fp = fingerprint.as_ref();
+
+    // Remove 0x prefix
+    let fp = if fp.starts_with("0x") || fp.starts_with("0X") {
+        &fp[2..]
+    } else {
+        fp
+    };
+
+    // Remove comment suffix
+    let fp = fp.split('#').next().unwrap();
+
+    // Trim whitespace and uppercase
+    fp.trim().to_uppercase()
 }
 
 /// Check whether two fingerprints match.

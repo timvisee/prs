@@ -1,5 +1,8 @@
 //! Crypto GPG protocol.
 
+/// GnuPG Long key ID length
+const LONG_KEY_ID: usize = 16;
+
 /// Represents a GPG key.
 #[derive(Clone)]
 pub struct Key {
@@ -13,13 +16,13 @@ pub struct Key {
 impl Key {
     /// Key fingerprint.
     pub fn fingerprint(&self, short: bool) -> String {
-        if short {
-            &self.fingerprint[self.fingerprint.len() - 16..]
+        let fp = if short {
+            &self.fingerprint[self.fingerprint.len() - LONG_KEY_ID..]
         } else {
             &self.fingerprint
-        }
-        .trim()
-        .to_uppercase()
+        };
+
+        crate::crypto::util::normalize_fingerprint(fp)
     }
 
     /// Key displayable user data.

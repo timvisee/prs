@@ -6,7 +6,7 @@ use std::path::{Path, PathBuf};
 use anyhow::{Context, Result};
 use thiserror::Error;
 
-use super::{Config, ContextPool, Key, Proto, prelude::*, recipients::Recipients, util};
+use super::{prelude::*, recipients::Recipients, util, Config, ContextPool, Key, Proto};
 use crate::Store;
 
 /// Password store GPG IDs file.
@@ -46,18 +46,14 @@ pub fn store_write_gpg_fingerprints<S: AsRef<str>>(
 }
 
 /// Read fingerprints from the given file.
+///
+/// Normalizes each fingerprint, see [`normalize_fingerprint`].
 fn read_fingerprints<P: AsRef<Path>>(path: P) -> Result<Vec<String>> {
     Ok(fs::read_to_string(path)
         .map_err(Err::ReadFile)?
         .lines()
-        // Strip comments
-        .map(|fp| match fp.split_once('#') {
-            Some((fp, _)) => fp,
-            None => fp,
-        })
-        .map(|fp| fp.trim())
+        .map(util::normalize_fingerprint)
         .filter(|fp| !fp.is_empty())
-        .map(Into::into)
         .collect())
 }
 

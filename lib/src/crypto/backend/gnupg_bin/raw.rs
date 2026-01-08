@@ -73,7 +73,10 @@ pub fn can_decrypt(config: &Config, ciphertext: Ciphertext) -> Result<bool> {
 
     match output.status.code() {
         Some(0) | None => Ok(true),
-        Some(2) => Ok(!std::str::from_utf8(&output.stdout)?.contains(GPG_OUTPUT_ERR_NO_SECKEY)),
+        Some(2) => Ok(
+            !std::str::from_utf8(&output.stderr)?.contains(GPG_OUTPUT_ERR_NO_SECKEY)
+                && !std::str::from_utf8(&output.stdout)?.contains(GPG_OUTPUT_ERR_NO_SECKEY),
+        ),
         Some(_) => Ok(true),
     }
 }

@@ -22,8 +22,8 @@ const TIMEOUT_CLIP_CHECK_DELAY: Duration = Duration::from_secs(3);
 /// Delay between each spin in `timeout_or_clip_change`.
 const TIMEOUT_CLIP_SPIN_DELAY: Duration = Duration::from_secs(5);
 
-/// Timeout after which to close a notification.
-const NOTIFICATION_TIMEOUT: Duration = Duration::from_secs(5);
+/// Timeout after which to close the 'cleared' notification
+const NOTIFICATION_CLEARED_TIMEOUT: Duration = Duration::from_secs(5);
 
 #[cfg(all(
     unix,
@@ -559,9 +559,11 @@ pub(crate) fn subprocess_copy_revert(
     quiet: bool,
     verbose: bool,
 ) -> Result<()> {
+    // Put secret in clipboard
     set(data, false, false, quiet, verbose).map_err(Err::Set)?;
 
-    // Wait for timeout or until clipboard is changed
+    // Show copied notification and wait
+    let handle_copied = notify_copied(timeout).map_err(Err::Notify)?;
     let changed = timeout_or_clip_change(data, timeout);
 
     // Revert clipboard to previous if contents didn't change
@@ -581,9 +583,16 @@ pub(crate) fn subprocess_copy_revert(
         set(data_old, true, true, quiet, verbose).map_err(Err::Revert)?;
     }
 
-    // Notify user
+    handle_copied.close();
+
+    // Show cleared notification
     if let Some(notify) = notify {
-        notify_cleared(notify).map_err(Err::Notify)?;
+        let handle_cleared = notify_cleared(notify).map_err(Err::Notify)?;
+
+        // Explicitly close notification after timeout
+        // Hack to enforce notification timeout on platforms that don't support it
+        std::thread::sleep(NOTIFICATION_CLEARED_TIMEOUT);
+        handle_cleared.close();
     }
 
     Ok(())
@@ -645,10 +654,57 @@ pub(crate) enum NotifyChange {
     Cleared,
 }
 
+#[must_use]
+pub(crate) struct NotifyHandle(
+    #[cfg(all(feature = "notify", not(target_env = "musl")))] notify_rust::NotificationHandle,
+);
+
+impl NotifyHandle {
+    /// Explicitly close the notification
+    fn close(self) {
+        #[cfg(all(feature = "notify", not(target_env = "musl")))]
+        self.0.close();
+    }
+}
+
+/// Show notification to the user notifying the secret is currently in the clipboard
+///
+/// Returns a handle that may be used to close the notification.
+pub(crate) fn notify_copied(timeout: Duration) -> Result<NotifyHandle> {
+    // Do not show notification with not notify or on musl due to segfault
+    #[cfg(all(feature = "notify", not(target_env = "musl")))]
+    {
+        use notify_rust::Notification;
+
+        let mut n = Notification::new();
+        n.appname(&crate::util::bin_name())
+            .summary(&format!("Secret copied - {}", crate::util::bin_name()))
+            .body(&format!("Clearing in {} seconds...", timeout.as_secs()))
+            .auto_icon()
+            .icon("lock")
+            .timeout(timeout);
+
+        #[cfg(all(unix, not(target_os = "macos")))]
+        n.urgency(notify_rust::Urgency::Normal)
+            .hint(notify_rust::Hint::Resident(true))
+            .hint(notify_rust::Hint::Category("presence.online".into()));
+
+        let handle = n.show()?;
+
+        Ok(NotifyHandle(handle))
+    }
+
+    // Fallback if we cannot notify
+    #[cfg(not(all(feature = "notify", not(target_env = "musl"))))]
+    {
+        Ok(NotifyHandle)
+    }
+}
+
 /// Show notification to user about cleared clipboard
 ///
-/// Blocking until the notification is closed after the default timeout.
-pub(crate) fn notify_cleared(change: NotifyChange) -> Result<()> {
+/// Returns a handle that may be used to close the notification.
+pub(crate) fn notify_cleared(change: NotifyChange) -> Result<NotifyHandle> {
     // Do not show notification with not notify or on musl due to segfault
     #[cfg(all(feature = "notify", not(target_env = "musl")))]
     {
@@ -665,7 +721,7 @@ pub(crate) fn notify_cleared(change: NotifyChange) -> Result<()> {
             .body("Secret wiped from clipboard")
             .auto_icon()
             .icon("lock")
-            .timeout(NOTIFICATION_TIMEOUT);
+            .timeout(NOTIFICATION_CLEARED_TIMEOUT);
 
         #[cfg(all(unix, not(target_os = "macos")))]
         n.urgency(notify_rust::Urgency::Low)
@@ -673,22 +729,14 @@ pub(crate) fn notify_cleared(change: NotifyChange) -> Result<()> {
 
         let handle = n.show()?;
 
-        // Explicitly close notification after timeout
-        // Hack to enforce notification timeout on platforms that don't support it
-        std::thread::sleep(NOTIFICATION_TIMEOUT);
-        handle.close();
-
-        return Ok(());
+        Ok(NotifyHandle(handle))
     }
 
     // Fallback if we cannot notify
-    #[cfg_attr(
-        all(feature = "notify", not(target_env = "musl")),
-        expect(unreachable_code)
-    )]
+    #[cfg(not(all(feature = "notify", not(target_env = "musl"))))]
     {
         eprintln!("Secret wiped from clipboard");
-        Ok(())
+        Ok(NotifyHandle)
     }
 }
 

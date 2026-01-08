@@ -22,6 +22,9 @@ const TIMEOUT_CLIP_CHECK_DELAY: Duration = Duration::from_secs(3);
 /// Delay between each spin in `timeout_or_clip_change`.
 const TIMEOUT_CLIP_SPIN_DELAY: Duration = Duration::from_secs(5);
 
+/// Timeout after which to close a notification.
+const NOTIFICATION_TIMEOUT: Duration = Duration::from_secs(5);
+
 #[cfg(all(
     unix,
     not(any(target_os = "macos", target_os = "android", target_os = "emscripten")),
@@ -547,6 +550,8 @@ pub(crate) fn subprocess_copy(data: &Plaintext, quiet: bool, verbose: bool) -> R
 ///
 /// Copies the given data to the clipboard, and reverts to the old data after the timeout if the
 /// clipboard contents have not been changed.
+///
+/// Blocking until clipboard timed out, and notification timeout is hit.
 pub(crate) fn subprocess_copy_revert(
     data: &Plaintext,
     data_old: &Plaintext,
@@ -560,15 +565,25 @@ pub(crate) fn subprocess_copy_revert(
     let changed = timeout_or_clip_change(data, timeout);
 
     // Revert clipboard to previous if contents didn't change
+    let mut notify = None;
     if changed {
         if !quiet {
-            notify_cleared(true, false).map_err(Err::Notify)?;
+            notify.replace(NotifyChange::Changed);
         }
     } else if !is_clipboard_changed(data)? {
         if !quiet {
-            notify_cleared(false, !data_old.is_empty()).map_err(Err::Notify)?;
+            notify.replace(if data_old.is_empty() {
+                NotifyChange::Cleared
+            } else {
+                NotifyChange::Restored
+            });
         }
         set(data_old, true, true, quiet, verbose).map_err(Err::Revert)?;
+    }
+
+    // Notify user
+    if let Some(notify) = notify {
+        notify_cleared(notify).map_err(Err::Notify)?;
     }
 
     Ok(())
@@ -620,19 +635,29 @@ pub(crate) fn timeout_or_clip_change(data: &Plaintext, timeout: Duration) -> boo
     }
 }
 
-/// Show notification to user about cleared clipboard.
-pub(crate) fn notify_cleared(changed: bool, restored: bool) -> Result<()> {
+#[derive(Debug, PartialEq, Eq)]
+pub(crate) enum NotifyChange {
+    /// Clipboard contents were changed before we reverted it
+    Changed,
+    /// Clipboard contents are restored to previous state
+    Restored,
+    /// Clipboard contents are cleared, no previous state
+    Cleared,
+}
+
+/// Show notification to user about cleared clipboard
+///
+/// Blocking until the notification is closed after the default timeout.
+pub(crate) fn notify_cleared(change: NotifyChange) -> Result<()> {
     // Do not show notification with not notify or on musl due to segfault
     #[cfg(all(feature = "notify", not(target_env = "musl")))]
     {
         use notify_rust::Notification;
 
-        let title = if changed {
-            "changed"
-        } else if restored {
-            "restored"
-        } else {
-            "cleared"
+        let title = match change {
+            NotifyChange::Changed => "changed",
+            NotifyChange::Restored => "restored",
+            NotifyChange::Cleared => "cleared",
         };
         let mut n = Notification::new();
         n.appname(&crate::util::bin_name())
@@ -640,13 +665,18 @@ pub(crate) fn notify_cleared(changed: bool, restored: bool) -> Result<()> {
             .body("Secret wiped from clipboard")
             .auto_icon()
             .icon("lock")
-            .timeout(3000);
+            .timeout(NOTIFICATION_TIMEOUT);
 
         #[cfg(all(unix, not(target_os = "macos")))]
         n.urgency(notify_rust::Urgency::Low)
             .hint(notify_rust::Hint::Category("presence.offline".into()));
 
-        n.show()?;
+        let handle = n.show()?;
+
+        // Explicitly close notification after timeout
+        // Hack to enforce notification timeout on platforms that don't support it
+        std::thread::sleep(NOTIFICATION_TIMEOUT);
+        handle.close();
 
         return Ok(());
     }

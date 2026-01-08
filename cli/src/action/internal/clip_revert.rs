@@ -53,7 +53,7 @@ impl<'a> ClipRevert<'a> {
         .map_err(Err::CopyRevert)?;
 
         if matcher_main.verbose() {
-            eprintln!("Clipboard reverted");
+            eprintln!("Clipboard revert completed");
         }
 
         Ok(())

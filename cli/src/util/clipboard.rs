@@ -7,10 +7,6 @@ use std::time::{Duration, Instant};
 use anyhow::{Result, anyhow};
 use copypasta_ext::display::DisplayServer;
 use copypasta_ext::prelude::*;
-#[cfg(all(feature = "notify", target_os = "linux", not(target_env = "musl")))]
-use notify_rust::Hint;
-#[cfg(all(feature = "notify", not(target_env = "musl")))]
-use notify_rust::Notification;
 use prs_lib::Plaintext;
 use thiserror::Error;
 
@@ -629,6 +625,8 @@ pub(crate) fn notify_cleared(changed: bool, restored: bool) -> Result<()> {
     // Do not show notification with not notify or on musl due to segfault
     #[cfg(all(feature = "notify", not(target_env = "musl")))]
     {
+        use notify_rust::Notification;
+
         let title = if changed {
             "changed"
         } else if restored {
@@ -638,21 +636,18 @@ pub(crate) fn notify_cleared(changed: bool, restored: bool) -> Result<()> {
         };
         let mut n = Notification::new();
         n.appname(&crate::util::bin_name())
-            .summary(&format!(
-                "Clipboard {} - {}",
-                title,
-                crate::util::bin_name()
-            ))
+            .summary(&format!("Clipboard {title} - {}", crate::util::bin_name()))
             .body("Secret wiped from clipboard")
             .auto_icon()
             .icon("lock")
             .timeout(3000);
 
-        #[cfg(target_os = "linux")]
+        #[cfg(all(unix, not(target_os = "macos")))]
         n.urgency(notify_rust::Urgency::Low)
-            .hint(Hint::Category("presence.offline".into()));
+            .hint(notify_rust::Hint::Category("presence.offline".into()));
 
         n.show()?;
+
         return Ok(());
     }
 

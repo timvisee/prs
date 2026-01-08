@@ -97,7 +97,11 @@ where
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .env("LANG", "en_US.UTF-8")
-        .env("LANGUAGE", "en_US.UTF-8");
+        .env("LANGUAGE", "en_US.UTF-8")
+        // needed on some installations to force UTF-8 output, on debian:13 in Docker for example
+        .arg("--display-charset")
+        .arg("utf-8")
+        .arg("--utf8-strings");
     if config.gpg_tty {
         cmd.arg("--pinentry-mode").arg("loopback");
         if !util::env::has_gpg_tty()

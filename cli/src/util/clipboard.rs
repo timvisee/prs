@@ -568,7 +568,7 @@ pub(crate) fn subprocess_copy_revert(
         if !quiet {
             notify_cleared(true, false).map_err(Err::Notify)?;
         }
-    } else if &get().map_err(Err::Get)? == data {
+    } else if !is_clipboard_changed(data)? {
         if !quiet {
             notify_cleared(false, !data_old.is_empty()).map_err(Err::Notify)?;
         }
@@ -576,6 +576,22 @@ pub(crate) fn subprocess_copy_revert(
     }
 
     Ok(())
+}
+
+/// Determine whether clipboard contents changed
+///
+/// Attempts to trim trailing white spaces from data because some clipboard managers (like `wl-clipboard`) add a newline.
+///
+/// Returns `true` if the current contents match `expected`.
+fn is_clipboard_changed(expected: &Plaintext) -> Result<bool> {
+    let actual = get().map_err(Err::Get)?;
+
+    match (expected.unsecure_to_str(), actual.unsecure_to_str()) {
+        // Compare as UTF-8, trim trailing ASCII whitespaces
+        (Ok(expected), Ok(actual)) => Ok(expected.trim_ascii_end() != actual.trim_ascii_end()),
+        // Compare pure byte data
+        _ => Ok(expected != &actual),
+    }
 }
 
 /// Wait for the given timeout or until the clipboard content is different than `data`.
@@ -592,11 +608,10 @@ pub(crate) fn timeout_or_clip_change(data: &Plaintext, timeout: Duration) -> boo
         let now = Instant::now();
 
         // Return early if content has changed
-        if now >= check_clip_from {
-            let got = CLIP.get();
-            if matches!(got, Ok(ref d) if d != data) {
-                return true;
-            }
+        if now >= check_clip_from
+            && let Ok(true) = is_clipboard_changed(data)
+        {
+            return true;
         }
 
         // Test if timeout is reached

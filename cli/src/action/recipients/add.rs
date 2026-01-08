@@ -69,17 +69,14 @@ impl<'a> Add<'a> {
         }
 
         let mut context = crate::crypto::context(&matcher_main)?;
-        let mut recipients = store.recipients().map_err(Err::Load)?;
+        let mut recipients = store.recipients().map_err(Err::LoadRecipients)?;
 
         // Find unused keys, select one and add to recipients
-        let mut tmp = Recipients::from(
-            if !matcher_add.secret() {
-                context.keys_public()
-            } else {
-                context.keys_private()
-            }
-            .map_err(Err::Load)?,
-        );
+        let mut tmp = Recipients::from(if !matcher_add.secret() {
+            context.keys_public().map_err(Err::LoadPublic)?
+        } else {
+            context.keys_private().map_err(Err::LoadPrivate)?
+        });
         tmp.remove_all(recipients.keys());
         let key = select::select_key(tmp.keys(), None).ok_or(Err::NoneSelected)?;
         recipients.add(key.clone());
@@ -142,8 +139,14 @@ pub enum Err {
     #[error("no key selected")]
     NoneSelected,
 
-    #[error("failed to load usable keys from keychain")]
-    Load(#[source] anyhow::Error),
+    #[error("failed to load recipients from keychain")]
+    LoadRecipients(#[source] anyhow::Error),
+
+    #[error("failed to load usable public keys from keychain")]
+    LoadPublic(#[source] anyhow::Error),
+
+    #[error("failed to load usable private keys from keychain")]
+    LoadPrivate(#[source] anyhow::Error),
 
     #[error("failed to re-encrypt secrets in store")]
     Recrypt(#[source] anyhow::Error),

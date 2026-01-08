@@ -90,7 +90,7 @@ impl<'a> Init<'a> {
 
         // Select GPG key to encrypt Tomb key
         let mut context = crate::crypto::context(&matcher_main)?;
-        let tmp = Recipients::from(context.keys_private().map_err(Err::Load)?);
+        let tmp = Recipients::from(context.keys_private().map_err(Err::LoadPrivate)?);
         let key =
             select::select_key(tmp.keys(), Some("Select key for Tomb")).ok_or(Err::NoGpgKey)?;
 
@@ -172,8 +172,8 @@ pub enum Err {
     #[error("failed to run housekeeping tasks")]
     Housekeeping(#[source] anyhow::Error),
 
-    #[error("failed to load usable keys from keychain")]
-    Load(#[source] anyhow::Error),
+    #[error("failed to load usable private keys from keychain")]
+    LoadPrivate(#[source] anyhow::Error),
 
     #[error("no GPG key selected to create tomb")]
     NoGpgKey,

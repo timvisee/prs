@@ -697,7 +697,7 @@ pub(crate) fn notify_copied(timeout: Duration) -> Result<NotifyHandle> {
     // Fallback if we cannot notify
     #[cfg(not(all(feature = "notify", not(target_env = "musl"))))]
     {
-        Ok(NotifyHandle)
+        Ok(NotifyHandle())
     }
 }
 
@@ -736,7 +736,7 @@ pub(crate) fn notify_cleared(change: NotifyChange) -> Result<NotifyHandle> {
     #[cfg(not(all(feature = "notify", not(target_env = "musl"))))]
     {
         eprintln!("Secret wiped from clipboard");
-        Ok(NotifyHandle)
+        Ok(NotifyHandle())
     }
 }
 

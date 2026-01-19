@@ -85,7 +85,9 @@ nix = { version = "0.30", default-features = false, features = [
     "user",
     "signal",
 ] }
-ofiles = "0.2"
+
+[target.'cfg(target_os = "linux")'.dependencies]
+procfs = { version = "0.18", default-features = false }
 
 [dev-dependencies]
 quickcheck = { version = "1.0", default-features = false }

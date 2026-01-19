@@ -12,9 +12,6 @@ use std::sync::Mutex;
 use crate::Store;
 use crate::git;
 
-#[cfg(unix)]
-use ofiles::opath;
-
 /// Environment variable git uses to modify the ssh command.
 const GIT_ENV_SSH: &str = "GIT_SSH_COMMAND";
 
@@ -173,28 +170,31 @@ pub fn kill_ssh_by_session(store: &Store) {
         .map(|e| e.path());
 
     // For each session file, kill attached SSH clients
-    session_files.for_each(|p| {
+    #[cfg(any(target_os = "linux", target_os = "macos", target_os = "freebsd"))]
+    session_files.for_each(|path| {
+        use super::proc::{pids_with_file_open, cmdline};
+
         // List PIDs having this session file open
-        let pids = match opath(p) {
+        let pids = match pids_with_file_open(&path) {
             Ok(pids) => pids,
             Err(_) => return,
         };
 
         pids.into_iter()
-            .map(Into::into)
-            .filter(|pid: &u32| pid > &0 && pid < &(i32::MAX as u32))
+            // PID must be in valid range
+            .filter(|pid| pid.as_raw() > 0 && pid.as_raw() < nix::libc::pid_t::MAX)
+            // Only kill commands starting with "ssh"
             .filter(|pid| {
-                // Only handle ssh clients
-                fs::read_to_string(format!("/proc/{pid}/cmdline"))
-                    .map(|cmdline| {
-                        let cmd = cmdline.split([' ', ':']).next().unwrap();
-                        cmd.starts_with("ssh")
-                    })
-                    .unwrap_or(true)
+                cmdline(*pid)
+                        .map(|cmdline| {
+                            let cmd = cmdline.split([' ', ':']).next().unwrap();
+                            cmd.starts_with("ssh")
+                        })
+                        .unwrap_or(true)
             })
             .for_each(|pid| {
                 if let Err(err) = nix::sys::signal::kill(
-                    nix::unistd::Pid::from_raw(pid as i32),
+                    pid,
                     Some(nix::sys::signal::Signal::SIGTERM),
                 ) {
                     eprintln!("Failed to kill persistent SSH client (pid: {pid}): {err}",);

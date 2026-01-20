@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.7 (2026-01-20)
+- Show persistent notification while password is in clipboard
+- Show notification when clipboard is restored, and close it after a few seconds
+- Fix communication with `gpg` on some platforms by enforcing UTF-8 encoding
+- Fix ssh process listing on FreeBSD and macOS
+- Fix external clipboard change monitoring on Wayland
+- Fix decrypt ability detection, don't auto recrypt secrets if not working
+
 ## 0.5.6 (2026-01-07)
 - Improve GPG fingerprint handling and matching, support pass and gopass formats
 - Update dependencies

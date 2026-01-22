@@ -662,7 +662,7 @@ pub(crate) struct NotifyHandle(
 impl NotifyHandle {
     /// Explicitly close the notification
     fn close(self) {
-        #[cfg(all(feature = "notify", not(target_env = "musl")))]
+        #[cfg(all(feature = "notify", not(target_env = "musl"), not(target_os = "macos")))]
         self.0.close();
     }
 }

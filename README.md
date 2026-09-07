@@ -356,6 +356,15 @@ You can use `prs` from the command line in the same directory:
 To make it globally invocable as `prs`, you must make the binary available in
 your systems `PATH`.
 
+#### X-CMD
+
+Maybe using [x-cmd](https://www.x-cmd.com/mod/eget):
+
+```bash
+x eget use timvisee/prs
+prs --help
+```
+
 #### Other
 
 Find the latest binaries on the latest release page:

@@ -4103,7 +4103,7 @@ dependencies = [
  "notify-rust",
  "prs-lib",
  "qr2term",
- "rand 0.9.5",
+ "rand 0.10.2",
  "regex",
  "shellexpand",
  "shlex 2.0.1",

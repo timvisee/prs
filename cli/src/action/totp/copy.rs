@@ -69,7 +69,7 @@ impl<'a> Copy<'a> {
         let mut copied = false;
 
         // Use background token recopy implementation if token changes within timeout
-        let ttl = totp.ttl().map_err(Err::Totp)?;
+        let ttl = totp.ttl();
         if timeout > ttl && !matcher_copy.no_recopy() {
             match totp::spawn_process_totp_recopy(&totp, timeout) {
                 Ok(_) => {
@@ -85,7 +85,7 @@ impl<'a> Copy<'a> {
         // Fall back to simply copy
         if !copied {
             clipboard::copy_plaintext(
-                totp.generate_current().map_err(Err::Totp)?,
+                totp.generate_current(),
                 false,
                 true,
                 matcher_main.quiet(),

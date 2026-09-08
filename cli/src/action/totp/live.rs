@@ -88,8 +88,8 @@ impl<'a> Live<'a> {
 /// Show countdown if not quiet, clear when a new token is shown.
 fn watch(totp: Totp, quiet: bool) -> Result<()> {
     loop {
-        let token = totp.generate_current().map_err(Err::Totp)?;
-        let ttl = totp.ttl().map_err(Err::Totp)?;
+        let token = totp.generate_current();
+        let ttl = totp.ttl();
 
         totp::print_token(&token, quiet, Some(ttl));
 
@@ -103,8 +103,8 @@ fn watch(totp: Totp, quiet: bool) -> Result<()> {
 /// Keep printing new tokens on a new line as they arrive.
 fn follow(totp: Totp, quiet: bool) -> Result<()> {
     loop {
-        let token = totp.generate_current().map_err(Err::Totp)?;
-        let ttl = totp.ttl().map_err(Err::Totp)?;
+        let token = totp.generate_current();
+        let ttl = totp.ttl();
 
         totp::print_token(&token, quiet, Some(ttl));
         thread::sleep(Duration::from_secs(ttl));

@@ -61,7 +61,7 @@ impl<'a> Qr<'a> {
         let totp = totp::find_token(&plaintext)
             .ok_or(Err::NoTotp)?
             .map_err(Err::Parse)?;
-        let url = totp.generate_url();
+        let url = totp.generate_url().map_err(Err::Totp)?;
 
         // Print TOTP URL and QR code
         if !matcher_main.quiet() {
@@ -103,6 +103,9 @@ pub enum Err {
 
     #[error("failed to parse TOTP secret")]
     Parse(#[source] anyhow::Error),
+
+    #[error("failed to generate TOTP url")]
+    Totp(#[source] anyhow::Error),
 
     #[error("failed to generate and print QR code")]
     Qr(#[source] qr2term::QrError),

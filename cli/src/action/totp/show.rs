@@ -64,8 +64,8 @@ impl<'a> Show<'a> {
         let totp = totp::find_token(&plaintext)
             .ok_or(Err::NoTotp)?
             .map_err(Err::Parse)?;
-        let token = totp.generate_current().map_err(Err::Totp)?;
-        let ttl = totp.ttl().map_err(Err::Totp)?;
+        let token = totp.generate_current();
+        let ttl = totp.ttl();
 
         // Copy to clipboard
         #[cfg(feature = "clipboard")]
@@ -129,9 +129,6 @@ pub enum Err {
 
     #[error("failed to parse TOTP secret")]
     Parse(#[source] anyhow::Error),
-
-    #[error("failed to generate TOTP token")]
-    Totp(#[source] anyhow::Error),
 
     #[error("failed to start secret viewer")]
     Viewer(#[source] anyhow::Error),

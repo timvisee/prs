@@ -42,8 +42,8 @@ impl<'a> TotpRecopy<'a> {
         while until > Instant::now() {
             // Calculate remaining timeout time, get current TOTP TTL
             let remaining_timeout = until.duration_since(std::time::Instant::now());
-            let token = totp.generate_current().map_err(Err::Totp)?;
-            let ttl = totp.ttl().map_err(Err::Totp)?;
+            let token = totp.generate_current();
+            let ttl = totp.ttl();
 
             // Keep clipboard timeout within timeout remaining and current toeken TTL if recopying
             clipboard::copy_plaintext(
@@ -73,7 +73,4 @@ impl<'a> TotpRecopy<'a> {
 pub enum Err {
     #[error("failed to obtain TOTP from stdin, malformed data")]
     Data(#[source] anyhow::Error),
-
-    #[error("failed to generate TOTP token")]
-    Totp(#[source] anyhow::Error),
 }

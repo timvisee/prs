@@ -7,10 +7,10 @@ use std::process::Command;
 pub(crate) fn current_cmd() -> Option<Command> {
     let current_exe = match std::env::current_exe() {
         Ok(exe) => exe,
-        Err(_) => match std::env::args().next() {
-            Some(bin) => bin.into(),
-            None => return None,
-        },
+        Err(_) => {
+            let bin = std::env::args().next()?;
+            bin.into()
+        }
     };
 
     Some(Command::new(current_exe))

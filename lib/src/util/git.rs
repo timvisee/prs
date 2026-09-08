@@ -172,7 +172,7 @@ pub fn kill_ssh_by_session(store: &Store) {
     // For each session file, kill attached SSH clients
     #[cfg(any(target_os = "linux", target_os = "macos", target_os = "freebsd"))]
     session_files.for_each(|path| {
-        use super::proc::{pids_with_file_open, cmdline};
+        use super::proc::{cmdline, pids_with_file_open};
 
         // List PIDs having this session file open
         let pids = match pids_with_file_open(&path) {
@@ -186,17 +186,16 @@ pub fn kill_ssh_by_session(store: &Store) {
             // Only kill commands starting with "ssh"
             .filter(|pid| {
                 cmdline(*pid)
-                        .map(|cmdline| {
-                            let cmd = cmdline.split([' ', ':']).next().unwrap();
-                            cmd.starts_with("ssh")
-                        })
-                        .unwrap_or(true)
+                    .map(|cmdline| {
+                        let cmd = cmdline.split([' ', ':']).next().unwrap();
+                        cmd.starts_with("ssh")
+                    })
+                    .unwrap_or(true)
             })
             .for_each(|pid| {
-                if let Err(err) = nix::sys::signal::kill(
-                    pid,
-                    Some(nix::sys::signal::Signal::SIGTERM),
-                ) {
+                if let Err(err) =
+                    nix::sys::signal::kill(pid, Some(nix::sys::signal::Signal::SIGTERM))
+                {
                     eprintln!("Failed to kill persistent SSH client (pid: {pid}): {err}",);
                 }
             });

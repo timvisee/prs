@@ -154,10 +154,10 @@ pub fn recrypt(store: &Store, secrets: &[Secret], matcher_main: &MainMatcher) ->
                 style::highlight(format!(
                     "{} housekeeping recrypt{}",
                     util::bin_name(),
-                    &if all {
+                    if all {
                         " --all".into()
                     } else if failed.len() == 1 {
-                        format!(" {}", &failed[0].name)
+                        format!(" {}", failed[0].name)
                     } else {
                         "".into()
                     }

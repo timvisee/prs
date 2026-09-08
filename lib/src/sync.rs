@@ -270,7 +270,7 @@ impl<'a> Sync<'a> {
 
         // If empty when trimmed, wipe completely
         if status.trim().is_empty() {
-            status.truncate(0);
+            status.clear();
         }
 
         Ok(status)

@@ -83,12 +83,10 @@ impl<'a> Sync<'a> {
                         .unwrap(),
                 );
             }
-            _ if !sync.has_remote()? => {
-                if !matcher_main.quiet() {
-                    error::print_warning(
-                        "no sync remote configured, set using: prs sync remote <GIT_URL>",
-                    );
-                }
+            _ if !sync.has_remote()? && !matcher_main.quiet() => {
+                error::print_warning(
+                    "no sync remote configured, set using: prs sync remote <GIT_URL>",
+                );
             }
             _ => {}
         }

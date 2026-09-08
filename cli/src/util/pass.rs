@@ -61,6 +61,6 @@ pub fn generate_password(len: u16) -> Plaintext {
             return pass.into();
         }
 
-        pass.truncate(0);
+        pass.clear();
     }
 }

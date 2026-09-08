@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.8 (2026-09-08)
+- Fix macOS compilation error
+- Update dependencies
+
 ## 0.5.7 (2026-01-20)
 - Show persistent notification while password is in clipboard
 - Show notification when clipboard is restored, and close it after a few seconds

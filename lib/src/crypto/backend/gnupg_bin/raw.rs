@@ -86,7 +86,7 @@ pub fn can_decrypt(config: &Config, ciphertext: Ciphertext) -> Result<bool> {
 /// - `config`: GPG config
 pub fn public_keys(config: &Config) -> Result<Vec<KeyId>> {
     let list =
-        gpg_stdout_ok(config, ["--list-keys", "--keyid-format", "LONG"]).map_err(Err::Keys)?;
+        gpg_stdout_ok(config, ["--no-options", "--list-keys", "--keyid-format", "LONG"]).map_err(Err::Keys)?;
     parse_key_list(list).ok_or_else(|| Err::UnexpectedOutput.into())
 }
 
@@ -94,7 +94,7 @@ pub fn public_keys(config: &Config) -> Result<Vec<KeyId>> {
 ///
 /// - `config`: GPG config
 pub fn private_keys(config: &Config) -> Result<Vec<KeyId>> {
-    let list = gpg_stdout_ok(config, ["--list-secret-keys", "--keyid-format", "LONG"])
+    let list = gpg_stdout_ok(config, ["--no-options", "--list-secret-keys", "--keyid-format", "LONG"])
         .map_err(Err::Keys)?;
     parse_key_list(list).ok_or_else(|| Err::UnexpectedOutput.into())
 }

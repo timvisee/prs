@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.5.9 (2026-09-15)
+- Fix GPG output parsing with custom `gpg.conf`
+
 ## 0.5.8 (2026-09-08)
 - Fix macOS compilation error
 - Update dependencies
